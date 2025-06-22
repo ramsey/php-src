@@ -31,6 +31,7 @@
 #include "zend_virtual_cwd.h"
 #include "zend_smart_str.h"
 #include "zend_smart_string.h"
+#include "zend_bigint.h"
 #include "zend_cpuinfo.h"
 #include "zend_attributes.h"
 #include "zend_observer.h"
@@ -947,6 +948,7 @@ void zend_startup(zend_utility_functions *utility_functions) /* {{{ */
 #endif
 
 	zend_startup_hrtime();
+	zend_startup_bigint();
 	zend_startup_extensions_mechanism();
 
 	/* Set up utility functions and values */

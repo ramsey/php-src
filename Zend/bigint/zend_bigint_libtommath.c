@@ -1,0 +1,29 @@
+/*
+   +----------------------------------------------------------------------+
+   | Zend Engine                                                          |
+   +----------------------------------------------------------------------+
+   | Copyright (c) Zend Technologies Ltd. (http://www.zend.com)           |
+   +----------------------------------------------------------------------+
+   | This source file is subject to version 2.00 of the Zend license,     |
+   | that is bundled with this package in the file LICENSE, and is        |
+   | available through the world-wide-web at the following url:           |
+   | http://www.zend.com/license/2_00.txt.                                |
+   | If you did not receive a copy of the Zend license and are unable to  |
+   | obtain it through the world-wide-web, please send a note to          |
+   | license@zend.com so we can mail you a copy immediately.              |
+   +----------------------------------------------------------------------+
+   | Authors: Andrea Faulds <ajf@ajf.me>                                  |
+   |          Ben Ramsey <ramsey@php.net>                                 |
+   +----------------------------------------------------------------------+
+*/
+
+/*
+ * This file is an implementation of zend_bigint.h
+ * See zend_bigint.c
+ */
+
+#include "zend.h"
+
+#ifdef ZEND_BIGINT_USE_LIBTOMMATH
+
+#endif /* ZEND_BIGINT_USE_LIBTOMMATH */

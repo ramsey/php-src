@@ -44,6 +44,7 @@ static const zend_rc_dtor_func_t zend_rc_dtor_func[] = {
 	[IS_LONG] =         (zend_rc_dtor_func_t)zend_empty_destroy,
 	[IS_DOUBLE] =       (zend_rc_dtor_func_t)zend_empty_destroy,
 	[IS_STRING] =       (zend_rc_dtor_func_t)zend_string_destroy,
+	[IS_BIGINT] =       (zend_rc_dtor_func_t)zend_empty_destroy,
 	[IS_ARRAY] =        (zend_rc_dtor_func_t)zend_array_destroy,
 	[IS_OBJECT] =       (zend_rc_dtor_func_t)zend_objects_store_del,
 	[IS_RESOURCE] =     (zend_rc_dtor_func_t)zend_list_free,

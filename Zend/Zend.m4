@@ -218,6 +218,7 @@ AX_CHECK_COMPILE_FLAG([-fno-common],
 ZEND_CHECK_ALIGNMENT
 ZEND_CHECK_SIGNALS
 ZEND_CHECK_MAX_EXECUTION_TIMERS
+ZEND_CHECK_BIGINT_BACKEND
 ])
 
 dnl
@@ -469,4 +470,28 @@ AS_VAR_IF([ZEND_MAX_EXECUTION_TIMERS], [yes],
 
 AC_MSG_CHECKING([whether to enable Zend max execution timers])
 AC_MSG_RESULT([$ZEND_MAX_EXECUTION_TIMERS])
+])
+
+dnl
+dnl ZEND_CHECK_BIGINT_BACKEND
+dnl
+dnl Check whether to use GMP or LibTomMath as the backend for arbitrary-precision arithmetic.
+dnl
+AC_DEFUN([ZEND_CHECK_BIGINT_BACKEND], [dnl
+  AC_ARG_WITH([bigint-gmp],
+    [AS_HELP_STRING([[--with-bigint-gmp[=DIR]]],
+      [Use GNU MP instead of LibTomMath for bigint support. Use PKG_CONFIG_PATH
+      (or GMP_CFLAGS and GMP_LIBS) environment variables, or alternatively the
+      optional DIR argument to customize where to look for the GNU MP library.])],
+    [ZEND_BIGINT_GMP=$enableval],
+    [ZEND_BIGINT_GMP=no])
+
+  AS_VAR_IF([ZEND_BIGINT_GMP], [yes], [
+    AC_DEFINE([ZEND_BIGINT_USE_GMP], 1, [Define to 1 if using GNU MP for arbitrary-precision arithmetic.])
+dnl TODO: Define later, possibly by copying over from ext/gmp/config.m4
+  ], [
+    AC_DEFINE([ZEND_BIGINT_USE_PLACEHOLDER], 1, [Define to 1 if using the placeholder implementation.])
+dnl AC_DEFINE([ZEND_BIGINT_USE_LIBTOMMATH], 1, [Define to 1 if using LibTomMath for arbitrary-precision arithmetic.])
+dnl PHP_ADD_INCLUDE(Zend/bigint)
+  ])
 ])

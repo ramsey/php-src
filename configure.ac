@@ -1707,6 +1707,9 @@ PHP_ADD_SOURCES_X([/main],
   [PHP_BINARY_OBJS])
 
 PHP_ADD_SOURCES([Zend], m4_normalize([
+    bigint/zend_bigint_gmp.c
+    bigint/zend_bigint_libtommath.c
+    bigint/zend_bigint_placeholder.c
     Optimizer/block_pass.c
     Optimizer/compact_literals.c
     Optimizer/compact_vars.c
@@ -1810,6 +1813,7 @@ PHP_ADD_BUILD_DIR([
   TSRM
   Zend
   Zend/asm
+  Zend/bigint
   Zend/Optimizer
 ])
 

@@ -38,6 +38,7 @@
 #include "zend_stream.h"
 #include "zend_smart_str_public.h"
 #include "zend_smart_string_public.h"
+#include "zend_bigint.h"
 #include "zend_signal.h"
 #include "zend_max_execution_timer.h"
 

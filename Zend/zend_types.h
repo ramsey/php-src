@@ -92,6 +92,7 @@ typedef struct _zend_execute_data    zend_execute_data;
 typedef struct _zval_struct     zval;
 
 typedef struct _zend_refcounted zend_refcounted;
+typedef struct _zend_bigint     zend_bigint;
 typedef struct _zend_string     zend_string;
 typedef struct _zend_array      zend_array;
 typedef struct _zend_object     zend_object;
@@ -335,6 +336,7 @@ typedef struct {
 typedef union _zend_value {
 	zend_long         lval;				/* long value */
 	double            dval;				/* double value */
+	zend_bigint      *big;
 	zend_refcounted  *counted;
 	zend_string      *str;
 	zend_array       *arr;
@@ -389,6 +391,9 @@ typedef struct _zend_refcounted_h {
 struct _zend_refcounted {
 	zend_refcounted_h gc;
 };
+
+/* The bigint structure is fully defined in bigint/zend_bigint.c */
+struct _zend_bigint;
 
 struct _zend_string {
 	zend_refcounted_h gc;
@@ -624,30 +629,32 @@ struct _zend_ast_ref {
 #define IS_LONG						4
 #define IS_DOUBLE					5
 #define IS_STRING					6
-#define IS_ARRAY					7
-#define IS_OBJECT					8
-#define IS_RESOURCE					9
-#define IS_REFERENCE				10
-#define IS_CONSTANT_AST				11 /* Constant expressions */
+#define IS_BIGINT					7
+#define IS_ARRAY					8
+#define IS_OBJECT					9
+#define IS_RESOURCE					10
+#define IS_REFERENCE				11
+#define IS_CONSTANT_AST				12 /* Constant expressions */
 
 /* Fake types used only for type hinting.
  * These are allowed to overlap with the types below. */
-#define IS_CALLABLE					12
-#define IS_ITERABLE					13
-#define IS_VOID						14
-#define IS_STATIC					15
-#define IS_MIXED					16
-#define IS_NEVER					17
+#define IS_CALLABLE					13
+#define IS_ITERABLE					14
+#define IS_VOID						15
+#define IS_STATIC					16
+#define IS_MIXED					17
+#define IS_NEVER					18
+#define IS_BIGINT_OR_LONG			19
 
 /* internal types */
-#define IS_INDIRECT             	12
-#define IS_PTR						13
-#define IS_ALIAS_PTR				14
-#define _IS_ERROR					15
+#define IS_INDIRECT             	13
+#define IS_PTR						14
+#define IS_ALIAS_PTR				15
+#define _IS_ERROR					16
 
 /* used for casts */
-#define _IS_BOOL					18
-#define _IS_NUMBER					19
+#define _IS_BOOL					19
+#define _IS_NUMBER					20
 
 /* guard flags */
 #define ZEND_GUARD_PROPERTY_GET		(1<<0)
@@ -826,6 +833,7 @@ static zend_always_inline uint32_t zval_gc_info(uint32_t gc_type_info) {
 
 #define IS_STRING_EX				(IS_STRING         | (IS_TYPE_REFCOUNTED << Z_TYPE_FLAGS_SHIFT))
 #define IS_ARRAY_EX					(IS_ARRAY          | (IS_TYPE_REFCOUNTED << Z_TYPE_FLAGS_SHIFT) | (IS_TYPE_COLLECTABLE << Z_TYPE_FLAGS_SHIFT))
+#define IS_BIGINT_EX				(IS_BIGINT         | (IS_TYPE_REFCOUNTED << Z_TYPE_FLAGS_SHIFT) | (IS_TYPE_COLLECTABLE << Z_TYPE_FLAGS_SHIFT))
 #define IS_OBJECT_EX				(IS_OBJECT         | (IS_TYPE_REFCOUNTED << Z_TYPE_FLAGS_SHIFT) | (IS_TYPE_COLLECTABLE << Z_TYPE_FLAGS_SHIFT))
 #define IS_RESOURCE_EX				(IS_RESOURCE       | (IS_TYPE_REFCOUNTED << Z_TYPE_FLAGS_SHIFT))
 #define IS_REFERENCE_EX				(IS_REFERENCE      | (IS_TYPE_REFCOUNTED << Z_TYPE_FLAGS_SHIFT) | (IS_TYPE_COLLECTABLE << Z_TYPE_FLAGS_SHIFT))
@@ -991,6 +999,9 @@ static zend_always_inline uint32_t zval_gc_info(uint32_t gc_type_info) {
 #define Z_DVAL(zval)				(zval).value.dval
 #define Z_DVAL_P(zval_p)			Z_DVAL(*(zval_p))
 
+#define Z_BIG(zval)					(zval).value.big
+#define Z_BIG_P(zval_p)				Z_BIG(*(zval_p))
+
 #define Z_STR(zval)					(zval).value.str
 #define Z_STR_P(zval_p)				Z_STR(*(zval_p))
 
@@ -1096,6 +1107,12 @@ static zend_always_inline uint32_t zval_gc_info(uint32_t gc_type_info) {
 		zval *__z = (z);				\
 		Z_DVAL_P(__z) = d;				\
 		Z_TYPE_INFO_P(__z) = IS_DOUBLE;	\
+	} while (0)
+
+#define ZVAL_BIGINT(z, b) do {				\
+		zval *__z = (z);					\
+		Z_BIG_P(__z) = b;					\
+		Z_TYPE_INFO_P(__z) = IS_BIGINT_EX;	\
 	} while (0)
 
 #define ZVAL_STR(z, s) do {						\

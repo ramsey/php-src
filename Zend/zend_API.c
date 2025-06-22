@@ -29,6 +29,7 @@
 #include "zend_interfaces.h"
 #include "zend_exceptions.h"
 #include "zend_closures.h"
+#include "zend_bigint.h"
 #include "zend_inheritance.h"
 #include "zend_ini.h"
 #include "zend_enum.h"
