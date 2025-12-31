@@ -22,6 +22,8 @@
 #ifndef ZEND_MULTIPLY_H
 #define ZEND_MULTIPLY_H
 
+#include "zend_bignum.h"
+
 #if defined(PHP_HAVE_BUILTIN_SMULL_OVERFLOW) && SIZEOF_LONG == SIZEOF_ZEND_LONG
 
 #define ZEND_SIGNED_MULTIPLY_LONG(a, b, lval, dval, usedval) do {	\

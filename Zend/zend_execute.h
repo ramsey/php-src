@@ -26,6 +26,7 @@
 #include "zend_operators.h"
 #include "zend_variables.h"
 #include "zend_constants.h"
+#include "zend_bignum.h"
 
 #include <stdint.h>
 

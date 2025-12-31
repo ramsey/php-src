@@ -81,6 +81,7 @@ typedef struct _zend_execute_data    zend_execute_data;
 typedef struct _zval_struct     zval;
 
 typedef struct _zend_refcounted zend_refcounted;
+typedef struct _zend_bignum     zend_bignum;
 typedef struct _zend_string     zend_string;
 typedef struct _zend_array      zend_array;
 typedef struct _zend_object     zend_object;
@@ -324,6 +325,7 @@ typedef struct {
 typedef union _zend_value {
 	zend_long         lval;				/* long value */
 	double            dval;				/* double value */
+	zend_bignum      *big;
 	zend_refcounted  *counted;
 	zend_string      *str;
 	zend_array       *arr;
@@ -378,6 +380,9 @@ typedef struct _zend_refcounted_h {
 struct _zend_refcounted {
 	zend_refcounted_h gc;
 };
+
+/* To keep the implementation of bignums abstracted, the struct is only fleshed-out in zend_bignum.c */
+struct _zend_bignum;
 
 struct _zend_string {
 	zend_refcounted_h gc;

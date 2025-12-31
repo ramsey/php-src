@@ -29,6 +29,7 @@
 #include "zend_smart_str.h"
 #include "zend_exceptions_arginfo.h"
 #include "zend_observer.h"
+#include "zend_bignum.h"
 
 #define ZEND_EXCEPTION_MESSAGE_OFF 0
 #define ZEND_EXCEPTION_CODE_OFF 2

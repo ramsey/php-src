@@ -25,6 +25,7 @@
 #include "zend_globals.h"
 #include "zend_constants.h"
 #include "zend_list.h"
+#include "zend_bignum.h"
 
 #if ZEND_DEBUG
 static void ZEND_FASTCALL zend_string_destroy(zend_string *str);

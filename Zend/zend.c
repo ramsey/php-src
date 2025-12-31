@@ -40,6 +40,7 @@
 #include "zend_hrtime.h"
 #include "zend_enum.h"
 #include "zend_closures.h"
+#include "zend_bignum.h"
 #include "Optimizer/zend_optimizer.h"
 #include "php.h"
 #include "php_globals.h"

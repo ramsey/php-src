@@ -1733,11 +1733,13 @@ PHP_ADD_SOURCES([Zend], m4_normalize([
     Optimizer/zend_inference.c
     Optimizer/zend_optimizer.c
     Optimizer/zend_ssa.c
+    bignum/zend_tiny-bignum-c.c
     zend_alloc.c
     zend_API.c
     zend_ast.c
     zend_atomic.c
     zend_attributes.c
+    zend_bignum.c
     zend_builtin_functions.c
     zend_call_stack.c
     zend_closures.c

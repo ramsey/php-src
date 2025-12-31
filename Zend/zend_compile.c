@@ -39,6 +39,7 @@
 #include "zend_call_stack.h"
 #include "zend_frameless_function.h"
 #include "zend_property_hooks.h"
+#include "zend_bignum.h"
 
 #define SET_NODE(target, src) do { \
 		target ## _type = (src)->op_type; \
