@@ -28,6 +28,7 @@
 #include "zend_enum.h"
 #include "zend_exceptions.h"
 #include "zend_types.h"
+#include "zend_bigint.h"
 /* }}} */
 
 struct php_serialize_data {
@@ -132,6 +133,13 @@ again:
 		case IS_LONG:
 			php_printf("%sint(" ZEND_LONG_FMT ")\n", COMMON, Z_LVAL_P(struc));
 			break;
+		case IS_BIGINT: {
+			size_t len;
+			char *s = zend_bigint_to_string(Z_BIG_P(struc), &len);
+			php_printf("%sint(%s)\n", COMMON, s);
+			efree(s);
+			break;
+		}
 		case IS_DOUBLE:
 			php_printf_unchecked("%sfloat(%.*H)\n", COMMON, (int) PG(serialize_precision), Z_DVAL_P(struc));
 			break;
@@ -327,6 +335,13 @@ PHPAPI void php_debug_zval_dump(zval *struc, int level) /* {{{ */
 	case IS_LONG:
 		php_printf("int(" ZEND_LONG_FMT ")\n", Z_LVAL_P(struc));
 		break;
+	case IS_BIGINT: {
+		size_t len;
+		char *s = zend_bigint_to_string(Z_BIG_P(struc), &len);
+		php_printf("int(%s)\n", s);
+		efree(s);
+		break;
+	}
 	case IS_DOUBLE:
 		php_printf_unchecked("float(%.*H)\n", (int) PG(serialize_precision), Z_DVAL_P(struc));
 		break;
