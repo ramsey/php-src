@@ -46,6 +46,7 @@
 #include "zend_portability.h"
 #include "zend_strtod.h"
 #include "zend_multiply.h"
+#include "zend_bigint.h"
 
 #define LONG_SIGN_MASK ZEND_LONG_MIN
 
@@ -405,6 +406,9 @@ again:
 			if (Z_LVAL_P(op)) {
 				result = 1;
 			}
+			break;
+		case IS_BIGINT:
+			result = zend_bigint_sign(Z_BIG_P(op)) != 0;
 			break;
 		case IS_DOUBLE:
 			if (UNEXPECTED(zend_isnan(Z_DVAL_P(op)))) {

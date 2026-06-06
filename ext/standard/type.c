@@ -50,6 +50,7 @@ PHP_FUNCTION(get_debug_type)
 		case IS_TRUE:
 			RETURN_INTERNED_STR(ZSTR_KNOWN(ZEND_STR_BOOL));
 		case IS_LONG:
+		case IS_BIGINT:
 			RETURN_INTERNED_STR(ZSTR_KNOWN(ZEND_STR_INT));
 		case IS_DOUBLE:
 			RETURN_INTERNED_STR(ZSTR_KNOWN(ZEND_STR_FLOAT));
@@ -244,7 +245,8 @@ static inline void php_is_type(INTERNAL_FUNCTION_PARAMETERS, int type)
 		Z_PARAM_ZVAL(arg)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (Z_TYPE_P(arg) == type) {
+	if (Z_TYPE_P(arg) == type
+			|| (type == IS_LONG && Z_TYPE_P(arg) == IS_BIGINT)) {
 		if (type == IS_RESOURCE) {
 			const char *type_name = zend_rsrc_list_get_rsrc_type(Z_RES_P(arg));
 			if (!type_name) {
