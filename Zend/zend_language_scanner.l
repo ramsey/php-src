@@ -44,6 +44,7 @@
 #include "zend_operators.h"
 #include "zend_API.h"
 #include "zend_strtod.h"
+#include "zend_bigint.h"
 #include "zend_exceptions.h"
 #include "zend_virtual_cwd.h"
 
@@ -2176,6 +2177,14 @@ OPTIONAL_WHITESPACE_OR_COMMENTS ({WHITESPACE}|{MULTI_LINE_COMMENT}|{SINGLE_LINE_
 			if (is_octal) { /* octal overflow */
 				ZVAL_DOUBLE(zendlval, zend_oct_strtod(lnum, (const char **)&end));
 			} else {
+				zend_bigint *big = zend_bigint_init_from_string_length(lnum, len, 10);
+				if (big) {
+					ZVAL_BIGINT(zendlval, big);
+					if (contains_underscores) {
+						efree(lnum);
+					}
+					RETURN_TOKEN_WITH_VAL(T_LNUMBER);
+				}
 				ZVAL_DOUBLE(zendlval, zend_strtod(lnum, (const char **)&end));
 			}
 			ZEND_ASSERT(end == lnum + len);
