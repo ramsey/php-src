@@ -1122,6 +1122,27 @@ static ZEND_FUNCTION(zend_test_bigint_string_roundtrip)
 	efree(s);
 }
 
+static ZEND_FUNCTION(zend_test_bigint_add_strings)
+{
+	zend_string *a, *b;
+	ZEND_PARSE_PARAMETERS_START(2, 2)
+		Z_PARAM_STR(a)
+		Z_PARAM_STR(b)
+	ZEND_PARSE_PARAMETERS_END();
+
+	zend_bigint *ba = zend_bigint_init_from_string_length(ZSTR_VAL(a), ZSTR_LEN(a), 10);
+	zend_bigint *bb = zend_bigint_init_from_string_length(ZSTR_VAL(b), ZSTR_LEN(b), 10);
+	zend_bigint *r  = zend_bigint_init();
+	zend_bigint_add(r, ba, bb);
+	size_t len;
+	char *s = zend_bigint_to_string(r, &len);
+	zend_bigint_free(ba);
+	zend_bigint_free(bb);
+	zend_bigint_free(r);
+	RETVAL_STRINGL(s, len);
+	efree(s);
+}
+
 typedef struct _zend_test_object {
 	zend_internal_function *tmp_method;
 	zend_object std;

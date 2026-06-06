@@ -32,9 +32,9 @@ ZEND_API zend_bigint *zend_bigint_init(void)
 
 ZEND_API zend_bigint *zend_bigint_init_from_long(zend_long value)
 {
-	/* not yet implemented */
-	ZEND_UNREACHABLE();
-	return NULL;
+	zend_bigint *b = zend_bigint_init();
+	mp_set_i64((mp_int *) b->mp, (int64_t) value);
+	return b;
 }
 
 ZEND_API zend_bigint *zend_bigint_init_from_string_length(const char *str, size_t len, int base)
@@ -53,9 +53,9 @@ ZEND_API zend_bigint *zend_bigint_init_from_string_length(const char *str, size_
 
 ZEND_API zend_bigint *zend_bigint_dup(const zend_bigint *src)
 {
-	/* not yet implemented */
-	ZEND_UNREACHABLE();
-	return NULL;
+	zend_bigint *b = zend_bigint_init();
+	mp_copy((const mp_int *) src->mp, (mp_int *) b->mp);
+	return b;
 }
 
 ZEND_API void zend_bigint_free(zend_bigint *big)
@@ -67,20 +67,22 @@ ZEND_API void zend_bigint_free(zend_bigint *big)
 
 ZEND_API void zend_bigint_add(zend_bigint *out, const zend_bigint *op1, const zend_bigint *op2)
 {
-	/* not yet implemented */
-	ZEND_UNREACHABLE();
+	mp_add((const mp_int *) op1->mp, (const mp_int *) op2->mp, (mp_int *) out->mp);
 }
 
 ZEND_API void zend_bigint_add_long(zend_bigint *out, const zend_bigint *op1, zend_long op2)
 {
-	/* not yet implemented */
-	ZEND_UNREACHABLE();
+	mp_int tmp;
+	mp_init(&tmp);
+	mp_set_i64(&tmp, (int64_t) op2);
+	mp_add((const mp_int *) op1->mp, &tmp, (mp_int *) out->mp);
+	mp_clear(&tmp);
 }
 
 ZEND_API void zend_bigint_long_add_long(zend_bigint *out, zend_long op1, zend_long op2)
 {
-	/* not yet implemented */
-	ZEND_UNREACHABLE();
+	mp_set_i64((mp_int *) out->mp, (int64_t) op1);
+	zend_bigint_add_long(out, out, op2);
 }
 
 ZEND_API int zend_bigint_sign(const zend_bigint *big)
