@@ -87,37 +87,47 @@ ZEND_API void zend_bigint_long_add_long(zend_bigint *out, zend_long op1, zend_lo
 
 ZEND_API int zend_bigint_sign(const zend_bigint *big)
 {
-	/* not yet implemented */
-	ZEND_UNREACHABLE();
-	return 0;
+	if (mp_iszero((const mp_int *) big->mp)) {
+		return 0;
+	}
+	return mp_isneg((const mp_int *) big->mp) ? -1 : 1;
 }
 
 ZEND_API bool zend_bigint_can_fit_long(const zend_bigint *big)
 {
-	/* not yet implemented */
-	ZEND_UNREACHABLE();
-	return false;
+	/* fits if within [ZEND_LONG_MIN, ZEND_LONG_MAX] */
+	mp_int min, max;
+	bool ok;
+	mp_init_multi(&min, &max, NULL);
+	mp_set_i64(&min, (int64_t) ZEND_LONG_MIN);
+	mp_set_i64(&max, (int64_t) ZEND_LONG_MAX);
+	ok = (mp_cmp((const mp_int *) big->mp, &min) != MP_LT)
+		&& (mp_cmp((const mp_int *) big->mp, &max) != MP_GT);
+	mp_clear_multi(&min, &max, NULL);
+	return ok;
 }
 
 ZEND_API zend_long zend_bigint_to_long(const zend_bigint *big)
 {
-	/* not yet implemented */
-	ZEND_UNREACHABLE();
-	return 0;
+	return (zend_long) mp_get_i64((const mp_int *) big->mp);
 }
 
 ZEND_API int zend_bigint_cmp(const zend_bigint *a, const zend_bigint *b)
 {
-	/* not yet implemented */
-	ZEND_UNREACHABLE();
-	return 0;
+	mp_ord o = mp_cmp((const mp_int *) a->mp, (const mp_int *) b->mp);
+	return o == MP_LT ? -1 : (o == MP_GT ? 1 : 0);
 }
 
 ZEND_API int zend_bigint_cmp_long(const zend_bigint *a, zend_long b)
 {
-	/* not yet implemented */
-	ZEND_UNREACHABLE();
-	return 0;
+	mp_int t;
+	int r;
+	mp_init(&t);
+	mp_set_i64(&t, (int64_t) b);
+	mp_ord o = mp_cmp((const mp_int *) a->mp, &t);
+	r = o == MP_LT ? -1 : (o == MP_GT ? 1 : 0);
+	mp_clear(&t);
+	return r;
 }
 
 ZEND_API char *zend_bigint_to_string(const zend_bigint *big, size_t *len)
