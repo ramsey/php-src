@@ -112,6 +112,11 @@ ZEND_API zend_long zend_bigint_to_long(const zend_bigint *big)
 	return (zend_long) mp_get_i64((const mp_int *) big->mp);
 }
 
+ZEND_API double zend_bigint_to_double(const zend_bigint *big)
+{
+	return mp_get_double((const mp_int *) big->mp);
+}
+
 ZEND_API int zend_bigint_cmp(const zend_bigint *a, const zend_bigint *b)
 {
 	mp_ord o = mp_cmp((const mp_int *) a->mp, (const mp_int *) b->mp);

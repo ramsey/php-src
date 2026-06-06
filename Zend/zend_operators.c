@@ -306,6 +306,9 @@ static zend_never_inline zval* ZEND_FASTCALL _zendi_convert_scalar_to_number_sil
 		case IS_RESOURCE:
 			ZVAL_LONG(holder, Z_RES_HANDLE_P(op));
 			return holder;
+		case IS_BIGINT:
+			ZVAL_DOUBLE(holder, zend_bigint_to_double(Z_BIG_P(op)));
+			return holder;
 		case IS_OBJECT:
 			convert_object_to_type(op, holder, _IS_NUMBER);
 			if (UNEXPECTED(EG(exception)) ||
@@ -355,6 +358,9 @@ static zend_never_inline zend_result ZEND_FASTCALL _zendi_try_convert_scalar_to_
 			}
 			ZEND_ASSERT(Z_TYPE_P(holder) == IS_LONG || Z_TYPE_P(holder) == IS_DOUBLE);
 			return SUCCESS;
+		case IS_BIGINT:
+			ZVAL_DOUBLE(holder, zend_bigint_to_double(Z_BIG_P(op)));
+			return SUCCESS;
 		case IS_RESOURCE:
 		case IS_ARRAY:
 			return FAILURE;
@@ -392,6 +398,8 @@ try_again:
 			}
 			return lval;
 		}
+		case IS_BIGINT:
+			return zend_bigint_to_long(Z_BIG_P(op));
 		case IS_STRING:
 			{
 				uint8_t type;
@@ -964,6 +972,8 @@ try_again:
 			return Z_RES_HANDLE_P(op);
 		case IS_LONG:
 			return Z_LVAL_P(op);
+		case IS_BIGINT:
+			return zend_bigint_to_long(Z_BIG_P(op));
 		case IS_DOUBLE: {
 			double dval = Z_DVAL_P(op);
 			zend_long lval = zend_dval_to_lval(dval);
@@ -1033,6 +1043,8 @@ try_again:
 			return (double) Z_RES_HANDLE_P(op);
 		case IS_LONG:
 			return (double) Z_LVAL_P(op);
+		case IS_BIGINT:
+			return zend_bigint_to_double(Z_BIG_P(op));
 		case IS_DOUBLE:
 			return Z_DVAL_P(op);
 		case IS_STRING:
@@ -1073,6 +1085,13 @@ try_again:
 			return zend_strpprintf(0, "Resource id #" ZEND_LONG_FMT, (zend_long)Z_RES_HANDLE_P(op));
 		case IS_LONG:
 			return zend_long_to_str(Z_LVAL_P(op));
+		case IS_BIGINT: {
+			size_t len;
+			char *s = zend_bigint_to_string(Z_BIG_P(op), &len);
+			zend_string *str = zend_string_init(s, len, 0);
+			efree(s);
+			return str;
+		}
 		case IS_DOUBLE:
 			return zend_double_to_str(Z_DVAL_P(op));
 		case IS_ARRAY:
@@ -1683,6 +1702,9 @@ try_again:
 	switch (Z_TYPE_P(op1)) {
 		case IS_LONG:
 			ZVAL_LONG(result, ~Z_LVAL_P(op1));
+			return SUCCESS;
+		case IS_BIGINT:
+			ZVAL_LONG(result, ~zend_bigint_to_long(Z_BIG_P(op1)));
 			return SUCCESS;
 		case IS_DOUBLE: {
 			zend_long lval = zend_dval_to_lval_safe(Z_DVAL_P(op1));
@@ -2352,6 +2374,15 @@ ZEND_API int ZEND_FASTCALL zend_compare(zval *op1, zval *op2) /* {{{ */
 			case TYPE_PAIR(IS_DOUBLE, IS_DOUBLE):
 				return ZEND_THREEWAY_COMPARE(Z_DVAL_P(op1), Z_DVAL_P(op2));
 
+			case TYPE_PAIR(IS_BIGINT, IS_BIGINT):
+				return zend_bigint_cmp(Z_BIG_P(op1), Z_BIG_P(op2));
+
+			case TYPE_PAIR(IS_BIGINT, IS_LONG):
+				return zend_bigint_cmp_long(Z_BIG_P(op1), Z_LVAL_P(op2));
+
+			case TYPE_PAIR(IS_LONG, IS_BIGINT):
+				return -zend_bigint_cmp_long(Z_BIG_P(op2), Z_LVAL_P(op1));
+
 			case TYPE_PAIR(IS_ARRAY, IS_ARRAY):
 				return zend_compare_arrays(op1, op2);
 
@@ -2518,6 +2549,8 @@ ZEND_API bool ZEND_FASTCALL zend_is_identical(const zval *op1, const zval *op2) 
 			return 1;
 		case IS_LONG:
 			return (Z_LVAL_P(op1) == Z_LVAL_P(op2));
+		case IS_BIGINT:
+			return zend_bigint_cmp(Z_BIG_P(op1), Z_BIG_P(op2)) == 0;
 		case IS_RESOURCE:
 			return (Z_RES_P(op1) == Z_RES_P(op2));
 		case IS_DOUBLE:
@@ -2746,6 +2779,13 @@ try_again:
 		case IS_LONG:
 			fast_long_increment_function(op1);
 			break;
+		case IS_BIGINT: {
+			zend_bigint *r = zend_bigint_init();
+			zend_bigint_add_long(r, Z_BIG_P(op1), 1);
+			zend_bigint_release(Z_BIG_P(op1));
+			zend_bigint_result(op1, r);
+			break;
+		}
 		case IS_DOUBLE:
 			Z_DVAL_P(op1) = Z_DVAL_P(op1) + 1;
 			break;
@@ -2834,6 +2874,13 @@ try_again:
 		case IS_LONG:
 			fast_long_decrement_function(op1);
 			break;
+		case IS_BIGINT: {
+			zend_bigint *r = zend_bigint_init();
+			zend_bigint_add_long(r, Z_BIG_P(op1), -1);
+			zend_bigint_release(Z_BIG_P(op1));
+			zend_bigint_result(op1, r);
+			break;
+		}
 		case IS_DOUBLE:
 			Z_DVAL_P(op1) = Z_DVAL_P(op1) - 1;
 			break;

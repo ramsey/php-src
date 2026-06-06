@@ -22,6 +22,7 @@
 #include "zend_compile.h"
 #include "zend_execute.h"
 #include "zend_API.h"
+#include "zend_bigint.h"
 #include "zend_hash.h"
 #include "zend_modules.h"
 #include "zend_extensions.h"
@@ -636,6 +637,8 @@ ZEND_API bool ZEND_FASTCALL zend_parse_arg_long_weak(const zval *arg, zend_long 
 		*dest = 0;
 	} else if (EXPECTED(Z_TYPE_P(arg) == IS_TRUE)) {
 		*dest = 1;
+	} else if (Z_TYPE_P(arg) == IS_BIGINT) {
+		*dest = zend_bigint_to_long(Z_BIG_P(arg));
 	} else {
 		return 0;
 	}
@@ -685,6 +688,8 @@ ZEND_API double ZEND_FASTCALL zend_parse_arg_double_weak(const zval *arg, uint32
 		return 0.0;
 	} else if (EXPECTED(Z_TYPE_P(arg) == IS_TRUE)) {
 		return 1.0;
+	} else if (Z_TYPE_P(arg) == IS_BIGINT) {
+		return zend_bigint_to_double(Z_BIG_P(arg));
 	} else {
 		return NAN;
 	}
@@ -728,6 +733,10 @@ ZEND_API bool ZEND_FASTCALL zend_parse_arg_number_slow(zval *arg, zval **dest, u
 		ZVAL_LONG(arg, 0);
 	} else if (Z_TYPE_P(arg) == IS_TRUE) {
 		ZVAL_LONG(arg, 1);
+	} else if (Z_TYPE_P(arg) == IS_BIGINT) {
+		zend_bigint *big = Z_BIG_P(arg);
+		ZVAL_DOUBLE(arg, zend_bigint_to_double(big));
+		zend_bigint_release(big);
 	} else {
 		return 0;
 	}
@@ -749,6 +758,10 @@ ZEND_API bool ZEND_FASTCALL zend_parse_arg_number_or_str_slow(zval *arg, zval **
 		ZVAL_LONG(arg, 0);
 	} else if (Z_TYPE_P(arg) == IS_TRUE) {
 		ZVAL_LONG(arg, 1);
+	} else if (Z_TYPE_P(arg) == IS_BIGINT) {
+		zend_bigint *big = Z_BIG_P(arg);
+		ZVAL_DOUBLE(arg, zend_bigint_to_double(big));
+		zend_bigint_release(big);
 	} else if (UNEXPECTED(Z_TYPE_P(arg) == IS_OBJECT)) {
 		zend_object *zobj = Z_OBJ_P(arg);
 		zval obj;

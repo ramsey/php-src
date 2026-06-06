@@ -39,6 +39,7 @@ ZEND_API void zend_bigint_long_add_long(zend_bigint *out, zend_long op1, zend_lo
 ZEND_API int       zend_bigint_sign(const zend_bigint *big);
 ZEND_API bool      zend_bigint_can_fit_long(const zend_bigint *big);
 ZEND_API zend_long zend_bigint_to_long(const zend_bigint *big);
+ZEND_API double    zend_bigint_to_double(const zend_bigint *big);
 ZEND_API int       zend_bigint_cmp(const zend_bigint *a, const zend_bigint *b);
 ZEND_API int       zend_bigint_cmp_long(const zend_bigint *a, zend_long b);
 ZEND_API char     *zend_bigint_to_string(const zend_bigint *big, size_t *len);
