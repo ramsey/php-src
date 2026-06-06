@@ -37,6 +37,7 @@
 #include "zend_call_stack.h"
 #include "zend_max_execution_timer.h"
 #include "zend_hrtime.h"
+#include "zend_bigint.h"
 #include "zend_enum.h"
 #include "zend_closures.h"
 #include "Optimizer/zend_optimizer.h"
@@ -951,6 +952,7 @@ void zend_startup(zend_utility_functions *utility_functions) /* {{{ */
 #endif
 
 	zend_startup_hrtime();
+	zend_startup_bigint();
 	zend_startup_extensions_mechanism();
 
 	/* Set up utility functions and values */

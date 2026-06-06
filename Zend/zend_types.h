@@ -324,6 +324,7 @@ typedef union _zend_value {
 	double            dval;				/* double value */
 	zend_refcounted  *counted;
 	zend_string      *str;
+	zend_bigint      *big;
 	zend_array       *arr;
 	zend_object      *obj;
 	zend_resource    *res;
@@ -647,6 +648,7 @@ struct _zend_ast_ref {
 #define IS_RESOURCE					9
 #define IS_REFERENCE				10
 #define IS_CONSTANT_AST				11 /* Constant expressions */
+#define IS_BIGINT					15 /* Arbitrary precision integers */
 
 /* Fake types used only for type hinting.
  * These are allowed to overlap with the types below. */
@@ -661,7 +663,7 @@ struct _zend_ast_ref {
 #define IS_INDIRECT             	12
 #define IS_PTR						13
 #define IS_ALIAS_PTR				14
-#define _IS_ERROR					15
+#define _IS_ERROR					21
 
 /* used for casts */
 #define _IS_BOOL					18
@@ -903,6 +905,7 @@ static zend_always_inline uint32_t zend_gc_delref_ex(zend_refcounted_h *p, uint3
 #define GC_RESOURCE					(IS_RESOURCE     | (GC_NOT_COLLECTABLE << GC_FLAGS_SHIFT))
 #define GC_REFERENCE				(IS_REFERENCE    | (GC_NOT_COLLECTABLE << GC_FLAGS_SHIFT))
 #define GC_CONSTANT_AST				(IS_CONSTANT_AST | (GC_NOT_COLLECTABLE << GC_FLAGS_SHIFT))
+#define GC_BIGINT					(IS_BIGINT       | (GC_NOT_COLLECTABLE << GC_FLAGS_SHIFT))
 
 /* zval.u1.v.type_flags */
 #define IS_TYPE_REFCOUNTED			(1<<0)
@@ -926,6 +929,8 @@ static zend_always_inline uint32_t zend_gc_delref_ex(zend_refcounted_h *p, uint3
 #define IS_REFERENCE_EX				(IS_REFERENCE      | (IS_TYPE_REFCOUNTED << Z_TYPE_FLAGS_SHIFT) | (IS_TYPE_COLLECTABLE << Z_TYPE_FLAGS_SHIFT))
 
 #define IS_CONSTANT_AST_EX			(IS_CONSTANT_AST   | (IS_TYPE_REFCOUNTED << Z_TYPE_FLAGS_SHIFT))
+
+#define IS_BIGINT_EX				(IS_BIGINT         | (IS_TYPE_REFCOUNTED << Z_TYPE_FLAGS_SHIFT))
 
 /* string flags (zval.value->gc.u.flags) */
 #define IS_STR_CLASS_NAME_MAP_PTR   GC_PROTECTED  /* refcount is a map_ptr offset of class_entry */
@@ -1072,6 +1077,9 @@ static zend_always_inline uint32_t zend_gc_delref_ex(zend_refcounted_h *p, uint3
 #define Z_STR(zval)					(zval).value.str
 #define Z_STR_P(zval_p)				Z_STR(*(zval_p))
 
+#define Z_BIG(zval)					(zval).value.big
+#define Z_BIG_P(zval_p)				Z_BIG(*(zval_p))
+
 #define Z_STRVAL(zval)				ZSTR_VAL(Z_STR(zval))
 #define Z_STRVAL_P(zval_p)			Z_STRVAL(*(zval_p))
 
@@ -1198,6 +1206,12 @@ static zend_always_inline uint32_t zend_gc_delref_ex(zend_refcounted_h *p, uint3
 		zend_string *__s = (s);					\
 		Z_STR_P(__z) = __s;						\
 		Z_TYPE_INFO_P(__z) = IS_STRING_EX;		\
+	} while (0)
+
+#define ZVAL_BIGINT(z, b) do {					\
+		zval *__z = (z);						\
+		Z_BIG_P(__z) = (b);						\
+		Z_TYPE_INFO_P(__z) = IS_BIGINT_EX;		\
 	} while (0)
 
 #define ZVAL_STR_COPY(z, s) do {						\

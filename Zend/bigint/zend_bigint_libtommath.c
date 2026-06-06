@@ -20,7 +20,7 @@ ZEND_API zend_bigint *zend_bigint_init(void)
 {
 	zend_bigint *b = emalloc(sizeof(zend_bigint));
 	GC_SET_REFCOUNT(b, 1);
-	GC_TYPE_INFO(b) = 0; /* placeholder until IS_BIGINT=15 + GC_BIGINT defined */
+	GC_TYPE_INFO(b) = GC_BIGINT;
 	b->mp = emalloc(sizeof(mp_int));
 	if (mp_init((mp_int *) b->mp) != MP_OKAY) {
 		efree(b->mp);
