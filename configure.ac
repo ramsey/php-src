@@ -1311,6 +1311,20 @@ else
     [AC_MSG_FAILURE([fibers not available on this platform])])
 fi
 
+AC_ARG_WITH([bigint],
+  [AS_HELP_STRING([--with-bigint=LIB],
+    [arbitrary-precision integer backend: libtommath (default)])],
+  [PHP_BIGINT=$withval], [PHP_BIGINT=libtommath])
+
+AS_CASE([$PHP_BIGINT],
+  [libtommath], [],
+  [AC_MSG_ERROR([--with-bigint: only 'libtommath' is supported at this time])])
+
+PHP_ADD_SOURCES([Zend/bigint/libtommath], [tommath_amalgam.c tommath_platform_stubs.c],
+  [-DMP_NO_FILE -DMP_64BIT])
+PHP_ADD_SOURCES([Zend/bigint], [zend_bigint.c zend_bigint_libtommath.c],
+  [-I$(abs_srcdir)/Zend/bigint])
+
 ZEND_INIT
 
 ZEND_EXTRA_LIBS=$LIBS

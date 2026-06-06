@@ -79,6 +79,7 @@ typedef struct _zval_struct     zval;
 
 typedef struct _zend_refcounted zend_refcounted;
 typedef struct _zend_string     zend_string;
+typedef struct _zend_bigint     zend_bigint;
 typedef struct _zend_array      zend_array;
 typedef struct _zend_object     zend_object;
 typedef struct _zend_resource   zend_resource;
@@ -381,6 +382,11 @@ struct _zend_string {
 	zend_ulong        h;                /* hash value */
 	size_t            len;
 	char              val[1];
+};
+
+struct _zend_bigint {
+	zend_refcounted_h gc;
+	void             *mp;               /* backend-private, opaque here */
 };
 
 typedef struct _Bucket {
