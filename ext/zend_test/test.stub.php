@@ -375,6 +375,9 @@ function zend_test_override_libxml_global_state(): void {}
 
     /** @internal */
     function zend_test_bigint_fits_long(string $decimal): bool {}
+
+    /** @internal */
+    function zend_test_make_bigint(string $decimal): mixed {}
 }
 
 namespace ZendTestNS {

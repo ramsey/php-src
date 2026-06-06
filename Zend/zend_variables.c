@@ -24,6 +24,7 @@
 #include "zend_globals.h"
 #include "zend_constants.h"
 #include "zend_list.h"
+#include "zend_bigint.h"
 
 #if ZEND_DEBUG
 static void ZEND_FASTCALL zend_string_destroy(zend_string *str);
@@ -32,6 +33,7 @@ static void ZEND_FASTCALL zend_string_destroy(zend_string *str);
 #endif
 static void ZEND_FASTCALL zend_reference_destroy(zend_reference *ref);
 static void ZEND_FASTCALL zend_empty_destroy(zend_reference *ref);
+static void ZEND_FASTCALL zend_bigint_destroy(zend_refcounted *p);
 
 typedef void (ZEND_FASTCALL *zend_rc_dtor_func_t)(zend_refcounted *p);
 
@@ -47,12 +49,16 @@ static const zend_rc_dtor_func_t zend_rc_dtor_func[] = {
 	[IS_OBJECT] =       (zend_rc_dtor_func_t)zend_objects_store_del,
 	[IS_RESOURCE] =     (zend_rc_dtor_func_t)zend_list_free,
 	[IS_REFERENCE] =    (zend_rc_dtor_func_t)zend_reference_destroy,
-	[IS_CONSTANT_AST] = (zend_rc_dtor_func_t)zend_ast_ref_destroy
+	[IS_CONSTANT_AST] = (zend_rc_dtor_func_t)zend_ast_ref_destroy,
+	[IS_INDIRECT] =     (zend_rc_dtor_func_t)zend_empty_destroy,
+	[IS_PTR] =          (zend_rc_dtor_func_t)zend_empty_destroy,
+	[IS_ALIAS_PTR] =    (zend_rc_dtor_func_t)zend_empty_destroy,
+	[IS_BIGINT] =       (zend_rc_dtor_func_t)zend_bigint_destroy
 };
 
 ZEND_API void ZEND_FASTCALL rc_dtor_func(zend_refcounted *p)
 {
-	ZEND_ASSERT(GC_TYPE(p) <= IS_CONSTANT_AST);
+	ZEND_ASSERT(GC_TYPE(p) <= IS_BIGINT);
 	zend_rc_dtor_func[GC_TYPE(p)](p);
 }
 
@@ -76,6 +82,11 @@ static void ZEND_FASTCALL zend_reference_destroy(zend_reference *ref)
 
 static void ZEND_FASTCALL zend_empty_destroy(zend_reference *ref)
 {
+}
+
+static void ZEND_FASTCALL zend_bigint_destroy(zend_refcounted *p)
+{
+	zend_bigint_free((zend_bigint *) p);
 }
 
 ZEND_API void zval_ptr_dtor(zval *zval_ptr) /* {{{ */
@@ -142,6 +153,8 @@ ZEND_API void ZEND_FASTCALL zval_copy_ctor_func(zval *zvalue)
 		ZEND_ASSERT(!ZSTR_IS_INTERNED(Z_STR_P(zvalue)));
 		CHECK_ZVAL_STRING(Z_STR_P(zvalue));
 		ZVAL_NEW_STR(zvalue, zend_string_dup(Z_STR_P(zvalue), 0));
+	} else if (EXPECTED(Z_TYPE_P(zvalue) == IS_BIGINT)) {
+		ZVAL_BIGINT(zvalue, zend_bigint_dup(Z_BIG_P(zvalue)));
 	} else {
 		ZEND_UNREACHABLE();
 	}

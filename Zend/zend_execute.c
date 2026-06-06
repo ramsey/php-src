@@ -1225,7 +1225,13 @@ static zend_always_inline bool zend_check_type(
 		arg = Z_REFVAL_P(arg);
 	}
 
-	if (EXPECTED(ZEND_TYPE_CONTAINS_CODE(*type, Z_TYPE_P(arg)))) {
+	uint8_t type_code = Z_TYPE_P(arg);
+	if (type_code == IS_BIGINT) {
+		/* A bigint satisfies the same type declarations as a long. */
+		type_code = IS_LONG;
+	}
+
+	if (EXPECTED(ZEND_TYPE_CONTAINS_CODE(*type, type_code))) {
 		return 1;
 	}
 

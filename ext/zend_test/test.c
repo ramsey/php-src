@@ -1156,6 +1156,20 @@ static ZEND_FUNCTION(zend_test_bigint_fits_long)
 	RETURN_BOOL(ok);
 }
 
+static ZEND_FUNCTION(zend_test_make_bigint)
+{
+	zend_string *in;
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_STR(in)
+	ZEND_PARSE_PARAMETERS_END();
+
+	zend_bigint *b = zend_bigint_init_from_string_length(ZSTR_VAL(in), ZSTR_LEN(in), 10);
+	if (!b) {
+		RETURN_FALSE;
+	}
+	ZVAL_BIGINT(return_value, b);
+}
+
 typedef struct _zend_test_object {
 	zend_internal_function *tmp_method;
 	zend_object std;
