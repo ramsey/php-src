@@ -366,6 +366,9 @@ function zend_test_override_libxml_global_state(): void {}
 
     /** @compile-time-eval */
     function zend_test_gh19792(): void {}
+
+    /** @internal */
+    function zend_test_bigint_string_roundtrip(string $decimal): string {}
 }
 
 namespace ZendTestNS {

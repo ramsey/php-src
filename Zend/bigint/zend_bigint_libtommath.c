@@ -18,9 +18,16 @@
 
 ZEND_API zend_bigint *zend_bigint_init(void)
 {
-	/* not yet implemented */
-	ZEND_UNREACHABLE();
-	return NULL;
+	zend_bigint *b = emalloc(sizeof(zend_bigint));
+	GC_SET_REFCOUNT(b, 1);
+	GC_TYPE_INFO(b) = 0; /* placeholder until IS_BIGINT=15 + GC_BIGINT defined */
+	b->mp = emalloc(sizeof(mp_int));
+	if (mp_init((mp_int *) b->mp) != MP_OKAY) {
+		efree(b->mp);
+		efree(b);
+		zend_error_noreturn(E_ERROR, "Could not initialize bigint: mp_init failed");
+	}
+	return b;
 }
 
 ZEND_API zend_bigint *zend_bigint_init_from_long(zend_long value)
@@ -32,9 +39,16 @@ ZEND_API zend_bigint *zend_bigint_init_from_long(zend_long value)
 
 ZEND_API zend_bigint *zend_bigint_init_from_string_length(const char *str, size_t len, int base)
 {
-	/* not yet implemented */
-	ZEND_UNREACHABLE();
-	return NULL;
+	/* mp_read_radix requires a NUL-terminated string */
+	char *tmp = estrndup(str, len);
+	zend_bigint *b = zend_bigint_init();
+	mp_err err = mp_read_radix((mp_int *) b->mp, tmp, base);
+	efree(tmp);
+	if (err != MP_OKAY) {
+		zend_bigint_free(b);
+		return NULL;
+	}
+	return b;
 }
 
 ZEND_API zend_bigint *zend_bigint_dup(const zend_bigint *src)
@@ -46,8 +60,9 @@ ZEND_API zend_bigint *zend_bigint_dup(const zend_bigint *src)
 
 ZEND_API void zend_bigint_free(zend_bigint *big)
 {
-	/* not yet implemented */
-	ZEND_UNREACHABLE();
+	mp_clear((mp_int *) big->mp);
+	efree(big->mp);
+	efree(big);
 }
 
 ZEND_API void zend_bigint_add(zend_bigint *out, const zend_bigint *op1, const zend_bigint *op2)
@@ -105,7 +120,13 @@ ZEND_API int zend_bigint_cmp_long(const zend_bigint *a, zend_long b)
 
 ZEND_API char *zend_bigint_to_string(const zend_bigint *big, size_t *len)
 {
-	/* not yet implemented */
-	ZEND_UNREACHABLE();
-	return NULL;
+	int size = 0;
+	mp_radix_size((const mp_int *) big->mp, 10, &size);
+	/* size includes the NUL terminator */
+	char *out = emalloc((size_t) size);
+	size_t written = 0;
+	mp_to_radix((const mp_int *) big->mp, out, (size_t) size, &written, 10);
+	/* written includes NUL; use strlen as a version-robust alternative */
+	*len = strlen(out);
+	return out;
 }

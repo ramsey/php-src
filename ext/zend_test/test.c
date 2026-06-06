@@ -32,6 +32,7 @@
 #include "zend_weakrefs.h"
 #include "Zend/Optimizer/zend_optimizer.h"
 #include "Zend/zend_alloc.h"
+#include "Zend/zend_bigint.h"
 #include "test_arginfo.h"
 #include "tmp_methods_arginfo.h"
 #include "zend_call_stack.h"
@@ -1101,6 +1102,24 @@ static ZEND_FUNCTION(zend_test_log_err_debug)
 	ZEND_PARSE_PARAMETERS_END();
 
 	php_log_err_with_severity(ZSTR_VAL(str), LOG_DEBUG);
+}
+
+static ZEND_FUNCTION(zend_test_bigint_string_roundtrip)
+{
+	zend_string *in;
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_STR(in)
+	ZEND_PARSE_PARAMETERS_END();
+
+	zend_bigint *b = zend_bigint_init_from_string_length(ZSTR_VAL(in), ZSTR_LEN(in), 10);
+	if (!b) {
+		RETURN_FALSE;
+	}
+	size_t len;
+	char *s = zend_bigint_to_string(b, &len);
+	zend_bigint_free(b);
+	RETVAL_STRINGL(s, len);
+	efree(s);
 }
 
 typedef struct _zend_test_object {
