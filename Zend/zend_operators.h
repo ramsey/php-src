@@ -532,6 +532,10 @@ ZEND_API void zend_reset_lc_ctype_locale(void);
 # define ZEND_USE_ASM_ARITHMETIC 0
 #endif
 
+ZEND_API void ZEND_FASTCALL zend_bigint_long_overflow_add(zval *result, zend_long a, zend_long b);
+ZEND_API void ZEND_FASTCALL zend_bigint_long_overflow_sub(zval *result, zend_long a, zend_long b);
+ZEND_API void ZEND_FASTCALL zend_bigint_long_overflow_mul(zval *result, zend_long a, zend_long b);
+
 static zend_always_inline void fast_long_increment_function(zval *op1)
 {
 #if ZEND_USE_ASM_ARITHMETIC && defined(__i386__) && !(4 == __GNUC__ && 8 == __GNUC_MINOR__)
@@ -544,7 +548,7 @@ static zend_always_inline void fast_long_increment_function(zval *op1)
 		: overflow);
 	return;
 overflow: ZEND_ATTRIBUTE_COLD_LABEL
-	ZVAL_DOUBLE(op1, (double)ZEND_LONG_MAX + 1.0);
+	zend_bigint_long_overflow_add(op1, ZEND_LONG_MAX, 1);
 #elif ZEND_USE_ASM_ARITHMETIC && defined(__x86_64__)
 	__asm__ goto(
 		"addq $1,(%0)\n\t"
@@ -555,7 +559,7 @@ overflow: ZEND_ATTRIBUTE_COLD_LABEL
 		: overflow);
 	return;
 overflow: ZEND_ATTRIBUTE_COLD_LABEL
-	ZVAL_DOUBLE(op1, (double)ZEND_LONG_MAX + 1.0);
+	zend_bigint_long_overflow_add(op1, ZEND_LONG_MAX, 1);
 #elif ZEND_USE_ASM_ARITHMETIC && defined(__aarch64__)
 	__asm__ goto (
 		"ldr x5, [%0]\n\t"
@@ -568,43 +572,38 @@ overflow: ZEND_ATTRIBUTE_COLD_LABEL
 		: overflow);
 	return;
 overflow: ZEND_ATTRIBUTE_COLD_LABEL
-	ZVAL_DOUBLE(op1, (double)ZEND_LONG_MAX + 1.0);
+	zend_bigint_long_overflow_add(op1, ZEND_LONG_MAX, 1);
 #elif defined(PHP_HAVE_BUILTIN_SADDL_OVERFLOW) && SIZEOF_LONG == SIZEOF_ZEND_LONG
 	long lresult;
 	if (UNEXPECTED(__builtin_saddl_overflow(Z_LVAL_P(op1), 1, &lresult))) {
-		/* switch to double */
-		ZVAL_DOUBLE(op1, (double)ZEND_LONG_MAX + 1.0);
+		zend_bigint_long_overflow_add(op1, ZEND_LONG_MAX, 1);
 	} else {
 		Z_LVAL_P(op1) = lresult;
 	}
 #elif defined(PHP_HAVE_BUILTIN_SADDLL_OVERFLOW) && SIZEOF_LONG_LONG == SIZEOF_ZEND_LONG
 	long long llresult;
 	if (UNEXPECTED(__builtin_saddll_overflow(Z_LVAL_P(op1), 1, &llresult))) {
-		/* switch to double */
-		ZVAL_DOUBLE(op1, (double)ZEND_LONG_MAX + 1.0);
+		zend_bigint_long_overflow_add(op1, ZEND_LONG_MAX, 1);
 	} else {
 		Z_LVAL_P(op1) = llresult;
 	}
 #elif defined(ZEND_WIN32) && SIZEOF_LONG == SIZEOF_ZEND_LONG
 	long lresult;
 	if (UNEXPECTED(FAILED(LongAdd(Z_LVAL_P(op1), 1, &lresult)))) {
-		/* switch to double */
-		ZVAL_DOUBLE(op1, (double)ZEND_LONG_MAX + 1.0);
+		zend_bigint_long_overflow_add(op1, ZEND_LONG_MAX, 1);
 	} else {
 		Z_LVAL_P(op1) = lresult;
 	}
 #elif defined(ZEND_WIN32) && SIZEOF_LONG_LONG == SIZEOF_ZEND_LONG
 	long long llresult;
 	if (UNEXPECTED(FAILED(LongLongAdd(Z_LVAL_P(op1), 1, &llresult)))) {
-		/* switch to double */
-		ZVAL_DOUBLE(op1, (double)ZEND_LONG_MAX + 1.0);
+		zend_bigint_long_overflow_add(op1, ZEND_LONG_MAX, 1);
 	} else {
 		Z_LVAL_P(op1) = llresult;
 	}
 #else
 	if (UNEXPECTED(Z_LVAL_P(op1) == ZEND_LONG_MAX)) {
-		/* switch to double */
-		ZVAL_DOUBLE(op1, (double)ZEND_LONG_MAX + 1.0);
+		zend_bigint_long_overflow_add(op1, ZEND_LONG_MAX, 1);
 	} else {
 		Z_LVAL_P(op1)++;
 	}
@@ -623,7 +622,7 @@ static zend_always_inline void fast_long_decrement_function(zval *op1)
 		: overflow);
 	return;
 overflow: ZEND_ATTRIBUTE_COLD_LABEL
-	ZVAL_DOUBLE(op1, (double)ZEND_LONG_MIN - 1.0);
+	zend_bigint_long_overflow_sub(op1, ZEND_LONG_MIN, 1);
 #elif ZEND_USE_ASM_ARITHMETIC && defined(__x86_64__)
 	__asm__ goto(
 		"subq $1,(%0)\n\t"
@@ -634,7 +633,7 @@ overflow: ZEND_ATTRIBUTE_COLD_LABEL
 		: overflow);
 	return;
 overflow: ZEND_ATTRIBUTE_COLD_LABEL
-	ZVAL_DOUBLE(op1, (double)ZEND_LONG_MIN - 1.0);
+	zend_bigint_long_overflow_sub(op1, ZEND_LONG_MIN, 1);
 #elif ZEND_USE_ASM_ARITHMETIC && defined(__aarch64__)
 	__asm__ goto (
 		"ldr x5, [%0]\n\t"
@@ -647,52 +646,43 @@ overflow: ZEND_ATTRIBUTE_COLD_LABEL
 		: overflow);
 	return;
 overflow: ZEND_ATTRIBUTE_COLD_LABEL
-	ZVAL_DOUBLE(op1, (double)ZEND_LONG_MIN - 1.0);
+	zend_bigint_long_overflow_sub(op1, ZEND_LONG_MIN, 1);
 #elif defined(PHP_HAVE_BUILTIN_SSUBL_OVERFLOW) && SIZEOF_LONG == SIZEOF_ZEND_LONG
 	long lresult;
 	if (UNEXPECTED(__builtin_ssubl_overflow(Z_LVAL_P(op1), 1, &lresult))) {
-		/* switch to double */
-		ZVAL_DOUBLE(op1, (double)ZEND_LONG_MIN - 1.0);
+		zend_bigint_long_overflow_sub(op1, ZEND_LONG_MIN, 1);
 	} else {
 		Z_LVAL_P(op1) = lresult;
 	}
 #elif defined(PHP_HAVE_BUILTIN_SSUBLL_OVERFLOW) && SIZEOF_LONG_LONG == SIZEOF_ZEND_LONG
 	long long llresult;
 	if (UNEXPECTED(__builtin_ssubll_overflow(Z_LVAL_P(op1), 1, &llresult))) {
-		/* switch to double */
-		ZVAL_DOUBLE(op1, (double)ZEND_LONG_MIN - 1.0);
+		zend_bigint_long_overflow_sub(op1, ZEND_LONG_MIN, 1);
 	} else {
 		Z_LVAL_P(op1) = llresult;
 	}
 #elif defined(ZEND_WIN32) && SIZEOF_LONG == SIZEOF_ZEND_LONG
 	long lresult;
 	if (UNEXPECTED(FAILED(LongSub(Z_LVAL_P(op1), 1, &lresult)))) {
-		/* switch to double */
-		ZVAL_DOUBLE(op1, (double)ZEND_LONG_MIN - 1.0);
+		zend_bigint_long_overflow_sub(op1, ZEND_LONG_MIN, 1);
 	} else {
 		Z_LVAL_P(op1) = lresult;
 	}
 #elif defined(ZEND_WIN32) && SIZEOF_LONG_LONG == SIZEOF_ZEND_LONG
 	long long llresult;
 	if (UNEXPECTED(FAILED(LongLongSub(Z_LVAL_P(op1), 1, &llresult)))) {
-		/* switch to double */
-		ZVAL_DOUBLE(op1, (double)ZEND_LONG_MIN - 1.0);
+		zend_bigint_long_overflow_sub(op1, ZEND_LONG_MIN, 1);
 	} else {
 		Z_LVAL_P(op1) = llresult;
 	}
 #else
 	if (UNEXPECTED(Z_LVAL_P(op1) == ZEND_LONG_MIN)) {
-		/* switch to double */
-		ZVAL_DOUBLE(op1, (double)ZEND_LONG_MIN - 1.0);
+		zend_bigint_long_overflow_sub(op1, ZEND_LONG_MIN, 1);
 	} else {
 		Z_LVAL_P(op1)--;
 	}
 #endif
 }
-
-ZEND_API void ZEND_FASTCALL zend_bigint_long_overflow_add(zval *result, zend_long a, zend_long b);
-ZEND_API void ZEND_FASTCALL zend_bigint_long_overflow_sub(zval *result, zend_long a, zend_long b);
-ZEND_API void ZEND_FASTCALL zend_bigint_long_overflow_mul(zval *result, zend_long a, zend_long b);
 
 static zend_always_inline void fast_long_add_function(zval *result, zval *op1, zval *op2)
 {

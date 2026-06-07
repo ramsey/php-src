@@ -8,45 +8,47 @@ class Test {
     public int|bool $prop2;
 }
 
-/* Incrementing a int|float property past int min/max is legal */
+/* Incrementing an int|float property past int min/max is legal and stays an
+ * integer: overflow promotes to a big integer rather than silently becoming a
+ * float, since the slot accepts int. */
 
 $test = new Test;
 $test->prop = PHP_INT_MAX;
 $x = $test->prop++;
-var_dump(is_double($test->prop));
+var_dump(is_int($test->prop));
 
 $test->prop = PHP_INT_MAX;
 $x = ++$test->prop;
-var_dump(is_double($test->prop));
+var_dump(is_int($test->prop));
 
 $test->prop = PHP_INT_MIN;
 $x = $test->prop--;
-var_dump(is_double($test->prop));
+var_dump(is_int($test->prop));
 
 $test->prop = PHP_INT_MIN;
 $x = --$test->prop;
-var_dump(is_double($test->prop));
+var_dump(is_int($test->prop));
 
 $test = new Test;
 $test->prop = PHP_INT_MAX;
 $r =& $test->prop;
 $x = $test->prop++;
-var_dump(is_double($test->prop));
+var_dump(is_int($test->prop));
 
 $test->prop = PHP_INT_MAX;
 $x = ++$test->prop;
 $r =& $test->prop;
-var_dump(is_double($test->prop));
+var_dump(is_int($test->prop));
 
 $test->prop = PHP_INT_MIN;
 $x = $test->prop--;
 $r =& $test->prop;
-var_dump(is_double($test->prop));
+var_dump(is_int($test->prop));
 
 $test->prop = PHP_INT_MIN;
 $x = --$test->prop;
 $r =& $test->prop;
-var_dump(is_double($test->prop));
+var_dump(is_int($test->prop));
 
 /* Incrementing a non-int|float property past int min/max is an error,
  * even if the result of the overflow (a float) would technically be allowed
