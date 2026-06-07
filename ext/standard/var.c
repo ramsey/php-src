@@ -559,6 +559,13 @@ again:
 			}
 			smart_str_append_long(buf, Z_LVAL_P(struc));
 			break;
+		case IS_BIGINT: {
+			size_t len;
+			char *s = zend_bigint_to_string(Z_BIG_P(struc), &len);
+			smart_str_appendl(buf, s, len);
+			efree(s);
+			break;
+		}
 		case IS_DOUBLE:
 			smart_str_append_double(
 				buf, Z_DVAL_P(struc), (int) PG(serialize_precision), /* zero_fraction */ true);
