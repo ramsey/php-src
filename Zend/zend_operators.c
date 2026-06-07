@@ -784,6 +784,15 @@ try_again:
 		case IS_LONG:
 			ZVAL_STR(op, zend_long_to_str(Z_LVAL_P(op)));
 			break;
+		case IS_BIGINT: {
+			size_t len;
+			char *s = zend_bigint_to_string(Z_BIG_P(op), &len);
+			zend_string *str = zend_string_init(s, len, 0);
+			efree(s);
+			zval_ptr_dtor(op);
+			ZVAL_NEW_STR(op, str);
+			break;
+		}
 		case IS_DOUBLE: {
 			/* Casting NAN will cause a warning */
 			zend_string *new_value = zend_double_to_str(Z_DVAL_P(op));
