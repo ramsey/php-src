@@ -50,7 +50,7 @@ float(NAN)
 float(NAN)
 --- testing: 9223372036854775806 ---
 float(NAN)
---- testing: 9.2233720368548E+18 ---
+--- testing: 9223372036854775808 ---
 float(NAN)
 --- testing: -9223372036854775807 ---
 float(NAN)
