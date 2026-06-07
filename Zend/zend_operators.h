@@ -692,6 +692,7 @@ overflow: ZEND_ATTRIBUTE_COLD_LABEL
 
 ZEND_API void ZEND_FASTCALL zend_bigint_long_overflow_add(zval *result, zend_long a, zend_long b);
 ZEND_API void ZEND_FASTCALL zend_bigint_long_overflow_sub(zval *result, zend_long a, zend_long b);
+ZEND_API void ZEND_FASTCALL zend_bigint_long_overflow_mul(zval *result, zend_long a, zend_long b);
 
 static zend_always_inline void fast_long_add_function(zval *result, zval *op1, zval *op2)
 {
@@ -899,6 +900,20 @@ overflow: ZEND_ATTRIBUTE_COLD_LABEL
 		ZVAL_LONG(result, sub);
 	}
 #endif
+}
+
+static zend_always_inline void fast_long_mul_function(zval *result, zval *op1, zval *op2)
+{
+	zend_long overflow, lresult;
+	double dresult;
+
+	ZEND_SIGNED_MULTIPLY_LONG(Z_LVAL_P(op1), Z_LVAL_P(op2), lresult, dresult, overflow);
+	if (UNEXPECTED(overflow)) {
+		zend_bigint_long_overflow_mul(result, Z_LVAL_P(op1), Z_LVAL_P(op2));
+	} else {
+		ZVAL_LONG(result, lresult);
+	}
+	(void) dresult;
 }
 
 static zend_always_inline bool zend_fast_equal_strings(zend_string *s1, zend_string *s2)

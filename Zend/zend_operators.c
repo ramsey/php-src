@@ -1168,6 +1168,16 @@ static zend_always_inline void zend_bigint_result(zval *result, zend_bigint *big
 	}
 }
 
+/* When result aliases a bigint operand, its old value must be released before
+ * the new result overwrites it. A non-aliasing result is a write-only temp whose
+ * contents are undefined and must not be read. */
+static zend_always_inline void zend_bigint_release_result_alias(zval *result, zval *op1, zval *op2)
+{
+	if ((result == op1 || result == op2) && Z_TYPE_P(result) == IS_BIGINT) {
+		zend_bigint_release(Z_BIG_P(result));
+	}
+}
+
 ZEND_API void ZEND_FASTCALL zend_bigint_long_overflow_add(zval *result, zend_long a, zend_long b)
 {
 	zend_bigint *big = zend_bigint_init();
@@ -1179,6 +1189,13 @@ ZEND_API void ZEND_FASTCALL zend_bigint_long_overflow_sub(zval *result, zend_lon
 {
 	zend_bigint *big = zend_bigint_init();
 	zend_bigint_long_sub_long(big, a, b);
+	ZVAL_BIGINT(result, big);
+}
+
+ZEND_API void ZEND_FASTCALL zend_bigint_long_overflow_mul(zval *result, zend_long a, zend_long b)
+{
+	zend_bigint *big = zend_bigint_init();
+	zend_bigint_long_mul_long(big, a, b);
 	ZVAL_BIGINT(result, big);
 }
 
@@ -1204,25 +1221,19 @@ static zend_always_inline zend_result add_function_fast(zval *result, zval *op1,
 	} else if (type_pair == TYPE_PAIR(IS_BIGINT, IS_BIGINT)) {
 		zend_bigint *r = zend_bigint_init();
 		zend_bigint_add(r, Z_BIG_P(op1), Z_BIG_P(op2));
-		if (Z_TYPE_P(result) == IS_BIGINT) {
-			zend_bigint_release(Z_BIG_P(result));
-		}
+		zend_bigint_release_result_alias(result, op1, op2);
 		zend_bigint_result(result, r);
 		return SUCCESS;
 	} else if (type_pair == TYPE_PAIR(IS_BIGINT, IS_LONG)) {
 		zend_bigint *r = zend_bigint_init();
 		zend_bigint_add_long(r, Z_BIG_P(op1), Z_LVAL_P(op2));
-		if (Z_TYPE_P(result) == IS_BIGINT) {
-			zend_bigint_release(Z_BIG_P(result));
-		}
+		zend_bigint_release_result_alias(result, op1, op2);
 		zend_bigint_result(result, r);
 		return SUCCESS;
 	} else if (type_pair == TYPE_PAIR(IS_LONG, IS_BIGINT)) {
 		zend_bigint *r = zend_bigint_init();
 		zend_bigint_add_long(r, Z_BIG_P(op2), Z_LVAL_P(op1));
-		if (Z_TYPE_P(result) == IS_BIGINT) {
-			zend_bigint_release(Z_BIG_P(result));
-		}
+		zend_bigint_release_result_alias(result, op1, op2);
 		zend_bigint_result(result, r);
 		return SUCCESS;
 	} else {
@@ -1291,25 +1302,19 @@ static zend_always_inline zend_result sub_function_fast(zval *result, zval *op1,
 	} else if (type_pair == TYPE_PAIR(IS_BIGINT, IS_BIGINT)) {
 		zend_bigint *r = zend_bigint_init();
 		zend_bigint_sub(r, Z_BIG_P(op1), Z_BIG_P(op2));
-		if (Z_TYPE_P(result) == IS_BIGINT) {
-			zend_bigint_release(Z_BIG_P(result));
-		}
+		zend_bigint_release_result_alias(result, op1, op2);
 		zend_bigint_result(result, r);
 		return SUCCESS;
 	} else if (type_pair == TYPE_PAIR(IS_BIGINT, IS_LONG)) {
 		zend_bigint *r = zend_bigint_init();
 		zend_bigint_sub_long(r, Z_BIG_P(op1), Z_LVAL_P(op2));
-		if (Z_TYPE_P(result) == IS_BIGINT) {
-			zend_bigint_release(Z_BIG_P(result));
-		}
+		zend_bigint_release_result_alias(result, op1, op2);
 		zend_bigint_result(result, r);
 		return SUCCESS;
 	} else if (type_pair == TYPE_PAIR(IS_LONG, IS_BIGINT)) {
 		zend_bigint *r = zend_bigint_init();
 		zend_bigint_long_sub(r, Z_LVAL_P(op1), Z_BIG_P(op2));
-		if (Z_TYPE_P(result) == IS_BIGINT) {
-			zend_bigint_release(Z_BIG_P(result));
-		}
+		zend_bigint_release_result_alias(result, op1, op2);
 		zend_bigint_result(result, r);
 		return SUCCESS;
 	} else {
@@ -1366,11 +1371,7 @@ static zend_always_inline zend_result mul_function_fast(zval *result, zval *op1,
 	uint8_t type_pair = TYPE_PAIR(Z_TYPE_P(op1), Z_TYPE_P(op2));
 
 	if (EXPECTED(type_pair == TYPE_PAIR(IS_LONG, IS_LONG))) {
-		zend_long overflow;
-		ZEND_SIGNED_MULTIPLY_LONG(
-			Z_LVAL_P(op1), Z_LVAL_P(op2),
-			Z_LVAL_P(result), Z_DVAL_P(result), overflow);
-		Z_TYPE_INFO_P(result) = overflow ? IS_DOUBLE : IS_LONG;
+		fast_long_mul_function(result, op1, op2);
 		return SUCCESS;
 	} else if (EXPECTED(type_pair == TYPE_PAIR(IS_DOUBLE, IS_DOUBLE))) {
 		ZVAL_DOUBLE(result, Z_DVAL_P(op1) * Z_DVAL_P(op2));
@@ -1380,6 +1381,24 @@ static zend_always_inline zend_result mul_function_fast(zval *result, zval *op1,
 		return SUCCESS;
 	} else if (EXPECTED(type_pair == TYPE_PAIR(IS_DOUBLE, IS_LONG))) {
 		ZVAL_DOUBLE(result, Z_DVAL_P(op1) * ((double)Z_LVAL_P(op2)));
+		return SUCCESS;
+	} else if (type_pair == TYPE_PAIR(IS_BIGINT, IS_BIGINT)) {
+		zend_bigint *r = zend_bigint_init();
+		zend_bigint_mul(r, Z_BIG_P(op1), Z_BIG_P(op2));
+		zend_bigint_release_result_alias(result, op1, op2);
+		zend_bigint_result(result, r);
+		return SUCCESS;
+	} else if (type_pair == TYPE_PAIR(IS_BIGINT, IS_LONG)) {
+		zend_bigint *r = zend_bigint_init();
+		zend_bigint_mul_long(r, Z_BIG_P(op1), Z_LVAL_P(op2));
+		zend_bigint_release_result_alias(result, op1, op2);
+		zend_bigint_result(result, r);
+		return SUCCESS;
+	} else if (type_pair == TYPE_PAIR(IS_LONG, IS_BIGINT)) {
+		zend_bigint *r = zend_bigint_init();
+		zend_bigint_mul_long(r, Z_BIG_P(op2), Z_LVAL_P(op1));
+		zend_bigint_release_result_alias(result, op1, op2);
+		zend_bigint_result(result, r);
 		return SUCCESS;
 	} else {
 		return FAILURE;

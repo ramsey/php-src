@@ -38,6 +38,9 @@ ZEND_API void zend_bigint_sub(zend_bigint *out, const zend_bigint *op1, const ze
 ZEND_API void zend_bigint_sub_long(zend_bigint *out, const zend_bigint *op1, zend_long op2);
 ZEND_API void zend_bigint_long_sub(zend_bigint *out, zend_long op1, const zend_bigint *op2);
 ZEND_API void zend_bigint_long_sub_long(zend_bigint *out, zend_long op1, zend_long op2);
+ZEND_API void zend_bigint_mul(zend_bigint *out, const zend_bigint *op1, const zend_bigint *op2);
+ZEND_API void zend_bigint_mul_long(zend_bigint *out, const zend_bigint *op1, zend_long op2);
+ZEND_API void zend_bigint_long_mul_long(zend_bigint *out, zend_long op1, zend_long op2);
 
 /* Information / conversion */
 ZEND_API int       zend_bigint_sign(const zend_bigint *big);
