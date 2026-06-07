@@ -85,6 +85,35 @@ ZEND_API void zend_bigint_long_add_long(zend_bigint *out, zend_long op1, zend_lo
 	zend_bigint_add_long(out, out, op2);
 }
 
+ZEND_API void zend_bigint_sub(zend_bigint *out, const zend_bigint *op1, const zend_bigint *op2)
+{
+	mp_sub((const mp_int *) op1->mp, (const mp_int *) op2->mp, (mp_int *) out->mp);
+}
+
+ZEND_API void zend_bigint_sub_long(zend_bigint *out, const zend_bigint *op1, zend_long op2)
+{
+	mp_int tmp;
+	mp_init(&tmp);
+	mp_set_i64(&tmp, (int64_t) op2);
+	mp_sub((const mp_int *) op1->mp, &tmp, (mp_int *) out->mp);
+	mp_clear(&tmp);
+}
+
+ZEND_API void zend_bigint_long_sub(zend_bigint *out, zend_long op1, const zend_bigint *op2)
+{
+	mp_int tmp;
+	mp_init(&tmp);
+	mp_set_i64(&tmp, (int64_t) op1);
+	mp_sub(&tmp, (const mp_int *) op2->mp, (mp_int *) out->mp);
+	mp_clear(&tmp);
+}
+
+ZEND_API void zend_bigint_long_sub_long(zend_bigint *out, zend_long op1, zend_long op2)
+{
+	mp_set_i64((mp_int *) out->mp, (int64_t) op1);
+	zend_bigint_sub_long(out, out, op2);
+}
+
 ZEND_API int zend_bigint_sign(const zend_bigint *big)
 {
 	if (mp_iszero((const mp_int *) big->mp)) {
