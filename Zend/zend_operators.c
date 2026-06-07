@@ -1197,16 +1197,25 @@ static zend_always_inline zend_result add_function_fast(zval *result, zval *op1,
 	} else if (type_pair == TYPE_PAIR(IS_BIGINT, IS_BIGINT)) {
 		zend_bigint *r = zend_bigint_init();
 		zend_bigint_add(r, Z_BIG_P(op1), Z_BIG_P(op2));
+		if (Z_TYPE_P(result) == IS_BIGINT) {
+			zend_bigint_release(Z_BIG_P(result));
+		}
 		zend_bigint_result(result, r);
 		return SUCCESS;
 	} else if (type_pair == TYPE_PAIR(IS_BIGINT, IS_LONG)) {
 		zend_bigint *r = zend_bigint_init();
 		zend_bigint_add_long(r, Z_BIG_P(op1), Z_LVAL_P(op2));
+		if (Z_TYPE_P(result) == IS_BIGINT) {
+			zend_bigint_release(Z_BIG_P(result));
+		}
 		zend_bigint_result(result, r);
 		return SUCCESS;
 	} else if (type_pair == TYPE_PAIR(IS_LONG, IS_BIGINT)) {
 		zend_bigint *r = zend_bigint_init();
 		zend_bigint_add_long(r, Z_BIG_P(op2), Z_LVAL_P(op1));
+		if (Z_TYPE_P(result) == IS_BIGINT) {
+			zend_bigint_release(Z_BIG_P(result));
+		}
 		zend_bigint_result(result, r);
 		return SUCCESS;
 	} else {
