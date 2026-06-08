@@ -59,6 +59,9 @@ ZEND_API void zend_bigint_mod(zend_bigint *out, const zend_bigint *op1, const ze
 ZEND_API void zend_bigint_mod_long(zend_bigint *out, const zend_bigint *op1, zend_long op2);
 ZEND_API void zend_bigint_long_mod(zend_bigint *out, zend_long op1, const zend_bigint *op2);
 
+/* Bitwise complement: out = ~op = -op - 1 (infinite-precision two's complement). */
+ZEND_API void zend_bigint_complement(zend_bigint *out, const zend_bigint *op);
+
 /* Exponentiation: out = base ** exp, for a non-negative exp. Returns true on
  * success. If the active backend cannot compute the power (e.g. an exponent
  * beyond the backend's reach), it leaves out untouched and returns false. When

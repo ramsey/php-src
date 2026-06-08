@@ -1942,9 +1942,13 @@ try_again:
 		case IS_LONG:
 			ZVAL_LONG(result, ~Z_LVAL_P(op1));
 			return SUCCESS;
-		case IS_BIGINT:
-			ZVAL_LONG(result, ~zend_bigint_to_long(Z_BIG_P(op1)));
+		case IS_BIGINT: {
+			zend_bigint *r = zend_bigint_init();
+			zend_bigint_complement(r, Z_BIG_P(op1));
+			zend_bigint_release_result_alias(result, op1, op1);
+			zend_bigint_result(result, r);
 			return SUCCESS;
+		}
 		case IS_DOUBLE: {
 			zend_long lval = zend_dval_to_lval_safe(Z_DVAL_P(op1));
 			if (EG(exception)) {

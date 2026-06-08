@@ -189,6 +189,11 @@ ZEND_API void zend_bigint_long_mod(zend_bigint *out, zend_long op1, const zend_b
 	mp_clear(&tmp);
 }
 
+ZEND_API void zend_bigint_complement(zend_bigint *out, const zend_bigint *op)
+{
+	mp_complement((const mp_int *) op->mp, (mp_int *) out->mp);
+}
+
 ZEND_API bool zend_bigint_can_pow_exponent(zend_long exp)
 {
 	ZEND_ASSERT(exp >= 0);
