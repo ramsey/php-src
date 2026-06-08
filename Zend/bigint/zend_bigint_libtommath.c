@@ -134,6 +134,29 @@ ZEND_API void zend_bigint_long_mul_long(zend_bigint *out, zend_long op1, zend_lo
 	zend_bigint_mul_long(out, out, op2);
 }
 
+ZEND_API void zend_bigint_divmod(zend_bigint *quot, zend_bigint *rem, const zend_bigint *op1, const zend_bigint *op2)
+{
+	mp_div((const mp_int *) op1->mp, (const mp_int *) op2->mp, (mp_int *) quot->mp, (mp_int *) rem->mp);
+}
+
+ZEND_API void zend_bigint_divmod_long(zend_bigint *quot, zend_bigint *rem, const zend_bigint *op1, zend_long op2)
+{
+	mp_int tmp;
+	mp_init(&tmp);
+	mp_set_i64(&tmp, (int64_t) op2);
+	mp_div((const mp_int *) op1->mp, &tmp, (mp_int *) quot->mp, (mp_int *) rem->mp);
+	mp_clear(&tmp);
+}
+
+ZEND_API void zend_bigint_long_divmod(zend_bigint *quot, zend_bigint *rem, zend_long op1, const zend_bigint *op2)
+{
+	mp_int tmp;
+	mp_init(&tmp);
+	mp_set_i64(&tmp, (int64_t) op1);
+	mp_div(&tmp, (const mp_int *) op2->mp, (mp_int *) quot->mp, (mp_int *) rem->mp);
+	mp_clear(&tmp);
+}
+
 ZEND_API int zend_bigint_sign(const zend_bigint *big)
 {
 	if (mp_iszero((const mp_int *) big->mp)) {

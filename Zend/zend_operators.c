@@ -1187,6 +1187,23 @@ static zend_always_inline void zend_bigint_release_result_alias(zval *result, zv
 	}
 }
 
+/* Store the outcome of a bigint division. A zero remainder means the division
+ * was exact, so the integer quotient is preserved (demoted to a long when it
+ * fits); otherwise the precomputed floating-point ratio is used. Consumes both
+ * quot and rem. Operands must already have been read into inexact_result. */
+static zend_always_inline void zend_bigint_div_result(zval *result, zval *op1, zval *op2, zend_bigint *quot, zend_bigint *rem, double inexact_result)
+{
+	bool exact = zend_bigint_sign(rem) == 0;
+	zend_bigint_release(rem);
+	zend_bigint_release_result_alias(result, op1, op2);
+	if (exact) {
+		zend_bigint_result(result, quot);
+	} else {
+		zend_bigint_release(quot);
+		ZVAL_DOUBLE(result, inexact_result);
+	}
+}
+
 ZEND_API void ZEND_FASTCALL zend_bigint_long_overflow_add(zval *result, zend_long a, zend_long b)
 {
 	zend_bigint *big = zend_bigint_init();
@@ -1568,7 +1585,7 @@ typedef enum {
 	DIV_TYPES_NOT_HANDLED
 } zend_div_status;
 
-static zend_div_status ZEND_FASTCALL div_function_base(zval *result, const zval *op1, const zval *op2) /* {{{ */
+static zend_div_status ZEND_FASTCALL div_function_base(zval *result, zval *op1, zval *op2) /* {{{ */
 {
 	uint8_t type_pair = TYPE_PAIR(Z_TYPE_P(op1), Z_TYPE_P(op2));
 
@@ -1603,6 +1620,32 @@ static zend_div_status ZEND_FASTCALL div_function_base(zval *result, const zval 
 			return DIV_BY_ZERO;
 		}
 		ZVAL_DOUBLE(result, (double)Z_LVAL_P(op1) / Z_DVAL_P(op2));
+		return DIV_SUCCESS;
+	} else if (type_pair == TYPE_PAIR(IS_BIGINT, IS_BIGINT)) {
+		/* a bigint operand is never zero, so no division-by-zero check is needed */
+		zend_bigint *quot = zend_bigint_init();
+		zend_bigint *rem = zend_bigint_init();
+		zend_bigint_divmod(quot, rem, Z_BIG_P(op1), Z_BIG_P(op2));
+		double inexact = zend_bigint_to_double(Z_BIG_P(op1)) / zend_bigint_to_double(Z_BIG_P(op2));
+		zend_bigint_div_result(result, op1, op2, quot, rem, inexact);
+		return DIV_SUCCESS;
+	} else if (type_pair == TYPE_PAIR(IS_BIGINT, IS_LONG)) {
+		if (Z_LVAL_P(op2) == 0) {
+			return DIV_BY_ZERO;
+		}
+		zend_bigint *quot = zend_bigint_init();
+		zend_bigint *rem = zend_bigint_init();
+		zend_bigint_divmod_long(quot, rem, Z_BIG_P(op1), Z_LVAL_P(op2));
+		double inexact = zend_bigint_to_double(Z_BIG_P(op1)) / (double) Z_LVAL_P(op2);
+		zend_bigint_div_result(result, op1, op2, quot, rem, inexact);
+		return DIV_SUCCESS;
+	} else if (type_pair == TYPE_PAIR(IS_LONG, IS_BIGINT)) {
+		/* the bigint divisor is never zero */
+		zend_bigint *quot = zend_bigint_init();
+		zend_bigint *rem = zend_bigint_init();
+		zend_bigint_long_divmod(quot, rem, Z_LVAL_P(op1), Z_BIG_P(op2));
+		double inexact = (double) Z_LVAL_P(op1) / zend_bigint_to_double(Z_BIG_P(op2));
+		zend_bigint_div_result(result, op1, op2, quot, rem, inexact);
 		return DIV_SUCCESS;
 	} else {
 		return DIV_TYPES_NOT_HANDLED;
