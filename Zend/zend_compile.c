@@ -10526,6 +10526,13 @@ ZEND_API bool zend_binary_op_produces_error(uint32_t opcode, const zval *op1, co
 		/* 0 ** (<0) throws a division by zero error. */
 		return 1;
 	}
+	if (opcode == ZEND_POW
+			&& Z_TYPE_P(op2) == IS_LONG && Z_LVAL_P(op2) > 0
+			&& !zend_bigint_can_pow_exponent(Z_LVAL_P(op2))) {
+		/* A power whose exponent is beyond the bigint backend's reach throws an
+		 * ArithmeticError. */
+		return 1;
+	}
 	if ((opcode == ZEND_SL || opcode == ZEND_SR) && zval_get_long(op2) < 0) {
 		/* Shift by negative number throws an error. */
 		return 1;

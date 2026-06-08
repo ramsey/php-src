@@ -14,7 +14,13 @@
 
 #include "zend.h"
 #include "zend_bigint.h"
+#include "zend_exceptions.h"
 #include "libtommath/tommath.h"
+
+ZEND_API const char *zend_bigint_backend_name(void)
+{
+	return "libtommath";
+}
 
 ZEND_API zend_bigint *zend_bigint_init(void)
 {
@@ -181,6 +187,35 @@ ZEND_API void zend_bigint_long_mod(zend_bigint *out, zend_long op1, const zend_b
 	mp_set_i64(&tmp, (int64_t) op1);
 	mp_div(&tmp, (const mp_int *) op2->mp, NULL, (mp_int *) out->mp);
 	mp_clear(&tmp);
+}
+
+ZEND_API bool zend_bigint_can_pow_exponent(zend_long exp)
+{
+	ZEND_ASSERT(exp >= 0);
+	/* mp_expt_n takes an int exponent */
+	return exp <= INT_MAX;
+}
+
+/* out = base ** exp, for a non-negative exp. On success returns true with the
+ * power in out. libtommath's mp_expt_n takes an int exponent, and an exponent
+ * above INT_MAX is beyond this backend's reach (and the result would be far too
+ * large to hold in memory); in that case it throws an ArithmeticError naming
+ * the backend limit, leaves out untouched, and returns false. */
+ZEND_API bool zend_bigint_pow_long(zend_bigint *out, const zend_bigint *base, zend_long exp)
+{
+	if (!zend_bigint_can_pow_exponent(exp)) {
+		zend_throw_error(zend_ce_arithmetic_error,
+			"The libtommath bigint backend cannot raise to an exponent greater than %d", INT_MAX);
+		return false;
+	}
+	mp_expt_n((const mp_int *) base->mp, (int) exp, (mp_int *) out->mp);
+	return true;
+}
+
+ZEND_API bool zend_bigint_long_pow_long(zend_bigint *out, zend_long base, zend_long exp)
+{
+	mp_set_i64((mp_int *) out->mp, (int64_t) base);
+	return zend_bigint_pow_long(out, out, exp);
 }
 
 ZEND_API int zend_bigint_sign(const zend_bigint *big)

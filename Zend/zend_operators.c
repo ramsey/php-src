@@ -1494,6 +1494,34 @@ static double safe_pow(double base, double exponent)
 	return pow(base, exponent);
 }
 
+/* Tidy up after the bigint backend has refused to compute a power (it has
+ * already thrown). A result that aliases op1 keeps its old value. The refused
+ * bigint temp is released. */
+static zend_always_inline void pow_backend_refused(zval *result, zval *op1, zend_bigint *discard)
+{
+	zend_bigint_release(discard);
+	if (result != op1) {
+		ZVAL_UNDEF(result);
+	}
+}
+
+/* A long ** long whose exact value overflows the long range is preserved as a
+ * bigint (demoted back to a long if it fits). Only called for a non-negative
+ * exponent since a negative exponent is fractional and the caller has already
+ * produced a float before an overflow can occur. If the backend can't compute
+ * the power, it throws and leaves the result as pow_backend_refused describes. */
+static zend_always_inline void pow_long_overflow_result(zval *result, zval *op1, zval *op2)
+{
+	zend_long base = Z_LVAL_P(op1), exp = Z_LVAL_P(op2);
+	ZEND_ASSERT(exp >= 0 && "pow_long_overflow_result requires a non-negative exponent");
+	zend_bigint *r = zend_bigint_init();
+	if (UNEXPECTED(!zend_bigint_long_pow_long(r, base, exp))) {
+		pow_backend_refused(result, op1, r);
+		return;
+	}
+	zend_bigint_result(result, r);
+}
+
 static zend_result ZEND_FASTCALL pow_function_base(zval *result, zval *op1, zval *op2) /* {{{ */
 {
 	uint8_t type_pair = TYPE_PAIR(Z_TYPE_P(op1), Z_TYPE_P(op2));
@@ -1518,14 +1546,14 @@ static zend_result ZEND_FASTCALL pow_function_base(zval *result, zval *op1, zval
 					--i;
 					ZEND_SIGNED_MULTIPLY_LONG(l1, l2, l1, dval, overflow);
 					if (overflow) {
-						ZVAL_DOUBLE(result, dval * safe_pow(l2, i));
+						pow_long_overflow_result(result, op1, op2);
 						return SUCCESS;
 					}
 				} else {
 					i /= 2;
 					ZEND_SIGNED_MULTIPLY_LONG(l2, l2, l2, dval, overflow);
 					if (overflow) {
-						ZVAL_DOUBLE(result, (double)l1 * safe_pow(dval, i));
+						pow_long_overflow_result(result, op1, op2);
 						return SUCCESS;
 					}
 				}
@@ -1544,6 +1572,27 @@ static zend_result ZEND_FASTCALL pow_function_base(zval *result, zval *op1, zval
 		return SUCCESS;
 	} else if (EXPECTED(type_pair == TYPE_PAIR(IS_DOUBLE, IS_LONG))) {
 		ZVAL_DOUBLE(result, safe_pow(Z_DVAL_P(op1), (double)Z_LVAL_P(op2)));
+		return SUCCESS;
+	} else if (type_pair == TYPE_PAIR(IS_BIGINT, IS_LONG)) {
+		zend_long exp = Z_LVAL_P(op2);
+		if (exp == 0) {
+			/* anything ** 0 is 1, regardless of the base's magnitude */
+			zend_bigint_release_result_alias(result, op1, op2);
+			ZVAL_LONG(result, 1);
+		} else if (exp > 0) {
+			zend_bigint *r = zend_bigint_init();
+			if (UNEXPECTED(!zend_bigint_pow_long(r, Z_BIG_P(op1), exp))) {
+				pow_backend_refused(result, op1, r);
+				return SUCCESS;
+			}
+			zend_bigint_release_result_alias(result, op1, op2);
+			zend_bigint_result(result, r);
+		} else {
+			/* a negative exponent is fractional, so the result is a float */
+			double d = safe_pow(zend_bigint_to_double(Z_BIG_P(op1)), (double) exp);
+			zend_bigint_release_result_alias(result, op1, op2);
+			ZVAL_DOUBLE(result, d);
+		}
 		return SUCCESS;
 	} else {
 		return FAILURE;

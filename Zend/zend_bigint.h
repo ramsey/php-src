@@ -22,6 +22,10 @@ BEGIN_EXTERN_C()
 /* One-time process startup hook. */
 ZEND_API void zend_startup_bigint(void);
 
+/* Name of the active arbitrary-precision backend (e.g. "libtommath"). Stable
+ * identifier for diagnostics and for tests that assert backend-specific limits. */
+ZEND_API const char *zend_bigint_backend_name(void);
+
 /* Lifecycle */
 ZEND_API zend_bigint *zend_bigint_init(void);
 ZEND_API zend_bigint *zend_bigint_init_from_long(zend_long value);
@@ -54,6 +58,19 @@ ZEND_API void zend_bigint_long_divmod(zend_bigint *quot, zend_bigint *rem, zend_
 ZEND_API void zend_bigint_mod(zend_bigint *out, const zend_bigint *op1, const zend_bigint *op2);
 ZEND_API void zend_bigint_mod_long(zend_bigint *out, const zend_bigint *op1, zend_long op2);
 ZEND_API void zend_bigint_long_mod(zend_bigint *out, zend_long op1, const zend_bigint *op2);
+
+/* Exponentiation: out = base ** exp, for a non-negative exp. Returns true on
+ * success. If the active backend cannot compute the power (e.g. an exponent
+ * beyond the backend's reach), it leaves out untouched and returns false. When
+ * returning false, it should throw an ArithmeticError describing the backend's
+ * limit. */
+ZEND_API bool zend_bigint_pow_long(zend_bigint *out, const zend_bigint *base, zend_long exp);
+ZEND_API bool zend_bigint_long_pow_long(zend_bigint *out, zend_long base, zend_long exp);
+
+/* Whether the active backend can raise to the given non-negative exponent. The
+ * compiler consults this to avoid constant-folding a power that would throw, so
+ * the error stays catchable at runtime instead of aborting compilation. */
+ZEND_API bool zend_bigint_can_pow_exponent(zend_long exp);
 
 /* Information / conversion */
 ZEND_API int       zend_bigint_sign(const zend_bigint *big);

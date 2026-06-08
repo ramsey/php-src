@@ -1,5 +1,5 @@
 /* This is a generated file, edit test.stub.php instead.
- * Stub hash: 39d6a94e86aefcc3c2d471acf0c72bc4de00ee4a
+ * Stub hash: b3a0cd2d92dfe71d28dd6e0e37b10ebe70fa90d6
  * Has decl header: yes */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_zend_trigger_bailout, 0, 0, IS_NEVER, 0)
@@ -210,6 +210,8 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_zend_test_gh19792 arginfo_zend_test_void_return
 
+#define arginfo_zend_test_bigint_backend arginfo_zend_get_current_func_name
+
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_zend_test_bigint_string_roundtrip, 0, 1, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, decimal, IS_STRING, 0)
 ZEND_END_ARG_INFO()
@@ -374,6 +376,7 @@ static ZEND_FUNCTION(zend_test_gh18756);
 static ZEND_FUNCTION(zend_test_opcache_preloading);
 static ZEND_FUNCTION(zend_test_uri_parser);
 static ZEND_FUNCTION(zend_test_gh19792);
+static ZEND_FUNCTION(zend_test_bigint_backend);
 static ZEND_FUNCTION(zend_test_bigint_string_roundtrip);
 static ZEND_FUNCTION(zend_test_bigint_add_strings);
 static ZEND_FUNCTION(zend_test_bigint_fits_long);
@@ -520,6 +523,7 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_RAW_FENTRY("zend_test_gh19792", zif_zend_test_gh19792, arginfo_zend_test_gh19792, 0)
 #endif
 #endif
+	ZEND_FE(zend_test_bigint_backend, arginfo_zend_test_bigint_backend)
 	ZEND_FE(zend_test_bigint_string_roundtrip, arginfo_zend_test_bigint_string_roundtrip)
 	ZEND_FE(zend_test_bigint_add_strings, arginfo_zend_test_bigint_add_strings)
 	ZEND_FE(zend_test_bigint_fits_long, arginfo_zend_test_bigint_fits_long)

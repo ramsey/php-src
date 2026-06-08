@@ -1104,6 +1104,13 @@ static ZEND_FUNCTION(zend_test_log_err_debug)
 	php_log_err_with_severity(ZSTR_VAL(str), LOG_DEBUG);
 }
 
+static ZEND_FUNCTION(zend_test_bigint_backend)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	RETURN_STRING(zend_bigint_backend_name());
+}
+
 static ZEND_FUNCTION(zend_test_bigint_string_roundtrip)
 {
 	zend_string *in;

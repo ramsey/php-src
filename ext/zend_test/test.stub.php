@@ -368,6 +368,9 @@ function zend_test_override_libxml_global_state(): void {}
     function zend_test_gh19792(): void {}
 
     /** @internal */
+    function zend_test_bigint_backend(): string {}
+
+    /** @internal */
     function zend_test_bigint_string_roundtrip(string $decimal): string {}
 
     /** @internal */
