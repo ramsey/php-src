@@ -75,6 +75,13 @@ ZEND_API bool zend_bigint_long_shift_left(zend_bigint *out, zend_long op, zend_l
  * so the error stays catchable at runtime instead of aborting compilation. */
 ZEND_API bool zend_bigint_can_shift_left(zend_long bits);
 
+/* Arithmetic (sign-propagating, floored) shift right: out = op >> bits, for a
+ * non-negative bit count the backend can represent. A count too large to
+ * represent would shift past every bit, so the caller should produce that result
+ * directly (0 for a non-negative op, -1 for a negative op) instead of calling
+ * this. */
+ZEND_API void zend_bigint_shift_right(zend_bigint *out, const zend_bigint *op, zend_long bits);
+
 /* Exponentiation: out = base ** exp, for a non-negative exp. Returns true on
  * success. If the active backend cannot compute the power (e.g. an exponent
  * beyond the backend's reach), it leaves out untouched and returns false. When

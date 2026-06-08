@@ -2368,9 +2368,104 @@ ZEND_API zend_result ZEND_FASTCALL shift_left_function(zval *result, zval *op1, 
 }
 /* }}} */
 
+static zend_never_inline zend_result ZEND_FASTCALL shift_right_function_bigint(zval *result, zval *op1, zval *op2)
+{
+	/* op1 and op2 are already dereferenced and at least one is an IS_BIGINT. A
+	 * right shift never grows: a count >= the operand's bit length (including any
+	 * bigint count, or a long count beyond the backend's reach) saturates to 0
+	 * (non-negative operand) or -1 (negative operand), so it never hits a
+	 * structural limit. */
+	zend_long count = 0;
+	bool count_saturates = false, count_negative = false;
+
+	if (UNEXPECTED(Z_TYPE_P(op2) == IS_BIGINT)) {
+		/* A bigint count is never zero, so a positive one is astronomically large. */
+		if (zend_bigint_sign(Z_BIG_P(op2)) < 0) {
+			count_negative = true;
+		} else {
+			count_saturates = true;
+		}
+	} else {
+		if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
+			count = Z_LVAL_P(op2);
+		} else {
+			bool failed;
+			count = zendi_try_get_long(op2, &failed);
+			if (UNEXPECTED(failed)) {
+				zend_binop_error(">>", op1, op2);
+				if (result != op1) {
+					ZVAL_UNDEF(result);
+				}
+				return FAILURE;
+			}
+		}
+		if (count < 0) {
+			count_negative = true;
+		} else if (!zend_bigint_can_shift_left(count)) {
+			/* Same int reach as the left shift: a larger count saturates. */
+			count_saturates = true;
+		}
+	}
+
+	if (UNEXPECTED(count_negative)) {
+		if (EG(current_execute_data) && !CG(in_compilation)) {
+			zend_throw_exception_ex(zend_ce_arithmetic_error, 0, "Bit shift by negative number");
+		} else {
+			zend_error_noreturn(E_ERROR, "Bit shift by negative number");
+		}
+		if (result != op1) {
+			ZVAL_UNDEF(result);
+		}
+		return FAILURE;
+	}
+
+	if (Z_TYPE_P(op1) == IS_BIGINT) {
+		if (count_saturates) {
+			int sign = zend_bigint_sign(Z_BIG_P(op1));
+			zend_bigint_release_result_alias(result, op1, op2);
+			ZVAL_LONG(result, (sign < 0) ? -1 : 0);
+			return SUCCESS;
+		}
+		zend_bigint *r = zend_bigint_init();
+		zend_bigint_shift_right(r, Z_BIG_P(op1), count);
+		zend_bigint_release_result_alias(result, op1, op2);
+		zend_bigint_result(result, r);
+		return SUCCESS;
+	}
+
+	/* op1 is not a bigint, so this helper was reached because op2 is a bigint:
+	 * the count is astronomically large and the result saturates to op1's sign. */
+	zend_long lval;
+	if (EXPECTED(Z_TYPE_P(op1) == IS_LONG)) {
+		lval = Z_LVAL_P(op1);
+	} else {
+		bool failed;
+		lval = zendi_try_get_long(op1, &failed);
+		if (UNEXPECTED(failed)) {
+			zend_binop_error(">>", op1, op2);
+			if (result != op1) {
+				ZVAL_UNDEF(result);
+			}
+			return FAILURE;
+		}
+	}
+	if (op1 == result) {
+		zval_ptr_dtor(result);
+	}
+	ZVAL_LONG(result, (lval < 0) ? -1 : 0);
+	return SUCCESS;
+}
+
 ZEND_API zend_result ZEND_FASTCALL shift_right_function(zval *result, zval *op1, zval *op2) /* {{{ */
 {
 	zend_long op1_lval, op2_lval;
+
+	ZVAL_DEREF(op1);
+	ZVAL_DEREF(op2);
+
+	if (UNEXPECTED(Z_TYPE_P(op1) == IS_BIGINT) || UNEXPECTED(Z_TYPE_P(op2) == IS_BIGINT)) {
+		return shift_right_function_bigint(result, op1, op2);
+	}
 
 	convert_op1_op2_long(op1, op1_lval, op2, op2_lval, result, ZEND_SR, ">>");
 
