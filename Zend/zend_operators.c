@@ -1703,9 +1703,83 @@ div_by_zero:
 }
 /* }}} */
 
+static zend_never_inline zend_result ZEND_FASTCALL mod_function_bigint(zval *result, zval *op1, zval *op2)
+{
+	/* op1 and op2 are already dereferenced and at least one is an IS_BIGINT.
+	 * "%" coerces its operands to integers, so a bigint operand keeps its full
+	 * value while any other operand is coerced to a long (a coerced value is
+	 * never itself a bigint). The truncated remainder always satisfies
+	 * |result| < |divisor|, so a long divisor yields a long result; only a
+	 * bigint divisor can leave a bigint remainder. */
+	bool op1_is_big = Z_TYPE_P(op1) == IS_BIGINT;
+	bool op2_is_big = Z_TYPE_P(op2) == IS_BIGINT;
+	zend_long op1_lval = 0, op2_lval = 0;
+	bool failed;
+
+	if (!op1_is_big) {
+		if (EXPECTED(Z_TYPE_P(op1) == IS_LONG)) {
+			op1_lval = Z_LVAL_P(op1);
+		} else {
+			op1_lval = zendi_try_get_long(op1, &failed);
+			if (UNEXPECTED(failed)) {
+				zend_binop_error("%", op1, op2);
+				if (result != op1) {
+					ZVAL_UNDEF(result);
+				}
+				return FAILURE;
+			}
+		}
+	}
+	if (!op2_is_big) {
+		if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
+			op2_lval = Z_LVAL_P(op2);
+		} else {
+			op2_lval = zendi_try_get_long(op2, &failed);
+			if (UNEXPECTED(failed)) {
+				zend_binop_error("%", op1, op2);
+				if (result != op1) {
+					ZVAL_UNDEF(result);
+				}
+				return FAILURE;
+			}
+		}
+		if (op2_lval == 0) {
+			/* modulus by zero (a bigint divisor is never zero) */
+			if (EG(current_execute_data) && !CG(in_compilation)) {
+				zend_throw_exception_ex(zend_ce_division_by_zero_error, 0, "Modulo by zero");
+			} else {
+				zend_error_noreturn(E_ERROR, "Modulo by zero");
+			}
+			if (result != op1) {
+				ZVAL_UNDEF(result);
+			}
+			return FAILURE;
+		}
+	}
+
+	zend_bigint *r = zend_bigint_init();
+	if (op1_is_big && op2_is_big) {
+		zend_bigint_mod(r, Z_BIG_P(op1), Z_BIG_P(op2));
+	} else if (op1_is_big) {
+		zend_bigint_mod_long(r, Z_BIG_P(op1), op2_lval);
+	} else {
+		zend_bigint_long_mod(r, op1_lval, Z_BIG_P(op2));
+	}
+	zend_bigint_release_result_alias(result, op1, op2);
+	zend_bigint_result(result, r);
+	return SUCCESS;
+}
+
 ZEND_API zend_result ZEND_FASTCALL mod_function(zval *result, zval *op1, zval *op2) /* {{{ */
 {
 	zend_long op1_lval, op2_lval;
+
+	ZVAL_DEREF(op1);
+	ZVAL_DEREF(op2);
+
+	if (UNEXPECTED(Z_TYPE_P(op1) == IS_BIGINT) || UNEXPECTED(Z_TYPE_P(op2) == IS_BIGINT)) {
+		return mod_function_bigint(result, op1, op2);
+	}
 
 	convert_op1_op2_long(op1, op1_lval, op2, op2_lval, result, ZEND_MOD, "%");
 

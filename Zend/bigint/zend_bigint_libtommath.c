@@ -157,6 +157,32 @@ ZEND_API void zend_bigint_long_divmod(zend_bigint *quot, zend_bigint *rem, zend_
 	mp_clear(&tmp);
 }
 
+/* PHP's "%" is C truncated division: the remainder takes the sign of the
+ * dividend. This is the same as mp_div's remainder; mp_mod would instead floor
+ * the result toward the divisor's sign. */
+ZEND_API void zend_bigint_mod(zend_bigint *out, const zend_bigint *op1, const zend_bigint *op2)
+{
+	mp_div((const mp_int *) op1->mp, (const mp_int *) op2->mp, NULL, (mp_int *) out->mp);
+}
+
+ZEND_API void zend_bigint_mod_long(zend_bigint *out, const zend_bigint *op1, zend_long op2)
+{
+	mp_int tmp;
+	mp_init(&tmp);
+	mp_set_i64(&tmp, (int64_t) op2);
+	mp_div((const mp_int *) op1->mp, &tmp, NULL, (mp_int *) out->mp);
+	mp_clear(&tmp);
+}
+
+ZEND_API void zend_bigint_long_mod(zend_bigint *out, zend_long op1, const zend_bigint *op2)
+{
+	mp_int tmp;
+	mp_init(&tmp);
+	mp_set_i64(&tmp, (int64_t) op1);
+	mp_div(&tmp, (const mp_int *) op2->mp, NULL, (mp_int *) out->mp);
+	mp_clear(&tmp);
+}
+
 ZEND_API int zend_bigint_sign(const zend_bigint *big)
 {
 	if (mp_iszero((const mp_int *) big->mp)) {
