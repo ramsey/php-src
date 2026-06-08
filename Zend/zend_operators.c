@@ -1187,12 +1187,17 @@ static zend_always_inline void zend_bigint_release_result_alias(zval *result, zv
 	}
 }
 
-/* Store the outcome of a bigint division. A zero remainder means the division
- * was exact, so the integer quotient is preserved (demoted to a long when it
- * fits); otherwise the precomputed floating-point ratio is used. Consumes both
- * quot and rem. Operands must already have been read into inexact_result. */
+/* Store the outcome of a bigint division. Callers must invoke this only when both
+ * operands are integers (IS_BIGINT/IS_LONG); a float operand always yields a float
+ * and is handled by the IS_DOUBLE arms, never here. Given that, a zero remainder
+ * means the division was exact, so the integer quotient is preserved (demoted to a
+ * long when it fits); otherwise the precomputed floating-point ratio is used.
+ * Consumes both quot and rem. Operands must already have been read into
+ * inexact_result. */
 static zend_always_inline void zend_bigint_div_result(zval *result, zval *op1, zval *op2, zend_bigint *quot, zend_bigint *rem, double inexact_result)
 {
+	ZEND_ASSERT(Z_TYPE_P(op1) != IS_DOUBLE && Z_TYPE_P(op2) != IS_DOUBLE
+		&& "an exact integer result requires both operands to be integers");
 	bool exact = zend_bigint_sign(rem) == 0;
 	zend_bigint_release(rem);
 	zend_bigint_release_result_alias(result, op1, op2);
