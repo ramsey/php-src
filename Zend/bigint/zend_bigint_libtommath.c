@@ -194,6 +194,30 @@ ZEND_API void zend_bigint_complement(zend_bigint *out, const zend_bigint *op)
 	mp_complement((const mp_int *) op->mp, (mp_int *) out->mp);
 }
 
+ZEND_API bool zend_bigint_can_shift_left(zend_long bits)
+{
+	ZEND_ASSERT(bits >= 0);
+	/* mp_mul_2d takes an int bit count */
+	return bits <= INT_MAX;
+}
+
+ZEND_API bool zend_bigint_shift_left(zend_bigint *out, const zend_bigint *op, zend_long bits)
+{
+	if (!zend_bigint_can_shift_left(bits)) {
+		zend_throw_error(zend_ce_arithmetic_error,
+			"The libtommath bigint backend cannot shift left by more than %d bits", INT_MAX);
+		return false;
+	}
+	mp_mul_2d((const mp_int *) op->mp, (int) bits, (mp_int *) out->mp);
+	return true;
+}
+
+ZEND_API bool zend_bigint_long_shift_left(zend_bigint *out, zend_long op, zend_long bits)
+{
+	mp_set_i64((mp_int *) out->mp, (int64_t) op);
+	return zend_bigint_shift_left(out, out, bits);
+}
+
 ZEND_API bool zend_bigint_can_pow_exponent(zend_long exp)
 {
 	ZEND_ASSERT(exp >= 0);

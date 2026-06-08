@@ -62,6 +62,19 @@ ZEND_API void zend_bigint_long_mod(zend_bigint *out, zend_long op1, const zend_b
 /* Bitwise complement: out = ~op = -op - 1 (infinite-precision two's complement). */
 ZEND_API void zend_bigint_complement(zend_bigint *out, const zend_bigint *op);
 
+/* Bitwise shift left (out = op << bits) for a non-negative bit count. Returns
+ * true on success. If the active backend cannot perform the shift (e.g. a bit
+ * count beyond the backend's reach), it leaves out untouched and returns false.
+ * When returning false, it should throw an ArithmeticError describing the
+ * backend's limit. */
+ZEND_API bool zend_bigint_shift_left(zend_bigint *out, const zend_bigint *op, zend_long bits);
+ZEND_API bool zend_bigint_long_shift_left(zend_bigint *out, zend_long op, zend_long bits);
+
+/* Whether the active backend can shift left by the given non-negative bit count.
+ * The compiler consults this to avoid constant-folding a shift that would throw,
+ * so the error stays catchable at runtime instead of aborting compilation. */
+ZEND_API bool zend_bigint_can_shift_left(zend_long bits);
+
 /* Exponentiation: out = base ** exp, for a non-negative exp. Returns true on
  * success. If the active backend cannot compute the power (e.g. an exponent
  * beyond the backend's reach), it leaves out untouched and returns false. When

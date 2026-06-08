@@ -2236,39 +2236,134 @@ ZEND_API zend_result ZEND_FASTCALL bitwise_xor_function(zval *result, zval *op1,
 }
 /* }}} */
 
-ZEND_API zend_result ZEND_FASTCALL shift_left_function(zval *result, zval *op1, zval *op2) /* {{{ */
+static zend_never_inline zend_result ZEND_FASTCALL shift_left_function_bigint(zval *result, zval *op1, zval *op2)
 {
-	zend_long op1_lval, op2_lval;
+	/* op1 and op2 are already dereferenced and at least one is an IS_BIGINT. */
+	zend_long count;
 
-	convert_op1_op2_long(op1, op1_lval, op2, op2_lval, result, ZEND_SL, "<<");
-
-	/* prevent wrapping quirkiness on some processors where << 64 + x == << x */
-	if (UNEXPECTED((zend_ulong)op2_lval >= SIZEOF_ZEND_LONG * 8)) {
-		if (EXPECTED(op2_lval > 0)) {
-			if (op1 == result) {
-				zval_ptr_dtor(result);
-			}
-			ZVAL_LONG(result, 0);
-			return SUCCESS;
-		} else {
+	if (UNEXPECTED(Z_TYPE_P(op2) == IS_BIGINT)) {
+		/* A bigint shift count: negative is the usual error; a positive count is
+		 * astronomically beyond the backend's reach. */
+		if (zend_bigint_sign(Z_BIG_P(op2)) < 0) {
 			if (EG(current_execute_data) && !CG(in_compilation)) {
 				zend_throw_exception_ex(zend_ce_arithmetic_error, 0, "Bit shift by negative number");
 			} else {
 				zend_error_noreturn(E_ERROR, "Bit shift by negative number");
 			}
-			if (op1 != result) {
+		} else {
+			zend_throw_error(zend_ce_arithmetic_error,
+				"The libtommath bigint backend cannot shift left by more than %d bits", INT_MAX);
+		}
+		if (result != op1) {
+			ZVAL_UNDEF(result);
+		}
+		return FAILURE;
+	}
+
+	if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
+		count = Z_LVAL_P(op2);
+	} else {
+		bool failed;
+		count = zendi_try_get_long(op2, &failed);
+		if (UNEXPECTED(failed)) {
+			zend_binop_error("<<", op1, op2);
+			if (result != op1) {
 				ZVAL_UNDEF(result);
 			}
 			return FAILURE;
 		}
 	}
+	if (UNEXPECTED(count < 0)) {
+		if (EG(current_execute_data) && !CG(in_compilation)) {
+			zend_throw_exception_ex(zend_ce_arithmetic_error, 0, "Bit shift by negative number");
+		} else {
+			zend_error_noreturn(E_ERROR, "Bit shift by negative number");
+		}
+		if (result != op1) {
+			ZVAL_UNDEF(result);
+		}
+		return FAILURE;
+	}
 
+	/* op1 is the bigint here: if it were a long, this helper was reached only
+	 * because op2 was a bigint, which already returned above. */
+	ZEND_ASSERT(Z_TYPE_P(op1) == IS_BIGINT);
+	zend_bigint *r = zend_bigint_init();
+	if (!zend_bigint_shift_left(r, Z_BIG_P(op1), count)) {
+		zend_bigint_release(r);
+		if (result != op1) {
+			ZVAL_UNDEF(result);
+		}
+		return FAILURE;
+	}
+	zend_bigint_release_result_alias(result, op1, op2);
+	zend_bigint_result(result, r);
+	return SUCCESS;
+}
+
+ZEND_API zend_result ZEND_FASTCALL shift_left_function(zval *result, zval *op1, zval *op2) /* {{{ */
+{
+	zend_long op1_lval, op2_lval;
+
+	ZVAL_DEREF(op1);
+	ZVAL_DEREF(op2);
+
+	if (UNEXPECTED(Z_TYPE_P(op1) == IS_BIGINT) || UNEXPECTED(Z_TYPE_P(op2) == IS_BIGINT)) {
+		return shift_left_function_bigint(result, op1, op2);
+	}
+
+	convert_op1_op2_long(op1, op1_lval, op2, op2_lval, result, ZEND_SL, "<<");
+
+	if (UNEXPECTED(op2_lval < 0)) {
+		if (EG(current_execute_data) && !CG(in_compilation)) {
+			zend_throw_exception_ex(zend_ce_arithmetic_error, 0, "Bit shift by negative number");
+		} else {
+			zend_error_noreturn(E_ERROR, "Bit shift by negative number");
+		}
+		if (op1 != result) {
+			ZVAL_UNDEF(result);
+		}
+		return FAILURE;
+	}
+
+	/* Native fast path: keep a plain long when the result provably fits. Guard
+	 * on the long width so the shift below never runs with a count >= the type
+	 * width (that is undefined behavior, and on some processors << 64 wraps to
+	 * << 0). The round-trip through an arithmetic right shift then detects any
+	 * lost bits (works for negative op1 too); a count >= the width can't fit and
+	 * falls through to the bigint promotion. The result-aliased operand is
+	 * released only at each store site, so a thrown overflow leaves it intact. */
+	if (op2_lval < SIZEOF_ZEND_LONG * 8) {
+		zend_long res = (zend_long) ((zend_ulong) op1_lval << op2_lval);
+		if ((res >> op2_lval) == op1_lval) {
+			if (op1 == result) {
+				zval_ptr_dtor(result);
+			}
+			ZVAL_LONG(result, res);
+			return SUCCESS;
+		}
+	}
+
+	/* Overflowed the long range: 1 << 70 == 2^70, etc. (0 never overflows). */
+	if (op1_lval == 0) {
+		if (op1 == result) {
+			zval_ptr_dtor(result);
+		}
+		ZVAL_LONG(result, 0);
+		return SUCCESS;
+	}
+	zend_bigint *r = zend_bigint_init();
+	if (!zend_bigint_long_shift_left(r, op1_lval, op2_lval)) {
+		zend_bigint_release(r);
+		if (op1 != result) {
+			ZVAL_UNDEF(result);
+		}
+		return FAILURE;
+	}
 	if (op1 == result) {
 		zval_ptr_dtor(result);
 	}
-
-	/* Perform shift on unsigned numbers to get well-defined wrap behavior. */
-	ZVAL_LONG(result, (zend_long) ((zend_ulong) op1_lval << op2_lval));
+	zend_bigint_result(result, r);
 	return SUCCESS;
 }
 /* }}} */

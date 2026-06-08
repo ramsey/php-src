@@ -10537,6 +10537,12 @@ ZEND_API bool zend_binary_op_produces_error(uint32_t opcode, const zval *op1, co
 		/* Shift by negative number throws an error. */
 		return 1;
 	}
+	if (opcode == ZEND_SL
+			&& Z_TYPE_P(op2) == IS_LONG && Z_LVAL_P(op2) >= 0
+			&& !zend_bigint_can_shift_left(Z_LVAL_P(op2))) {
+		/* A shift beyond the bigint backend's reach throws an ArithmeticError. */
+		return 1;
+	}
 
 	return 0;
 }
