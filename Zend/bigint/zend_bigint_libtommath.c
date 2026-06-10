@@ -240,6 +240,20 @@ ZEND_API void zend_bigint_and_long(zend_bigint *out, const zend_bigint *op1, zen
 	mp_clear(&tmp);
 }
 
+ZEND_API void zend_bigint_or(zend_bigint *out, const zend_bigint *op1, const zend_bigint *op2)
+{
+	mp_or((const mp_int *) op1->mp, (const mp_int *) op2->mp, (mp_int *) out->mp);
+}
+
+ZEND_API void zend_bigint_or_long(zend_bigint *out, const zend_bigint *op1, zend_long op2)
+{
+	mp_int tmp;
+	mp_init(&tmp);
+	mp_set_i64(&tmp, (int64_t) op2);
+	mp_or((const mp_int *) op1->mp, &tmp, (mp_int *) out->mp);
+	mp_clear(&tmp);
+}
+
 ZEND_API bool zend_bigint_can_pow_exponent(zend_long exp)
 {
 	ZEND_ASSERT(exp >= 0);

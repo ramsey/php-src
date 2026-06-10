@@ -87,6 +87,11 @@ ZEND_API void zend_bigint_shift_right(zend_bigint *out, const zend_bigint *op, z
 ZEND_API void zend_bigint_and(zend_bigint *out, const zend_bigint *op1, const zend_bigint *op2);
 ZEND_API void zend_bigint_and_long(zend_bigint *out, const zend_bigint *op1, zend_long op2);
 
+/* Bitwise OR in infinite-precision two's complement. The *_long variant takes a
+ * long operand (OR is commutative, so it covers both bigint|long and long|bigint). */
+ZEND_API void zend_bigint_or(zend_bigint *out, const zend_bigint *op1, const zend_bigint *op2);
+ZEND_API void zend_bigint_or_long(zend_bigint *out, const zend_bigint *op1, zend_long op2);
+
 /* Exponentiation: out = base ** exp, for a non-negative exp. Returns true on
  * success. If the active backend cannot compute the power (e.g. an exponent
  * beyond the backend's reach), it leaves out untouched and returns false. When
