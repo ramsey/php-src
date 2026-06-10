@@ -104,6 +104,7 @@ ZEND_API const char *zend_get_type_by_const(int type) /* {{{ */
 			return "bool";
 		case IS_LONG:
 		case IS_BIGINT:
+		case _IS_INT:
 			return "int";
 		case IS_DOUBLE:
 			return "float";
@@ -768,6 +769,8 @@ ZEND_API bool ZEND_FASTCALL zend_parse_arg_number_slow(zval *arg, zval **dest, u
 	} else if (Z_TYPE_P(arg) == IS_TRUE) {
 		ZVAL_LONG(arg, 1);
 	} else if (Z_TYPE_P(arg) == IS_BIGINT) {
+		/* Scaffolding until the builtin sweep: unmigrated consumers receive a double.
+		 * Remove after the sweep. */
 		zend_bigint *big = Z_BIG_P(arg);
 		ZVAL_DOUBLE(arg, zend_bigint_to_double(big));
 		zend_bigint_release(big);
@@ -793,6 +796,8 @@ ZEND_API bool ZEND_FASTCALL zend_parse_arg_number_or_str_slow(zval *arg, zval **
 	} else if (Z_TYPE_P(arg) == IS_TRUE) {
 		ZVAL_LONG(arg, 1);
 	} else if (Z_TYPE_P(arg) == IS_BIGINT) {
+		/* Scaffolding until the builtin sweep: unmigrated consumers receive a double.
+		 * Remove after the sweep. */
 		zend_bigint *big = Z_BIG_P(arg);
 		ZVAL_DOUBLE(arg, zend_bigint_to_double(big));
 		zend_bigint_release(big);
@@ -812,6 +817,22 @@ ZEND_API bool ZEND_FASTCALL zend_parse_arg_number_or_str_slow(zval *arg, zval **
 	*dest = arg;
 	return true;
 }
+
+ZEND_API bool ZEND_FASTCALL zend_parse_arg_int_slow(zval *arg, zval **dest, uint32_t arg_num) /* {{{ */
+{
+	if (UNEXPECTED(ZEND_ARG_USES_STRICT_TYPES())) {
+		return false;
+	}
+	zend_long lval;
+	if (!zend_parse_arg_long_weak(arg, &lval, arg_num)) {
+		return false;
+	}
+	zval_ptr_dtor(arg);
+	ZVAL_LONG(arg, lval);
+	*dest = arg;
+	return true;
+}
+/* }}} */
 
 ZEND_API zend_string* ZEND_FASTCALL zend_parse_arg_str_weak(zval *arg, uint32_t arg_num) /* {{{ */
 {
@@ -945,6 +966,16 @@ static const char *zend_parse_arg_impl(zval *arg, va_list *va, const char **spec
 
 				if (!zend_parse_arg_number(arg, p, check_null, arg_num)) {
 					return check_null ? "int|float|null" : "int|float";
+				}
+			}
+			break;
+
+		case 'i':
+			{
+				zval **p = va_arg(*va, zval **);
+
+				if (!zend_parse_arg_int(arg, p, check_null, arg_num)) {
+					return check_null ? "?int" : "int";
 				}
 			}
 			break;
@@ -1246,6 +1277,7 @@ static zend_result zend_parse_va_args(uint32_t num_args, const char *type_spec, 
 			case 'H': case 'p':
 			case 'S': case 'P':
 			case 'L': case 'n':
+			case 'i':
 				max_num_args++;
 				break;
 

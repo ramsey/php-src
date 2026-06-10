@@ -672,6 +672,9 @@ struct _zend_ast_ref {
 /* used for PFAs/FCCs */
 #define _IS_PLACEHOLDER             20
 
+/* used for ZPP: a logical integer, i.e., IS_LONG or IS_BIGINT */
+#define _IS_INT						22
+
 /* guard flags */
 #define ZEND_GUARD_PROPERTY_GET		(1<<0)
 #define ZEND_GUARD_PROPERTY_SET		(1<<1)
@@ -696,6 +699,7 @@ static zend_always_inline uint8_t zval_get_type(const zval* pz) {
 #define ZEND_SAME_FAKE_TYPE(faketype, realtype) ( \
 	(faketype) == (realtype) \
 	|| ((faketype) == _IS_BOOL && ((realtype) == IS_TRUE || (realtype) == IS_FALSE)) \
+	|| ((faketype) == _IS_INT  && ((realtype) == IS_LONG || (realtype) == IS_BIGINT)) \
 )
 
 /* we should never set just Z_TYPE, we should set Z_TYPE_INFO */

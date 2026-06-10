@@ -381,6 +381,18 @@ function zend_test_override_libxml_global_state(): void {}
 
     /** @internal */
     function zend_test_make_bigint(string $decimal): mixed {}
+
+    /** @internal */
+    function zend_test_zpp_int(int $i): mixed {}
+
+    /** @internal */
+    function zend_test_zpp_int_or_null(?int $i): mixed {}
+
+    /** @internal */
+    function zend_test_zpp_int_or_float(int|float $n): mixed {}
+
+    /** @internal */
+    function zend_test_zpp_int_oldstyle(int $i): mixed {}
 }
 
 namespace ZendTestNS {

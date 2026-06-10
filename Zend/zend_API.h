@@ -1547,6 +1547,10 @@ static zend_always_inline zval *zend_try_array_init(zval *zv)
 	_(Z_EXPECTED_NUMBER_OR_NULL,	"of type int|float|null") \
 	_(Z_EXPECTED_NUMBER_OR_STRING,			"of type string|int|float") \
 	_(Z_EXPECTED_NUMBER_OR_STRING_OR_NULL,	"of type string|int|float|null") \
+	_(Z_EXPECTED_INT,				"of type int") \
+	_(Z_EXPECTED_INT_OR_NULL,		"of type ?int") \
+	_(Z_EXPECTED_INT_OR_FLOAT,		"of type int|float") \
+	_(Z_EXPECTED_INT_OR_FLOAT_OR_NULL, "of type int|float|null") \
 	_(Z_EXPECTED_ARRAY_OR_STRING,	"of type array|string") \
 	_(Z_EXPECTED_ARRAY_OR_STRING_OR_NULL, "of type array|string|null") \
 	_(Z_EXPECTED_STRING_OR_LONG,	"of type string|int") \
@@ -1947,6 +1951,36 @@ ZEND_API ZEND_COLD void zend_class_redeclaration_error_ex(int type, zend_string 
 #define Z_PARAM_NUMBER_OR_STR_OR_NULL(dest) \
 	Z_PARAM_NUMBER_OR_STR_EX(dest, true)
 
+/* old "i", logical integer: accepts IS_LONG or IS_BIGINT at full precision */
+#define Z_PARAM_INT_EX(dest, check_null) \
+	Z_PARAM_PROLOGUE(0, 0); \
+	if (UNEXPECTED(!zend_parse_arg_int(_arg, &dest, check_null, _i))) { \
+		_expected_type = check_null ? Z_EXPECTED_INT_OR_NULL : Z_EXPECTED_INT; \
+		_error_code = ZPP_ERROR_WRONG_ARG; \
+		break; \
+	}
+
+#define Z_PARAM_INT(dest) \
+	Z_PARAM_INT_EX(dest, 0)
+
+#define Z_PARAM_INT_OR_NULL(dest) \
+	Z_PARAM_INT_EX(dest, 1)
+
+/* logical int|float: accepts IS_LONG, IS_DOUBLE, or IS_BIGINT at full precision */
+#define Z_PARAM_INT_OR_FLOAT_EX(dest, check_null) \
+	Z_PARAM_PROLOGUE(0, 0); \
+	if (UNEXPECTED(!zend_parse_arg_int_or_float(_arg, &dest, check_null, _i))) { \
+		_expected_type = check_null ? Z_EXPECTED_INT_OR_FLOAT_OR_NULL : Z_EXPECTED_INT_OR_FLOAT; \
+		_error_code = ZPP_ERROR_WRONG_ARG; \
+		break; \
+	}
+
+#define Z_PARAM_INT_OR_FLOAT(dest) \
+	Z_PARAM_INT_OR_FLOAT_EX(dest, 0)
+
+#define Z_PARAM_INT_OR_FLOAT_OR_NULL(dest) \
+	Z_PARAM_INT_OR_FLOAT_EX(dest, 1)
+
 /* old "o" */
 #define Z_PARAM_OBJECT_EX(dest, check_null, deref) \
 		Z_PARAM_PROLOGUE(deref, 0); \
@@ -2216,6 +2250,7 @@ ZEND_API zend_string* ZEND_FASTCALL zend_parse_arg_str_weak(zval *arg, uint32_t 
 ZEND_API bool ZEND_FASTCALL zend_parse_arg_number_slow(zval *arg, zval **dest, uint32_t arg_num);
 ZEND_API bool ZEND_FASTCALL zend_parse_arg_number_or_str_slow(zval *arg, zval **dest, uint32_t arg_num);
 ZEND_API bool ZEND_FASTCALL zend_parse_arg_str_or_long_slow(zval *arg, zend_string **dest_str, zend_long *dest_long, uint32_t arg_num);
+ZEND_API bool ZEND_FASTCALL zend_parse_arg_int_slow(zval *arg, zval **dest, uint32_t arg_num);
 
 ZEND_API zpp_parse_bool_status ZEND_FASTCALL zend_flf_parse_arg_bool_slow(const zval *arg, uint32_t arg_num);
 ZEND_API zend_string* ZEND_FASTCALL zend_flf_parse_arg_str_slow(zval *arg, uint32_t arg_num);
@@ -2315,6 +2350,34 @@ static zend_always_inline bool zend_parse_arg_number_or_str(zval *arg, zval **de
 		*dest = NULL;
 	} else {
 		return zend_parse_arg_number_or_str_slow(arg, dest, arg_num);
+	}
+	return true;
+}
+
+/* old "i", logical integer: IS_LONG or IS_BIGINT pass through at full precision */
+static zend_always_inline bool zend_parse_arg_int(zval *arg, zval **dest, bool check_null, uint32_t arg_num)
+{
+	if (EXPECTED(Z_TYPE_P(arg) == IS_LONG || Z_TYPE_P(arg) == IS_BIGINT)) {
+		*dest = arg;
+	} else if (check_null && EXPECTED(Z_TYPE_P(arg) == IS_NULL)) {
+		*dest = NULL;
+	} else {
+		return zend_parse_arg_int_slow(arg, dest, arg_num);
+	}
+	return true;
+}
+
+/* logical int|float: IS_LONG, IS_DOUBLE, or IS_BIGINT pass through at full precision.
+ * A bigint never reaches the slow path; the slow path reuses zend_parse_arg_number_slow. */
+static zend_always_inline bool zend_parse_arg_int_or_float(zval *arg, zval **dest, bool check_null, uint32_t arg_num)
+{
+	if (EXPECTED(Z_TYPE_P(arg) == IS_LONG || Z_TYPE_P(arg) == IS_DOUBLE || Z_TYPE_P(arg) == IS_BIGINT)) {
+		*dest = arg;
+	} else if (check_null && EXPECTED(Z_TYPE_P(arg) == IS_NULL)) {
+		*dest = NULL;
+	} else {
+		/* Bigint is already handled above; this slow path is for weak coercions only. */
+		return zend_parse_arg_number_slow(arg, dest, arg_num);
 	}
 	return true;
 }

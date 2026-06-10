@@ -1177,6 +1177,45 @@ static ZEND_FUNCTION(zend_test_make_bigint)
 	ZVAL_BIGINT(return_value, b);
 }
 
+static ZEND_FUNCTION(zend_test_zpp_int)
+{
+	zval *v;
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_INT(v)
+	ZEND_PARSE_PARAMETERS_END();
+	RETURN_COPY(v);
+}
+
+static ZEND_FUNCTION(zend_test_zpp_int_or_null)
+{
+	zval *v;
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_INT_OR_NULL(v)
+	ZEND_PARSE_PARAMETERS_END();
+	if (v == NULL) {
+		RETURN_NULL();
+	}
+	RETURN_COPY(v);
+}
+
+static ZEND_FUNCTION(zend_test_zpp_int_or_float)
+{
+	zval *v;
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_INT_OR_FLOAT(v)
+	ZEND_PARSE_PARAMETERS_END();
+	RETURN_COPY(v);
+}
+
+static ZEND_FUNCTION(zend_test_zpp_int_oldstyle)
+{
+	zval *v;
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "i", &v) == FAILURE) {
+		RETURN_THROWS();
+	}
+	RETURN_COPY(v);
+}
+
 typedef struct _zend_test_object {
 	zend_internal_function *tmp_method;
 	zend_object std;
