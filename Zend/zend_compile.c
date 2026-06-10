@@ -2701,9 +2701,20 @@ static void zend_emit_return_type_check(
 			return;
 		}
 
-		if (expr && expr->op_type == IS_CONST && ZEND_TYPE_CONTAINS_CODE(type, Z_TYPE(expr->u.constant))) {
-			/* we don't need run-time check */
-			return;
+		if (expr && expr->op_type == IS_CONST) {
+			/* A bigint satisfies the same type declarations as a long.
+			 * Remap before CONTAINS_CODE: IS_BIGINT=15 shares its bit value
+			 * with IS_STATIC (MAY_BE_STATIC=1<<15), so passing IS_BIGINT raw
+			 * would falsely match a "static" return type and skip emitting the
+			 * VERIFY_RETURN_TYPE opcode entirely. */
+			uint8_t const_type = Z_TYPE(expr->u.constant);
+			if (UNEXPECTED(const_type == IS_BIGINT)) {
+				const_type = IS_LONG;
+			}
+			if (ZEND_TYPE_CONTAINS_CODE(type, const_type)) {
+				/* we don't need run-time check */
+				return;
+			}
 		}
 
 		opline = zend_emit_op(NULL, ZEND_VERIFY_RETURN_TYPE, expr, NULL);

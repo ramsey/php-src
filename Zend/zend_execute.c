@@ -1209,9 +1209,13 @@ static zend_always_inline bool zend_check_type_slow(
 	const uint32_t type_mask = ZEND_TYPE_FULL_MASK(*type);
 	if (UNEXPECTED(Z_TYPE_P(arg) == IS_BIGINT) && (type_mask & MAY_BE_LONG)) {
 		/* A bigint satisfies the same type declarations as a long.
-		 * The CONTAINS_CODE fast path in zend_check_type cannot represent IS_BIGINT
-		 * (bit 15 is MAY_BE_STATIC, not MAY_BE_LONG), so we must handle it here
-		 * before zend_verify_scalar_type_hint() rejects it in strict mode. */
+		 * IS_BIGINT=15 shares its bit value with IS_STATIC (MAY_BE_STATIC=1<<15),
+		 * so ZEND_TYPE_CONTAINS_CODE cannot represent IS_BIGINT directly.
+		 * Callers that use CONTAINS_CODE as a fast path (ZEND_VERIFY_RETURN_TYPE
+		 * in zend_vm_def.h, JIT helpers via zend_check_user_type_slow) must remap
+		 * IS_BIGINT to IS_LONG before calling CONTAINS_CODE; this arm handles the
+		 * cases that fall through to the slow path without that remap, and ensures
+		 * strict-mode scalar-type-hint checks accept bigints for int targets. */
 		return true;
 	}
 	if ((type_mask & MAY_BE_CALLABLE) &&
