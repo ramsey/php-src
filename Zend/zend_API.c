@@ -732,6 +732,9 @@ ZEND_API double ZEND_FASTCALL zend_parse_arg_double_slow(const zval *arg, uint32
 	if (EXPECTED(Z_TYPE_P(arg) == IS_LONG)) {
 		/* SSTH Exception: IS_LONG may be accepted instead as IS_DOUBLE */
 		return (double)Z_LVAL_P(arg);
+	} else if (Z_TYPE_P(arg) == IS_BIGINT) {
+		/* SSTH Exception: IS_BIGINT may be accepted instead as IS_DOUBLE */
+		return zend_bigint_to_double(Z_BIG_P(arg));
 	} else if (UNEXPECTED(ZEND_ARG_USES_STRICT_TYPES())) {
 		return NAN;
 	}

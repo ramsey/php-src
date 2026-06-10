@@ -830,8 +830,12 @@ static bool zend_verify_weak_scalar_type_hint_no_sideeffect(uint32_t type_mask, 
 ZEND_API bool zend_verify_scalar_type_hint(uint32_t type_mask, zval *arg, bool strict, bool is_internal_arg)
 {
 	if (UNEXPECTED(strict)) {
-		/* SSTH Exception: IS_LONG may be accepted as IS_DOUBLE (converted) */
-		if (!(type_mask & MAY_BE_DOUBLE) || Z_TYPE_P(arg) != IS_LONG) {
+		/* SSTH Exception: an integer in either representation widens to float.
+		 * Note: for int|float targets the fast path (CONTAINS_CODE with IS_BIGINT
+		 * remapped to IS_LONG) already returns true before we reach here, so
+		 * reaching this branch with IS_BIGINT means the target is float-only. */
+		if (!(type_mask & MAY_BE_DOUBLE)
+				|| (Z_TYPE_P(arg) != IS_LONG && Z_TYPE_P(arg) != IS_BIGINT)) {
 			return 0;
 		}
 	} else if (UNEXPECTED(Z_TYPE_P(arg) == IS_NULL)) {
@@ -3998,9 +4002,11 @@ static zend_always_inline int i_zend_verify_type_assignable_zval(
 	type_mask = ZEND_TYPE_FULL_MASK(type);
 	ZEND_ASSERT(!(type_mask & (MAY_BE_CALLABLE|MAY_BE_STATIC)));
 
-	/* SSTH Exception: IS_LONG may be accepted as IS_DOUBLE (converted) */
+	/* SSTH Exception: an integer in either representation (long or bigint) widens
+	 * to float. Return -1 so the caller runs the weak-hint path, whose MAY_BE_DOUBLE
+	 * arm calls zend_parse_arg_double_weak(), which handles IS_BIGINT. */
 	if (strict) {
-		if ((type_mask & MAY_BE_DOUBLE) && zv_type == IS_LONG) {
+		if ((type_mask & MAY_BE_DOUBLE) && (zv_type == IS_LONG || zv_type == IS_BIGINT)) {
 			return -1;
 		}
 		return 0;
