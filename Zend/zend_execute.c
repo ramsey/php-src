@@ -796,7 +796,7 @@ static bool can_convert_to_string(const zval *zv) {
 		return Z_OBJ_HT_P(zv)->cast_object != zend_std_cast_object_tostring
 			|| Z_OBJCE_P(zv)->__tostring;
 	}
-	return Z_TYPE_P(zv) <= IS_STRING;
+	return Z_TYPE_P(zv) <= IS_STRING || Z_TYPE_P(zv) == IS_BIGINT;
 }
 
 /* Used to sanity-check internal arginfo types without performing any actual type conversions. */

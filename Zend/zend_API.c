@@ -815,7 +815,7 @@ ZEND_API bool ZEND_FASTCALL zend_parse_arg_number_or_str_slow(zval *arg, zval **
 
 ZEND_API zend_string* ZEND_FASTCALL zend_parse_arg_str_weak(zval *arg, uint32_t arg_num) /* {{{ */
 {
-	if (EXPECTED(Z_TYPE_P(arg) < IS_STRING)) {
+	if (EXPECTED(Z_TYPE_P(arg) < IS_STRING) || UNEXPECTED(Z_TYPE_P(arg) == IS_BIGINT)) {
 		if (UNEXPECTED(Z_TYPE_P(arg) == IS_NULL) && !zend_null_arg_deprecated("string", arg_num)) {
 			return NULL;
 		}
