@@ -2682,11 +2682,26 @@ send_array:
 				len = Z_LVAL_P(op2);
 			} else if (Z_TYPE_P(op2) == IS_NULL) {
 				len = count - skip;
+			} else if (Z_TYPE_P(op2) == IS_BIGINT) {
+				/* A bigint is an int; handle before the strict-types bailout so
+				 * fitting bigints succeed in both weak and strict mode. */
+				if (UNEXPECTED(!zend_bigint_can_fit_long(Z_BIG_P(op2)))) {
+					zend_value_error(
+						"array_slice(): Argument #3 ($length) must be between "
+						ZEND_LONG_FMT " and " ZEND_LONG_FMT,
+						ZEND_LONG_MIN, ZEND_LONG_MAX);
+					FREE_OP(opline->op2_type, opline->op2.var);
+					FREE_OP(opline->op1_type, opline->op1.var);
+					HANDLE_EXCEPTION();
+				}
+				len = zend_bigint_to_long(Z_BIG_P(op2));
 			} else if (EX_USES_STRICT_TYPES()
 					|| !zend_parse_arg_long_weak(op2, &len, /* arg_num */ 3)) {
-				zend_type_error(
-					"array_slice(): Argument #3 ($length) must be of type ?int, %s given",
-					zend_zval_value_name(op2));
+				if (EXPECTED(!EG(exception))) {
+					zend_type_error(
+						"array_slice(): Argument #3 ($length) must be of type ?int, %s given",
+						zend_zval_value_name(op2));
+				}
 				FREE_OP(opline->op2_type, opline->op2.var);
 				FREE_OP(opline->op1_type, opline->op1.var);
 				HANDLE_EXCEPTION();
@@ -55590,11 +55605,26 @@ send_array:
 				len = Z_LVAL_P(op2);
 			} else if (Z_TYPE_P(op2) == IS_NULL) {
 				len = count - skip;
+			} else if (Z_TYPE_P(op2) == IS_BIGINT) {
+				/* A bigint is an int; handle before the strict-types bailout so
+				 * fitting bigints succeed in both weak and strict mode. */
+				if (UNEXPECTED(!zend_bigint_can_fit_long(Z_BIG_P(op2)))) {
+					zend_value_error(
+						"array_slice(): Argument #3 ($length) must be between "
+						ZEND_LONG_FMT " and " ZEND_LONG_FMT,
+						ZEND_LONG_MIN, ZEND_LONG_MAX);
+					FREE_OP(opline->op2_type, opline->op2.var);
+					FREE_OP(opline->op1_type, opline->op1.var);
+					HANDLE_EXCEPTION();
+				}
+				len = zend_bigint_to_long(Z_BIG_P(op2));
 			} else if (EX_USES_STRICT_TYPES()
 					|| !zend_parse_arg_long_weak(op2, &len, /* arg_num */ 3)) {
-				zend_type_error(
-					"array_slice(): Argument #3 ($length) must be of type ?int, %s given",
-					zend_zval_value_name(op2));
+				if (EXPECTED(!EG(exception))) {
+					zend_type_error(
+						"array_slice(): Argument #3 ($length) must be of type ?int, %s given",
+						zend_zval_value_name(op2));
+				}
 				FREE_OP(opline->op2_type, opline->op2.var);
 				FREE_OP(opline->op1_type, opline->op1.var);
 				HANDLE_EXCEPTION();
