@@ -7960,7 +7960,12 @@ static zend_type zend_compile_typename(zend_ast *ast)
 static bool zend_is_valid_default_value(zend_type type, zval *value)
 {
 	ZEND_ASSERT(ZEND_TYPE_IS_SET(type));
-	if (ZEND_TYPE_CONTAINS_CODE(type, Z_TYPE_P(value))) {
+	uint8_t type_code = Z_TYPE_P(value);
+	if (UNEXPECTED(type_code == IS_BIGINT)) {
+		/* A bigint satisfies the same type declarations as a long. */
+		type_code = IS_LONG;
+	}
+	if (ZEND_TYPE_CONTAINS_CODE(type, type_code)) {
 		return true;
 	}
 	if ((ZEND_TYPE_FULL_MASK(type) & MAY_BE_DOUBLE) && Z_TYPE_P(value) == IS_LONG) {

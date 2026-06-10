@@ -1,7 +1,7 @@
 --TEST--
-Test typed properties overflowing (64 bit)
+Test typed properties overflowing (32 bit)
 --SKIPIF--
-<?php if (PHP_INT_SIZE == 4) die("SKIP: 64 bit test"); ?>
+<?php if (PHP_INT_SIZE > 4) die("SKIP: 32 bit test"); ?>
 --FILE--
 <?php
 
@@ -44,7 +44,7 @@ var_dump(Foo::$bar);
 ?>
 --EXPECT--
 string(70) "Cannot increment property Foo::$bar of type int past its maximal value"
-int(9223372036854775807)
-int(9223372036854775808)
-int(9223372036854775809)
-int(9223372036854775810)
+int(2147483647)
+int(2147483648)
+int(2147483649)
+int(2147483650)

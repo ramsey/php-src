@@ -734,6 +734,11 @@ static bool zend_verify_weak_scalar_type_hint(uint32_t type_mask, zval *arg)
 	zend_long lval;
 	double dval;
 
+	/* A bigint is already an int; keep it without any coercion. */
+	if (UNEXPECTED(Z_TYPE_P(arg) == IS_BIGINT) && (type_mask & MAY_BE_LONG)) {
+		return true;
+	}
+
 	/* Type preference order: int -> float -> string -> bool */
 	if (type_mask & MAY_BE_LONG) {
 		/* For an int|float union type and string value,
@@ -798,6 +803,11 @@ static bool can_convert_to_string(const zval *zv) {
 static bool zend_verify_weak_scalar_type_hint_no_sideeffect(uint32_t type_mask, const zval *arg)
 {
 	zend_long lval;
+
+	/* A bigint is already an int; it is acceptable wherever long is. */
+	if (UNEXPECTED(Z_TYPE_P(arg) == IS_BIGINT) && (type_mask & MAY_BE_LONG)) {
+		return true;
+	}
 
 	/* Pass (uint32_t)-1 as arg_num to indicate to ZPP not to emit any deprecation notice,
 	 * this is needed because the version with side effects also uses 0 (e.g. for typed properties) */
@@ -1042,7 +1052,12 @@ static bool zend_check_and_resolve_property_or_class_constant_class_type(
 static zend_always_inline bool i_zend_check_property_type(const zend_property_info *info, zval *property, bool strict)
 {
 	ZEND_ASSERT(!Z_ISREF_P(property));
-	if (EXPECTED(ZEND_TYPE_CONTAINS_CODE(info->type, Z_TYPE_P(property)))) {
+	uint8_t type_code = Z_TYPE_P(property);
+	if (UNEXPECTED(type_code == IS_BIGINT)) {
+		/* A bigint satisfies the same type declarations as a long. */
+		type_code = IS_LONG;
+	}
+	if (EXPECTED(ZEND_TYPE_CONTAINS_CODE(info->type, type_code))) {
 		return 1;
 	}
 
@@ -1522,7 +1537,12 @@ static zend_never_inline ZEND_COLD void zend_verify_missing_return_type(const ze
 static zend_always_inline bool zend_check_class_constant_type(const zend_class_constant *c, zval *constant)
 {
 	ZEND_ASSERT(!Z_ISREF_P(constant));
-	if (EXPECTED(ZEND_TYPE_CONTAINS_CODE(c->type, Z_TYPE_P(constant)))) {
+	uint8_t type_code = Z_TYPE_P(constant);
+	if (UNEXPECTED(type_code == IS_BIGINT)) {
+		/* A bigint satisfies the same type declarations as a long. */
+		type_code = IS_LONG;
+	}
+	if (EXPECTED(ZEND_TYPE_CONTAINS_CODE(c->type, type_code))) {
 		return 1;
 	}
 
@@ -3972,7 +3992,13 @@ static zend_always_inline int i_zend_verify_type_assignable_zval(
 	uint32_t type_mask;
 	uint8_t zv_type = Z_TYPE_P(zv);
 
-	if (EXPECTED(ZEND_TYPE_CONTAINS_CODE(type, zv_type))) {
+	/* For the CONTAINS_CODE check only: a bigint satisfies the same type
+	 * declarations as a long. Keep the raw zv_type for all other checks
+	 * (e.g., the strict-mode SSTH arm) so that IS_BIGINT is not
+	 * accidentally treated as IS_LONG there. */
+	uint8_t zv_type_for_contains = (UNEXPECTED(zv_type == IS_BIGINT)) ? IS_LONG : zv_type;
+
+	if (EXPECTED(ZEND_TYPE_CONTAINS_CODE(type, zv_type_for_contains))) {
 		return 1;
 	}
 
