@@ -119,6 +119,18 @@ ZEND_API int       zend_bigint_cmp(const zend_bigint *a, const zend_bigint *b);
 ZEND_API int       zend_bigint_cmp_long(const zend_bigint *a, zend_long b);
 ZEND_API char     *zend_bigint_to_string(const zend_bigint *big, size_t *len);
 
+/* Store a bigint result, demoting to IS_LONG when it fits. */
+static zend_always_inline void zend_bigint_result(zval *result, zend_bigint *big)
+{
+	if (zend_bigint_can_fit_long(big)) {
+		zend_long l = zend_bigint_to_long(big);
+		zend_bigint_release(big);
+		ZVAL_LONG(result, l);
+	} else {
+		ZVAL_BIGINT(result, big);
+	}
+}
+
 END_EXTERN_C()
 
 #endif /* ZEND_BIGINT_H */

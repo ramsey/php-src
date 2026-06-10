@@ -1186,18 +1186,6 @@ static zend_never_inline void ZEND_FASTCALL add_function_array(zval *result, con
 }
 /* }}} */
 
-/* Store a bigint result, demoting to IS_LONG when it fits. */
-static zend_always_inline void zend_bigint_result(zval *result, zend_bigint *big)
-{
-	if (zend_bigint_can_fit_long(big)) {
-		zend_long l = zend_bigint_to_long(big);
-		zend_bigint_release(big);
-		ZVAL_LONG(result, l);
-	} else {
-		ZVAL_BIGINT(result, big);
-	}
-}
-
 /* When result aliases a bigint operand, its old value must be released before
  * the new result overwrites it. A non-aliasing result is a write-only temp whose
  * contents are undefined and must not be read. */
