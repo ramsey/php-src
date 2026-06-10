@@ -1491,23 +1491,49 @@ PHP_FUNCTION(fpow)
 /* {{{ Returns the integer quotient of the division of dividend by divisor */
 PHP_FUNCTION(intdiv)
 {
-	zend_long dividend, divisor;
+	zval *dividend, *divisor;
 
 	ZEND_PARSE_PARAMETERS_START(2, 2)
-		Z_PARAM_LONG(dividend)
-		Z_PARAM_LONG(divisor)
+		Z_PARAM_INT(dividend)
+		Z_PARAM_INT(divisor)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (divisor == 0) {
+	if (EXPECTED(Z_TYPE_P(dividend) == IS_LONG && Z_TYPE_P(divisor) == IS_LONG)) {
+		zend_long ldividend = Z_LVAL_P(dividend);
+		zend_long ldivisor  = Z_LVAL_P(divisor);
+
+		if (ldivisor == 0) {
+			zend_throw_exception_ex(zend_ce_division_by_zero_error, 0, "Division by zero");
+			RETURN_THROWS();
+		}
+		if (UNEXPECTED(ldivisor == -1 && ldividend == ZEND_LONG_MIN)) {
+			/* |ZEND_LONG_MIN| overflows zend_long (it can never fit), so store the bigint directly instead of throwing. */
+			zend_bigint *quot = zend_bigint_init();
+			zend_bigint_long_sub_long(quot, 0, ZEND_LONG_MIN);
+			ZVAL_BIGINT(return_value, quot);
+			return;
+		}
+		RETURN_LONG(ldividend / ldivisor);
+	}
+
+	/* At least one operand is a bigint.  Check the divisor for zero here because
+	 * a parameter may carry a non-canonical in-range bigint (e.g. from zend_test). */
+	if ((Z_TYPE_P(divisor) == IS_LONG && Z_LVAL_P(divisor) == 0)
+	 || (Z_TYPE_P(divisor) == IS_BIGINT && zend_bigint_sign(Z_BIG_P(divisor)) == 0)) {
 		zend_throw_exception_ex(zend_ce_division_by_zero_error, 0, "Division by zero");
-		RETURN_THROWS();
-	} else if (divisor == -1 && dividend == ZEND_LONG_MIN) {
-		/* Prevent overflow error/crash ... really should not happen:
-		   We don't return a float here as that violates function contract */
-		zend_throw_exception_ex(zend_ce_arithmetic_error, 0, "Division of PHP_INT_MIN by -1 is not an integer");
 		RETURN_THROWS();
 	}
 
-	RETURN_LONG(dividend / divisor);
+	zend_bigint *quot = zend_bigint_init();
+	zend_bigint *rem  = zend_bigint_init();
+	if (Z_TYPE_P(dividend) == IS_BIGINT && Z_TYPE_P(divisor) == IS_BIGINT) {
+		zend_bigint_divmod(quot, rem, Z_BIG_P(dividend), Z_BIG_P(divisor));
+	} else if (Z_TYPE_P(dividend) == IS_BIGINT) {
+		zend_bigint_divmod_long(quot, rem, Z_BIG_P(dividend), Z_LVAL_P(divisor));
+	} else {
+		zend_bigint_long_divmod(quot, rem, Z_LVAL_P(dividend), Z_BIG_P(divisor));
+	}
+	zend_bigint_release(rem);
+	zend_bigint_result(return_value, quot);
 }
 /* }}} */
