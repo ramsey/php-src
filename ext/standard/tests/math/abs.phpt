@@ -18,7 +18,7 @@ var_dump(-(LONG_MIN+1) === abs(LONG_MIN+1));
 
 ?>
 --EXPECT--
-1,1,0,0
+1,1,1,1
 bool(true)
 bool(true)
 bool(true)

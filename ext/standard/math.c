@@ -248,18 +248,31 @@ PHP_FUNCTION(abs)
 	zval *value;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_NUMBER(value)
+		Z_PARAM_INT_OR_FLOAT(value)
 	ZEND_PARSE_PARAMETERS_END();
 
 	switch (Z_TYPE_P(value)) {
 		case IS_LONG:
 			if (UNEXPECTED(Z_LVAL_P(value) == ZEND_LONG_MIN)) {
-				RETURN_DOUBLE(-(double)ZEND_LONG_MIN);
-			} else {
-				RETURN_LONG(Z_LVAL_P(value) < 0 ? -Z_LVAL_P(value) : Z_LVAL_P(value));
+				/* |ZEND_LONG_MIN| overflows zend_long (it can never fit), so
+				 * store the bigint directly instead of degrading to float. */
+				zend_bigint *big = zend_bigint_init();
+				zend_bigint_long_sub_long(big, 0, ZEND_LONG_MIN);
+				ZVAL_BIGINT(return_value, big);
+				return;
 			}
+			RETURN_LONG(Z_LVAL_P(value) < 0 ? -Z_LVAL_P(value) : Z_LVAL_P(value));
 		case IS_DOUBLE:
 			RETURN_DOUBLE(fabs(Z_DVAL_P(value)));
+		case IS_BIGINT:
+			if (zend_bigint_sign(Z_BIG_P(value)) < 0) {
+				zend_bigint *big = zend_bigint_init();
+				zend_bigint_long_sub(big, 0, Z_BIG_P(value));
+				zend_bigint_result(return_value, big);
+			} else {
+				RETURN_COPY(value);
+			}
+			return;
 		default: ZEND_UNREACHABLE();
 	}
 }
