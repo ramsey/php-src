@@ -12630,6 +12630,11 @@ bool zend_try_ct_eval_cast(zval *result, uint32_t type, zval *op1)
 			if (Z_TYPE_P(op1) == IS_DOUBLE && !ZEND_DOUBLE_FITS_LONG(Z_DVAL_P((op1)))) {
 				return false;
 			}
+			if (Z_TYPE_P(op1) == IS_BIGINT) {
+				/* A bigint is already an int: (int) is an identity. */
+				ZVAL_COPY(result, op1);
+				return true;
+			}
 			ZVAL_LONG(result, zval_get_long(op1));
 			return true;
 		case IS_DOUBLE:

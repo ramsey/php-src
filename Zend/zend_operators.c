@@ -578,6 +578,13 @@ try_again:
 			break;
 		case IS_LONG:
 			break;
+		case IS_BIGINT: {
+			zend_bigint *big = Z_BIG_P(op);
+			zend_long lval = zend_bigint_to_long(big);
+			zend_bigint_release(big);
+			ZVAL_LONG(op, lval);
+			break;
+		}
 		case IS_DOUBLE: {
 			/* NAN might emit a warning */
 			zend_long new_value = zend_dval_to_lval(Z_DVAL_P(op));
@@ -641,6 +648,13 @@ try_again:
 		case IS_LONG:
 			ZVAL_DOUBLE(op, (double) Z_LVAL_P(op));
 			break;
+		case IS_BIGINT: {
+			zend_bigint *big = Z_BIG_P(op);
+			double dval = zend_bigint_to_double(big);
+			zend_bigint_release(big);
+			ZVAL_DOUBLE(op, dval);
+			break;
+		}
 		case IS_DOUBLE:
 			break;
 		case IS_STRING:
@@ -752,6 +766,13 @@ try_again:
 				}
 				break;
 			}
+		case IS_BIGINT: {
+			zend_bigint *big = Z_BIG_P(op);
+			bool b = zend_bigint_sign(big) != 0;
+			zend_bigint_release(big);
+			ZVAL_BOOL(op, b);
+			break;
+		}
 		case IS_REFERENCE:
 			zend_unwrap_reference(op);
 			goto try_again;

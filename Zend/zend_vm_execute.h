@@ -5434,6 +5434,23 @@ static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_
 
 	switch (opline->extended_value) {
 		case IS_LONG:
+			if (IS_CONST & (IS_VAR|IS_CV)) {
+				ZVAL_DEREF(expr);
+			}
+			if (UNEXPECTED(Z_TYPE_P(expr) == IS_BIGINT)) {
+				/* A bigint is already an int: (int) is a no-op identity.
+				 * The value is already of the correct type; return it directly.
+				 * This follows the same pattern used by the default arm. */
+				ZVAL_COPY_VALUE(result, expr);
+				if (IS_CONST == IS_CONST) {
+					if (UNEXPECTED(Z_OPT_REFCOUNTED_P(result))) Z_ADDREF_P(result);
+				} else if (IS_CONST != IS_TMP_VAR) {
+					if (Z_OPT_REFCOUNTED_P(result)) Z_ADDREF_P(result);
+				}
+
+
+				ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
+			}
 			ZVAL_LONG(result, zval_get_long(expr));
 			break;
 		case IS_DOUBLE:
@@ -17554,6 +17571,23 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_CAST_SPEC_TMP
 
 	switch (opline->extended_value) {
 		case IS_LONG:
+			if (IS_TMP_VAR & (IS_VAR|IS_CV)) {
+				ZVAL_DEREF(expr);
+			}
+			if (UNEXPECTED(Z_TYPE_P(expr) == IS_BIGINT)) {
+				/* A bigint is already an int: (int) is a no-op identity.
+				 * The value is already of the correct type; return it directly.
+				 * This follows the same pattern used by the default arm. */
+				ZVAL_COPY_VALUE(result, expr);
+				if (IS_TMP_VAR == IS_CONST) {
+					if (UNEXPECTED(Z_OPT_REFCOUNTED_P(result))) Z_ADDREF_P(result);
+				} else if (IS_TMP_VAR != IS_TMP_VAR) {
+					if (Z_OPT_REFCOUNTED_P(result)) Z_ADDREF_P(result);
+				}
+
+
+				ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
+			}
 			ZVAL_LONG(result, zval_get_long(expr));
 			break;
 		case IS_DOUBLE:
@@ -40308,6 +40342,23 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_CAST_SPEC_CV_
 
 	switch (opline->extended_value) {
 		case IS_LONG:
+			if (IS_CV & (IS_VAR|IS_CV)) {
+				ZVAL_DEREF(expr);
+			}
+			if (UNEXPECTED(Z_TYPE_P(expr) == IS_BIGINT)) {
+				/* A bigint is already an int: (int) is a no-op identity.
+				 * The value is already of the correct type; return it directly.
+				 * This follows the same pattern used by the default arm. */
+				ZVAL_COPY_VALUE(result, expr);
+				if (IS_CV == IS_CONST) {
+					if (UNEXPECTED(Z_OPT_REFCOUNTED_P(result))) Z_ADDREF_P(result);
+				} else if (IS_CV != IS_TMP_VAR) {
+					if (Z_OPT_REFCOUNTED_P(result)) Z_ADDREF_P(result);
+				}
+
+
+				ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
+			}
 			ZVAL_LONG(result, zval_get_long(expr));
 			break;
 		case IS_DOUBLE:
@@ -58292,6 +58343,23 @@ static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_CAST_
 
 	switch (opline->extended_value) {
 		case IS_LONG:
+			if (IS_CONST & (IS_VAR|IS_CV)) {
+				ZVAL_DEREF(expr);
+			}
+			if (UNEXPECTED(Z_TYPE_P(expr) == IS_BIGINT)) {
+				/* A bigint is already an int: (int) is a no-op identity.
+				 * The value is already of the correct type; return it directly.
+				 * This follows the same pattern used by the default arm. */
+				ZVAL_COPY_VALUE(result, expr);
+				if (IS_CONST == IS_CONST) {
+					if (UNEXPECTED(Z_OPT_REFCOUNTED_P(result))) Z_ADDREF_P(result);
+				} else if (IS_CONST != IS_TMP_VAR) {
+					if (Z_OPT_REFCOUNTED_P(result)) Z_ADDREF_P(result);
+				}
+
+
+				ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
+			}
 			ZVAL_LONG(result, zval_get_long(expr));
 			break;
 		case IS_DOUBLE:
@@ -70310,6 +70378,23 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_CAST_SPEC_TMP_TAIL
 
 	switch (opline->extended_value) {
 		case IS_LONG:
+			if (IS_TMP_VAR & (IS_VAR|IS_CV)) {
+				ZVAL_DEREF(expr);
+			}
+			if (UNEXPECTED(Z_TYPE_P(expr) == IS_BIGINT)) {
+				/* A bigint is already an int: (int) is a no-op identity.
+				 * The value is already of the correct type; return it directly.
+				 * This follows the same pattern used by the default arm. */
+				ZVAL_COPY_VALUE(result, expr);
+				if (IS_TMP_VAR == IS_CONST) {
+					if (UNEXPECTED(Z_OPT_REFCOUNTED_P(result))) Z_ADDREF_P(result);
+				} else if (IS_TMP_VAR != IS_TMP_VAR) {
+					if (Z_OPT_REFCOUNTED_P(result)) Z_ADDREF_P(result);
+				}
+
+
+				ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
+			}
 			ZVAL_LONG(result, zval_get_long(expr));
 			break;
 		case IS_DOUBLE:
@@ -92964,6 +93049,23 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_CAST_SPEC_CV_TAILC
 
 	switch (opline->extended_value) {
 		case IS_LONG:
+			if (IS_CV & (IS_VAR|IS_CV)) {
+				ZVAL_DEREF(expr);
+			}
+			if (UNEXPECTED(Z_TYPE_P(expr) == IS_BIGINT)) {
+				/* A bigint is already an int: (int) is a no-op identity.
+				 * The value is already of the correct type; return it directly.
+				 * This follows the same pattern used by the default arm. */
+				ZVAL_COPY_VALUE(result, expr);
+				if (IS_CV == IS_CONST) {
+					if (UNEXPECTED(Z_OPT_REFCOUNTED_P(result))) Z_ADDREF_P(result);
+				} else if (IS_CV != IS_TMP_VAR) {
+					if (Z_OPT_REFCOUNTED_P(result)) Z_ADDREF_P(result);
+				}
+
+
+				ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
+			}
 			ZVAL_LONG(result, zval_get_long(expr));
 			break;
 		case IS_DOUBLE:

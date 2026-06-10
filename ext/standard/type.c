@@ -98,10 +98,12 @@ PHP_FUNCTION(settype)
 	} else {
 		ptr = Z_REFVAL_P(var);
 	}
-	if (zend_string_equals_ci(type, ZSTR_KNOWN(ZEND_STR_INTEGER))) {
-		convert_to_long(ptr);
-	} else if (zend_string_equals_ci(type, ZSTR_KNOWN(ZEND_STR_INT))) {
-		convert_to_long(ptr);
+	if (zend_string_equals_ci(type, ZSTR_KNOWN(ZEND_STR_INTEGER))
+			|| zend_string_equals_ci(type, ZSTR_KNOWN(ZEND_STR_INT))) {
+		/* A bigint is already an int: settype to 'integer'/'int' is an identity. */
+		if (Z_TYPE_P(ptr) != IS_BIGINT) {
+			convert_to_long(ptr);
+		}
 	} else if (zend_string_equals_ci(type, ZSTR_KNOWN(ZEND_STR_FLOAT))) {
 		convert_to_double(ptr);
 	} else if (zend_string_equals_ci(type, ZSTR_KNOWN(ZEND_STR_DOUBLE))) {
