@@ -2278,13 +2278,10 @@ static void zend_incdec_typed_ref(zend_reference *ref, zval *copy OPLINE_DC EXEC
 		decrement_function(var_ptr);
 	}
 
-	if (UNEXPECTED(Z_TYPE_P(var_ptr) == IS_DOUBLE || Z_TYPE_P(var_ptr) == IS_BIGINT) && Z_TYPE_P(copy) == IS_LONG) {
+	if (UNEXPECTED(Z_TYPE_P(var_ptr) == IS_DOUBLE) && Z_TYPE_P(copy) == IS_LONG) {
 		zend_property_info *error_prop = zend_get_prop_not_accepting_double(ref);
 		if (UNEXPECTED(error_prop)) {
 			zend_long val = zend_throw_incdec_ref_error(error_prop OPLINE_CC);
-			if (Z_TYPE_P(var_ptr) == IS_BIGINT) {
-				zend_bigint_release(Z_BIG_P(var_ptr));
-			}
 			ZVAL_LONG(var_ptr, val);
 		}
 	} else if (UNEXPECTED(!zend_verify_ref_assignable_zval(ref, var_ptr, EX_USES_STRICT_TYPES()))) {
@@ -2312,12 +2309,9 @@ static void zend_incdec_typed_prop(const zend_property_info *prop_info, zval *va
 		decrement_function(var_ptr);
 	}
 
-	if (UNEXPECTED(Z_TYPE_P(var_ptr) == IS_DOUBLE || Z_TYPE_P(var_ptr) == IS_BIGINT) && Z_TYPE_P(copy) == IS_LONG) {
+	if (UNEXPECTED(Z_TYPE_P(var_ptr) == IS_DOUBLE) && Z_TYPE_P(copy) == IS_LONG) {
 		if (!(ZEND_TYPE_FULL_MASK(prop_info->type) & MAY_BE_DOUBLE)) {
 			zend_long val = zend_throw_incdec_prop_error(prop_info OPLINE_CC);
-			if (Z_TYPE_P(var_ptr) == IS_BIGINT) {
-				zend_bigint_release(Z_BIG_P(var_ptr));
-			}
 			ZVAL_LONG(var_ptr, val);
 		}
 	} else if (UNEXPECTED(!zend_verify_property_type(prop_info, var_ptr, EX_USES_STRICT_TYPES()))) {
@@ -2337,12 +2331,9 @@ static void zend_pre_incdec_property_zval(zval *prop, const zend_property_info *
 		} else {
 			fast_long_decrement_function(prop);
 		}
-		if (UNEXPECTED(Z_TYPE_P(prop) != IS_LONG) && prop_info
+		if (UNEXPECTED(Z_TYPE_P(prop) == IS_DOUBLE) && prop_info
 				&& !(ZEND_TYPE_FULL_MASK(prop_info->type) & MAY_BE_DOUBLE)) {
 			zend_long val = zend_throw_incdec_prop_error(prop_info OPLINE_CC);
-			if (Z_TYPE_P(prop) == IS_BIGINT) {
-				zend_bigint_release(Z_BIG_P(prop));
-			}
 			ZVAL_LONG(prop, val);
 		}
 	} else {
@@ -2379,12 +2370,9 @@ static void zend_post_incdec_property_zval(zval *prop, const zend_property_info 
 		} else {
 			fast_long_decrement_function(prop);
 		}
-		if (UNEXPECTED(Z_TYPE_P(prop) != IS_LONG) && prop_info
+		if (UNEXPECTED(Z_TYPE_P(prop) == IS_DOUBLE) && prop_info
 				&& !(ZEND_TYPE_FULL_MASK(prop_info->type) & MAY_BE_DOUBLE)) {
 			zend_long val = zend_throw_incdec_prop_error(prop_info OPLINE_CC);
-			if (Z_TYPE_P(prop) == IS_BIGINT) {
-				zend_bigint_release(Z_BIG_P(prop));
-			}
 			ZVAL_LONG(prop, val);
 		}
 	} else {

@@ -1,5 +1,5 @@
 --TEST--
-Test typed properties int must not be allowed to overflow
+Test typed properties int promotes to bigint on overflow
 --FILE--
 <?php
 class Foo {
@@ -12,11 +12,10 @@ class Foo {
 
 $foo = new Foo();
 
-try {
-    $foo->inc();
-} catch (TypeError $e) {
-    echo $e->getMessage(), "\n";
-}
+$ret = $foo->inc();
+var_dump(is_int($ret));
+var_dump(is_int($foo->bar));
 ?>
 --EXPECT--
-Cannot increment property Foo::$bar of type int past its maximal value
+bool(true)
+bool(true)

@@ -72,19 +72,11 @@ var_dump($test->foo);
 
 ?>
 --EXPECT--
-Cannot decrement property Test::$foo of type int past its minimal value
-int(-9223372036854775808)
-Cannot decrement property Test::$foo of type int past its minimal value
-int(-9223372036854775808)
-Cannot increment property Test::$foo of type int past its maximal value
-int(9223372036854775807)
-Cannot increment property Test::$foo of type int past its maximal value
-int(9223372036854775807)
-Cannot decrement a reference held by property Test::$foo of type int past its minimal value
-int(-9223372036854775808)
-Cannot decrement a reference held by property Test::$foo of type int past its minimal value
-int(-9223372036854775808)
-Cannot increment a reference held by property Test::$foo of type int past its maximal value
-int(9223372036854775807)
-Cannot increment a reference held by property Test::$foo of type int past its maximal value
-int(9223372036854775807)
+int(-9223372036854775809)
+int(-9223372036854775810)
+int(9223372036854775808)
+int(9223372036854775809)
+int(-9223372036854775809)
+int(-9223372036854775810)
+int(9223372036854775808)
+int(9223372036854775809)

@@ -1,7 +1,7 @@
 --TEST--
 Bigint: ++/-- on a typed int property promotes past the long boundary
 --SKIPIF--
-<?php if (PHP_INT_SIZE < 8) die("skip this test is for 64-bit platform only"); ?>
+<?php if (PHP_INT_SIZE > 4) die("skip this test is for 32-bit platform only"); ?>
 --INI--
 opcache.enable_cli=0
 --FILE--
@@ -39,13 +39,13 @@ var_dump($ret === $c->n);   // same value
 var_dump($c->n);            // promoted bigint
 ?>
 --EXPECT--
-int(9223372036854775807)
-int(9223372036854775808)
-int(-9223372036854775808)
-int(-9223372036854775809)
-int(9223372036854775808)
+int(2147483647)
+int(2147483648)
+int(-2147483648)
+int(-2147483649)
+int(2147483648)
 bool(true)
-int(9223372036854775808)
-int(-9223372036854775809)
+int(2147483648)
+int(-2147483649)
 bool(true)
-int(-9223372036854775809)
+int(-2147483649)

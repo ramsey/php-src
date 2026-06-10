@@ -1,7 +1,7 @@
 --TEST--
 Typed property on by-ref variable
 --SKIPIF--
-<?php if (PHP_INT_SIZE < 8) die("skip this test is for 64-bit platform only"); ?>
+<?php if (PHP_INT_SIZE > 4) die("skip this test is for 32-bit platform only"); ?>
 --FILE--
 <?php
 
@@ -61,10 +61,10 @@ Cannot assign string to reference held by property class@anonymous::$foo of type
 int(21)
 int(20)
 int(19)
-int(-9223372036854775809)
-int(-9223372036854775810)
-int(9223372036854775808)
-int(9223372036854775809)
+int(-2147483649)
+int(-2147483650)
+int(2147483648)
+int(2147483649)
 Cannot assign array to reference held by property class@anonymous::$foo of type int
 int(0)
 int(1)

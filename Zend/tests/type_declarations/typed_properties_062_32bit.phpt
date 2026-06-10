@@ -1,56 +1,57 @@
 --TEST--
-Typed property on by-ref variable
+Typed property on by-ref property
 --SKIPIF--
-<?php if (PHP_INT_SIZE < 8) die("skip this test is for 64-bit platform only"); ?>
+<?php if (PHP_INT_SIZE > 4) die("skip this test is for 32-bit platform only"); ?>
 --FILE--
 <?php
 
 $a = new class {
     public int $foo = 1;
+    public $_;
 };
 
-$_ = &$a->foo;
+$a->_ = &$a->foo;
 
-$_ += 1;
+$a->_ += 1;
 var_dump($a->foo);
 
-$_ .= "1";
+$a->_ .= "1";
 var_dump($a->foo);
 
 try {
-    $_ .= "e50";
+    $a->_ .= "e50";
 } catch (Error $e) { echo $e->getMessage(), "\n"; }
 var_dump($a->foo);
 
-$_--;
+$a->_--;
 var_dump($a->foo);
 
---$_;
+--$a->_;
 var_dump($a->foo);
 
 $a->foo = PHP_INT_MIN;
 
-$_--;
+$a->_--;
 var_dump($a->foo);
 
---$_;
+--$a->_;
 var_dump($a->foo);
 
 $a->foo = PHP_INT_MAX;
 
-$_++;
+$a->_++;
 var_dump($a->foo);
 
-++$_;
+++$a->_;
 var_dump($a->foo);
 
-$_ = 0;
+$a->_ = 0;
 try {
-    $_ = [];
+    $a->_ = [];
 } catch (Error $e) { echo $e->getMessage(), "\n"; }
 var_dump($a->foo);
 
-$_ = 1;
+$a->_ = 1;
 var_dump($a->foo);
 
 ?>
@@ -61,10 +62,10 @@ Cannot assign string to reference held by property class@anonymous::$foo of type
 int(21)
 int(20)
 int(19)
-int(-9223372036854775809)
-int(-9223372036854775810)
-int(9223372036854775808)
-int(9223372036854775809)
+int(-2147483649)
+int(-2147483650)
+int(2147483648)
+int(2147483649)
 Cannot assign array to reference held by property class@anonymous::$foo of type int
 int(0)
 int(1)

@@ -43,8 +43,7 @@ var_dump(Foo::$bar);
 
 ?>
 --EXPECT--
-string(70) "Cannot increment property Foo::$bar of type int past its maximal value"
-int(2147483647)
-int(2147483648)
+int(2147483649)
 int(2147483649)
 int(2147483650)
+int(2147483651)

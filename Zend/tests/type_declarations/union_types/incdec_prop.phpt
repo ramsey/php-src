@@ -50,69 +50,44 @@ $x = --$test->prop;
 $r =& $test->prop;
 var_dump(is_int($test->prop));
 
-/* Incrementing a non-int|float property past int min/max is an error,
- * even if the result of the overflow (a float) would technically be allowed
- * under a type coercion. */
+/* Incrementing a non-float property past int min/max promotes to a bigint,
+ * which is accepted by any int-accepting type including int|bool. */
 
-try {
-    $test->prop2 = PHP_INT_MAX;
-    $x = $test->prop2++;
-} catch (TypeError $e) {
-    echo $e->getMessage(), "\n";
-}
+$test->prop2 = PHP_INT_MAX;
+$x = $test->prop2++;
+var_dump(is_int($test->prop2));
 
-try {
-    $test->prop2 = PHP_INT_MAX;
-    $x = ++$test->prop2;
-} catch (TypeError $e) {
-    echo $e->getMessage(), "\n";
-}
+$test->prop2 = PHP_INT_MAX;
+$x = ++$test->prop2;
+var_dump(is_int($test->prop2));
 
-try {
-    $test->prop2 = PHP_INT_MIN;
-    $x = $test->prop2--;
-} catch (TypeError $e) {
-    echo $e->getMessage(), "\n";
-}
+$test->prop2 = PHP_INT_MIN;
+$x = $test->prop2--;
+var_dump(is_int($test->prop2));
 
-try {
-    $test->prop2 = PHP_INT_MIN;
-    $x = --$test->prop2;
-} catch (TypeError $e) {
-    echo $e->getMessage(), "\n";
-}
+$test->prop2 = PHP_INT_MIN;
+$x = --$test->prop2;
+var_dump(is_int($test->prop2));
 
-try {
-    $test->prop2 = PHP_INT_MAX;
-    $r =& $test->prop2;
-    $x = $test->prop2++;
-} catch (TypeError $e) {
-    echo $e->getMessage(), "\n";
-}
+$test->prop2 = PHP_INT_MAX;
+$r =& $test->prop2;
+$x = $test->prop2++;
+var_dump(is_int($test->prop2));
 
-try {
-    $test->prop2 = PHP_INT_MAX;
-    $r =& $test->prop2;
-    $x = ++$test->prop2;
-} catch (TypeError $e) {
-    echo $e->getMessage(), "\n";
-}
+$test->prop2 = PHP_INT_MAX;
+$r =& $test->prop2;
+$x = ++$test->prop2;
+var_dump(is_int($test->prop2));
 
-try {
-    $test->prop2 = PHP_INT_MIN;
-    $r =& $test->prop2;
-    $x = $test->prop2--;
-} catch (TypeError $e) {
-    echo $e->getMessage(), "\n";
-}
+$test->prop2 = PHP_INT_MIN;
+$r =& $test->prop2;
+$x = $test->prop2--;
+var_dump(is_int($test->prop2));
 
-try {
-    $test->prop2 = PHP_INT_MIN;
-    $r =& $test->prop2;
-    $x = --$test->prop2;
-} catch (TypeError $e) {
-    echo $e->getMessage(), "\n";
-}
+$test->prop2 = PHP_INT_MIN;
+$r =& $test->prop2;
+$x = --$test->prop2;
+var_dump(is_int($test->prop2));
 
 ?>
 --EXPECT--
@@ -124,11 +99,11 @@ bool(true)
 bool(true)
 bool(true)
 bool(true)
-Cannot increment property Test::$prop2 of type int|bool past its maximal value
-Cannot increment property Test::$prop2 of type int|bool past its maximal value
-Cannot decrement property Test::$prop2 of type int|bool past its minimal value
-Cannot decrement property Test::$prop2 of type int|bool past its minimal value
-Cannot increment a reference held by property Test::$prop2 of type int|bool past its maximal value
-Cannot increment a reference held by property Test::$prop2 of type int|bool past its maximal value
-Cannot decrement a reference held by property Test::$prop2 of type int|bool past its minimal value
-Cannot decrement a reference held by property Test::$prop2 of type int|bool past its minimal value
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
