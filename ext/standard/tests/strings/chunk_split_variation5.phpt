@@ -1,13 +1,9 @@
 --TEST--
 Test chunk_split() function : usage variations - different integer values for 'chunklen' argument(Bug#42796)
---SKIPIF--
-<?php
-if (PHP_INT_SIZE != 8) die("skip this test is for 64bit platform only");
-?>
 --FILE--
 <?php
 /*
-* passsing different integer values for 'chunklen' argument to chunk_split()
+* passing different integer values for 'chunklen' argument to chunk_split()
 * 'ending' is set to '||'
 */
 
@@ -61,6 +57,6 @@ It als||o checks for %0 char||"
 string(73) "This contains	and special char & numbers 123.
 It also checks for %0 char||"
 -- Iteration 6 --
-chunk_split(): Argument #2 ($length) must be of type int, float given
+chunk_split(): Argument #2 ($length) must be between -%d and %d
 -- Iteration 7 --
 chunk_split(): Argument #2 ($length) must be greater than 0

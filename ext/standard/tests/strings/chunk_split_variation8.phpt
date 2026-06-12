@@ -1,9 +1,5 @@
 --TEST--
 Test chunk_split() function : usage variations - different integer values for 'chunklen' with heredoc string as 'str'(Bug#42796)
---SKIPIF--
-<?php
-if (PHP_INT_SIZE != 8) die("skip this test is for 64bit platform only");
-?>
 --FILE--
 <?php
 /*
@@ -50,7 +46,7 @@ for($count = 0; $count < count($values); $count++) {
 }
 
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing chunk_split() : different 'chunklen' with heredoc 'str' ***
 -- Iteration 1 --
 chunk_split(): Argument #2 ($length) must be greater than 0
@@ -77,6 +73,6 @@ string(129) "This's heredoc string with 	 and
 It has _speci@l ch@r$ 2222 !!!Now \k as escape char to test
 chunk_split():::"
 -- Iteration 7 --
-chunk_split(): Argument #2 ($length) must be of type int, float given
+chunk_split(): Argument #2 ($length) must be between -%d and %d
 -- Iteration 8 --
 chunk_split(): Argument #2 ($length) must be greater than 0

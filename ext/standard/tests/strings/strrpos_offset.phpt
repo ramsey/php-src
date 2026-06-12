@@ -5,7 +5,7 @@ strrpos() offset integer overflow
 
 try {
     var_dump(strrpos("t", "t", PHP_INT_MAX+1));
-} catch (TypeError $e) {
+} catch (ValueError $e) {
     echo $e->getMessage(), "\n";
 }
 
@@ -35,8 +35,8 @@ try {
 
 echo "Done\n";
 ?>
---EXPECT--
-strrpos(): Argument #3 ($offset) must be of type int, float given
+--EXPECTF--
+strrpos(): Argument #3 ($offset) must be between -%d and %d
 strrpos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
 strrpos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
 strrpos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
