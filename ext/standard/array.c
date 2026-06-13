@@ -6993,15 +6993,22 @@ PHP_FUNCTION(array_chunk)
 	zend_ulong num_key;
 	bool preserve_keys = 0;
 	zval *input = NULL;
+	zval *size_arg;
 	zval chunk;
 	zval *entry;
 
 	ZEND_PARSE_PARAMETERS_START(2, 3)
 		Z_PARAM_ARRAY(input)
-		Z_PARAM_LONG(size)
+		Z_PARAM_INT(size_arg)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_BOOL(preserve_keys)
 	ZEND_PARSE_PARAMETERS_END();
+
+	if (UNEXPECTED(!zend_logical_int_to_long(size_arg, &size))) {
+		/* A bigint is larger than any array: map to a same-sign long so the bounds
+		 * checks clamp a positive size and reject a non-positive one. */
+		size = zend_bigint_sign(Z_BIG_P(size_arg)) < 0 ? -1 : ZEND_LONG_MAX;
+	}
 
 	/* Do bounds checking for size parameter. */
 	if (size < 1) {
