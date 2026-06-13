@@ -6328,13 +6328,19 @@ PHPAPI bool php_array_pick_keys(php_random_algo_with_state engine, zval *input, 
 PHP_FUNCTION(array_rand)
 {
 	zval *input;
+	zval *num_arg = NULL;
 	zend_long num_req = 1;
 
 	ZEND_PARSE_PARAMETERS_START(1, 2)
 		Z_PARAM_ARRAY(input)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_LONG(num_req)
+		Z_PARAM_INT(num_arg)
 	ZEND_PARSE_PARAMETERS_END();
+
+	if (num_arg != NULL && UNEXPECTED(!zend_logical_int_to_long(num_arg, &num_req))) {
+		/* A bigint is outside [1, count]; let php_array_pick_keys raise that range error. */
+		num_req = zend_bigint_sign(Z_BIG_P(num_arg)) < 0 ? ZEND_LONG_MIN : ZEND_LONG_MAX;
+	}
 
 	if (!php_array_pick_keys(
 			php_random_default_engine(),
