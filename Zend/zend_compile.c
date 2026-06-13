@@ -2702,15 +2702,9 @@ static void zend_emit_return_type_check(
 		}
 
 		if (expr && expr->op_type == IS_CONST) {
-			/* A bigint satisfies the same type declarations as a long.
-			 * Remap before CONTAINS_CODE: IS_BIGINT=15 shares its bit value
-			 * with IS_STATIC (MAY_BE_STATIC=1<<15), so passing IS_BIGINT raw
-			 * would falsely match a "static" return type and skip emitting the
-			 * VERIFY_RETURN_TYPE opcode entirely. */
-			uint8_t const_type = Z_TYPE(expr->u.constant);
-			if (UNEXPECTED(const_type == IS_BIGINT)) {
-				const_type = IS_LONG;
-			}
+			/* Remap so a bigint constant doesn't falsely match a "static" return
+			 * type and skip emitting the VERIFY_RETURN_TYPE opcode entirely. */
+			uint8_t const_type = zend_type_code_for_contains(Z_TYPE(expr->u.constant));
 			if (ZEND_TYPE_CONTAINS_CODE(type, const_type)) {
 				/* we don't need run-time check */
 				return;
@@ -7971,11 +7965,7 @@ static zend_type zend_compile_typename(zend_ast *ast)
 static bool zend_is_valid_default_value(zend_type type, zval *value)
 {
 	ZEND_ASSERT(ZEND_TYPE_IS_SET(type));
-	uint8_t type_code = Z_TYPE_P(value);
-	if (UNEXPECTED(type_code == IS_BIGINT)) {
-		/* A bigint satisfies the same type declarations as a long. */
-		type_code = IS_LONG;
-	}
+	uint8_t type_code = zend_type_code_for_contains(Z_TYPE_P(value));
 	if (ZEND_TYPE_CONTAINS_CODE(type, type_code)) {
 		return true;
 	}

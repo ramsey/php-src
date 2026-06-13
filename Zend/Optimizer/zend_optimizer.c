@@ -648,15 +648,9 @@ bool zend_optimizer_replace_by_const(zend_op_array *op_array,
 				}
 				case ZEND_VERIFY_RETURN_TYPE: {
 					const zend_arg_info *ret_info = op_array->arg_info - 1;
-					/* A bigint satisfies the same type declarations as a long.
-					 * Remap before CONTAINS_CODE: IS_BIGINT=15 shares its bit
-					 * value with IS_STATIC (MAY_BE_STATIC=1<<15), so passing
-					 * IS_BIGINT raw would falsely match a "static" return type
-					 * and elide the VERIFY_RETURN_TYPE opcode incorrectly. */
-					uint8_t val_type = Z_TYPE_P(val);
-					if (UNEXPECTED(val_type == IS_BIGINT)) {
-						val_type = IS_LONG;
-					}
+					/* Remap so a bigint constant doesn't falsely match a "static"
+					 * return type and elide the VERIFY_RETURN_TYPE opcode. */
+					uint8_t val_type = zend_type_code_for_contains(Z_TYPE_P(val));
 					if (!ZEND_TYPE_CONTAINS_CODE(ret_info->type, val_type)
 						|| (op_array->fn_flags & ZEND_ACC_RETURN_REFERENCE)) {
 						return false;

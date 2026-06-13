@@ -702,6 +702,16 @@ static zend_always_inline uint8_t zval_get_type(const zval* pz) {
 	|| ((faketype) == _IS_INT  && ((realtype) == IS_LONG || (realtype) == IS_BIGINT)) \
 )
 
+/* IS_BIGINT (type tag 15) shares its value with the IS_STATIC fake type, so the
+ * MAY_BE_* mask cannot represent it and ZEND_TYPE_CONTAINS_CODE cannot be queried
+ * with IS_BIGINT directly (it would falsely match a "static" type). A bigint
+ * satisfies every type declaration a long does, so map it to IS_LONG for such a
+ * check; pass every other type code through unchanged. */
+static zend_always_inline uint8_t zend_type_code_for_contains(uint8_t type)
+{
+	return UNEXPECTED(type == IS_BIGINT) ? IS_LONG : type;
+}
+
 /* we should never set just Z_TYPE, we should set Z_TYPE_INFO */
 #define Z_TYPE(zval)				zval_get_type(&(zval))
 #define Z_TYPE_P(zval_p)			Z_TYPE(*(zval_p))

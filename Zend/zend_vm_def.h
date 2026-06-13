@@ -4488,14 +4488,9 @@ ZEND_VM_COLD_CONST_HANDLER(124, ZEND_VERIFY_RETURN_TYPE, CONST|TMP|VAR|UNUSED|CV
 			ZVAL_DEREF(retval_ptr);
 		}
 
-		/* A bigint satisfies the same type declarations as a long.  Remap
-		 * before ZEND_TYPE_CONTAINS_CODE: IS_BIGINT=15 shares its bit value
-		 * with IS_STATIC (MAY_BE_STATIC = 1<<15), so passing IS_BIGINT raw
-		 * would falsely match a "static" return type and skip the type check. */
-		uint8_t ret_type_code = Z_TYPE_P(retval_ref);
-		if (UNEXPECTED(ret_type_code == IS_BIGINT)) {
-			ret_type_code = IS_LONG;
-		}
+		/* Remap so a bigint return value doesn't falsely match a "static" return
+		 * type and skip the type check. */
+		uint8_t ret_type_code = zend_type_code_for_contains(Z_TYPE_P(retval_ref));
 		if (EXPECTED(ZEND_TYPE_CONTAINS_CODE(ret_info->type, ret_type_code))) {
 			ZEND_VM_NEXT_OPCODE();
 		}
