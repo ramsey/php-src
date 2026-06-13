@@ -6219,19 +6219,31 @@ PHP_FUNCTION(strpbrk)
 PHP_FUNCTION(substr_compare)
 {
 	zend_string *s1, *s2;
+	zval *offset_arg, *len_arg = NULL;
 	zend_long offset, len=0;
-	bool len_is_default=1;
+	bool len_is_default;
 	bool cs=0;
 	size_t cmp_len;
 
 	ZEND_PARSE_PARAMETERS_START(3, 5)
 		Z_PARAM_STR(s1)
 		Z_PARAM_STR(s2)
-		Z_PARAM_LONG(offset)
+		Z_PARAM_INT(offset_arg)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_LONG_OR_NULL(len, len_is_default)
+		Z_PARAM_INT_OR_NULL(len_arg)
 		Z_PARAM_BOOL(cs)
 	ZEND_PARSE_PARAMETERS_END();
+
+	if (UNEXPECTED(!zend_logical_int_to_long(offset_arg, &offset))) {
+		/* A huge positive offset is past the end (error below); a huge negative one
+		 * clamps to the start like any large negative offset. */
+		offset = zend_bigint_sign(Z_BIG_P(offset_arg)) < 0 ? ZEND_LONG_MIN : ZEND_LONG_MAX;
+	}
+	len_is_default = (len_arg == NULL);
+	if (!len_is_default && UNEXPECTED(!zend_logical_int_to_long(len_arg, &len))) {
+		/* A positive bigint length compares the whole strings; a negative one is rejected below. */
+		len = zend_bigint_sign(Z_BIG_P(len_arg)) < 0 ? ZEND_LONG_MIN : ZEND_LONG_MAX;
+	}
 
 	if (!len_is_default && len <= 0) {
 		if (len == 0) {
