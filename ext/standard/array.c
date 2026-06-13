@@ -2639,13 +2639,21 @@ PHP_FUNCTION(compact)
 PHP_FUNCTION(array_fill)
 {
 	zval *val;
+	zval *num_arg;
 	zend_long start_key, num;
 
 	ZEND_PARSE_PARAMETERS_START(3, 3)
 		Z_PARAM_LONG(start_key)
-		Z_PARAM_LONG(num)
+		Z_PARAM_INT(num_arg)
 		Z_PARAM_ZVAL(val)
 	ZEND_PARSE_PARAMETERS_END();
+
+	if (UNEXPECTED(!zend_logical_int_to_long(num_arg, &num))) {
+		/* A bigint count can never fit an array: too large when positive, below the minimum when negative. */
+		zend_argument_value_error(2, zend_bigint_sign(Z_BIG_P(num_arg)) < 0
+			? "must be greater than or equal to 0" : "is too large");
+		RETURN_THROWS();
+	}
 
 	if (EXPECTED(num > 0)) {
 		if (sizeof(num) > 4 && UNEXPECTED(num > INT_MAX)) {
