@@ -5682,8 +5682,9 @@ PHP_FUNCTION(localeconv)
 PHP_FUNCTION(substr_count)
 {
 	char *haystack, *needle;
+	zval *offset_arg = NULL, *length_arg = NULL;
 	zend_long offset = 0, length = 0;
-	bool length_is_null = 1;
+	bool length_is_null;
 	zend_long count;
 	size_t haystack_len, needle_len;
 	const char *p, *endp;
@@ -5692,9 +5693,19 @@ PHP_FUNCTION(substr_count)
 		Z_PARAM_STRING(haystack, haystack_len)
 		Z_PARAM_STRING(needle, needle_len)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_LONG(offset)
-		Z_PARAM_LONG_OR_NULL(length, length_is_null)
+		Z_PARAM_INT(offset_arg)
+		Z_PARAM_INT_OR_NULL(length_arg)
 	ZEND_PARSE_PARAMETERS_END();
+
+	if (offset_arg != NULL && UNEXPECTED(!zend_logical_int_to_long(offset_arg, &offset))) {
+		/* A bigint offset can't lie within the haystack. */
+		offset = zend_bigint_sign(Z_BIG_P(offset_arg)) < 0 ? ZEND_LONG_MIN : ZEND_LONG_MAX;
+	}
+	length_is_null = (length_arg == NULL);
+	if (!length_is_null && UNEXPECTED(!zend_logical_int_to_long(length_arg, &length))) {
+		/* A bigint length can't lie within the haystack. */
+		length = zend_bigint_sign(Z_BIG_P(length_arg)) < 0 ? ZEND_LONG_MIN : ZEND_LONG_MAX;
+	}
 
 	if (needle_len == 0) {
 		zend_argument_must_not_be_empty_error(2);
