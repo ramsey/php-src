@@ -878,6 +878,7 @@ PHPAPI void php_explode_negative_limit(const zend_string *delim, zend_string *st
 PHP_FUNCTION(explode)
 {
 	zend_string *str, *delim;
+	zval *limit_arg = NULL;
 	zend_long limit = ZEND_LONG_MAX; /* No limit */
 	zval tmp;
 
@@ -885,8 +886,13 @@ PHP_FUNCTION(explode)
 		Z_PARAM_STR(delim)
 		Z_PARAM_STR(str)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_LONG(limit)
+		Z_PARAM_INT(limit_arg)
 	ZEND_PARSE_PARAMETERS_END();
+
+	if (limit_arg != NULL && UNEXPECTED(!zend_logical_int_to_long(limit_arg, &limit))) {
+		/* A bigint is an unbounded limit when positive, or removes every piece when negative. */
+		limit = zend_bigint_sign(Z_BIG_P(limit_arg)) < 0 ? ZEND_LONG_MIN : ZEND_LONG_MAX;
+	}
 
 	if (ZSTR_LEN(delim) == 0) {
 		zend_argument_value_error(1, "must not be empty, use str_split() to split a string into characters");
