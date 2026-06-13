@@ -6114,6 +6114,7 @@ PHP_FUNCTION(str_word_count)
 PHP_FUNCTION(str_split)
 {
 	zend_string *str;
+	zval *split_length_arg = NULL;
 	zend_long split_length = 1;
 	const char *p;
 	size_t n_reg_segments;
@@ -6121,8 +6122,13 @@ PHP_FUNCTION(str_split)
 	ZEND_PARSE_PARAMETERS_START(1, 2)
 		Z_PARAM_STR(str)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_LONG(split_length)
+		Z_PARAM_INT(split_length_arg)
 	ZEND_PARSE_PARAMETERS_END();
+
+	if (split_length_arg != NULL && UNEXPECTED(!zend_logical_int_to_long(split_length_arg, &split_length))) {
+		/* A positive bigint exceeds any string length (one chunk); a non-positive one is rejected below. */
+		split_length = zend_bigint_sign(Z_BIG_P(split_length_arg)) < 0 ? -1 : ZEND_LONG_MAX;
+	}
 
 	if (split_length <= 0) {
 		zend_argument_value_error(2, "must be greater than 0");
