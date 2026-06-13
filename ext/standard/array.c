@@ -4683,6 +4683,7 @@ PHP_FUNCTION(array_pad)
 {
 	zval  *input;		/* Input array */
 	zval  *pad_value;	/* Padding value obviously */
+	zval  *pad_size_arg;	/* Size to pad to, before it is read as a long */
 	zend_long pad_size;		/* Size to pad to */
 	zend_long pad_size_abs;	/* Absolute value of pad_size */
 	zend_long input_size;		/* Size of the input array */
@@ -4693,11 +4694,15 @@ PHP_FUNCTION(array_pad)
 
 	ZEND_PARSE_PARAMETERS_START(3, 3)
 		Z_PARAM_ARRAY(input)
-		Z_PARAM_LONG(pad_size)
+		Z_PARAM_INT(pad_size_arg)
 		Z_PARAM_ZVAL(pad_value)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (pad_size < Z_L(-HT_MAX_SIZE) || pad_size > Z_L(HT_MAX_SIZE)) {
+	/* A big integer is always far outside the array-size bounds, so a value that does
+	 * not fit a zend_long and one that fits but still exceeds HT_MAX_SIZE both fail the
+	 * same way. */
+	if (!zend_logical_int_to_long(pad_size_arg, &pad_size)
+			|| pad_size < Z_L(-HT_MAX_SIZE) || pad_size > Z_L(HT_MAX_SIZE)) {
 		zend_argument_value_error(2, "must not exceed the maximum allowed array size");
 		RETURN_THROWS();
 	}
