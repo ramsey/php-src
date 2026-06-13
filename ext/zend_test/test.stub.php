@@ -393,6 +393,9 @@ function zend_test_override_libxml_global_state(): void {}
 
     /** @internal */
     function zend_test_zpp_int_oldstyle(int $i): mixed {}
+
+    /** @internal */
+    function zend_test_logical_int_to_long(int $i): int|false {}
 }
 
 namespace ZendTestNS {

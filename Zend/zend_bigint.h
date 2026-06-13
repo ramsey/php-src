@@ -131,6 +131,29 @@ static zend_always_inline void zend_bigint_result(zval *result, zend_bigint *big
 	}
 }
 
+/* Reads a logical int (an IS_LONG or IS_BIGINT zval, e.g. from Z_PARAM_INT) as a
+ * zend_long. Writes *out and returns true if the value fits a zend_long; returns
+ * false, WITHOUT throwing, if an IS_BIGINT is too large to fit.
+ *
+ * The no-throw result is for "bounded" builtins, those whose int argument is a
+ * count/length/index they already cap. On false they throw their own limit error,
+ * so an oversized integer is rejected just like an oversized IS_LONG, never leaking
+ * that a long has a maximum. (Builtins whose *result* is an unbounded integer, like
+ * intdiv()/abs(), instead keep the bigint and store it with zend_bigint_result().) */
+static zend_always_inline bool zend_logical_int_to_long(const zval *op, zend_long *out)
+{
+	if (EXPECTED(Z_TYPE_P(op) == IS_LONG)) {
+		*out = Z_LVAL_P(op);
+		return true;
+	}
+	ZEND_ASSERT(Z_TYPE_P(op) == IS_BIGINT);
+	if (EXPECTED(zend_bigint_can_fit_long(Z_BIG_P(op)))) {
+		*out = zend_bigint_to_long(Z_BIG_P(op));
+		return true;
+	}
+	return false;
+}
+
 END_EXTERN_C()
 
 #endif /* ZEND_BIGINT_H */

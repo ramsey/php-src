@@ -1216,6 +1216,20 @@ static ZEND_FUNCTION(zend_test_zpp_int_oldstyle)
 	RETURN_COPY(v);
 }
 
+static ZEND_FUNCTION(zend_test_logical_int_to_long)
+{
+	zval *v;
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_INT(v)
+	ZEND_PARSE_PARAMETERS_END();
+
+	zend_long out;
+	if (zend_logical_int_to_long(v, &out)) {
+		RETURN_LONG(out);
+	}
+	RETURN_FALSE;
+}
+
 typedef struct _zend_test_object {
 	zend_internal_function *tmp_method;
 	zend_object std;
