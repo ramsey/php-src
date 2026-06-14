@@ -382,7 +382,9 @@ PHP_FUNCTION(file_get_contents)
 	php_stream *stream;
 	zend_long offset = 0;
 	zend_long maxlen;
-	bool maxlen_is_null = 1;
+	zval *offset_arg = NULL;
+	zval *maxlen_arg = NULL;
+	bool maxlen_is_null;
 	zval *zcontext = NULL;
 	php_stream_context *context = NULL;
 	zend_string *contents;
@@ -393,9 +395,19 @@ PHP_FUNCTION(file_get_contents)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_BOOL(use_include_path)
 		Z_PARAM_RESOURCE_OR_NULL(zcontext)
-		Z_PARAM_LONG(offset)
-		Z_PARAM_LONG_OR_NULL(maxlen, maxlen_is_null)
+		Z_PARAM_INT_OR_NULL(offset_arg)
+		Z_PARAM_INT_OR_NULL(maxlen_arg)
 	ZEND_PARSE_PARAMETERS_END();
+
+	if (offset_arg != NULL && UNEXPECTED(!zend_logical_int_to_long(offset_arg, &offset))) {
+		/* A bigint offset is past either end of the stream, so the seek below fails. */
+		offset = zend_bigint_sign(Z_BIG_P(offset_arg)) < 0 ? ZEND_LONG_MIN : ZEND_LONG_MAX;
+	}
+	maxlen_is_null = (maxlen_arg == NULL);
+	if (!maxlen_is_null && UNEXPECTED(!zend_logical_int_to_long(maxlen_arg, &maxlen))) {
+		/* A positive bigint length caps past the stream; a negative one is rejected below. */
+		maxlen = zend_bigint_sign(Z_BIG_P(maxlen_arg)) < 0 ? ZEND_LONG_MIN : ZEND_LONG_MAX;
+	}
 
 	if (maxlen_is_null) {
 		maxlen = (ssize_t) PHP_STREAM_COPY_ALL;
