@@ -289,6 +289,8 @@ struct _zend_executor_globals {
 
 	zend_long exception_string_param_max_len;
 
+	zend_long int_string_max_digits;
+
 	zend_get_gc_buffer get_gc_buffer;
 
 	zend_fiber_context *main_fiber_context;

@@ -383,6 +383,13 @@ zend.exception_ignore_args = On
 ; of sensitive information in stack traces.
 zend.exception_string_param_max_len = 0
 
+; The maximum number of decimal digits an integer may have when it is converted
+; to a string (string cast, echo, var_dump, var_export, serialize). Converting a
+; larger integer throws a ValueError. 0 disables the limit. Values between 1 and
+; 639 are not allowed.
+; Default Value: 4300
+zend.int_string_max_digits = 4300
+
 ;;;;;;;;;;;;;;;;;
 ; Miscellaneous ;
 ;;;;;;;;;;;;;;;;;

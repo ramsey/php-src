@@ -189,6 +189,19 @@ static ZEND_INI_MH(OnSetExceptionStringParamMaxLen) /* {{{ */
 }
 /* }}} */
 
+static ZEND_INI_MH(OnSetIntStringMaxDigits) /* {{{ */
+{
+	zend_long i = ZEND_ATOL(ZSTR_VAL(new_value));
+	/* 0 disables the limit; any other value must be at least 640 so the cap can
+	 * never break ordinary integer output (a 64-bit value is at most 20 digits). */
+	if (i == 0 || i >= 640) {
+		EG(int_string_max_digits) = i;
+		return SUCCESS;
+	}
+	return FAILURE;
+}
+/* }}} */
+
 #ifdef ZEND_CHECK_STACK_LIMIT
 static ZEND_INI_MH(OnUpdateMaxAllowedStackSize) /* {{{ */
 {
@@ -276,6 +289,7 @@ ZEND_INI_BEGIN()
 #endif
 	STD_ZEND_INI_BOOLEAN("zend.exception_ignore_args",	"0",	ZEND_INI_ALL,		OnUpdateBool, exception_ignore_args, zend_executor_globals, executor_globals)
 	STD_ZEND_INI_ENTRY("zend.exception_string_param_max_len",	"15",	ZEND_INI_ALL,	OnSetExceptionStringParamMaxLen,	exception_string_param_max_len,		zend_executor_globals,	executor_globals)
+	STD_ZEND_INI_ENTRY("zend.int_string_max_digits",	"4300",	ZEND_INI_ALL,	OnSetIntStringMaxDigits,	int_string_max_digits,	zend_executor_globals,	executor_globals)
 	STD_ZEND_INI_ENTRY("fiber.stack_size",		NULL,			ZEND_INI_ALL,		OnUpdateFiberStackSize,		fiber_stack_size,	zend_executor_globals, 		executor_globals)
 #ifdef ZEND_CHECK_STACK_LIMIT
 	/* The maximum allowed call stack size. 0: auto detect, -1: no limit. For fibers, this is fiber.stack_size. */
