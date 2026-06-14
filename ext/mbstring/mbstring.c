@@ -2384,17 +2384,30 @@ out:
 PHP_FUNCTION(mb_substr)
 {
 	zend_string *str, *encoding = NULL;
+	zval *from_arg, *len_arg = NULL;
 	zend_long from, len;
 	size_t real_from, real_len;
-	bool len_is_null = true;
+	bool len_is_null;
 
 	ZEND_PARSE_PARAMETERS_START(2, 4)
 		Z_PARAM_STR(str)
-		Z_PARAM_LONG(from)
+		Z_PARAM_INT(from_arg)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_LONG_OR_NULL(len, len_is_null)
+		Z_PARAM_INT_OR_NULL(len_arg)
 		Z_PARAM_STR_OR_NULL(encoding)
 	ZEND_PARSE_PARAMETERS_END();
+
+	if (UNEXPECTED(!zend_logical_int_to_long(from_arg, &from))) {
+		/* A positive bigint starts past the end (empty result); a negative one
+		 * lands on the rejected ZEND_LONG_MIN sentinel. */
+		from = zend_bigint_sign(Z_BIG_P(from_arg)) < 0 ? ZEND_LONG_MIN : ZEND_LONG_MAX;
+	}
+	len_is_null = (len_arg == NULL);
+	if (!len_is_null && UNEXPECTED(!zend_logical_int_to_long(len_arg, &len))) {
+		/* A positive bigint keeps the whole remainder; a negative one lands on
+		 * the rejected ZEND_LONG_MIN sentinel. */
+		len = zend_bigint_sign(Z_BIG_P(len_arg)) < 0 ? ZEND_LONG_MIN : ZEND_LONG_MAX;
+	}
 
 	if (from == ZEND_LONG_MIN) {
 		zend_argument_value_error(2, "must be between " ZEND_LONG_FMT " and " ZEND_LONG_FMT, (ZEND_LONG_MIN + 1), ZEND_LONG_MAX);
