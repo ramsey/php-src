@@ -521,7 +521,8 @@ PHP_FUNCTION(stream_copy_to_stream)
 {
 	php_stream *src, *dest;
 	zend_long maxlen, pos = 0;
-	bool maxlen_is_null = 1;
+	zval *maxlen_arg = NULL, *pos_arg = NULL;
+	bool maxlen_is_null;
 	size_t len;
 	zval *zcontext = NULL;
 	php_stream_context *context = NULL;
@@ -530,10 +531,20 @@ PHP_FUNCTION(stream_copy_to_stream)
 		PHP_Z_PARAM_STREAM(src)
 		PHP_Z_PARAM_STREAM(dest)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_LONG_OR_NULL(maxlen, maxlen_is_null)
-		Z_PARAM_LONG(pos)
+		Z_PARAM_INT_OR_NULL(maxlen_arg)
+		Z_PARAM_INT(pos_arg)
 		Z_PARAM_RESOURCE_OR_NULL(zcontext)
 	ZEND_PARSE_PARAMETERS_END();
+
+	maxlen_is_null = (maxlen_arg == NULL);
+	if (!maxlen_is_null && UNEXPECTED(!zend_logical_int_to_long(maxlen_arg, &maxlen))) {
+		/* Either sign caps past the source, so the copy reads everything available. */
+		maxlen = zend_bigint_sign(Z_BIG_P(maxlen_arg)) < 0 ? ZEND_LONG_MIN : ZEND_LONG_MAX;
+	}
+	if (pos_arg != NULL && UNEXPECTED(!zend_logical_int_to_long(pos_arg, &pos))) {
+		/* A positive bigint seeks past the end; a negative one leaves the position untouched. */
+		pos = zend_bigint_sign(Z_BIG_P(pos_arg)) < 0 ? ZEND_LONG_MIN : ZEND_LONG_MAX;
+	}
 
 	if (maxlen_is_null) {
 		maxlen = PHP_STREAM_COPY_ALL;
