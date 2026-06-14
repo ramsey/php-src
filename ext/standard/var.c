@@ -134,10 +134,13 @@ again:
 			php_printf("%sint(" ZEND_LONG_FMT ")\n", COMMON, Z_LVAL_P(struc));
 			break;
 		case IS_BIGINT: {
-			size_t len;
-			char *s = zend_bigint_to_string(Z_BIG_P(struc), &len);
-			php_printf("%sint(%s)\n", COMMON, s);
-			efree(s);
+			zend_string *str = zend_bigint_to_string_checked(Z_BIG_P(struc));
+			if (UNEXPECTED(!str)) {
+				/* integer to large for string: exception pending */
+				return;
+			}
+			php_printf("%sint(%s)\n", COMMON, ZSTR_VAL(str));
+			zend_string_release(str);
 			break;
 		}
 		case IS_DOUBLE:
@@ -336,10 +339,13 @@ PHPAPI void php_debug_zval_dump(zval *struc, int level) /* {{{ */
 		php_printf("int(" ZEND_LONG_FMT ")\n", Z_LVAL_P(struc));
 		break;
 	case IS_BIGINT: {
-		size_t len;
-		char *s = zend_bigint_to_string(Z_BIG_P(struc), &len);
-		php_printf("int(%s)\n", s);
-		efree(s);
+		zend_string *str = zend_bigint_to_string_checked(Z_BIG_P(struc));
+		if (UNEXPECTED(!str)) {
+			/* integer to large for string: exception pending */
+			return;
+		}
+		php_printf("int(%s)\n", ZSTR_VAL(str));
+		zend_string_release(str);
 		break;
 	}
 	case IS_DOUBLE:
@@ -560,10 +566,13 @@ again:
 			smart_str_append_long(buf, Z_LVAL_P(struc));
 			break;
 		case IS_BIGINT: {
-			size_t len;
-			char *s = zend_bigint_to_string(Z_BIG_P(struc), &len);
-			smart_str_appendl(buf, s, len);
-			efree(s);
+			zend_string *str = zend_bigint_to_string_checked(Z_BIG_P(struc));
+			if (UNEXPECTED(!str)) {
+				/* integer to large for string: exception pending */
+				return FAILURE;
+			}
+			smart_str_appendl(buf, ZSTR_VAL(str), ZSTR_LEN(str));
+			zend_string_release(str);
 			break;
 		}
 		case IS_DOUBLE:
