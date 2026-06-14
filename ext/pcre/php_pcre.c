@@ -2341,6 +2341,7 @@ static void preg_replace_common(INTERNAL_FUNCTION_PARAMETERS, bool is_filter)
 	HashTable *regex_ht, *replace_ht, *subject_ht;
 	zend_long limit = -1;
 	zval *zcount = NULL;
+	zval *limit_arg = NULL;
 
 	/* Get function parameters and do error-checking. */
 	ZEND_PARSE_PARAMETERS_START(3, 5)
@@ -2348,9 +2349,14 @@ static void preg_replace_common(INTERNAL_FUNCTION_PARAMETERS, bool is_filter)
 		Z_PARAM_ARRAY_HT_OR_STR(replace_ht, replace_str)
 		Z_PARAM_ARRAY_HT_OR_STR(subject_ht, subject_str)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_LONG(limit)
+		Z_PARAM_INT(limit_arg)
 		Z_PARAM_ZVAL(zcount)
 	ZEND_PARSE_PARAMETERS_END();
+
+	if (limit_arg != NULL && UNEXPECTED(!zend_logical_int_to_long(limit_arg, &limit))) {
+		/* A bigint limit is effectively unlimited, like an out-of-range long limit. */
+		limit = zend_bigint_sign(Z_BIG_P(limit_arg)) < 0 ? ZEND_LONG_MIN : ZEND_LONG_MAX;
+	}
 
 	_preg_replace_common(
 		return_value,
@@ -2400,6 +2406,7 @@ PHP_FUNCTION(preg_replace_callback)
 	zend_string *subject_str;
 	HashTable *subject_ht;
 	zend_long limit = -1, flags = 0;
+	zval *limit_arg = NULL;
 	size_t replace_count;
 	zend_fcall_info fci = empty_fcall_info;
 	zend_fcall_info_cache fcc = empty_fcall_info_cache;
@@ -2410,10 +2417,15 @@ PHP_FUNCTION(preg_replace_callback)
 		Z_PARAM_FUNC(fci, fcc)
 		Z_PARAM_ARRAY_HT_OR_STR(subject_ht, subject_str)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_LONG(limit)
+		Z_PARAM_INT(limit_arg)
 		Z_PARAM_ZVAL(zcount)
 		Z_PARAM_LONG(flags)
 	ZEND_PARSE_PARAMETERS_END();
+
+	if (limit_arg != NULL && UNEXPECTED(!zend_logical_int_to_long(limit_arg, &limit))) {
+		/* A bigint limit is effectively unlimited, like an out-of-range long limit. */
+		limit = zend_bigint_sign(Z_BIG_P(limit_arg)) < 0 ? ZEND_LONG_MIN : ZEND_LONG_MAX;
+	}
 
 	replace_count = php_preg_replace_func_impl(return_value, regex_str, regex_ht,
 		&fci, &fcc,
@@ -2431,6 +2443,7 @@ PHP_FUNCTION(preg_replace_callback_array)
 	HashTable *pattern, *subject_ht;
 	zend_string *subject_str, *str_idx_regex;
 	zend_long limit = -1, flags = 0;
+	zval *limit_arg = NULL;
 	size_t replace_count = 0;
 
 	/* Get function parameters and do error-checking. */
@@ -2438,10 +2451,15 @@ PHP_FUNCTION(preg_replace_callback_array)
 		Z_PARAM_ARRAY_HT(pattern)
 		Z_PARAM_ARRAY_HT_OR_STR(subject_ht, subject_str)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_LONG(limit)
+		Z_PARAM_INT(limit_arg)
 		Z_PARAM_ZVAL(zcount)
 		Z_PARAM_LONG(flags)
 	ZEND_PARSE_PARAMETERS_END();
+
+	if (limit_arg != NULL && UNEXPECTED(!zend_logical_int_to_long(limit_arg, &limit))) {
+		/* A bigint limit is effectively unlimited, like an out-of-range long limit. */
+		limit = zend_bigint_sign(Z_BIG_P(limit_arg)) < 0 ? ZEND_LONG_MIN : ZEND_LONG_MAX;
+	}
 
 	if (subject_ht) {
 		GC_TRY_ADDREF(subject_ht);
@@ -2533,14 +2551,21 @@ PHP_FUNCTION(preg_split)
 	zend_long			 flags = 0;		/* Match control flags */
 	pcre_cache_entry	*pce;			/* Compiled regular expression */
 
+	zval *limit_arg = NULL;
+
 	/* Get function parameters and do error checking */
 	ZEND_PARSE_PARAMETERS_START(2, 4)
 		Z_PARAM_STR(regex)
 		Z_PARAM_STR(subject)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_LONG(limit_val)
+		Z_PARAM_INT(limit_arg)
 		Z_PARAM_LONG(flags)
 	ZEND_PARSE_PARAMETERS_END();
+
+	if (limit_arg != NULL && UNEXPECTED(!zend_logical_int_to_long(limit_arg, &limit_val))) {
+		/* A bigint limit is effectively unlimited, like an out-of-range long limit. */
+		limit_val = zend_bigint_sign(Z_BIG_P(limit_arg)) < 0 ? ZEND_LONG_MIN : ZEND_LONG_MAX;
+	}
 
 	/* Compile regex or get it from cache. */
 	if ((pce = pcre_get_compiled_regex_cache(regex)) == NULL) {
