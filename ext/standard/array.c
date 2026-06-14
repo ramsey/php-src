@@ -3700,19 +3700,30 @@ PHP_FUNCTION(array_splice)
 {
 	zval *array,				/* Input array */
 		 *repl_array = NULL;	/* Replacement array */
+	zval *offset_arg, *length_arg = NULL;
 	HashTable  *rem_hash = NULL;
 	zend_long offset,
 			length = 0;
-	bool length_is_null = 1;
+	bool length_is_null;
 	int		num_in;				/* Number of elements in the input array */
 
 	ZEND_PARSE_PARAMETERS_START(2, 4)
 		Z_PARAM_ARRAY_EX(array, 0, 1)
-		Z_PARAM_LONG(offset)
+		Z_PARAM_INT(offset_arg)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_LONG_OR_NULL(length, length_is_null)
+		Z_PARAM_INT_OR_NULL(length_arg)
 		Z_PARAM_ZVAL(repl_array)
 	ZEND_PARSE_PARAMETERS_END();
+
+	if (UNEXPECTED(!zend_logical_int_to_long(offset_arg, &offset))) {
+		/* A bigint offset is beyond either end; clamp like a huge long. */
+		offset = zend_bigint_sign(Z_BIG_P(offset_arg)) < 0 ? ZEND_LONG_MIN : ZEND_LONG_MAX;
+	}
+	length_is_null = (length_arg == NULL);
+	if (!length_is_null && UNEXPECTED(!zend_logical_int_to_long(length_arg, &length))) {
+		/* A bigint length removes everything from the offset (positive) or nothing (negative). */
+		length = zend_bigint_sign(Z_BIG_P(length_arg)) < 0 ? ZEND_LONG_MIN : ZEND_LONG_MAX;
+	}
 
 	num_in = zend_hash_num_elements(Z_ARRVAL_P(array));
 
