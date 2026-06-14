@@ -1490,16 +1490,25 @@ PHP_FUNCTION(stream_set_blocking)
 PHP_FUNCTION(stream_set_timeout)
 {
 	zend_long seconds, microseconds = 0;
+	zval *seconds_arg, *microseconds_arg = NULL;
 	struct timeval t;
 	php_stream *stream;
 	int argc = ZEND_NUM_ARGS();
 
 	ZEND_PARSE_PARAMETERS_START(2, 3)
 		PHP_Z_PARAM_STREAM(stream)
-		Z_PARAM_LONG(seconds)
+		Z_PARAM_INT(seconds_arg)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_LONG(microseconds)
+		Z_PARAM_INT(microseconds_arg)
 	ZEND_PARSE_PARAMETERS_END();
+
+	if (UNEXPECTED(!zend_logical_int_to_long(seconds_arg, &seconds))) {
+		/* No bound is enforced; a bigint sets an effectively unbounded timeout, like a huge long. */
+		seconds = zend_bigint_sign(Z_BIG_P(seconds_arg)) < 0 ? ZEND_LONG_MIN : ZEND_LONG_MAX;
+	}
+	if (microseconds_arg != NULL && UNEXPECTED(!zend_logical_int_to_long(microseconds_arg, &microseconds))) {
+		microseconds = zend_bigint_sign(Z_BIG_P(microseconds_arg)) < 0 ? ZEND_LONG_MIN : ZEND_LONG_MAX;
+	}
 
 #ifdef PHP_WIN32
 	t.tv_sec = (long)seconds;
