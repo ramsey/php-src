@@ -1803,11 +1803,7 @@ static zend_never_inline zend_result ZEND_FASTCALL mod_function_bigint(zval *res
 		}
 		if (op2_lval == 0) {
 			/* modulus by zero (a bigint divisor is never zero) */
-			if (EG(current_execute_data) && !CG(in_compilation)) {
-				zend_throw_exception_ex(zend_ce_division_by_zero_error, 0, "Modulo by zero");
-			} else {
-				zend_error_noreturn(E_ERROR, "Modulo by zero");
-			}
+			zend_throw_error(zend_ce_division_by_zero_error, "Modulo by zero");
 			if (result != op1) {
 				ZVAL_UNDEF(result);
 			}
@@ -1843,11 +1839,7 @@ ZEND_API zend_result ZEND_FASTCALL mod_function(zval *result, zval *op1, zval *o
 
 	if (op2_lval == 0) {
 		/* modulus by zero */
-		if (EG(current_execute_data) && !CG(in_compilation)) {
-			zend_throw_exception_ex(zend_ce_division_by_zero_error, 0, "Modulo by zero");
-		} else {
-			zend_error_noreturn(E_ERROR, "Modulo by zero");
-		}
+		zend_throw_error(zend_ce_division_by_zero_error, "Modulo by zero");
 		if (op1 != result) {
 			ZVAL_UNDEF(result);
 		}
@@ -2428,11 +2420,7 @@ static zend_never_inline zend_result ZEND_FASTCALL shift_left_function_bigint(zv
 		/* A bigint shift count: negative is the usual error; a positive count is
 		 * astronomically beyond the backend's reach. */
 		if (zend_bigint_sign(Z_BIG_P(op2)) < 0) {
-			if (EG(current_execute_data) && !CG(in_compilation)) {
-				zend_throw_exception_ex(zend_ce_arithmetic_error, 0, "Bit shift by negative number");
-			} else {
-				zend_error_noreturn(E_ERROR, "Bit shift by negative number");
-			}
+			zend_throw_error(zend_ce_arithmetic_error, "Bit shift by negative number");
 		} else {
 			zend_throw_error(zend_ce_arithmetic_error,
 				"The libtommath bigint backend cannot shift left by more than %d bits", INT_MAX);
@@ -2457,11 +2445,7 @@ static zend_never_inline zend_result ZEND_FASTCALL shift_left_function_bigint(zv
 		}
 	}
 	if (UNEXPECTED(count < 0)) {
-		if (EG(current_execute_data) && !CG(in_compilation)) {
-			zend_throw_exception_ex(zend_ce_arithmetic_error, 0, "Bit shift by negative number");
-		} else {
-			zend_error_noreturn(E_ERROR, "Bit shift by negative number");
-		}
+		zend_throw_error(zend_ce_arithmetic_error, "Bit shift by negative number");
 		if (result != op1) {
 			ZVAL_UNDEF(result);
 		}
@@ -2498,11 +2482,7 @@ ZEND_API zend_result ZEND_FASTCALL shift_left_function(zval *result, zval *op1, 
 	convert_op1_op2_long(op1, op1_lval, op2, op2_lval, result, ZEND_SL, "<<");
 
 	if (UNEXPECTED(op2_lval < 0)) {
-		if (EG(current_execute_data) && !CG(in_compilation)) {
-			zend_throw_exception_ex(zend_ce_arithmetic_error, 0, "Bit shift by negative number");
-		} else {
-			zend_error_noreturn(E_ERROR, "Bit shift by negative number");
-		}
+		zend_throw_error(zend_ce_arithmetic_error, "Bit shift by negative number");
 		if (op1 != result) {
 			ZVAL_UNDEF(result);
 		}
@@ -2591,11 +2571,7 @@ static zend_never_inline zend_result ZEND_FASTCALL shift_right_function_bigint(z
 	}
 
 	if (UNEXPECTED(count_negative)) {
-		if (EG(current_execute_data) && !CG(in_compilation)) {
-			zend_throw_exception_ex(zend_ce_arithmetic_error, 0, "Bit shift by negative number");
-		} else {
-			zend_error_noreturn(E_ERROR, "Bit shift by negative number");
-		}
+		zend_throw_error(zend_ce_arithmetic_error, "Bit shift by negative number");
 		if (result != op1) {
 			ZVAL_UNDEF(result);
 		}
@@ -2661,11 +2637,7 @@ ZEND_API zend_result ZEND_FASTCALL shift_right_function(zval *result, zval *op1,
 			ZVAL_LONG(result, (op1_lval < 0) ? -1 : 0);
 			return SUCCESS;
 		} else {
-			if (EG(current_execute_data) && !CG(in_compilation)) {
-				zend_throw_exception_ex(zend_ce_arithmetic_error, 0, "Bit shift by negative number");
-			} else {
-				zend_error_noreturn(E_ERROR, "Bit shift by negative number");
-			}
+			zend_throw_error(zend_ce_arithmetic_error, "Bit shift by negative number");
 			if (op1 != result) {
 				ZVAL_UNDEF(result);
 			}
