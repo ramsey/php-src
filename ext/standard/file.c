@@ -1825,7 +1825,8 @@ PHP_FUNCTION(fgetcsv)
 	char *buf;
 	php_stream *stream;
 
-	bool len_is_null = 1;
+	zval *len_arg = NULL;
+	bool len_is_null;
 	char *delimiter_str = NULL;
 	size_t delimiter_str_len = 0;
 	char *enclosure_str = NULL;
@@ -1835,11 +1836,17 @@ PHP_FUNCTION(fgetcsv)
 	ZEND_PARSE_PARAMETERS_START(1, 5)
 		PHP_Z_PARAM_STREAM(stream)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_LONG_OR_NULL(len, len_is_null)
+		Z_PARAM_INT_OR_NULL(len_arg)
 		Z_PARAM_STRING(delimiter_str, delimiter_str_len)
 		Z_PARAM_STRING(enclosure_str, enclosure_str_len)
 		Z_PARAM_STR(escape_str)
 	ZEND_PARSE_PARAMETERS_END();
+
+	len_is_null = (len_arg == NULL);
+	if (!len_is_null && UNEXPECTED(!zend_logical_int_to_long(len_arg, &len))) {
+		/* A bigint length is past the cap below, so reject it like a too-large long. */
+		len = zend_bigint_sign(Z_BIG_P(len_arg)) < 0 ? ZEND_LONG_MIN : ZEND_LONG_MAX;
+	}
 
 	if (delimiter_str != NULL) {
 		/* Make sure that there is at least one character in string */
