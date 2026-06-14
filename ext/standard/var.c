@@ -1128,6 +1128,20 @@ again:
 			php_var_serialize_long(buf, Z_LVAL_P(struc));
 			return;
 
+		case IS_BIGINT: {
+			zend_string *str = zend_bigint_to_string_checked(Z_BIG_P(struc));
+			if (!str) {
+				return;
+			}
+			size_t l = ZSTR_LEN(str);
+			char *res = smart_str_extend(buf, 2 + l + 1);
+			res = zend_mempcpy(res, "i:", 2);
+			memcpy(res, ZSTR_VAL(str), l);
+			res[l] = ';';
+			zend_string_release(str);
+			return;
+		}
+
 		case IS_DOUBLE: {
 			char tmp_str[ZEND_DOUBLE_MAX_LENGTH];
 			zend_gcvt(Z_DVAL_P(struc), (int)PG(serialize_precision), '.', 'E', tmp_str);
