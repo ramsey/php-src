@@ -349,6 +349,7 @@ static zend_always_inline void _zend_is_numeric(zval *return_value, zval *arg)
 {
 	switch (Z_TYPE_P(arg)) {
 		case IS_LONG:
+		case IS_BIGINT:
 		case IS_DOUBLE:
 			RETURN_TRUE;
 
