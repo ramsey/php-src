@@ -456,15 +456,26 @@ PHP_FUNCTION(stream_get_contents)
 {
 	php_stream *stream;
 	zend_long maxlen, desiredpos = -1L;
-	bool maxlen_is_null = 1;
+	zval *maxlen_arg = NULL, *desiredpos_arg = NULL;
+	bool maxlen_is_null;
 	zend_string *contents;
 
 	ZEND_PARSE_PARAMETERS_START(1, 3)
 		PHP_Z_PARAM_STREAM(stream)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_LONG_OR_NULL(maxlen, maxlen_is_null)
-		Z_PARAM_LONG(desiredpos)
+		Z_PARAM_INT_OR_NULL(maxlen_arg)
+		Z_PARAM_INT(desiredpos_arg)
 	ZEND_PARSE_PARAMETERS_END();
+
+	maxlen_is_null = (maxlen_arg == NULL);
+	if (!maxlen_is_null && UNEXPECTED(!zend_logical_int_to_long(maxlen_arg, &maxlen))) {
+		/* A positive bigint length caps past the stream; a negative one is rejected below. */
+		maxlen = zend_bigint_sign(Z_BIG_P(maxlen_arg)) < 0 ? ZEND_LONG_MIN : ZEND_LONG_MAX;
+	}
+	if (desiredpos_arg != NULL && UNEXPECTED(!zend_logical_int_to_long(desiredpos_arg, &desiredpos))) {
+		/* A positive bigint seeks past the end; a negative one leaves the position untouched. */
+		desiredpos = zend_bigint_sign(Z_BIG_P(desiredpos_arg)) < 0 ? ZEND_LONG_MIN : ZEND_LONG_MAX;
+	}
 
 	if (maxlen_is_null) {
 		maxlen = (ssize_t) PHP_STREAM_COPY_ALL;
