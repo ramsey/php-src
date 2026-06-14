@@ -679,13 +679,19 @@ PHP_FUNCTION(unpack)
 	zend_long formatlen, inputpos, inputlen;
 	int i;
 	zend_long offset = 0;
+	zval *offset_arg = NULL;
 
 	ZEND_PARSE_PARAMETERS_START(2, 3)
 		Z_PARAM_STR(formatarg)
 		Z_PARAM_STR(inputarg)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_LONG(offset)
+		Z_PARAM_INT(offset_arg)
 	ZEND_PARSE_PARAMETERS_END();
+
+	if (offset_arg != NULL && UNEXPECTED(!zend_logical_int_to_long(offset_arg, &offset))) {
+		/* A bigint offset can't lie within the input. */
+		offset = zend_bigint_sign(Z_BIG_P(offset_arg)) < 0 ? ZEND_LONG_MIN : ZEND_LONG_MAX;
+	}
 
 	format = ZSTR_VAL(formatarg);
 	formatlen = ZSTR_LEN(formatarg);
