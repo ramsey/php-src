@@ -6605,6 +6605,7 @@ PHP_FUNCTION(mb_encode_mimeheader)
 	zend_string *str, *charset_name = NULL, *transenc_name = NULL;
 	char *linefeed = "\r\n";
 	size_t linefeed_len = 2;
+	zval *indent_arg = NULL;
 	zend_long indent = 0;
 	bool base64 = true;
 
@@ -6614,8 +6615,13 @@ PHP_FUNCTION(mb_encode_mimeheader)
 		Z_PARAM_STR(charset_name)
 		Z_PARAM_STR(transenc_name)
 		Z_PARAM_STRING(linefeed, linefeed_len)
-		Z_PARAM_LONG(indent)
+		Z_PARAM_INT(indent_arg)
 	ZEND_PARSE_PARAMETERS_END();
+
+	if (indent_arg != NULL && UNEXPECTED(!zend_logical_int_to_long(indent_arg, &indent))) {
+		/* A bigint indent is out of the 0..73 range and clamps to 0. */
+		indent = 0;
+	}
 
 	if (charset_name != NULL) {
 		charset = php_mb_get_encoding(charset_name, 2);
