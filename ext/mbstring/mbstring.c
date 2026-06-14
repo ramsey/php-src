@@ -2742,16 +2742,27 @@ append_trim_marker:
 PHP_FUNCTION(mb_strimwidth)
 {
 	zend_string *str, *trimmarker = zend_empty_string, *encoding = NULL;
+	zval *from_arg, *width_arg;
 	zend_long from, width;
 
 	ZEND_PARSE_PARAMETERS_START(3, 5)
 		Z_PARAM_STR(str)
-		Z_PARAM_LONG(from)
-		Z_PARAM_LONG(width)
+		Z_PARAM_INT(from_arg)
+		Z_PARAM_INT(width_arg)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_STR(trimmarker)
 		Z_PARAM_STR_OR_NULL(encoding)
 	ZEND_PARSE_PARAMETERS_END();
+
+	if (UNEXPECTED(!zend_logical_int_to_long(from_arg, &from))) {
+		/* A bigint $start lies outside the string in either direction. */
+		from = zend_bigint_sign(Z_BIG_P(from_arg)) < 0 ? ZEND_LONG_MIN : ZEND_LONG_MAX;
+	}
+	if (UNEXPECTED(!zend_logical_int_to_long(width_arg, &width))) {
+		/* A positive bigint $width keeps the whole string; a negative one takes
+		 * the deprecated branch and lands out of range. */
+		width = zend_bigint_sign(Z_BIG_P(width_arg)) < 0 ? ZEND_LONG_MIN : ZEND_LONG_MAX;
+	}
 
 	const mbfl_encoding *enc = php_mb_get_encoding(encoding, 5);
 	if (!enc) {
