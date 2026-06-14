@@ -1646,14 +1646,21 @@ PHP_FUNCTION(mb_output_handler)
 PHP_FUNCTION(mb_str_split)
 {
 	zend_string *str, *encoding = NULL;
+	zval *split_len_arg = NULL;
 	zend_long split_len = 1;
 
 	ZEND_PARSE_PARAMETERS_START(1, 3)
 		Z_PARAM_STR(str)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_LONG(split_len)
+		Z_PARAM_INT(split_len_arg)
 		Z_PARAM_STR_OR_NULL(encoding)
 	ZEND_PARSE_PARAMETERS_END();
+
+	if (split_len_arg != NULL && UNEXPECTED(!zend_logical_int_to_long(split_len_arg, &split_len))) {
+		/* A bigint is outside the valid chunk-size range: too large when positive,
+		 * not positive when negative. */
+		split_len = zend_bigint_sign(Z_BIG_P(split_len_arg)) < 0 ? -1 : ZEND_LONG_MAX;
+	}
 
 	if (split_len <= 0) {
 		zend_argument_value_error(2, "must be greater than 0");
