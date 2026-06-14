@@ -1539,12 +1539,18 @@ PHP_FUNCTION(stream_set_chunk_size)
 {
 	int			ret;
 	zend_long		csize;
+	zval		*csize_arg;
 	php_stream	*stream;
 
 	ZEND_PARSE_PARAMETERS_START(2, 2)
 		PHP_Z_PARAM_STREAM(stream)
-		Z_PARAM_LONG(csize)
+		Z_PARAM_INT(csize_arg)
 	ZEND_PARSE_PARAMETERS_END();
+
+	if (UNEXPECTED(!zend_logical_int_to_long(csize_arg, &csize))) {
+		/* A positive bigint is rejected as too large; a negative one as non-positive. */
+		csize = zend_bigint_sign(Z_BIG_P(csize_arg)) < 0 ? ZEND_LONG_MIN : ZEND_LONG_MAX;
+	}
 
 	if (csize <= 0) {
 		zend_argument_value_error(2, "must be greater than 0");
