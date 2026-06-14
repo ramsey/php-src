@@ -1990,6 +1990,7 @@ static void handle_strpos_error(size_t error) {
 
 PHP_FUNCTION(mb_strpos)
 {
+	zval *offset_arg = NULL;
 	zend_long offset = 0;
 	zend_string *needle, *haystack;
 	zend_string *enc_name = NULL;
@@ -1998,9 +1999,14 @@ PHP_FUNCTION(mb_strpos)
 		Z_PARAM_STR(haystack)
 		Z_PARAM_STR(needle)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_LONG(offset)
+		Z_PARAM_INT(offset_arg)
 		Z_PARAM_STR_OR_NULL(enc_name)
 	ZEND_PARSE_PARAMETERS_END();
+
+	if (offset_arg != NULL && UNEXPECTED(!zend_logical_int_to_long(offset_arg, &offset))) {
+		/* A bigint offset can't lie within the haystack. */
+		offset = zend_bigint_sign(Z_BIG_P(offset_arg)) < 0 ? ZEND_LONG_MIN : ZEND_LONG_MAX;
+	}
 
 	const mbfl_encoding *enc = php_mb_get_encoding(enc_name, 4);
 	if (!enc) {
@@ -2019,6 +2025,7 @@ PHP_FUNCTION(mb_strpos)
 /* {{{ Find position of last occurrence of a string within another */
 PHP_FUNCTION(mb_strrpos)
 {
+	zval *offset_arg = NULL;
 	zend_long offset = 0;
 	zend_string *needle, *haystack;
 	zend_string *enc_name = NULL;
@@ -2027,9 +2034,14 @@ PHP_FUNCTION(mb_strrpos)
 		Z_PARAM_STR(haystack)
 		Z_PARAM_STR(needle)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_LONG(offset)
+		Z_PARAM_INT(offset_arg)
 		Z_PARAM_STR_OR_NULL(enc_name)
 	ZEND_PARSE_PARAMETERS_END();
+
+	if (offset_arg != NULL && UNEXPECTED(!zend_logical_int_to_long(offset_arg, &offset))) {
+		/* A bigint offset can't lie within the haystack. */
+		offset = zend_bigint_sign(Z_BIG_P(offset_arg)) < 0 ? ZEND_LONG_MIN : ZEND_LONG_MAX;
+	}
 
 	const mbfl_encoding *enc = php_mb_get_encoding(enc_name, 4);
 	if (!enc) {
@@ -2049,6 +2061,7 @@ PHP_FUNCTION(mb_strrpos)
 /* {{{ Finds position of first occurrence of a string within another, case insensitive */
 PHP_FUNCTION(mb_stripos)
 {
+	zval *offset_arg = NULL;
 	zend_long offset = 0;
 	zend_string *haystack, *needle;
 	zend_string *from_encoding = NULL;
@@ -2057,9 +2070,14 @@ PHP_FUNCTION(mb_stripos)
 		Z_PARAM_STR(haystack)
 		Z_PARAM_STR(needle)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_LONG(offset)
+		Z_PARAM_INT(offset_arg)
 		Z_PARAM_STR_OR_NULL(from_encoding)
 	ZEND_PARSE_PARAMETERS_END();
+
+	if (offset_arg != NULL && UNEXPECTED(!zend_logical_int_to_long(offset_arg, &offset))) {
+		/* A bigint offset can't lie within the haystack. */
+		offset = zend_bigint_sign(Z_BIG_P(offset_arg)) < 0 ? ZEND_LONG_MIN : ZEND_LONG_MAX;
+	}
 
 	const mbfl_encoding *enc = php_mb_get_encoding(from_encoding, 4);
 	if (!enc) {
@@ -2080,6 +2098,7 @@ PHP_FUNCTION(mb_stripos)
 /* {{{ Finds position of last occurrence of a string within another, case insensitive */
 PHP_FUNCTION(mb_strripos)
 {
+	zval *offset_arg = NULL;
 	zend_long offset = 0;
 	zend_string *haystack, *needle;
 	zend_string *from_encoding = NULL;
@@ -2088,9 +2107,14 @@ PHP_FUNCTION(mb_strripos)
 		Z_PARAM_STR(haystack)
 		Z_PARAM_STR(needle)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_LONG(offset)
+		Z_PARAM_INT(offset_arg)
 		Z_PARAM_STR_OR_NULL(from_encoding)
 	ZEND_PARSE_PARAMETERS_END();
+
+	if (offset_arg != NULL && UNEXPECTED(!zend_logical_int_to_long(offset_arg, &offset))) {
+		/* A bigint offset can't lie within the haystack. */
+		offset = zend_bigint_sign(Z_BIG_P(offset_arg)) < 0 ? ZEND_LONG_MIN : ZEND_LONG_MAX;
+	}
 
 	const mbfl_encoding *enc = php_mb_get_encoding(from_encoding, 4);
 	if (!enc) {
