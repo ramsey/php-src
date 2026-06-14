@@ -1216,6 +1216,19 @@ static ZEND_FUNCTION(zend_test_zpp_int_oldstyle)
 	RETURN_COPY(v);
 }
 
+static ZEND_FUNCTION(zend_test_check_int_string_digits)
+{
+	zend_string *in;
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_STR(in)
+	ZEND_PARSE_PARAMETERS_END();
+
+	if (!zend_check_int_string_digit_limit(ZSTR_VAL(in), ZSTR_LEN(in))) {
+		RETURN_THROWS();
+	}
+	RETURN_TRUE;
+}
+
 static ZEND_FUNCTION(zend_test_logical_int_to_long)
 {
 	zval *v;

@@ -395,6 +395,9 @@ function zend_test_override_libxml_global_state(): void {}
     function zend_test_zpp_int_oldstyle(int $i): mixed {}
 
     /** @internal */
+    function zend_test_check_int_string_digits(string $decimal): bool {}
+
+    /** @internal */
     function zend_test_logical_int_to_long(int $i): int|false {}
 }
 

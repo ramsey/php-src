@@ -799,6 +799,27 @@ ZEND_API zend_string* ZEND_FASTCALL zend_bigint_to_string_checked(const zend_big
 }
 /* }}} */
 
+ZEND_API bool ZEND_FASTCALL zend_check_int_string_digit_limit(const char *str, size_t len) /* {{{ */
+{
+	zend_long limit = EG(int_string_max_digits);
+	if (limit == 0) {
+		return true;
+	}
+	/* Do not count a leading sign symbol. */
+	if (len > 0 && (*str == '-' || *str == '+')) {
+		len--;
+	}
+	if ((zend_long) len > limit) {
+		zend_value_error(
+			"Integer string too large to convert; it exceeds the limit of "
+			ZEND_LONG_FMT " digits, configurable via the "
+			"zend.int_string_max_digits setting", limit);
+		return false;
+	}
+	return true;
+}
+/* }}} */
+
 ZEND_API void ZEND_FASTCALL _convert_to_string(zval *op) /* {{{ */
 {
 try_again:
