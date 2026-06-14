@@ -344,6 +344,7 @@ PHPAPI int php_math_round_mode_from_enum(zend_enum_RoundingMode mode)
 PHP_FUNCTION(round)
 {
 	zval *value;
+	zval *precision_arg = NULL;
 	int places = 0;
 	zend_long precision = 0;
 	zend_long mode = PHP_ROUND_HALF_UP;
@@ -352,9 +353,14 @@ PHP_FUNCTION(round)
 	ZEND_PARSE_PARAMETERS_START(1, 3)
 		Z_PARAM_NUMBER(value)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_LONG(precision)
+		Z_PARAM_INT(precision_arg)
 		Z_PARAM_OBJ_OF_CLASS_OR_LONG(mode_object, rounding_mode_ce, mode)
 	ZEND_PARSE_PARAMETERS_END();
+
+	if (precision_arg != NULL && UNEXPECTED(!zend_logical_int_to_long(precision_arg, &precision))) {
+		/* A bigint precision clamps to the int range below, like a huge long. */
+		precision = zend_bigint_sign(Z_BIG_P(precision_arg)) < 0 ? ZEND_LONG_MIN : ZEND_LONG_MAX;
+	}
 
 	if (ZEND_NUM_ARGS() >= 2) {
 		if (precision >= 0) {
