@@ -1410,15 +1410,21 @@ PHP_FUNCTION(stream_get_line)
 	char *str = NULL;
 	size_t str_len = 0;
 	zend_long max_length;
+	zval *max_length_arg;
 	zend_string *buf;
 	php_stream *stream;
 
 	ZEND_PARSE_PARAMETERS_START(2, 3)
 		PHP_Z_PARAM_STREAM(stream)
-		Z_PARAM_LONG(max_length)
+		Z_PARAM_INT(max_length_arg)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_STRING(str, str_len)
 	ZEND_PARSE_PARAMETERS_END();
+
+	if (UNEXPECTED(!zend_logical_int_to_long(max_length_arg, &max_length))) {
+		/* A positive bigint reads the whole record; a negative one is rejected below. */
+		max_length = zend_bigint_sign(Z_BIG_P(max_length_arg)) < 0 ? ZEND_LONG_MIN : ZEND_LONG_MAX;
+	}
 
 	if (max_length < 0) {
 		zend_argument_value_error(2, "must be greater than or equal to 0");
