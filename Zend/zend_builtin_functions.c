@@ -404,12 +404,18 @@ ZEND_FUNCTION(strncmp)
 {
 	zend_string *s1, *s2;
 	zend_long len;
+	zval *len_arg;
 
 	ZEND_PARSE_PARAMETERS_START(3, 3)
 		Z_PARAM_STR(s1)
 		Z_PARAM_STR(s2)
-		Z_PARAM_LONG(len)
+		Z_PARAM_INT(len_arg)
 	ZEND_PARSE_PARAMETERS_END();
+
+	if (UNEXPECTED(!zend_logical_int_to_long(len_arg, &len))) {
+		/* A positive bigint length compares the whole strings; a negative one is rejected below. */
+		len = zend_bigint_sign(Z_BIG_P(len_arg)) < 0 ? ZEND_LONG_MIN : ZEND_LONG_MAX;
+	}
 
 	if (len < 0) {
 		zend_argument_value_error(3, "must be greater than or equal to 0");
@@ -439,12 +445,18 @@ ZEND_FUNCTION(strncasecmp)
 {
 	zend_string *s1, *s2;
 	zend_long len;
+	zval *len_arg;
 
 	ZEND_PARSE_PARAMETERS_START(3, 3)
 		Z_PARAM_STR(s1)
 		Z_PARAM_STR(s2)
-		Z_PARAM_LONG(len)
+		Z_PARAM_INT(len_arg)
 	ZEND_PARSE_PARAMETERS_END();
+
+	if (UNEXPECTED(!zend_logical_int_to_long(len_arg, &len))) {
+		/* A positive bigint length compares the whole strings; a negative one is rejected below. */
+		len = zend_bigint_sign(Z_BIG_P(len_arg)) < 0 ? ZEND_LONG_MIN : ZEND_LONG_MAX;
+	}
 
 	if (len < 0) {
 		zend_argument_value_error(3, "must be greater than or equal to 0");
