@@ -182,11 +182,11 @@ static const char *php_json_get_error_msg(php_json_error_code error_code) /* {{{
 static zend_string *php_json_get_error_msg_with_location(const php_json_error_details *details) /* {{{ */
 {
 	const char *base_msg = php_json_get_error_msg(details->code);
-	
+
 	if (details->line > 0 && details->column > 0) {
 		return zend_strpprintf(0, "%s near location %" PRIu64 ":%" PRIu64, base_msg, details->line, details->column);
 	}
-	
+
 	return zend_string_init(base_msg, strlen(base_msg), 0);
 }
 /* }}} */
@@ -198,6 +198,13 @@ PHP_JSON_API zend_result php_json_decode_ex(zval *return_value, const char *str,
 	php_json_parser_init(&parser, return_value, str, str_len, (int)options, (int)depth);
 
 	if (php_json_yyparse(&parser)) {
+		/* A scanner/parser callback threw (e.g., the integer digit limit);
+		 * let that exception win over the JSON error channel. */
+		if (EG(exception)) {
+			RETVAL_NULL();
+			return FAILURE;
+		}
+
 		php_json_error_details details;
 		php_json_parser_error_details(&parser, &details);
 
@@ -253,6 +260,12 @@ PHP_FUNCTION(json_encode)
 	php_json_encode_init(&encoder);
 	encoder.max_depth = (int)depth;
 	php_json_encode_zval(&buf, parameter, (int)options, &encoder);
+
+	/* A value-level error may have thrown (e.g. the integer digit limit). */
+	if (EG(exception)) {
+		smart_str_free(&buf);
+		RETURN_THROWS();
+	}
 
 	if (!(options & PHP_JSON_THROW_ON_ERROR) || (options & PHP_JSON_PARTIAL_OUTPUT_ON_ERROR)) {
 		JSON_G(error_details) = (php_json_error_details){

@@ -189,8 +189,18 @@ std:
 			ZVAL_STRINGL(&s->value, (char *) s->token, (size_t)(s->cursor - s->token));
 			return PHP_JSON_T_STRING;
 		} else {
-			ZVAL_DOUBLE(&s->value, zend_strtod((char *) s->token, NULL));
-			return PHP_JSON_T_DOUBLE;
+			size_t len = (size_t)(s->cursor - s->token);
+			if (!zend_check_int_string_digit_limit((char *) s->token, len)) {
+				s->errcode = PHP_JSON_ERROR_SYNTAX;
+				return PHP_JSON_T_ERROR;
+			}
+			zend_bigint *big = zend_bigint_init_from_string_length((char *) s->token, len, 10);
+			if (UNEXPECTED(!big)) {
+				s->errcode = PHP_JSON_ERROR_SYNTAX;
+				return PHP_JSON_T_ERROR;
+			}
+			zend_bigint_result(&s->value, big);
+			return PHP_JSON_T_INT;
 		}
 	}
 	<JS>FLOAT|EXP            {

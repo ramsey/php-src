@@ -644,6 +644,16 @@ again:
 			smart_str_append_long(buf, Z_LVAL_P(val));
 			break;
 
+		case IS_BIGINT: {
+			zend_string *str = zend_bigint_to_string_checked(Z_BIG_P(val));
+			if (!str) {
+				return FAILURE;
+			}
+			smart_str_append(buf, str);
+			zend_string_release(str);
+			break;
+		}
+
 		case IS_DOUBLE:
 			if (php_json_is_valid_double(Z_DVAL_P(val))) {
 				php_json_encode_double(buf, Z_DVAL_P(val), options);
