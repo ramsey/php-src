@@ -807,8 +807,9 @@ PHP_FUNCTION(stream_select)
 	php_socket_t max_fd = 0;
 	int retval, sets = 0;
 	zend_long sec, usec = 0;
+	zval *sec_arg, *usec_arg = NULL;
 	bool secnull;
-	bool usecnull = 1;
+	bool usecnull;
 	int set_count, max_set_count = 0;
 	php_stream_context *context = NULL;
 
@@ -816,11 +817,21 @@ PHP_FUNCTION(stream_select)
 		Z_PARAM_ARRAY_EX2(r_array, 1, 1, 0)
 		Z_PARAM_ARRAY_EX2(w_array, 1, 1, 0)
 		Z_PARAM_ARRAY_EX2(e_array, 1, 1, 0)
-		Z_PARAM_LONG_OR_NULL(sec, secnull)
+		Z_PARAM_INT_OR_NULL(sec_arg)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_LONG_OR_NULL(usec, usecnull)
+		Z_PARAM_INT_OR_NULL(usec_arg)
 		Z_PARAM_RESOURCE_OR_NULL(zcontext)
 	ZEND_PARSE_PARAMETERS_END();
+
+	secnull = (sec_arg == NULL);
+	if (!secnull && UNEXPECTED(!zend_logical_int_to_long(sec_arg, &sec))) {
+		/* A positive bigint is an effectively unbounded wait; a negative one is rejected below. */
+		sec = zend_bigint_sign(Z_BIG_P(sec_arg)) < 0 ? ZEND_LONG_MIN : ZEND_LONG_MAX;
+	}
+	usecnull = (usec_arg == NULL);
+	if (!usecnull && UNEXPECTED(!zend_logical_int_to_long(usec_arg, &usec))) {
+		usec = zend_bigint_sign(Z_BIG_P(usec_arg)) < 0 ? ZEND_LONG_MIN : ZEND_LONG_MAX;
+	}
 
 	FD_ZERO(&rfds);
 	FD_ZERO(&wfds);
