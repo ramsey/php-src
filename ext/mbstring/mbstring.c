@@ -2460,17 +2460,28 @@ PHP_FUNCTION(mb_strcut)
 {
 	zend_string *encoding = NULL;
 	char *string_val;
+	zval *from_arg, *len_arg = NULL;
 	zend_long from, len;
-	bool len_is_null = true;
+	bool len_is_null;
 	mbfl_string string, result, *ret;
 
 	ZEND_PARSE_PARAMETERS_START(2, 4)
 		Z_PARAM_STRING(string_val, string.len)
-		Z_PARAM_LONG(from)
+		Z_PARAM_INT(from_arg)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_LONG_OR_NULL(len, len_is_null)
+		Z_PARAM_INT_OR_NULL(len_arg)
 		Z_PARAM_STR_OR_NULL(encoding)
 	ZEND_PARSE_PARAMETERS_END();
+
+	if (UNEXPECTED(!zend_logical_int_to_long(from_arg, &from))) {
+		/* A bigint $from clamps like a huge int of that sign. */
+		from = zend_bigint_sign(Z_BIG_P(from_arg)) < 0 ? ZEND_LONG_MIN : ZEND_LONG_MAX;
+	}
+	len_is_null = (len_arg == NULL);
+	if (!len_is_null && UNEXPECTED(!zend_logical_int_to_long(len_arg, &len))) {
+		/* A bigint $length clamps like a huge int of that sign. */
+		len = zend_bigint_sign(Z_BIG_P(len_arg)) < 0 ? ZEND_LONG_MIN : ZEND_LONG_MAX;
+	}
 
 	const mbfl_encoding *enc = php_mb_get_encoding(encoding, 4);
 	if (!enc) {
