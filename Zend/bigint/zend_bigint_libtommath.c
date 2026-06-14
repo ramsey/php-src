@@ -359,3 +359,53 @@ ZEND_API char *zend_bigint_to_string(const zend_bigint *big, size_t *len)
 	*len = strlen(out);
 	return out;
 }
+
+/* Reports whether the decimal form of big would run longer than max_digits,
+ * which is how we enforce zend.int_string_max_digits without building the
+ * string first.
+ *
+ * We don't need an exact count to answer most calls. A b-bit number has about
+ * b * log10(2) decimal digits (roughly 0.301 digits per bit), and we can read a
+ * cheap range of possible bit lengths straight off the limb count. If that
+ * range sits comfortably under the limit, the answer is no; if it sits
+ * comfortably over, the answer is yes. That second case is the one that keeps
+ * us safe: a giant value is rejected right here, without ever paying for an
+ * O(n^2) digit count. Thus, the cost is O(1) for values far from the limit.
+ *
+ * Only when the estimate lands right around the limit do we fall through and
+ * count exactly, and by then the value is small enough that counting is cheap. */
+ZEND_API bool zend_bigint_string_exceeds_digits(const zend_bigint *big, zend_long max_digits)
+{
+	const mp_int *a = (const mp_int *) big->mp;
+	const double log10_2 = 0.30102999566398114;
+
+	/* Bound the magnitude's bit length from the limb count, in 64-bit: each of
+	 * the `used` limbs holds MP_DIGIT_BIT bits and the top limb holds at least
+	 * one. (mp_count_bits() returns int and would overflow near the INT_MAX-bit
+	 * ceiling the shift/pow limits allow.) The decimal digit count d of |a|
+	 * satisfies (b-1)*log10(2) < d <= b*log10(2) + 1 for a b-bit value. */
+	uint64_t bits_ub = (uint64_t) a->used * (uint64_t) MP_DIGIT_BIT;  /* >= b */
+	uint64_t bits_lb = (a->used > 0)
+		? ((uint64_t) (a->used - 1) * (uint64_t) MP_DIGIT_BIT)        /* <  b */
+		: 0;
+
+	/* Upper bound on d within the limit => definitely within (cheap, common case). */
+	if ((double) bits_ub * log10_2 + 1.0 <= (double) max_digits) {
+		return false;
+	}
+
+	/* Lower bound on d already over the limit => definitely over (cheap; this is
+	 * the DoS guard--a gigantic value is rejected without an O(n^2) count). */
+	if ((double) bits_lb * log10_2 > (double) max_digits + 1.0) {
+		return true;
+	}
+
+	/* Boundary zone: |a| has ~max_digits digits, so an exact count is inexpensive. */
+	int size = 0;
+	(void) mp_radix_size(a, 10, &size);  /* size includes the sign and NUL */
+	size_t digits = (size_t) size - 1;        /* drop the NUL terminator */
+	if (a->sign == MP_NEG) {
+		digits -= 1;                          /* the limit counts magnitude digits */
+	}
+	return (zend_long) digits > max_digits;
+}

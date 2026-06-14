@@ -781,6 +781,24 @@ try_again:
 }
 /* }}} */
 
+ZEND_API zend_string* ZEND_FASTCALL zend_bigint_to_string_checked(const zend_bigint *big) /* {{{ */
+{
+	zend_long limit = EG(int_string_max_digits);
+	if (limit != 0 && zend_bigint_string_exceeds_digits(big, limit)) {
+		zend_value_error(
+			"Integer too large to convert to string; it exceeds the limit of "
+			ZEND_LONG_FMT " digits, configurable via the "
+			"zend.int_string_max_digits setting", limit);
+		return NULL;
+	}
+	size_t len;
+	char *s = zend_bigint_to_string(big, &len);
+	zend_string *str = zend_string_init(s, len, 0);
+	efree(s);
+	return str;
+}
+/* }}} */
+
 ZEND_API void ZEND_FASTCALL _convert_to_string(zval *op) /* {{{ */
 {
 try_again:
@@ -806,10 +824,13 @@ try_again:
 			ZVAL_STR(op, zend_long_to_str(Z_LVAL_P(op)));
 			break;
 		case IS_BIGINT: {
-			size_t len;
-			char *s = zend_bigint_to_string(Z_BIG_P(op), &len);
-			zend_string *str = zend_string_init(s, len, 0);
-			efree(s);
+			zend_string *str = zend_bigint_to_string_checked(Z_BIG_P(op));
+			if (UNEXPECTED(!str)) {
+				/* integer to large for string: exception pending */
+				zval_ptr_dtor(op);
+				ZVAL_EMPTY_STRING(op);
+				break;
+			}
 			zval_ptr_dtor(op);
 			ZVAL_NEW_STR(op, str);
 			break;
@@ -1116,10 +1137,11 @@ try_again:
 		case IS_LONG:
 			return zend_long_to_str(Z_LVAL_P(op));
 		case IS_BIGINT: {
-			size_t len;
-			char *s = zend_bigint_to_string(Z_BIG_P(op), &len);
-			zend_string *str = zend_string_init(s, len, 0);
-			efree(s);
+			zend_string *str = zend_bigint_to_string_checked(Z_BIG_P(op));
+			if (UNEXPECTED(!str)) {
+				/* integer to large for string: exception pending */
+				return try ? NULL : ZSTR_EMPTY_ALLOC();
+			}
 			return str;
 		}
 		case IS_DOUBLE:
