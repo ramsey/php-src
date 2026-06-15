@@ -394,6 +394,18 @@ function zend_test_override_libxml_global_state(): void {}
     /** @internal */
     function zend_test_zpp_int_oldstyle(int $i): mixed {}
 
+    /**
+     * @internal
+     * @frameless-function {"arity": 1}
+     */
+    function zend_test_flf_int(int $i): mixed {}
+
+    /**
+     * @internal
+     * @frameless-function {"arity": 1}
+     */
+    function zend_test_flf_int_or_null(?int $i): mixed {}
+
     /** @internal */
     function zend_test_check_int_string_digits(string $decimal): bool {}
 

@@ -1216,6 +1216,57 @@ static ZEND_FUNCTION(zend_test_zpp_int_oldstyle)
 	RETURN_COPY(v);
 }
 
+static ZEND_FUNCTION(zend_test_flf_int)
+{
+	zval *v;
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_INT(v)
+	ZEND_PARSE_PARAMETERS_END();
+	RETURN_COPY(v);
+}
+
+static ZEND_FUNCTION(zend_test_flf_int_or_null)
+{
+	zval *v;
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_INT_OR_NULL(v)
+	ZEND_PARSE_PARAMETERS_END();
+	if (v == NULL) {
+		RETURN_NULL();
+	}
+	RETURN_COPY(v);
+}
+
+ZEND_FRAMELESS_FUNCTION(zend_test_flf_int, 1)
+{
+	zval *v;
+	zval tmp;
+
+	Z_FLF_PARAM_INT(1, v, tmp);
+
+	RETVAL_COPY(v);
+
+	/* Nothing to clean up, but required by the ZEND_FLF_PARAM_INT macros. */
+flf_clean:;
+}
+
+ZEND_FRAMELESS_FUNCTION(zend_test_flf_int_or_null, 1)
+{
+	zval *v;
+	zval tmp;
+
+	Z_FLF_PARAM_INT_OR_NULL(1, v, tmp);
+
+	if (v == NULL) {
+		RETVAL_NULL();
+	} else {
+		RETVAL_COPY(v);
+	}
+
+	/* Nothing to clean up, but required by the ZEND_FLF_PARAM_INT macros. */
+flf_clean:;
+}
+
 static ZEND_FUNCTION(zend_test_check_int_string_digits)
 {
 	zend_string *in;

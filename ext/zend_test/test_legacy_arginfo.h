@@ -1,5 +1,5 @@
 /* This is a generated file, edit test.stub.php instead.
- * Stub hash: 95357b4763e76376eb9d40d9cce7d1e8eb8b3baa
+ * Stub hash: a637e587f529658a528e89d342655dbe35092ef8
  * Has decl header: yes */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_zend_trigger_bailout, 0, 0, 0)
@@ -213,6 +213,10 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_zend_test_zpp_int_oldstyle arginfo_zend_test_zpp_int
 
+#define arginfo_zend_test_flf_int arginfo_zend_test_zpp_int
+
+#define arginfo_zend_test_flf_int_or_null arginfo_zend_test_zpp_int
+
 #define arginfo_zend_test_check_int_string_digits arginfo_zend_test_bigint_string_roundtrip
 
 #define arginfo_zend_test_logical_int_to_long arginfo_zend_test_zpp_int
@@ -360,6 +364,8 @@ static ZEND_FUNCTION(zend_test_zpp_int);
 static ZEND_FUNCTION(zend_test_zpp_int_or_null);
 static ZEND_FUNCTION(zend_test_zpp_int_or_float);
 static ZEND_FUNCTION(zend_test_zpp_int_oldstyle);
+static ZEND_FUNCTION(zend_test_flf_int);
+static ZEND_FUNCTION(zend_test_flf_int_or_null);
 static ZEND_FUNCTION(zend_test_check_int_string_digits);
 static ZEND_FUNCTION(zend_test_logical_int_to_long);
 static ZEND_FUNCTION(ZendTestNS2_namespaced_func);
@@ -477,6 +483,8 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(zend_test_zpp_int_or_null, arginfo_zend_test_zpp_int_or_null)
 	ZEND_FE(zend_test_zpp_int_or_float, arginfo_zend_test_zpp_int_or_float)
 	ZEND_FE(zend_test_zpp_int_oldstyle, arginfo_zend_test_zpp_int_oldstyle)
+	ZEND_FE(zend_test_flf_int, arginfo_zend_test_flf_int)
+	ZEND_FE(zend_test_flf_int_or_null, arginfo_zend_test_flf_int_or_null)
 	ZEND_FE(zend_test_check_int_string_digits, arginfo_zend_test_check_int_string_digits)
 	ZEND_FE(zend_test_logical_int_to_long, arginfo_zend_test_logical_int_to_long)
 #if (PHP_VERSION_ID >= 80400)

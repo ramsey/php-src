@@ -834,6 +834,22 @@ ZEND_API bool ZEND_FASTCALL zend_parse_arg_int_slow(zval *arg, zval **dest, uint
 }
 /* }}} */
 
+ZEND_API bool ZEND_FASTCALL zend_flf_parse_arg_int_slow(const zval *arg, zval *tmp, zval **dest, uint32_t arg_num)
+{
+	if (UNEXPECTED(ZEND_FLF_ARG_USES_STRICT_TYPES())) {
+		return false;
+	}
+	zend_long lval;
+	if (!zend_parse_arg_long_weak(arg, &lval, arg_num)) {
+		return false;
+	}
+	/* Long-weak is non-mutating, so the operand is left untouched and the coerced
+	 * value is materialized in the caller's tmp zval. */
+	ZVAL_LONG(tmp, lval);
+	*dest = tmp;
+	return true;
+}
+
 ZEND_API zend_string* ZEND_FASTCALL zend_parse_arg_str_weak(zval *arg, uint32_t arg_num) /* {{{ */
 {
 	if (EXPECTED(Z_TYPE_P(arg) < IS_STRING) || UNEXPECTED(Z_TYPE_P(arg) == IS_BIGINT)) {
