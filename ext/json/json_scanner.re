@@ -185,23 +185,28 @@ std:
 		if (!bigint) {
 			ZVAL_LONG(&s->value, ZEND_STRTOL((char *) s->token, NULL, 10));
 			return PHP_JSON_T_INT;
-		} else if (s->options & PHP_JSON_BIGINT_AS_STRING) {
-			ZVAL_STRINGL(&s->value, (char *) s->token, (size_t)(s->cursor - s->token));
-			return PHP_JSON_T_STRING;
-		} else {
-			size_t len = (size_t)(s->cursor - s->token);
-			if (!zend_check_int_string_digit_limit((char *) s->token, len)) {
-				s->errcode = PHP_JSON_ERROR_SYNTAX;
-				return PHP_JSON_T_ERROR;
-			}
-			zend_bigint *big = zend_bigint_init_from_string_length((char *) s->token, len, 10);
-			if (UNEXPECTED(!big)) {
-				s->errcode = PHP_JSON_ERROR_SYNTAX;
-				return PHP_JSON_T_ERROR;
-			}
-			zend_bigint_result(&s->value, big);
-			return PHP_JSON_T_INT;
 		}
+		size_t len = (size_t)(s->cursor - s->token);
+		/* Within the digit limit the value is always an integer (a bigint),
+		 * regardless of JSON_BIGINT_AS_STRING. Past the limit it cannot be
+		 * materialized: JSON_BIGINT_AS_STRING yields the raw decimal string,
+		 * otherwise it is a ValueError. */
+		if ((s->options & PHP_JSON_BIGINT_AS_STRING)
+				&& zend_int_string_exceeds_digit_limit((char *) s->token, len)) {
+			ZVAL_STRINGL(&s->value, (char *) s->token, len);
+			return PHP_JSON_T_STRING;
+		}
+		if (!zend_check_int_string_digit_limit((char *) s->token, len)) {
+			s->errcode = PHP_JSON_ERROR_SYNTAX;
+			return PHP_JSON_T_ERROR;
+		}
+		zend_bigint *big = zend_bigint_init_from_string_length((char *) s->token, len, 10);
+		if (UNEXPECTED(!big)) {
+			s->errcode = PHP_JSON_ERROR_SYNTAX;
+			return PHP_JSON_T_ERROR;
+		}
+		zend_bigint_result(&s->value, big);
+		return PHP_JSON_T_INT;
 	}
 	<JS>FLOAT|EXP            {
 		ZVAL_DOUBLE(&s->value, zend_strtod((char *) s->token, NULL));

@@ -5,11 +5,12 @@ json_decode() with large integers
 $json = '{"largenum":123456789012345678901234567890}';
 $x = json_decode($json);
 var_dump($x->largenum);
+// JSON_BIGINT_AS_STRING no longer downgrades an integer within zend.int_string_max_digits.
 $x = json_decode($json, false, 512, JSON_BIGINT_AS_STRING);
 var_dump($x->largenum);
 echo "Done\n";
 ?>
 --EXPECT--
 int(123456789012345678901234567890)
-string(30) "123456789012345678901234567890"
+int(123456789012345678901234567890)
 Done

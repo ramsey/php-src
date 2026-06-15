@@ -332,11 +332,15 @@ ZEND_API zend_string* ZEND_FASTCALL zval_try_get_string_func(const zval *op);
  * digit count exceeds the limit; otherwise a new zend_string (caller owns it). */
 ZEND_API zend_string* ZEND_FASTCALL zend_bigint_to_string_checked(const zend_bigint *big);
 
+/* True if the decimal string has more digits than EG(int_string_max_digits)
+ * (0 disables the limit). A leading '+' or '-' symbol is not counted. Tests the
+ * literal length only, so nothing is allocated; does not throw. */
+ZEND_API bool ZEND_FASTCALL zend_int_string_exceeds_digit_limit(const char *str, size_t len);
+
 /* Enforce EG(int_string_max_digits) on a decimal string before it is parsed
  * into a bigint (the input-side counterpart of zend_bigint_to_string_checked).
- * A leading '+' or '-' symbol is not counted. Returns false with a pending
- * ValueError when the digit count exceeds the limit; otherwise true. This
- * checks the literal length, so an over-limit value is never allocated. */
+ * Returns false with a pending ValueError when zend_int_string_exceeds_digit_limit()
+ * is true; otherwise true. */
 ZEND_API bool ZEND_FASTCALL zend_check_int_string_digit_limit(const char *str, size_t len);
 
 static zend_always_inline zend_long zval_get_long(const zval *op) {

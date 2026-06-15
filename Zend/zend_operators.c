@@ -799,21 +799,27 @@ ZEND_API zend_string* ZEND_FASTCALL zend_bigint_to_string_checked(const zend_big
 }
 /* }}} */
 
-ZEND_API bool ZEND_FASTCALL zend_check_int_string_digit_limit(const char *str, size_t len) /* {{{ */
+ZEND_API bool ZEND_FASTCALL zend_int_string_exceeds_digit_limit(const char *str, size_t len) /* {{{ */
 {
 	zend_long limit = EG(int_string_max_digits);
 	if (limit == 0) {
-		return true;
+		return false;
 	}
 	/* Do not count a leading sign symbol. */
 	if (len > 0 && (*str == '-' || *str == '+')) {
 		len--;
 	}
-	if ((zend_long) len > limit) {
+	return (zend_long) len > limit;
+}
+/* }}} */
+
+ZEND_API bool ZEND_FASTCALL zend_check_int_string_digit_limit(const char *str, size_t len) /* {{{ */
+{
+	if (zend_int_string_exceeds_digit_limit(str, len)) {
 		zend_value_error(
 			"Integer string too large to convert; it exceeds the limit of "
 			ZEND_LONG_FMT " digits, configurable via the "
-			"zend.int_string_max_digits setting", limit);
+			"zend.int_string_max_digits setting", EG(int_string_max_digits));
 		return false;
 	}
 	return true;
