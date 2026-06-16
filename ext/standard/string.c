@@ -2294,15 +2294,26 @@ static inline void _zend_substr(zval *return_value, zend_string *str, zend_long 
 PHP_FUNCTION(substr)
 {
 	zend_string *str;
+	zval *f_arg, *l_arg = NULL;
 	zend_long l = 0, f;
-	bool len_is_null = 1;
+	bool len_is_null;
 
 	ZEND_PARSE_PARAMETERS_START(2, 3)
 		Z_PARAM_STR(str)
-		Z_PARAM_LONG(f)
+		Z_PARAM_INT(f_arg)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_LONG_OR_NULL(l, len_is_null)
+		Z_PARAM_INT_OR_NULL(l_arg)
 	ZEND_PARSE_PARAMETERS_END();
+
+	if (UNEXPECTED(!zend_logical_int_to_long(f_arg, &f))) {
+		/* A bigint offset clamps to the start or end of the string. */
+		f = zend_bigint_sign(Z_BIG_P(f_arg)) < 0 ? ZEND_LONG_MIN : ZEND_LONG_MAX;
+	}
+	len_is_null = (l_arg == NULL);
+	if (!len_is_null && UNEXPECTED(!zend_logical_int_to_long(l_arg, &l))) {
+		/* A bigint length clamps to the rest of the string or to empty. */
+		l = zend_bigint_sign(Z_BIG_P(l_arg)) < 0 ? ZEND_LONG_MIN : ZEND_LONG_MAX;
+	}
 
 	_zend_substr(return_value, str, f, len_is_null, l);
 }
@@ -2310,12 +2321,18 @@ PHP_FUNCTION(substr)
 
 ZEND_FRAMELESS_FUNCTION(substr, 2)
 {
-	zval str_tmp;
+	zval str_tmp, f_tmp;
 	zend_string *str;
+	zval *f_arg;
 	zend_long f;
 
 	Z_FLF_PARAM_STR(1, str, str_tmp);
-	Z_FLF_PARAM_LONG(2, f);
+	Z_FLF_PARAM_INT(2, f_arg, f_tmp);
+
+	if (UNEXPECTED(!zend_logical_int_to_long(f_arg, &f))) {
+		/* A bigint offset clamps to the start or end of the string. */
+		f = zend_bigint_sign(Z_BIG_P(f_arg)) < 0 ? ZEND_LONG_MIN : ZEND_LONG_MAX;
+	}
 
 	_zend_substr(return_value, str, f, /* len_is_null */ true, 0);
 
@@ -2325,14 +2342,25 @@ flf_clean:
 
 ZEND_FRAMELESS_FUNCTION(substr, 3)
 {
-	zval str_tmp;
+	zval str_tmp, f_tmp, l_tmp;
 	zend_string *str;
-	zend_long f, l;
+	zval *f_arg, *l_arg;
+	zend_long f, l = 0;
 	bool len_is_null;
 
 	Z_FLF_PARAM_STR(1, str, str_tmp);
-	Z_FLF_PARAM_LONG(2, f);
-	Z_FLF_PARAM_LONG_OR_NULL(3, len_is_null, l);
+	Z_FLF_PARAM_INT(2, f_arg, f_tmp);
+	Z_FLF_PARAM_INT_OR_NULL(3, l_arg, l_tmp);
+
+	if (UNEXPECTED(!zend_logical_int_to_long(f_arg, &f))) {
+		/* A bigint offset clamps to the start or end of the string. */
+		f = zend_bigint_sign(Z_BIG_P(f_arg)) < 0 ? ZEND_LONG_MIN : ZEND_LONG_MAX;
+	}
+	len_is_null = (l_arg == NULL);
+	if (!len_is_null && UNEXPECTED(!zend_logical_int_to_long(l_arg, &l))) {
+		/* A bigint length clamps to the rest of the string or to empty. */
+		l = zend_bigint_sign(Z_BIG_P(l_arg)) < 0 ? ZEND_LONG_MIN : ZEND_LONG_MAX;
+	}
 
 	_zend_substr(return_value, str, f, len_is_null, l);
 
