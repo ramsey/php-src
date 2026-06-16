@@ -1514,13 +1514,19 @@ static zend_always_inline void _zend_dirname(zval *return_value, zend_string *st
 PHP_FUNCTION(dirname)
 {
 	zend_string *str;
+	zval *levels_arg = NULL;
 	zend_long levels = 1;
 
 	ZEND_PARSE_PARAMETERS_START(1, 2)
 		Z_PARAM_STR(str)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_LONG(levels)
+		Z_PARAM_INT(levels_arg)
 	ZEND_PARSE_PARAMETERS_END();
+
+	if (levels_arg != NULL && UNEXPECTED(!zend_logical_int_to_long(levels_arg, &levels))) {
+		/* A positive bigint clamps to the root; a negative one fails the "must be >= 1" check. */
+		levels = zend_bigint_sign(Z_BIG_P(levels_arg)) < 0 ? ZEND_LONG_MIN : ZEND_LONG_MAX;
+	}
 
 	_zend_dirname(return_value, str, levels);
 }
@@ -1541,12 +1547,18 @@ flf_clean:
 
 ZEND_FRAMELESS_FUNCTION(dirname, 2)
 {
-	zval str_tmp;
+	zval str_tmp, levels_tmp;
 	zend_string *str;
+	zval *levels_arg;
 	zend_long levels;
 
 	Z_FLF_PARAM_STR(1, str, str_tmp);
-	Z_FLF_PARAM_LONG(2, levels);
+	Z_FLF_PARAM_INT(2, levels_arg, levels_tmp);
+
+	if (UNEXPECTED(!zend_logical_int_to_long(levels_arg, &levels))) {
+		/* A positive bigint clamps to the root; a negative one fails the "must be >= 1" check. */
+		levels = zend_bigint_sign(Z_BIG_P(levels_arg)) < 0 ? ZEND_LONG_MIN : ZEND_LONG_MAX;
+	}
 
 	_zend_dirname(return_value, str, levels);
 
