@@ -36,7 +36,7 @@ try {
 echo "Done\n";
 ?>
 --EXPECTF--
-strrpos(): Argument #3 ($offset) must be between -%d and %d
+strrpos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
 strrpos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
 strrpos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
 strrpos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)

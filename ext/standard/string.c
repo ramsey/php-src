@@ -1915,14 +1915,20 @@ static zend_always_inline void _zend_strpos(zval *return_value, zend_string *hay
 PHP_FUNCTION(strpos)
 {
 	zend_string *haystack, *needle;
+	zval *offset_arg = NULL;
 	zend_long offset = 0;
 
 	ZEND_PARSE_PARAMETERS_START(2, 3)
 		Z_PARAM_STR(haystack)
 		Z_PARAM_STR(needle)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_LONG(offset)
+		Z_PARAM_INT(offset_arg)
 	ZEND_PARSE_PARAMETERS_END();
+
+	if (offset_arg != NULL && UNEXPECTED(!zend_logical_int_to_long(offset_arg, &offset))) {
+		/* A bigint offset can't lie within the haystack. */
+		offset = zend_bigint_sign(Z_BIG_P(offset_arg)) < 0 ? ZEND_LONG_MIN : ZEND_LONG_MAX;
+	}
 
 	_zend_strpos(return_value, haystack, needle, offset);
 }
@@ -1945,13 +1951,19 @@ flf_clean:
 
 ZEND_FRAMELESS_FUNCTION(strpos, 3)
 {
-	zval haystack_tmp, needle_tmp;
+	zval haystack_tmp, needle_tmp, offset_tmp;
 	zend_string *haystack, *needle;
+	zval *offset_arg;
 	zend_long offset;
 
 	Z_FLF_PARAM_STR(1, haystack, haystack_tmp);
 	Z_FLF_PARAM_STR(2, needle, needle_tmp);
-	Z_FLF_PARAM_LONG(3, offset);
+	Z_FLF_PARAM_INT(3, offset_arg, offset_tmp);
+
+	if (UNEXPECTED(!zend_logical_int_to_long(offset_arg, &offset))) {
+		/* A bigint offset can't lie within the haystack. */
+		offset = zend_bigint_sign(Z_BIG_P(offset_arg)) < 0 ? ZEND_LONG_MIN : ZEND_LONG_MAX;
+	}
 
 	_zend_strpos(return_value, haystack, needle, offset);
 
@@ -1965,14 +1977,20 @@ PHP_FUNCTION(stripos)
 {
 	const char *found = NULL;
 	zend_string *haystack, *needle;
+	zval *offset_arg = NULL;
 	zend_long offset = 0;
 
 	ZEND_PARSE_PARAMETERS_START(2, 3)
 		Z_PARAM_STR(haystack)
 		Z_PARAM_STR(needle)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_LONG(offset)
+		Z_PARAM_INT(offset_arg)
 	ZEND_PARSE_PARAMETERS_END();
+
+	if (offset_arg != NULL && UNEXPECTED(!zend_logical_int_to_long(offset_arg, &offset))) {
+		/* A bigint offset can't lie within the haystack. */
+		offset = zend_bigint_sign(Z_BIG_P(offset_arg)) < 0 ? ZEND_LONG_MIN : ZEND_LONG_MAX;
+	}
 
 	if (offset < 0) {
 		offset += (zend_long)ZSTR_LEN(haystack);
@@ -1997,6 +2015,7 @@ PHP_FUNCTION(strrpos)
 {
 	zend_string *needle;
 	zend_string *haystack;
+	zval *offset_arg = NULL;
 	zend_long offset = 0;
 	const char *p, *e, *found;
 
@@ -2004,8 +2023,13 @@ PHP_FUNCTION(strrpos)
 		Z_PARAM_STR(haystack)
 		Z_PARAM_STR(needle)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_LONG(offset)
+		Z_PARAM_INT(offset_arg)
 	ZEND_PARSE_PARAMETERS_END();
+
+	if (offset_arg != NULL && UNEXPECTED(!zend_logical_int_to_long(offset_arg, &offset))) {
+		/* A bigint offset can't lie within the haystack. */
+		offset = zend_bigint_sign(Z_BIG_P(offset_arg)) < 0 ? ZEND_LONG_MIN : ZEND_LONG_MAX;
+	}
 
 	if (offset >= 0) {
 		if ((size_t)offset > ZSTR_LEN(haystack)) {
@@ -2042,6 +2066,7 @@ PHP_FUNCTION(strripos)
 {
 	zend_string *needle;
 	zend_string *haystack;
+	zval *offset_arg = NULL;
 	zend_long offset = 0;
 	const char *p, *e, *found;
 	zend_string *needle_dup, *haystack_dup;
@@ -2050,8 +2075,13 @@ PHP_FUNCTION(strripos)
 		Z_PARAM_STR(haystack)
 		Z_PARAM_STR(needle)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_LONG(offset)
+		Z_PARAM_INT(offset_arg)
 	ZEND_PARSE_PARAMETERS_END();
+
+	if (offset_arg != NULL && UNEXPECTED(!zend_logical_int_to_long(offset_arg, &offset))) {
+		/* A bigint offset can't lie within the haystack. */
+		offset = zend_bigint_sign(Z_BIG_P(offset_arg)) < 0 ? ZEND_LONG_MIN : ZEND_LONG_MAX;
+	}
 
 	if (ZSTR_LEN(needle) == 1) {
 		/* Single character search can shortcut memcmps
