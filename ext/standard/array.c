@@ -1553,11 +1553,8 @@ static zend_always_inline void _php_search_array(zval *return_value, zval *value
 					if (behavior == 0) {
 						RETURN_TRUE;
 					} else {
-						if (str_idx) {
-							RETURN_STR_COPY(str_idx);
-						} else {
-							RETURN_LONG(num_idx);
-						}
+						zend_array_key_to_zval(return_value, str_idx, num_idx);
+						return;
 					}
 				}
 			} ZEND_HASH_FOREACH_END();
@@ -1568,11 +1565,8 @@ static zend_always_inline void _php_search_array(zval *return_value, zval *value
 					if (behavior == 0) {
 						RETURN_TRUE;
 					} else {
-						if (str_idx) {
-							RETURN_STR_COPY(str_idx);
-						} else {
-							RETURN_LONG(num_idx);
-						}
+						zend_array_key_to_zval(return_value, str_idx, num_idx);
+						return;
 					}
 				}
 			} ZEND_HASH_FOREACH_END();
@@ -1584,11 +1578,8 @@ static zend_always_inline void _php_search_array(zval *return_value, zval *value
 					if (behavior == 0) {
 						RETURN_TRUE;
 					} else {
-						if (str_idx) {
-							RETURN_STR_COPY(str_idx);
-						} else {
-							RETURN_LONG(num_idx);
-						}
+						zend_array_key_to_zval(return_value, str_idx, num_idx);
+						return;
 					}
 				}
 			} ZEND_HASH_FOREACH_END();
@@ -1598,11 +1589,8 @@ static zend_always_inline void _php_search_array(zval *return_value, zval *value
 					if (behavior == 0) {
 						RETURN_TRUE;
 					} else {
-						if (str_idx) {
-							RETURN_STR_COPY(str_idx);
-						} else {
-							RETURN_LONG(num_idx);
-						}
+						zend_array_key_to_zval(return_value, str_idx, num_idx);
+						return;
 					}
 				}
 			} ZEND_HASH_FOREACH_END();
@@ -1612,11 +1600,8 @@ static zend_always_inline void _php_search_array(zval *return_value, zval *value
 					if (behavior == 0) {
 						RETURN_TRUE;
 					} else {
-						if (str_idx) {
-							RETURN_STR_COPY(str_idx);
-						} else {
-							RETURN_LONG(num_idx);
-						}
+						zend_array_key_to_zval(return_value, str_idx, num_idx);
+						return;
 					}
 				}
 			} ZEND_HASH_FOREACH_END();
@@ -4368,22 +4353,14 @@ PHP_FUNCTION(array_keys)
 			ZEND_HASH_FOREACH_KEY_VAL(arrval, num_idx, str_idx, entry) {
 				ZVAL_DEREF(entry);
 				if (fast_is_identical_function(search_value, entry)) {
-					if (str_idx) {
-						ZVAL_STR_COPY(&new_val, str_idx);
-					} else {
-						ZVAL_LONG(&new_val, num_idx);
-					}
+					zend_array_key_to_zval(&new_val, str_idx, num_idx);
 					zend_hash_next_index_insert_new(Z_ARRVAL_P(return_value), &new_val);
 				}
 			} ZEND_HASH_FOREACH_END();
 		} else {
 			ZEND_HASH_FOREACH_KEY_VAL(arrval, num_idx, str_idx, entry) {
 				if (fast_equal_check_function(search_value, entry)) {
-					if (str_idx) {
-						ZVAL_STR_COPY(&new_val, str_idx);
-					} else {
-						ZVAL_LONG(&new_val, num_idx);
-					}
+					zend_array_key_to_zval(&new_val, str_idx, num_idx);
 					zend_hash_next_index_insert_new(Z_ARRVAL_P(return_value), &new_val);
 				}
 			} ZEND_HASH_FOREACH_END();
@@ -4404,7 +4381,13 @@ PHP_FUNCTION(array_keys)
 				/* Go through input array and add keys to the return array */
 				ZEND_HASH_FOREACH_KEY_VAL(Z_ARRVAL_P(input), num_idx, str_idx, entry) {
 					if (str_idx) {
-						ZEND_HASH_FILL_SET_STR_COPY(str_idx);
+						if (UNEXPECTED(zend_string_is_canonical_bigint_key(str_idx))) {
+							zval key_zv;
+							zend_array_key_to_zval(&key_zv, str_idx, num_idx);
+							ZEND_HASH_FILL_SET(&key_zv);
+						} else {
+							ZEND_HASH_FILL_SET_STR_COPY(str_idx);
+						}
 					} else {
 						ZEND_HASH_FILL_SET_LONG(num_idx);
 					}
@@ -4808,18 +4791,10 @@ PHP_FUNCTION(array_flip)
 	ZEND_HASH_FOREACH_KEY_VAL(Z_ARRVAL_P(array), num_idx, str_idx, entry) {
 		ZVAL_DEREF(entry);
 		if (Z_TYPE_P(entry) == IS_LONG) {
-			if (str_idx) {
-				ZVAL_STR_COPY(&data, str_idx);
-			} else {
-				ZVAL_LONG(&data, num_idx);
-			}
+			zend_array_key_to_zval(&data, str_idx, num_idx);
 			zend_hash_index_update(Z_ARRVAL_P(return_value), Z_LVAL_P(entry), &data);
 		} else if (Z_TYPE_P(entry) == IS_STRING) {
-			if (str_idx) {
-				ZVAL_STR_COPY(&data, str_idx);
-			} else {
-				ZVAL_LONG(&data, num_idx);
-			}
+			zend_array_key_to_zval(&data, str_idx, num_idx);
 			zend_symtable_update(Z_ARRVAL_P(return_value), Z_STR_P(entry), &data);
 		} else {
 			php_error_docref(NULL, E_WARNING, "Can only flip string and integer values, entry skipped");
