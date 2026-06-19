@@ -2624,11 +2624,13 @@ PHP_FUNCTION(compact)
 PHP_FUNCTION(array_fill)
 {
 	zval *val;
+	zval *start_key_arg;
 	zval *num_arg;
 	zend_long start_key, num;
+	bool start_fits;
 
 	ZEND_PARSE_PARAMETERS_START(3, 3)
-		Z_PARAM_LONG(start_key)
+		Z_PARAM_INT(start_key_arg)
 		Z_PARAM_INT(num_arg)
 		Z_PARAM_ZVAL(val)
 	ZEND_PARSE_PARAMETERS_END();
@@ -2640,10 +2642,28 @@ PHP_FUNCTION(array_fill)
 		RETURN_THROWS();
 	}
 
+	start_fits = zend_logical_int_to_long(start_key_arg, &start_key);
+
 	if (EXPECTED(num > 0)) {
 		if (sizeof(num) > 4 && UNEXPECTED(num > INT_MAX)) {
 			zend_argument_value_error(2, "is too large");
 			RETURN_THROWS();
+		} else if (UNEXPECTED(!start_fits)) {
+			/* A bigint start key is out of zend_long range, so every key is a
+			 * bigint stored under its decimal string. In other words, we build
+			 * a hashed array. */
+			zend_bigint *counter = zend_bigint_dup(Z_BIG_P(start_key_arg));
+
+			array_init_size(return_value, (uint32_t) num);
+			zend_hash_real_init_mixed(Z_ARRVAL_P(return_value));
+			do {
+				zend_string *key = zend_bigint_to_str(counter);
+				Z_TRY_ADDREF_P(val);
+				zend_hash_update(Z_ARRVAL_P(return_value), key, val);
+				zend_string_release(key);
+				zend_bigint_add_long(counter, counter, 1);
+			} while (--num);
+			zend_bigint_release(counter);
 		} else if (UNEXPECTED(start_key > ZEND_LONG_MAX - num + 1)) {
 			zend_throw_error(NULL, "Cannot add element to the array as the next element is already occupied");
 			RETURN_THROWS();
