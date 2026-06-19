@@ -26411,6 +26411,16 @@ num_index_dim:
 				ZVAL_UNDEFINED_OP2();
 				key = ZSTR_EMPTY_ALLOC();
 				goto str_index_dim;
+			} else if (Z_TYPE_P(offset) == IS_BIGINT) {
+				zend_long lval;
+				if (zend_logical_int_to_long(offset, &lval)) {
+					hval = lval;
+					goto num_index_dim;
+				}
+				key = zend_bigint_to_str(Z_BIG_P(offset));
+				ZEND_ASSERT(ht != &EG(symbol_table));
+				zend_hash_del(ht, key);
+				zend_string_release(key);
 			} else {
 				zend_illegal_array_offset_unset(offset);
 			}
@@ -28669,6 +28679,16 @@ num_index_dim:
 				ZVAL_UNDEFINED_OP2();
 				key = ZSTR_EMPTY_ALLOC();
 				goto str_index_dim;
+			} else if (Z_TYPE_P(offset) == IS_BIGINT) {
+				zend_long lval;
+				if (zend_logical_int_to_long(offset, &lval)) {
+					hval = lval;
+					goto num_index_dim;
+				}
+				key = zend_bigint_to_str(Z_BIG_P(offset));
+				ZEND_ASSERT(ht != &EG(symbol_table));
+				zend_hash_del(ht, key);
+				zend_string_release(key);
 			} else {
 				zend_illegal_array_offset_unset(offset);
 			}
@@ -32552,6 +32572,16 @@ num_index_dim:
 				ZVAL_UNDEFINED_OP2();
 				key = ZSTR_EMPTY_ALLOC();
 				goto str_index_dim;
+			} else if (Z_TYPE_P(offset) == IS_BIGINT) {
+				zend_long lval;
+				if (zend_logical_int_to_long(offset, &lval)) {
+					hval = lval;
+					goto num_index_dim;
+				}
+				key = zend_bigint_to_str(Z_BIG_P(offset));
+				ZEND_ASSERT(ht != &EG(symbol_table));
+				zend_hash_del(ht, key);
+				zend_string_release(key);
 			} else {
 				zend_illegal_array_offset_unset(offset);
 			}
@@ -44461,6 +44491,16 @@ num_index_dim:
 				ZVAL_UNDEFINED_OP2();
 				key = ZSTR_EMPTY_ALLOC();
 				goto str_index_dim;
+			} else if (Z_TYPE_P(offset) == IS_BIGINT) {
+				zend_long lval;
+				if (zend_logical_int_to_long(offset, &lval)) {
+					hval = lval;
+					goto num_index_dim;
+				}
+				key = zend_bigint_to_str(Z_BIG_P(offset));
+				ZEND_ASSERT(ht != &EG(symbol_table));
+				zend_hash_del(ht, key);
+				zend_string_release(key);
 			} else {
 				zend_illegal_array_offset_unset(offset);
 			}
@@ -48123,6 +48163,16 @@ num_index_dim:
 				ZVAL_UNDEFINED_OP2();
 				key = ZSTR_EMPTY_ALLOC();
 				goto str_index_dim;
+			} else if (Z_TYPE_P(offset) == IS_BIGINT) {
+				zend_long lval;
+				if (zend_logical_int_to_long(offset, &lval)) {
+					hval = lval;
+					goto num_index_dim;
+				}
+				key = zend_bigint_to_str(Z_BIG_P(offset));
+				ZEND_ASSERT(ht != &EG(symbol_table));
+				zend_hash_del(ht, key);
+				zend_string_release(key);
 			} else {
 				zend_illegal_array_offset_unset(offset);
 			}
@@ -53300,6 +53350,16 @@ num_index_dim:
 				ZVAL_UNDEFINED_OP2();
 				key = ZSTR_EMPTY_ALLOC();
 				goto str_index_dim;
+			} else if (Z_TYPE_P(offset) == IS_BIGINT) {
+				zend_long lval;
+				if (zend_logical_int_to_long(offset, &lval)) {
+					hval = lval;
+					goto num_index_dim;
+				}
+				key = zend_bigint_to_str(Z_BIG_P(offset));
+				ZEND_ASSERT(ht != &EG(symbol_table));
+				zend_hash_del(ht, key);
+				zend_string_release(key);
 			} else {
 				zend_illegal_array_offset_unset(offset);
 			}
@@ -79093,6 +79153,16 @@ num_index_dim:
 				ZVAL_UNDEFINED_OP2();
 				key = ZSTR_EMPTY_ALLOC();
 				goto str_index_dim;
+			} else if (Z_TYPE_P(offset) == IS_BIGINT) {
+				zend_long lval;
+				if (zend_logical_int_to_long(offset, &lval)) {
+					hval = lval;
+					goto num_index_dim;
+				}
+				key = zend_bigint_to_str(Z_BIG_P(offset));
+				ZEND_ASSERT(ht != &EG(symbol_table));
+				zend_hash_del(ht, key);
+				zend_string_release(key);
 			} else {
 				zend_illegal_array_offset_unset(offset);
 			}
@@ -81351,6 +81421,16 @@ num_index_dim:
 				ZVAL_UNDEFINED_OP2();
 				key = ZSTR_EMPTY_ALLOC();
 				goto str_index_dim;
+			} else if (Z_TYPE_P(offset) == IS_BIGINT) {
+				zend_long lval;
+				if (zend_logical_int_to_long(offset, &lval)) {
+					hval = lval;
+					goto num_index_dim;
+				}
+				key = zend_bigint_to_str(Z_BIG_P(offset));
+				ZEND_ASSERT(ht != &EG(symbol_table));
+				zend_hash_del(ht, key);
+				zend_string_release(key);
 			} else {
 				zend_illegal_array_offset_unset(offset);
 			}
@@ -85234,6 +85314,16 @@ num_index_dim:
 				ZVAL_UNDEFINED_OP2();
 				key = ZSTR_EMPTY_ALLOC();
 				goto str_index_dim;
+			} else if (Z_TYPE_P(offset) == IS_BIGINT) {
+				zend_long lval;
+				if (zend_logical_int_to_long(offset, &lval)) {
+					hval = lval;
+					goto num_index_dim;
+				}
+				key = zend_bigint_to_str(Z_BIG_P(offset));
+				ZEND_ASSERT(ht != &EG(symbol_table));
+				zend_hash_del(ht, key);
+				zend_string_release(key);
 			} else {
 				zend_illegal_array_offset_unset(offset);
 			}
@@ -97143,6 +97233,16 @@ num_index_dim:
 				ZVAL_UNDEFINED_OP2();
 				key = ZSTR_EMPTY_ALLOC();
 				goto str_index_dim;
+			} else if (Z_TYPE_P(offset) == IS_BIGINT) {
+				zend_long lval;
+				if (zend_logical_int_to_long(offset, &lval)) {
+					hval = lval;
+					goto num_index_dim;
+				}
+				key = zend_bigint_to_str(Z_BIG_P(offset));
+				ZEND_ASSERT(ht != &EG(symbol_table));
+				zend_hash_del(ht, key);
+				zend_string_release(key);
 			} else {
 				zend_illegal_array_offset_unset(offset);
 			}
@@ -100805,6 +100905,16 @@ num_index_dim:
 				ZVAL_UNDEFINED_OP2();
 				key = ZSTR_EMPTY_ALLOC();
 				goto str_index_dim;
+			} else if (Z_TYPE_P(offset) == IS_BIGINT) {
+				zend_long lval;
+				if (zend_logical_int_to_long(offset, &lval)) {
+					hval = lval;
+					goto num_index_dim;
+				}
+				key = zend_bigint_to_str(Z_BIG_P(offset));
+				ZEND_ASSERT(ht != &EG(symbol_table));
+				zend_hash_del(ht, key);
+				zend_string_release(key);
 			} else {
 				zend_illegal_array_offset_unset(offset);
 			}
@@ -105880,6 +105990,16 @@ num_index_dim:
 				ZVAL_UNDEFINED_OP2();
 				key = ZSTR_EMPTY_ALLOC();
 				goto str_index_dim;
+			} else if (Z_TYPE_P(offset) == IS_BIGINT) {
+				zend_long lval;
+				if (zend_logical_int_to_long(offset, &lval)) {
+					hval = lval;
+					goto num_index_dim;
+				}
+				key = zend_bigint_to_str(Z_BIG_P(offset));
+				ZEND_ASSERT(ht != &EG(symbol_table));
+				zend_hash_del(ht, key);
+				zend_string_release(key);
 			} else {
 				zend_illegal_array_offset_unset(offset);
 			}

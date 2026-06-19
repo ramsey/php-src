@@ -2752,6 +2752,17 @@ static zend_never_inline uint8_t slow_index_convert(HashTable *ht, const zval *d
 		case IS_TRUE:
 			value->lval = 1;
 			return IS_LONG;
+		case IS_BIGINT: {
+			zend_long lval;
+			if (zend_logical_int_to_long(dim, &lval)) {
+				/* A bigint that fits a long is an integer key. */
+				value->lval = lval;
+				return IS_LONG;
+			}
+			/* Out of range: store the bigint as a string key. */
+			value->str = zend_bigint_to_str(Z_BIG_P(dim));
+			return IS_STRING;
+		}
 		default:
 			zend_illegal_array_offset_access(dim);
 			return IS_NULL;
@@ -2838,6 +2849,17 @@ static zend_never_inline uint8_t slow_index_convert_w(HashTable *ht, const zval 
 		case IS_TRUE:
 			value->lval = 1;
 			return IS_LONG;
+		case IS_BIGINT: {
+			zend_long lval;
+			if (zend_logical_int_to_long(dim, &lval)) {
+				/* A bigint that fits a long is an integer key. */
+				value->lval = lval;
+				return IS_LONG;
+			}
+			/* Out of range: store the bigint as a string key. */
+			value->str = zend_bigint_to_str(Z_BIG_P(dim));
+			return IS_STRING;
+		}
 		default:
 			zend_illegal_array_offset_access(dim);
 			return IS_NULL;
@@ -2849,6 +2871,7 @@ static zend_always_inline zval *zend_fetch_dimension_address_inner(HashTable *ht
 	zval *retval = NULL;
 	zend_string *offset_key;
 	zend_ulong hval;
+	bool release_offset_key = false;
 
 try_again:
 	if (EXPECTED(Z_TYPE_P(dim) == IS_LONG)) {
@@ -2914,6 +2937,10 @@ str_index:
 		}
 		if (t == IS_STRING) {
 			offset_key = val.str;
+			/* Owned string, so it must be released. The bigint case allocates a
+			 * decimal; the null-offset case is interned, making the release a
+			 * no-op. */
+			release_offset_key = true;
 			goto str_index;
 		} else if (t == IS_LONG) {
 			hval = val.lval;
@@ -2922,6 +2949,9 @@ str_index:
 			retval = (type == BP_VAR_W || type == BP_VAR_RW) ?
 					NULL : &EG(uninitialized_zval);
 		}
+	}
+	if (UNEXPECTED(release_offset_key)) {
+		zend_string_release(offset_key);
 	}
 	return retval;
 }
@@ -3330,6 +3360,16 @@ null_undef_idx:
 	} else if (/*OP2_TYPE == IS_CV &&*/ Z_TYPE_P(offset) == IS_UNDEF) {
 		ZVAL_UNDEFINED_OP2();
 		goto null_undef_idx;
+	} else if (Z_TYPE_P(offset) == IS_BIGINT) {
+		zend_long lval;
+		if (zend_logical_int_to_long(offset, &lval)) {
+			hval = lval;
+			goto num_idx;
+		}
+		zend_string *bigint_key = zend_bigint_to_str(Z_BIG_P(offset));
+		zval *value = zend_hash_find(ht, bigint_key);
+		zend_string_release(bigint_key);
+		return value;
 	} else {
 		zend_illegal_array_offset_isset(offset);
 		return NULL;
