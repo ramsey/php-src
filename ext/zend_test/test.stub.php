@@ -383,6 +383,12 @@ function zend_test_override_libxml_global_state(): void {}
     function zend_test_make_bigint(string $decimal): mixed {}
 
     /** @internal */
+    function zend_test_bigint_to_str(int $value): string {}
+
+    /** @internal */
+    function zend_test_array_key_classify(string $candidate): string {}
+
+    /** @internal */
     function zend_test_zpp_int(int $i): mixed {}
 
     /** @internal */

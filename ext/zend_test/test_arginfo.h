@@ -1,5 +1,5 @@
 /* This is a generated file, edit test.stub.php instead.
- * Stub hash: a637e587f529658a528e89d342655dbe35092ef8
+ * Stub hash: f6403f89d830073e8b85c2d4fa8be8f88963db93
  * Has decl header: yes */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_zend_trigger_bailout, 0, 0, IS_NEVER, 0)
@@ -229,6 +229,14 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_zend_test_make_bigint, 0, 1, IS_
 	ZEND_ARG_TYPE_INFO(0, decimal, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_zend_test_bigint_to_str, 0, 1, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, value, IS_LONG, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_zend_test_array_key_classify, 0, 1, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, candidate, IS_STRING, 0)
+ZEND_END_ARG_INFO()
+
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_zend_test_zpp_int, 0, 1, IS_MIXED, 0)
 	ZEND_ARG_TYPE_INFO(0, i, IS_LONG, 0)
 ZEND_END_ARG_INFO()
@@ -422,6 +430,8 @@ static ZEND_FUNCTION(zend_test_bigint_string_roundtrip);
 static ZEND_FUNCTION(zend_test_bigint_add_strings);
 static ZEND_FUNCTION(zend_test_bigint_fits_long);
 static ZEND_FUNCTION(zend_test_make_bigint);
+static ZEND_FUNCTION(zend_test_bigint_to_str);
+static ZEND_FUNCTION(zend_test_array_key_classify);
 static ZEND_FUNCTION(zend_test_zpp_int);
 static ZEND_FUNCTION(zend_test_zpp_int_or_null);
 static ZEND_FUNCTION(zend_test_zpp_int_or_float);
@@ -577,6 +587,8 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(zend_test_bigint_add_strings, arginfo_zend_test_bigint_add_strings)
 	ZEND_FE(zend_test_bigint_fits_long, arginfo_zend_test_bigint_fits_long)
 	ZEND_FE(zend_test_make_bigint, arginfo_zend_test_make_bigint)
+	ZEND_FE(zend_test_bigint_to_str, arginfo_zend_test_bigint_to_str)
+	ZEND_FE(zend_test_array_key_classify, arginfo_zend_test_array_key_classify)
 	ZEND_FE(zend_test_zpp_int, arginfo_zend_test_zpp_int)
 	ZEND_FE(zend_test_zpp_int_or_null, arginfo_zend_test_zpp_int_or_null)
 	ZEND_FE(zend_test_zpp_int_or_float, arginfo_zend_test_zpp_int_or_float)

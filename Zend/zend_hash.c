@@ -3277,6 +3277,50 @@ ZEND_API bool ZEND_FASTCALL _zend_handle_numeric_str_ex(const char *key, size_t 
 	}
 }
 
+/* True if a string array key is a canonical decimal integer literal that is out
+ * of zend_long range: optional leading "-", a non-zero first digit, then digits
+ * only (i.e., no leading zeros and no "-0"). An in-range canonical decimal
+ * string is always converted to a long key at insert, so any decimal string key
+ * outside the long boundry is, by that same logic, a bigint key. */
+ZEND_API bool ZEND_FASTCALL zend_string_is_canonical_bigint_key(const zend_string *key)
+{
+	const char *p = ZSTR_VAL(key);
+	size_t len = ZSTR_LEN(key);
+
+	if (len == 0) {
+		return false;
+	}
+	if (*p == '-') {
+		p++;
+		len--;
+	}
+	if (len == 0 || *p == '0') {
+		return false;
+	}
+	for (size_t i = 0; i < len; i++) {
+		if (p[i] < '0' || p[i] > '9') {
+			return false;
+		}
+	}
+	return true;
+}
+
+/* Builds the zval that an array yields for a bucket key on readback. An integer
+ * key (i.e., key == NULL) becomes a long; a canonical out-of-range decimal
+ * string key becomes a bigint (demoted to a long at the boundary by
+ * zend_bigint_result); any other string key is copied as-is. */
+ZEND_API void ZEND_FASTCALL zend_array_key_to_zval(zval *dest, const zend_string *key, zend_ulong h)
+{
+	if (key == NULL) {
+		ZVAL_LONG(dest, (zend_long) h);
+	} else if (zend_string_is_canonical_bigint_key(key)) {
+		zend_bigint *big = zend_bigint_init_from_string_length(ZSTR_VAL(key), ZSTR_LEN(key), 10);
+		zend_bigint_result(dest, big);
+	} else {
+		ZVAL_STR_COPY(dest, (zend_string *) key);
+	}
+}
+
 /* Takes a "symtable" hashtable (contains integer and non-numeric string keys)
  * and converts it to a "proptable" (contains only string keys).
  * If the symtable didn't need duplicating, its refcount is incremented.

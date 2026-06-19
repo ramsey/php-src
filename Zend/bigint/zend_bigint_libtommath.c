@@ -360,6 +360,15 @@ ZEND_API char *zend_bigint_to_string(const zend_bigint *big, size_t *len)
 	return out;
 }
 
+ZEND_API zend_string *zend_bigint_to_str(const zend_bigint *big)
+{
+	size_t len;
+	char *buf = zend_bigint_to_string(big, &len);
+	zend_string *str = zend_string_init(buf, len, 0);
+	efree(buf);
+	return str;
+}
+
 /* Reports whether the decimal form of big would run longer than max_digits,
  * which is how we enforce zend.int_string_max_digits without building the
  * string first.

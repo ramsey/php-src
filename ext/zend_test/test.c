@@ -1177,6 +1177,37 @@ static ZEND_FUNCTION(zend_test_make_bigint)
 	ZVAL_BIGINT(return_value, b);
 }
 
+static ZEND_FUNCTION(zend_test_bigint_to_str)
+{
+	zval *arg;
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_INT(arg)
+	ZEND_PARSE_PARAMETERS_END();
+
+	if (Z_TYPE_P(arg) == IS_BIGINT) {
+		RETURN_STR(zend_bigint_to_str(Z_BIG_P(arg)));
+	}
+
+	zend_bigint *b = zend_bigint_init_from_long(Z_LVAL_P(arg));
+	zend_string *s = zend_bigint_to_str(b);
+	zend_bigint_release(b);
+	RETURN_STR(s);
+}
+
+static ZEND_FUNCTION(zend_test_array_key_classify)
+{
+	zend_string *in;
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_STR(in)
+	ZEND_PARSE_PARAMETERS_END();
+
+	zval tmp;
+	zend_array_key_to_zval(&tmp, in, 0);
+	const char *label = (Z_TYPE(tmp) == IS_LONG || Z_TYPE(tmp) == IS_BIGINT) ? "int" : "string";
+	zval_ptr_dtor(&tmp);
+	RETURN_STRING(label);
+}
+
 static ZEND_FUNCTION(zend_test_zpp_int)
 {
 	zval *v;

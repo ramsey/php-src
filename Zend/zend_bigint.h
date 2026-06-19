@@ -119,6 +119,10 @@ ZEND_API int       zend_bigint_cmp(const zend_bigint *a, const zend_bigint *b);
 ZEND_API int       zend_bigint_cmp_long(const zend_bigint *a, zend_long b);
 ZEND_API char     *zend_bigint_to_string(const zend_bigint *big, size_t *len);
 
+/* Like zend_bigint_to_string(), but returns an owned (refcount-1) zend_string
+ * holding the canonical decimal. Does not apply any display digit limit. */
+ZEND_API zend_string *zend_bigint_to_str(const zend_bigint *big);
+
 /* True if the decimal representation of |big| has more than max_digits digits
  * (the sign is not counted). */
 ZEND_API bool zend_bigint_string_exceeds_digits(const zend_bigint *big, zend_long max_digits);
