@@ -10723,6 +10723,17 @@ static bool zend_try_ct_eval_array(zval *result, zend_ast *ast) /* {{{ */
 				case IS_NULL:
 					/* Null key will generate a warning at run-time. */
 					goto fail;
+				case IS_BIGINT: {
+					zend_long lval;
+					if (zend_logical_int_to_long(key, &lval)) {
+						zend_hash_index_update(Z_ARRVAL_P(result), lval, value);
+					} else {
+						zend_string *bigint_key = zend_bigint_to_str(Z_BIG_P(key));
+						zend_symtable_update(Z_ARRVAL_P(result), bigint_key, value);
+						zend_string_release(bigint_key);
+					}
+					break;
+				}
 				default:
 					zend_error_noreturn(E_COMPILE_ERROR, "Illegal offset type");
 			}

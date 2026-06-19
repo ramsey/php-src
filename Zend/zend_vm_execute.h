@@ -8162,6 +8162,15 @@ num_index:
 			ZVAL_UNDEFINED_OP2();
 			str = ZSTR_EMPTY_ALLOC();
 			goto str_index;
+		} else if (Z_TYPE_P(offset) == IS_BIGINT) {
+			zend_long lval;
+			if (zend_logical_int_to_long(offset, &lval)) {
+				hval = lval;
+				goto num_index;
+			}
+			str = zend_bigint_to_str(Z_BIG_P(offset));
+			zend_hash_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), str, expr_ptr);
+			zend_string_release(str);
 		} else {
 			zend_illegal_array_offset_access(offset);
 			zval_ptr_dtor_nogc(expr_ptr);
@@ -10679,6 +10688,15 @@ num_index:
 			ZVAL_UNDEFINED_OP2();
 			str = ZSTR_EMPTY_ALLOC();
 			goto str_index;
+		} else if (Z_TYPE_P(offset) == IS_BIGINT) {
+			zend_long lval;
+			if (zend_logical_int_to_long(offset, &lval)) {
+				hval = lval;
+				goto num_index;
+			}
+			str = zend_bigint_to_str(Z_BIG_P(offset));
+			zend_hash_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), str, expr_ptr);
+			zend_string_release(str);
 		} else {
 			zend_illegal_array_offset_access(offset);
 			zval_ptr_dtor_nogc(expr_ptr);
@@ -11646,6 +11664,15 @@ num_index:
 			ZVAL_UNDEFINED_OP2();
 			str = ZSTR_EMPTY_ALLOC();
 			goto str_index;
+		} else if (Z_TYPE_P(offset) == IS_BIGINT) {
+			zend_long lval;
+			if (zend_logical_int_to_long(offset, &lval)) {
+				hval = lval;
+				goto num_index;
+			}
+			str = zend_bigint_to_str(Z_BIG_P(offset));
+			zend_hash_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), str, expr_ptr);
+			zend_string_release(str);
 		} else {
 			zend_illegal_array_offset_access(offset);
 			zval_ptr_dtor_nogc(expr_ptr);
@@ -13301,6 +13328,15 @@ num_index:
 			ZVAL_UNDEFINED_OP2();
 			str = ZSTR_EMPTY_ALLOC();
 			goto str_index;
+		} else if (Z_TYPE_P(offset) == IS_BIGINT) {
+			zend_long lval;
+			if (zend_logical_int_to_long(offset, &lval)) {
+				hval = lval;
+				goto num_index;
+			}
+			str = zend_bigint_to_str(Z_BIG_P(offset));
+			zend_hash_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), str, expr_ptr);
+			zend_string_release(str);
 		} else {
 			zend_illegal_array_offset_access(offset);
 			zval_ptr_dtor_nogc(expr_ptr);
@@ -19559,6 +19595,15 @@ num_index:
 			ZVAL_UNDEFINED_OP2();
 			str = ZSTR_EMPTY_ALLOC();
 			goto str_index;
+		} else if (Z_TYPE_P(offset) == IS_BIGINT) {
+			zend_long lval;
+			if (zend_logical_int_to_long(offset, &lval)) {
+				hval = lval;
+				goto num_index;
+			}
+			str = zend_bigint_to_str(Z_BIG_P(offset));
+			zend_hash_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), str, expr_ptr);
+			zend_string_release(str);
 		} else {
 			zend_illegal_array_offset_access(offset);
 			zval_ptr_dtor_nogc(expr_ptr);
@@ -21095,6 +21140,15 @@ num_index:
 			ZVAL_UNDEFINED_OP2();
 			str = ZSTR_EMPTY_ALLOC();
 			goto str_index;
+		} else if (Z_TYPE_P(offset) == IS_BIGINT) {
+			zend_long lval;
+			if (zend_logical_int_to_long(offset, &lval)) {
+				hval = lval;
+				goto num_index;
+			}
+			str = zend_bigint_to_str(Z_BIG_P(offset));
+			zend_hash_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), str, expr_ptr);
+			zend_string_release(str);
 		} else {
 			zend_illegal_array_offset_access(offset);
 			zval_ptr_dtor_nogc(expr_ptr);
@@ -21863,6 +21917,15 @@ num_index:
 			ZVAL_UNDEFINED_OP2();
 			str = ZSTR_EMPTY_ALLOC();
 			goto str_index;
+		} else if (Z_TYPE_P(offset) == IS_BIGINT) {
+			zend_long lval;
+			if (zend_logical_int_to_long(offset, &lval)) {
+				hval = lval;
+				goto num_index;
+			}
+			str = zend_bigint_to_str(Z_BIG_P(offset));
+			zend_hash_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), str, expr_ptr);
+			zend_string_release(str);
 		} else {
 			zend_illegal_array_offset_access(offset);
 			zval_ptr_dtor_nogc(expr_ptr);
@@ -22962,6 +23025,15 @@ num_index:
 			ZVAL_UNDEFINED_OP2();
 			str = ZSTR_EMPTY_ALLOC();
 			goto str_index;
+		} else if (Z_TYPE_P(offset) == IS_BIGINT) {
+			zend_long lval;
+			if (zend_logical_int_to_long(offset, &lval)) {
+				hval = lval;
+				goto num_index;
+			}
+			str = zend_bigint_to_str(Z_BIG_P(offset));
+			zend_hash_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), str, expr_ptr);
+			zend_string_release(str);
 		} else {
 			zend_illegal_array_offset_access(offset);
 			zval_ptr_dtor_nogc(expr_ptr);
@@ -26299,6 +26371,15 @@ num_index:
 			ZVAL_UNDEFINED_OP2();
 			str = ZSTR_EMPTY_ALLOC();
 			goto str_index;
+		} else if (Z_TYPE_P(offset) == IS_BIGINT) {
+			zend_long lval;
+			if (zend_logical_int_to_long(offset, &lval)) {
+				hval = lval;
+				goto num_index;
+			}
+			str = zend_bigint_to_str(Z_BIG_P(offset));
+			zend_hash_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), str, expr_ptr);
+			zend_string_release(str);
 		} else {
 			zend_illegal_array_offset_access(offset);
 			zval_ptr_dtor_nogc(expr_ptr);
@@ -28568,6 +28649,15 @@ num_index:
 			ZVAL_UNDEFINED_OP2();
 			str = ZSTR_EMPTY_ALLOC();
 			goto str_index;
+		} else if (Z_TYPE_P(offset) == IS_BIGINT) {
+			zend_long lval;
+			if (zend_logical_int_to_long(offset, &lval)) {
+				hval = lval;
+				goto num_index;
+			}
+			str = zend_bigint_to_str(Z_BIG_P(offset));
+			zend_hash_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), str, expr_ptr);
+			zend_string_release(str);
 		} else {
 			zend_illegal_array_offset_access(offset);
 			zval_ptr_dtor_nogc(expr_ptr);
@@ -30352,6 +30442,15 @@ num_index:
 			ZVAL_UNDEFINED_OP2();
 			str = ZSTR_EMPTY_ALLOC();
 			goto str_index;
+		} else if (Z_TYPE_P(offset) == IS_BIGINT) {
+			zend_long lval;
+			if (zend_logical_int_to_long(offset, &lval)) {
+				hval = lval;
+				goto num_index;
+			}
+			str = zend_bigint_to_str(Z_BIG_P(offset));
+			zend_hash_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), str, expr_ptr);
+			zend_string_release(str);
 		} else {
 			zend_illegal_array_offset_access(offset);
 			zval_ptr_dtor_nogc(expr_ptr);
@@ -32460,6 +32559,15 @@ num_index:
 			ZVAL_UNDEFINED_OP2();
 			str = ZSTR_EMPTY_ALLOC();
 			goto str_index;
+		} else if (Z_TYPE_P(offset) == IS_BIGINT) {
+			zend_long lval;
+			if (zend_logical_int_to_long(offset, &lval)) {
+				hval = lval;
+				goto num_index;
+			}
+			str = zend_bigint_to_str(Z_BIG_P(offset));
+			zend_hash_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), str, expr_ptr);
+			zend_string_release(str);
 		} else {
 			zend_illegal_array_offset_access(offset);
 			zval_ptr_dtor_nogc(expr_ptr);
@@ -44371,6 +44479,15 @@ num_index:
 			ZVAL_UNDEFINED_OP2();
 			str = ZSTR_EMPTY_ALLOC();
 			goto str_index;
+		} else if (Z_TYPE_P(offset) == IS_BIGINT) {
+			zend_long lval;
+			if (zend_logical_int_to_long(offset, &lval)) {
+				hval = lval;
+				goto num_index;
+			}
+			str = zend_bigint_to_str(Z_BIG_P(offset));
+			zend_hash_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), str, expr_ptr);
+			zend_string_release(str);
 		} else {
 			zend_illegal_array_offset_access(offset);
 			zval_ptr_dtor_nogc(expr_ptr);
@@ -48044,6 +48161,15 @@ num_index:
 			ZVAL_UNDEFINED_OP2();
 			str = ZSTR_EMPTY_ALLOC();
 			goto str_index;
+		} else if (Z_TYPE_P(offset) == IS_BIGINT) {
+			zend_long lval;
+			if (zend_logical_int_to_long(offset, &lval)) {
+				hval = lval;
+				goto num_index;
+			}
+			str = zend_bigint_to_str(Z_BIG_P(offset));
+			zend_hash_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), str, expr_ptr);
+			zend_string_release(str);
 		} else {
 			zend_illegal_array_offset_access(offset);
 			zval_ptr_dtor_nogc(expr_ptr);
@@ -49765,6 +49891,15 @@ num_index:
 			ZVAL_UNDEFINED_OP2();
 			str = ZSTR_EMPTY_ALLOC();
 			goto str_index;
+		} else if (Z_TYPE_P(offset) == IS_BIGINT) {
+			zend_long lval;
+			if (zend_logical_int_to_long(offset, &lval)) {
+				hval = lval;
+				goto num_index;
+			}
+			str = zend_bigint_to_str(Z_BIG_P(offset));
+			zend_hash_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), str, expr_ptr);
+			zend_string_release(str);
 		} else {
 			zend_illegal_array_offset_access(offset);
 			zval_ptr_dtor_nogc(expr_ptr);
@@ -53230,6 +53365,15 @@ num_index:
 			ZVAL_UNDEFINED_OP2();
 			str = ZSTR_EMPTY_ALLOC();
 			goto str_index;
+		} else if (Z_TYPE_P(offset) == IS_BIGINT) {
+			zend_long lval;
+			if (zend_logical_int_to_long(offset, &lval)) {
+				hval = lval;
+				goto num_index;
+			}
+			str = zend_bigint_to_str(Z_BIG_P(offset));
+			zend_hash_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), str, expr_ptr);
+			zend_string_release(str);
 		} else {
 			zend_illegal_array_offset_access(offset);
 			zval_ptr_dtor_nogc(expr_ptr);
@@ -61090,6 +61234,15 @@ num_index:
 			ZVAL_UNDEFINED_OP2();
 			str = ZSTR_EMPTY_ALLOC();
 			goto str_index;
+		} else if (Z_TYPE_P(offset) == IS_BIGINT) {
+			zend_long lval;
+			if (zend_logical_int_to_long(offset, &lval)) {
+				hval = lval;
+				goto num_index;
+			}
+			str = zend_bigint_to_str(Z_BIG_P(offset));
+			zend_hash_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), str, expr_ptr);
+			zend_string_release(str);
 		} else {
 			zend_illegal_array_offset_access(offset);
 			zval_ptr_dtor_nogc(expr_ptr);
@@ -63607,6 +63760,15 @@ num_index:
 			ZVAL_UNDEFINED_OP2();
 			str = ZSTR_EMPTY_ALLOC();
 			goto str_index;
+		} else if (Z_TYPE_P(offset) == IS_BIGINT) {
+			zend_long lval;
+			if (zend_logical_int_to_long(offset, &lval)) {
+				hval = lval;
+				goto num_index;
+			}
+			str = zend_bigint_to_str(Z_BIG_P(offset));
+			zend_hash_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), str, expr_ptr);
+			zend_string_release(str);
 		} else {
 			zend_illegal_array_offset_access(offset);
 			zval_ptr_dtor_nogc(expr_ptr);
@@ -64472,6 +64634,15 @@ num_index:
 			ZVAL_UNDEFINED_OP2();
 			str = ZSTR_EMPTY_ALLOC();
 			goto str_index;
+		} else if (Z_TYPE_P(offset) == IS_BIGINT) {
+			zend_long lval;
+			if (zend_logical_int_to_long(offset, &lval)) {
+				hval = lval;
+				goto num_index;
+			}
+			str = zend_bigint_to_str(Z_BIG_P(offset));
+			zend_hash_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), str, expr_ptr);
+			zend_string_release(str);
 		} else {
 			zend_illegal_array_offset_access(offset);
 			zval_ptr_dtor_nogc(expr_ptr);
@@ -66127,6 +66298,15 @@ num_index:
 			ZVAL_UNDEFINED_OP2();
 			str = ZSTR_EMPTY_ALLOC();
 			goto str_index;
+		} else if (Z_TYPE_P(offset) == IS_BIGINT) {
+			zend_long lval;
+			if (zend_logical_int_to_long(offset, &lval)) {
+				hval = lval;
+				goto num_index;
+			}
+			str = zend_bigint_to_str(Z_BIG_P(offset));
+			zend_hash_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), str, expr_ptr);
+			zend_string_release(str);
 		} else {
 			zend_illegal_array_offset_access(offset);
 			zval_ptr_dtor_nogc(expr_ptr);
@@ -72385,6 +72565,15 @@ num_index:
 			ZVAL_UNDEFINED_OP2();
 			str = ZSTR_EMPTY_ALLOC();
 			goto str_index;
+		} else if (Z_TYPE_P(offset) == IS_BIGINT) {
+			zend_long lval;
+			if (zend_logical_int_to_long(offset, &lval)) {
+				hval = lval;
+				goto num_index;
+			}
+			str = zend_bigint_to_str(Z_BIG_P(offset));
+			zend_hash_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), str, expr_ptr);
+			zend_string_release(str);
 		} else {
 			zend_illegal_array_offset_access(offset);
 			zval_ptr_dtor_nogc(expr_ptr);
@@ -73921,6 +74110,15 @@ num_index:
 			ZVAL_UNDEFINED_OP2();
 			str = ZSTR_EMPTY_ALLOC();
 			goto str_index;
+		} else if (Z_TYPE_P(offset) == IS_BIGINT) {
+			zend_long lval;
+			if (zend_logical_int_to_long(offset, &lval)) {
+				hval = lval;
+				goto num_index;
+			}
+			str = zend_bigint_to_str(Z_BIG_P(offset));
+			zend_hash_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), str, expr_ptr);
+			zend_string_release(str);
 		} else {
 			zend_illegal_array_offset_access(offset);
 			zval_ptr_dtor_nogc(expr_ptr);
@@ -74589,6 +74787,15 @@ num_index:
 			ZVAL_UNDEFINED_OP2();
 			str = ZSTR_EMPTY_ALLOC();
 			goto str_index;
+		} else if (Z_TYPE_P(offset) == IS_BIGINT) {
+			zend_long lval;
+			if (zend_logical_int_to_long(offset, &lval)) {
+				hval = lval;
+				goto num_index;
+			}
+			str = zend_bigint_to_str(Z_BIG_P(offset));
+			zend_hash_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), str, expr_ptr);
+			zend_string_release(str);
 		} else {
 			zend_illegal_array_offset_access(offset);
 			zval_ptr_dtor_nogc(expr_ptr);
@@ -75688,6 +75895,15 @@ num_index:
 			ZVAL_UNDEFINED_OP2();
 			str = ZSTR_EMPTY_ALLOC();
 			goto str_index;
+		} else if (Z_TYPE_P(offset) == IS_BIGINT) {
+			zend_long lval;
+			if (zend_logical_int_to_long(offset, &lval)) {
+				hval = lval;
+				goto num_index;
+			}
+			str = zend_bigint_to_str(Z_BIG_P(offset));
+			zend_hash_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), str, expr_ptr);
+			zend_string_release(str);
 		} else {
 			zend_illegal_array_offset_access(offset);
 			zval_ptr_dtor_nogc(expr_ptr);
@@ -79025,6 +79241,15 @@ num_index:
 			ZVAL_UNDEFINED_OP2();
 			str = ZSTR_EMPTY_ALLOC();
 			goto str_index;
+		} else if (Z_TYPE_P(offset) == IS_BIGINT) {
+			zend_long lval;
+			if (zend_logical_int_to_long(offset, &lval)) {
+				hval = lval;
+				goto num_index;
+			}
+			str = zend_bigint_to_str(Z_BIG_P(offset));
+			zend_hash_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), str, expr_ptr);
+			zend_string_release(str);
 		} else {
 			zend_illegal_array_offset_access(offset);
 			zval_ptr_dtor_nogc(expr_ptr);
@@ -81294,6 +81519,15 @@ num_index:
 			ZVAL_UNDEFINED_OP2();
 			str = ZSTR_EMPTY_ALLOC();
 			goto str_index;
+		} else if (Z_TYPE_P(offset) == IS_BIGINT) {
+			zend_long lval;
+			if (zend_logical_int_to_long(offset, &lval)) {
+				hval = lval;
+				goto num_index;
+			}
+			str = zend_bigint_to_str(Z_BIG_P(offset));
+			zend_hash_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), str, expr_ptr);
+			zend_string_release(str);
 		} else {
 			zend_illegal_array_offset_access(offset);
 			zval_ptr_dtor_nogc(expr_ptr);
@@ -83078,6 +83312,15 @@ num_index:
 			ZVAL_UNDEFINED_OP2();
 			str = ZSTR_EMPTY_ALLOC();
 			goto str_index;
+		} else if (Z_TYPE_P(offset) == IS_BIGINT) {
+			zend_long lval;
+			if (zend_logical_int_to_long(offset, &lval)) {
+				hval = lval;
+				goto num_index;
+			}
+			str = zend_bigint_to_str(Z_BIG_P(offset));
+			zend_hash_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), str, expr_ptr);
+			zend_string_release(str);
 		} else {
 			zend_illegal_array_offset_access(offset);
 			zval_ptr_dtor_nogc(expr_ptr);
@@ -85186,6 +85429,15 @@ num_index:
 			ZVAL_UNDEFINED_OP2();
 			str = ZSTR_EMPTY_ALLOC();
 			goto str_index;
+		} else if (Z_TYPE_P(offset) == IS_BIGINT) {
+			zend_long lval;
+			if (zend_logical_int_to_long(offset, &lval)) {
+				hval = lval;
+				goto num_index;
+			}
+			str = zend_bigint_to_str(Z_BIG_P(offset));
+			zend_hash_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), str, expr_ptr);
+			zend_string_release(str);
 		} else {
 			zend_illegal_array_offset_access(offset);
 			zval_ptr_dtor_nogc(expr_ptr);
@@ -97097,6 +97349,15 @@ num_index:
 			ZVAL_UNDEFINED_OP2();
 			str = ZSTR_EMPTY_ALLOC();
 			goto str_index;
+		} else if (Z_TYPE_P(offset) == IS_BIGINT) {
+			zend_long lval;
+			if (zend_logical_int_to_long(offset, &lval)) {
+				hval = lval;
+				goto num_index;
+			}
+			str = zend_bigint_to_str(Z_BIG_P(offset));
+			zend_hash_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), str, expr_ptr);
+			zend_string_release(str);
 		} else {
 			zend_illegal_array_offset_access(offset);
 			zval_ptr_dtor_nogc(expr_ptr);
@@ -100770,6 +101031,15 @@ num_index:
 			ZVAL_UNDEFINED_OP2();
 			str = ZSTR_EMPTY_ALLOC();
 			goto str_index;
+		} else if (Z_TYPE_P(offset) == IS_BIGINT) {
+			zend_long lval;
+			if (zend_logical_int_to_long(offset, &lval)) {
+				hval = lval;
+				goto num_index;
+			}
+			str = zend_bigint_to_str(Z_BIG_P(offset));
+			zend_hash_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), str, expr_ptr);
+			zend_string_release(str);
 		} else {
 			zend_illegal_array_offset_access(offset);
 			zval_ptr_dtor_nogc(expr_ptr);
@@ -102389,6 +102659,15 @@ num_index:
 			ZVAL_UNDEFINED_OP2();
 			str = ZSTR_EMPTY_ALLOC();
 			goto str_index;
+		} else if (Z_TYPE_P(offset) == IS_BIGINT) {
+			zend_long lval;
+			if (zend_logical_int_to_long(offset, &lval)) {
+				hval = lval;
+				goto num_index;
+			}
+			str = zend_bigint_to_str(Z_BIG_P(offset));
+			zend_hash_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), str, expr_ptr);
+			zend_string_release(str);
 		} else {
 			zend_illegal_array_offset_access(offset);
 			zval_ptr_dtor_nogc(expr_ptr);
@@ -105854,6 +106133,15 @@ num_index:
 			ZVAL_UNDEFINED_OP2();
 			str = ZSTR_EMPTY_ALLOC();
 			goto str_index;
+		} else if (Z_TYPE_P(offset) == IS_BIGINT) {
+			zend_long lval;
+			if (zend_logical_int_to_long(offset, &lval)) {
+				hval = lval;
+				goto num_index;
+			}
+			str = zend_bigint_to_str(Z_BIG_P(offset));
+			zend_hash_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), str, expr_ptr);
+			zend_string_release(str);
 		} else {
 			zend_illegal_array_offset_access(offset);
 			zval_ptr_dtor_nogc(expr_ptr);
