@@ -38,10 +38,27 @@ struct php_serialize_data {
 
 #define COMMON (is_ref ? "&" : "")
 
+static zend_result php_array_bigint_key_check(const zend_string *key)
+{
+	if (UNEXPECTED(zend_int_string_exceeds_digit_limit(ZSTR_VAL(key), ZSTR_LEN(key)))) {
+		zend_value_error(
+			"Integer too large to convert to string; it exceeds the limit of "
+			ZEND_LONG_FMT " digits, configurable via the zend.int_string_max_digits setting",
+			EG(int_string_max_digits));
+		return FAILURE;
+	}
+	return SUCCESS;
+}
+
 static void php_array_element_dump(zval *zv, zend_ulong index, zend_string *key, int level) /* {{{ */
 {
 	if (key == NULL) { /* numeric key */
 		php_printf("%*c[" ZEND_LONG_FMT "]=>\n", level + 1, ' ', index);
+	} else if (zend_string_is_canonical_bigint_key(key)) {
+		if (UNEXPECTED(php_array_bigint_key_check(key) == FAILURE)) {
+			return;
+		}
+		php_printf("%*c[%s]=>\n", level + 1, ' ', ZSTR_VAL(key));
 	} else { /* string key */
 		php_printf("%*c[\"", level + 1, ' ');
 		PHPWRITE(ZSTR_VAL(key), ZSTR_LEN(key));
@@ -270,6 +287,11 @@ static void zval_array_element_dump(zval *zv, zend_ulong index, zend_string *key
 {
 	if (key == NULL) { /* numeric key */
 		php_printf("%*c[" ZEND_LONG_FMT "]=>\n", level + 1, ' ', index);
+	} else if (zend_string_is_canonical_bigint_key(key)) {
+		if (UNEXPECTED(php_array_bigint_key_check(key) == FAILURE)) {
+			return;
+		}
+		php_printf("%*c[%s]=>\n", level + 1, ' ', ZSTR_VAL(key));
 	} else { /* string key */
 		php_printf("%*c[\"", level + 1, ' ');
 		PHPWRITE(ZSTR_VAL(key), ZSTR_LEN(key));
@@ -486,6 +508,13 @@ static zend_result php_array_element_export(zval *zv, zend_ulong index, zend_str
 		smart_str_append_long(buf, (zend_long) index);
 		smart_str_appendl(buf, " => ", 4);
 
+	} else if (zend_string_is_canonical_bigint_key(key)) {
+		if (UNEXPECTED(php_array_bigint_key_check(key) == FAILURE)) {
+			return FAILURE;
+		}
+		buffer_append_spaces(buf, level + 1);
+		smart_str_append(buf, (zend_string *) key);
+		smart_str_appendl(buf, " => ", 4);
 	} else { /* string key */
 		zend_string *tmp_str;
 		zend_string *ckey = php_addcslashes(key, "'\\", 2);
