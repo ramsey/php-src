@@ -7335,11 +7335,7 @@ ZEND_VM_HOT_HANDLER(78, ZEND_FE_FETCH_R, TMP, ANY, JMP_ADDR)
 		}
 		Z_FE_POS_P(array) = pos;
 		if (RETURN_VALUE_USED(opline)) {
-			if (!p->key) {
-				ZVAL_LONG(EX_VAR(opline->result.var), p->h);
-			} else {
-				ZVAL_STR_COPY(EX_VAR(opline->result.var), p->key);
-			}
+			zend_array_key_to_zval(EX_VAR(opline->result.var), p->key, p->h);
 		}
 	}
 	if (EXPECTED(OP2_TYPE == IS_CV)) {
@@ -7417,11 +7413,7 @@ ZEND_VM_HANDLER(126, ZEND_FE_FETCH_RW, VAR, ANY, JMP_ADDR)
 			}
 			EG(ht_iterators)[Z_FE_ITER_P(EX_VAR(opline->op1.var))].pos = pos;
 			if (RETURN_VALUE_USED(opline)) {
-				if (!p->key) {
-					ZVAL_LONG(EX_VAR(opline->result.var), p->h);
-				} else {
-					ZVAL_STR_COPY(EX_VAR(opline->result.var), p->key);
-				}
+				zend_array_key_to_zval(EX_VAR(opline->result.var), p->key, p->h);
 			}
 		}
 	} else if (EXPECTED(Z_TYPE_P(array) == IS_OBJECT)) {
@@ -10712,11 +10704,7 @@ ZEND_VM_HOT_TYPE_SPEC_HANDLER(ZEND_FE_FETCH_R, op->op2_type == IS_CV && (op1_inf
 		}
 		Z_FE_POS_P(array) = pos;
 		if (RETURN_VALUE_USED(opline)) {
-			if (!p->key) {
-				ZVAL_LONG(EX_VAR(opline->result.var), p->h);
-			} else {
-				ZVAL_STR_COPY(EX_VAR(opline->result.var), p->key);
-			}
+			zend_array_key_to_zval(EX_VAR(opline->result.var), p->key, p->h);
 		}
 	}
 
