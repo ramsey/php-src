@@ -192,6 +192,13 @@ ZEND_API uint8_t ZEND_FASTCALL is_numeric_str_function(const zend_string *str, z
 ZEND_API uint8_t ZEND_FASTCALL zend_string_to_number(const char *str, size_t len,
 	bool allow_errors, zval *result, bool *trailing_data);
 
+/* Weak-coerces a string arg for an int target. If its integer value is out of
+ * long range, it replaces arg in place with a bigint and returns true. Returns
+ * false (arg unchanged) when the string is not an out-of-range integer, so the
+ * caller applies its normal long coercion. Honors zend.int_string_max_digits;
+ * an over-limit string throws and returns false with an exception pending. */
+ZEND_API bool ZEND_FASTCALL zend_try_string_arg_to_bigint(zval *arg);
+
 static zend_always_inline const char *
 zend_memnstr(const char *haystack, const char *needle, size_t needle_len, const char *end)
 {

@@ -782,6 +782,36 @@ ZEND_API bool ZEND_FASTCALL zend_parse_arg_number_slow(zval *arg, zval **dest, u
 }
 /* }}} */
 
+/* Logical int|float slow path (Z_PARAM_INT_OR_FLOAT). A bigint argument is
+ * handled in the inline fast path, so this only weak-coerces the remaining types. */
+ZEND_API bool ZEND_FASTCALL zend_parse_arg_int_or_float_slow(zval *arg, zval **dest, uint32_t arg_num) /* {{{ */
+{
+	if (UNEXPECTED(ZEND_ARG_USES_STRICT_TYPES())) {
+		return false;
+	}
+	if (Z_TYPE_P(arg) == IS_STRING) {
+		zend_string *str = Z_STR_P(arg);
+		zval holder;
+		if (zend_string_to_number(ZSTR_VAL(str), ZSTR_LEN(str), false, &holder, NULL) == 0) {
+			return false;
+		}
+		ZVAL_COPY_VALUE(arg, &holder);
+		zend_string_release(str);
+	} else if (Z_TYPE_P(arg) < IS_TRUE) {
+		if (UNEXPECTED(Z_TYPE_P(arg) == IS_NULL) && !zend_null_arg_deprecated("int|float", arg_num)) {
+			return false;
+		}
+		ZVAL_LONG(arg, 0);
+	} else if (Z_TYPE_P(arg) == IS_TRUE) {
+		ZVAL_LONG(arg, 1);
+	} else {
+		return false;
+	}
+	*dest = arg;
+	return true;
+}
+/* }}} */
+
 
 ZEND_API bool ZEND_FASTCALL zend_parse_arg_number_or_str_slow(zval *arg, zval **dest, uint32_t arg_num) /* {{{ */
 {
@@ -822,6 +852,15 @@ ZEND_API bool ZEND_FASTCALL zend_parse_arg_int_slow(zval *arg, zval **dest, uint
 {
 	if (UNEXPECTED(ZEND_ARG_USES_STRICT_TYPES())) {
 		return false;
+	}
+	if (Z_TYPE_P(arg) == IS_STRING) {
+		if (zend_try_string_arg_to_bigint(arg)) {
+			*dest = arg;
+			return true;
+		}
+		if (UNEXPECTED(EG(exception))) {
+			return false;
+		}
 	}
 	zend_long lval;
 	if (!zend_parse_arg_long_weak(arg, &lval, arg_num)) {

@@ -4660,6 +4660,23 @@ ZEND_API uint8_t ZEND_FASTCALL zend_string_to_number(const char *str, size_t len
 }
 /* }}} */
 
+ZEND_API bool ZEND_FASTCALL zend_try_string_arg_to_bigint(zval *arg) /* {{{ */
+{
+	ZEND_ASSERT(Z_TYPE_P(arg) == IS_STRING);
+	zval holder;
+	/* Only an out-of-range integer string yields a bigint here; an in-range
+	 * integer or a float string returns false, so the caller applies its long
+	 * coercion. A string over zend.int_string_max_digits throws and returns
+	 * false with an exception pending. */
+	if (zend_string_to_number(Z_STRVAL_P(arg), Z_STRLEN_P(arg), false, &holder, NULL) == IS_BIGINT) {
+		zend_string_release(Z_STR_P(arg));
+		ZVAL_COPY_VALUE(arg, &holder);
+		return true;
+	}
+	return false;
+}
+/* }}} */
+
 /*
  * String matching - Sunday algorithm
  * http://www.iti.fh-flensburg.de/lang/algorithmen/pattern/sundayen.htm

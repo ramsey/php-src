@@ -37,12 +37,8 @@ try {
     echo get_class($e) . ': ' . $e->getMessage() . "\n";
 }
 
-// Out-of-range numeric string results in a TypeError (string-to-bigint promotion deferred)
-try {
-    zend_test_zpp_int('18446744073709551616');
-} catch (TypeError $e) {
-    echo get_class($e) . ": " . $e->getMessage() . "\n";
-}
+// Out-of-range numeric string coerces to a bigint in weak mode (full precision)
+var_dump(zend_test_zpp_int('18446744073709551616') === 2 ** 64);
 
 // Out-of-range float results in a TypeError (float-to-bigint promotion deferred, like strings)
 try {
@@ -78,7 +74,7 @@ int(0)
 Deprecated: Implicit conversion from float 5.5 to int loses precision in %s on line %d
 int(5)
 TypeError: zend_test_zpp_int(): Argument #1 ($i) must be of type int, string given
-TypeError: zend_test_zpp_int(): Argument #1 ($i) must be of type int, string given
+bool(true)
 TypeError: zend_test_zpp_int(): Argument #1 ($i) must be of type int, float given
 
 Deprecated: zend_test_zpp_int(): Passing null to parameter #1 ($i) of type int is deprecated in %s on line %d

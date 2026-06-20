@@ -753,23 +753,30 @@ static bool zend_verify_weak_scalar_type_hint(uint32_t type_mask, zval *arg)
 		/* For an int|float union type and string value,
 		 * determine chosen type by is_numeric_string() semantics. */
 		if ((type_mask & MAY_BE_DOUBLE) && Z_TYPE_P(arg) == IS_STRING) {
-			uint8_t type = is_numeric_str_function(Z_STR_P(arg), &lval, &dval);
-			if (type == IS_LONG) {
+			zval holder;
+			uint8_t type = zend_string_to_number(Z_STRVAL_P(arg), Z_STRLEN_P(arg), false, &holder, NULL);
+			if (type != 0) {
 				zend_string_release(Z_STR_P(arg));
+				ZVAL_COPY_VALUE(arg, &holder);
+				return true;
+			}
+			if (UNEXPECTED(EG(exception))) {
+				return false;
+			}
+		} else {
+			if (Z_TYPE_P(arg) == IS_STRING && zend_try_string_arg_to_bigint(arg)) {
+				return true;
+			}
+			if (UNEXPECTED(EG(exception))) {
+				return false;
+			}
+			if (zend_parse_arg_long_weak(arg, &lval, 0)) {
+				zval_ptr_dtor(arg);
 				ZVAL_LONG(arg, lval);
 				return true;
+			} else if (UNEXPECTED(EG(exception))) {
+				return false;
 			}
-			if (type == IS_DOUBLE) {
-				zend_string_release(Z_STR_P(arg));
-				ZVAL_DOUBLE(arg, dval);
-				return true;
-			}
-		} else if (zend_parse_arg_long_weak(arg, &lval, 0)) {
-			zval_ptr_dtor(arg);
-			ZVAL_LONG(arg, lval);
-			return true;
-		} else if (UNEXPECTED(EG(exception))) {
-			return false;
 		}
 	}
 	if (type_mask & MAY_BE_DOUBLE) {
@@ -816,6 +823,15 @@ static bool zend_verify_weak_scalar_type_hint_no_sideeffect(uint32_t type_mask, 
 	/* A bigint is already an int; it is acceptable wherever long is. */
 	if (zend_bigint_satisfies_long_mask(arg, type_mask)) {
 		return true;
+	}
+
+	/* A numeric string whose integer value is out of long range coerces to a bigint. */
+	if ((type_mask & MAY_BE_LONG) && Z_TYPE_P(arg) == IS_STRING) {
+		int oflow = 0;
+		if (is_numeric_string_ex(Z_STRVAL_P(arg), Z_STRLEN_P(arg), &lval, NULL, false, &oflow, NULL) == IS_DOUBLE
+				&& oflow != 0) {
+			return true;
+		}
 	}
 
 	/* Pass (uint32_t)-1 as arg_num to indicate to ZPP not to emit any deprecation notice,

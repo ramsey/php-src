@@ -44,5 +44,4 @@ string(2) "13"
 string(2) "12"
 int(1)
 int(%d)
-Cannot assign string to property Foo::$i of type int
 int(%d)
