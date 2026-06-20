@@ -2,6 +2,7 @@
 Test binary operands exposing the same behavior at compile as at run time
 --INI--
 memory_limit=256M
+zend.int_string_max_digits=0
 --SKIPIF--
 <?php
 if (getenv("SKIP_SLOW_TESTS")) die('skip slow test');

@@ -338,14 +338,16 @@ static zend_never_inline zend_result ZEND_FASTCALL _zendi_try_convert_scalar_to_
 		{
 			bool trailing_data = false;
 			/* For BC reasons we allow errors so that we can warn on leading numeric string */
-			if (0 == (Z_TYPE_INFO_P(holder) = is_numeric_string_ex(Z_STRVAL_P(op), Z_STRLEN_P(op),
-					&Z_LVAL_P(holder), &Z_DVAL_P(holder),  /* allow errors */ true, NULL, &trailing_data))) {
-				/* Will lead to invalid OP type error */
+			if (0 == zend_string_to_number(Z_STRVAL_P(op), Z_STRLEN_P(op), /* allow errors */ true,
+					holder, &trailing_data)) {
+				/* Non-numeric or reached the digit limit; leads to an invalid OP type error. */
 				return FAILURE;
 			}
 			if (UNEXPECTED(trailing_data)) {
 				zend_error(E_WARNING, "A non-numeric value encountered");
 				if (UNEXPECTED(EG(exception))) {
+					/* holder may hold a bigint if the operand overflowed long. */
+					zval_ptr_dtor(holder);
 					return FAILURE;
 				}
 			}
@@ -1288,6 +1290,26 @@ ZEND_API void ZEND_FASTCALL zend_bigint_long_overflow_mul(zval *result, zend_lon
 	ZVAL_BIGINT(result, big);
 }
 
+static zend_always_inline void zendi_flatten_bigint_to_double(zval *op)
+{
+	if (Z_TYPE_P(op) == IS_BIGINT) {
+		double d = zend_bigint_to_double(Z_BIG_P(op));
+		zval_ptr_dtor(op);
+		ZVAL_DOUBLE(op, d);
+	}
+}
+
+/* The integer fast paths handle bigint+bigint and bigint+long directly; a bigint paired with a
+ * double makes the float dominate, so flatten the bigint to a double before re-dispatching. */
+static zend_always_inline void zendi_normalize_number_pair(zval *op1, zval *op2)
+{
+	if (Z_TYPE_P(op1) == IS_DOUBLE) {
+		zendi_flatten_bigint_to_double(op2);
+	} else if (Z_TYPE_P(op2) == IS_DOUBLE) {
+		zendi_flatten_bigint_to_double(op1);
+	}
+}
+
 static zend_always_inline zend_result add_function_fast(zval *result, zval *op1, zval *op2) /* {{{ */
 {
 	uint8_t type_pair = TYPE_PAIR(Z_TYPE_P(op1), Z_TYPE_P(op2));
@@ -1341,8 +1363,16 @@ static zend_never_inline zend_result ZEND_FASTCALL add_function_slow(zval *resul
 	ZEND_TRY_BINARY_OBJECT_OPERATION(ZEND_ADD);
 
 	zval op1_copy, op2_copy;
-	if (UNEXPECTED(zendi_try_convert_scalar_to_number(op1, &op1_copy) == FAILURE)
-			|| UNEXPECTED(zendi_try_convert_scalar_to_number(op2, &op2_copy) == FAILURE)) {
+	if (UNEXPECTED(zendi_try_convert_scalar_to_number(op1, &op1_copy) == FAILURE)) {
+		zend_binop_error("+", op1, op2);
+		if (result != op1) {
+			ZVAL_UNDEF(result);
+		}
+		return FAILURE;
+	}
+	if (UNEXPECTED(zendi_try_convert_scalar_to_number(op2, &op2_copy) == FAILURE)) {
+		/* op1 coerced successfully and may be a bigint; release it before bailing. */
+		zval_ptr_dtor(&op1_copy);
 		zend_binop_error("+", op1, op2);
 		if (result != op1) {
 			ZVAL_UNDEF(result);
@@ -1350,11 +1380,16 @@ static zend_never_inline zend_result ZEND_FASTCALL add_function_slow(zval *resul
 		return FAILURE;
 	}
 
+	zendi_normalize_number_pair(&op1_copy, &op2_copy);
+
 	if (result == op1) {
 		zval_ptr_dtor(result);
 	}
 
-	if (add_function_fast(result, &op1_copy, &op2_copy) == SUCCESS) {
+	zend_result status = add_function_fast(result, &op1_copy, &op2_copy);
+	zval_ptr_dtor(&op1_copy);
+	zval_ptr_dtor(&op2_copy);
+	if (status == SUCCESS) {
 		return SUCCESS;
 	}
 
@@ -1423,8 +1458,16 @@ static zend_never_inline zend_result ZEND_FASTCALL sub_function_slow(zval *resul
 	ZEND_TRY_BINARY_OBJECT_OPERATION(ZEND_SUB);
 
 	zval op1_copy, op2_copy;
-	if (UNEXPECTED(zendi_try_convert_scalar_to_number(op1, &op1_copy) == FAILURE)
-			|| UNEXPECTED(zendi_try_convert_scalar_to_number(op2, &op2_copy) == FAILURE)) {
+	if (UNEXPECTED(zendi_try_convert_scalar_to_number(op1, &op1_copy) == FAILURE)) {
+		zend_binop_error("-", op1, op2);
+		if (result != op1) {
+			ZVAL_UNDEF(result);
+		}
+		return FAILURE;
+	}
+	if (UNEXPECTED(zendi_try_convert_scalar_to_number(op2, &op2_copy) == FAILURE)) {
+		/* op1 coerced successfully and may be a bigint; release it before bailing. */
+		zval_ptr_dtor(&op1_copy);
 		zend_binop_error("-", op1, op2);
 		if (result != op1) {
 			ZVAL_UNDEF(result);
@@ -1432,11 +1475,16 @@ static zend_never_inline zend_result ZEND_FASTCALL sub_function_slow(zval *resul
 		return FAILURE;
 	}
 
+	zendi_normalize_number_pair(&op1_copy, &op2_copy);
+
 	if (result == op1) {
 		zval_ptr_dtor(result);
 	}
 
-	if (sub_function_fast(result, &op1_copy, &op2_copy) == SUCCESS) {
+	zend_result status = sub_function_fast(result, &op1_copy, &op2_copy);
+	zval_ptr_dtor(&op1_copy);
+	zval_ptr_dtor(&op2_copy);
+	if (status == SUCCESS) {
 		return SUCCESS;
 	}
 
@@ -1506,8 +1554,16 @@ static zend_never_inline zend_result ZEND_FASTCALL mul_function_slow(zval *resul
 	ZEND_TRY_BINARY_OBJECT_OPERATION(ZEND_MUL);
 
 	zval op1_copy, op2_copy;
-	if (UNEXPECTED(zendi_try_convert_scalar_to_number(op1, &op1_copy) == FAILURE)
-			|| UNEXPECTED(zendi_try_convert_scalar_to_number(op2, &op2_copy) == FAILURE)) {
+	if (UNEXPECTED(zendi_try_convert_scalar_to_number(op1, &op1_copy) == FAILURE)) {
+		zend_binop_error("*", op1, op2);
+		if (result != op1) {
+			ZVAL_UNDEF(result);
+		}
+		return FAILURE;
+	}
+	if (UNEXPECTED(zendi_try_convert_scalar_to_number(op2, &op2_copy) == FAILURE)) {
+		/* op1 coerced successfully and may be a bigint; release it before bailing. */
+		zval_ptr_dtor(&op1_copy);
 		zend_binop_error("*", op1, op2);
 		if (result != op1) {
 			ZVAL_UNDEF(result);
@@ -1515,11 +1571,16 @@ static zend_never_inline zend_result ZEND_FASTCALL mul_function_slow(zval *resul
 		return FAILURE;
 	}
 
+	zendi_normalize_number_pair(&op1_copy, &op2_copy);
+
 	if (result == op1) {
 		zval_ptr_dtor(result);
 	}
 
-	if (mul_function_fast(result, &op1_copy, &op2_copy) == SUCCESS) {
+	zend_result status = mul_function_fast(result, &op1_copy, &op2_copy);
+	zval_ptr_dtor(&op1_copy);
+	zval_ptr_dtor(&op2_copy);
+	if (status == SUCCESS) {
 		return SUCCESS;
 	}
 
@@ -1669,8 +1730,16 @@ ZEND_API zend_result ZEND_FASTCALL pow_function(zval *result, zval *op1, zval *o
 	ZEND_TRY_BINARY_OBJECT_OPERATION(ZEND_POW);
 
 	zval op1_copy, op2_copy;
-	if (UNEXPECTED(zendi_try_convert_scalar_to_number(op1, &op1_copy) == FAILURE)
-			|| UNEXPECTED(zendi_try_convert_scalar_to_number(op2, &op2_copy) == FAILURE)) {
+	if (UNEXPECTED(zendi_try_convert_scalar_to_number(op1, &op1_copy) == FAILURE)) {
+		zend_binop_error("**", op1, op2);
+		if (result != op1) {
+			ZVAL_UNDEF(result);
+		}
+		return FAILURE;
+	}
+	if (UNEXPECTED(zendi_try_convert_scalar_to_number(op2, &op2_copy) == FAILURE)) {
+		/* op1 coerced successfully and may be a bigint; release it before bailing. */
+		zval_ptr_dtor(&op1_copy);
 		zend_binop_error("**", op1, op2);
 		if (result != op1) {
 			ZVAL_UNDEF(result);
@@ -1678,11 +1747,22 @@ ZEND_API zend_result ZEND_FASTCALL pow_function(zval *result, zval *op1, zval *o
 		return FAILURE;
 	}
 
+	/* pow_function_base only computes a bigint base raised to a long exponent. A bigint
+	 * exponent has no integer result yet (deferred), and a double operand yields a double, so
+	 * flatten every other bigint combination to a double before re-dispatching. */
+	if (!(Z_TYPE(op1_copy) == IS_BIGINT && Z_TYPE(op2_copy) == IS_LONG)) {
+		zendi_flatten_bigint_to_double(&op1_copy);
+		zendi_flatten_bigint_to_double(&op2_copy);
+	}
+
 	if (result == op1) {
 		zval_ptr_dtor(result);
 	}
 
-	if (pow_function_base(result, &op1_copy, &op2_copy) == SUCCESS) {
+	zend_result status = pow_function_base(result, &op1_copy, &op2_copy);
+	zval_ptr_dtor(&op1_copy);
+	zval_ptr_dtor(&op2_copy);
+	if (status == SUCCESS) {
 		return SUCCESS;
 	}
 
@@ -1782,8 +1862,16 @@ ZEND_API zend_result ZEND_FASTCALL div_function(zval *result, zval *op1, zval *o
 	ZEND_TRY_BINARY_OBJECT_OPERATION(ZEND_DIV);
 
 	zval result_copy, op1_copy, op2_copy;
-	if (UNEXPECTED(zendi_try_convert_scalar_to_number(op1, &op1_copy) == FAILURE)
-			|| UNEXPECTED(zendi_try_convert_scalar_to_number(op2, &op2_copy) == FAILURE)) {
+	if (UNEXPECTED(zendi_try_convert_scalar_to_number(op1, &op1_copy) == FAILURE)) {
+		zend_binop_error("/", op1, op2);
+		if (result != op1) {
+			ZVAL_UNDEF(result);
+		}
+		return FAILURE;
+	}
+	if (UNEXPECTED(zendi_try_convert_scalar_to_number(op2, &op2_copy) == FAILURE)) {
+		/* op1 coerced successfully and may be a bigint; release it before bailing. */
+		zval_ptr_dtor(&op1_copy);
 		zend_binop_error("/", op1, op2);
 		if (result != op1) {
 			ZVAL_UNDEF(result);
@@ -1791,7 +1879,11 @@ ZEND_API zend_result ZEND_FASTCALL div_function(zval *result, zval *op1, zval *o
 		return FAILURE;
 	}
 
+	zendi_normalize_number_pair(&op1_copy, &op2_copy);
+
 	retval = div_function_base(&result_copy, &op1_copy, &op2_copy);
+	zval_ptr_dtor(&op1_copy);
+	zval_ptr_dtor(&op2_copy);
 	if (retval == DIV_SUCCESS) {
 		if (result == op1) {
 			zval_ptr_dtor(result);
