@@ -1933,14 +1933,44 @@ div_by_zero:
 }
 /* }}} */
 
+/* Convert a scalar operand into a holder for the integer-operator bigint path.
+ * An out-of-range integer numeric string becomes a bigint (*is_bigint = true);
+ * any other value is copied verbatim, so the *_bigint helper applies its
+ * existing zendi_try_get_long coercion/error. */
+static zend_always_inline zend_result zend_op_to_bigint_holder(zval *op, zval *holder, bool *is_bigint)
+{
+	*is_bigint = false;
+	if (Z_TYPE_P(op) == IS_STRING) {
+		bool trailing = false;
+		uint8_t type = zend_string_to_number(Z_STRVAL_P(op), Z_STRLEN_P(op),true, holder, &trailing);
+		if (type == IS_BIGINT) {
+			if (UNEXPECTED(trailing)) {
+				zend_error(E_WARNING, "A non-numeric value encountered");
+				if (UNEXPECTED(EG(exception))) {
+					zval_ptr_dtor(holder);
+					return FAILURE;
+				}
+			}
+			*is_bigint = true;
+			return SUCCESS;
+		}
+		if (UNEXPECTED(type == 0 && EG(exception))) {
+			return FAILURE;
+		}
+	}
+	ZVAL_COPY(holder, op);
+	return SUCCESS;
+}
+
 static zend_never_inline zend_result ZEND_FASTCALL mod_function_bigint(zval *result, zval *op1, zval *op2)
 {
 	/* op1 and op2 are already dereferenced and at least one is an IS_BIGINT.
-	 * "%" coerces its operands to integers, so a bigint operand keeps its full
-	 * value while any other operand is coerced to a long (a coerced value is
-	 * never itself a bigint). The truncated remainder always satisfies
-	 * |result| < |divisor|, so a long divisor yields a long result; only a
-	 * bigint divisor can leave a bigint remainder. */
+	 * "%" coerces its operands to integers; an out-of-range integer string is
+	 * promoted to a bigint before dispatch, so a non-bigint operand here is a
+	 * long or another value coerced via zendi_try_get_long, never an overflowing
+	 * string. The truncated remainder always satisfies |result| < |divisor|, so a
+	 * long divisor yields a long result; only a bigint divisor can leave a bigint
+	 * remainder. */
 	bool op1_is_big = Z_TYPE_P(op1) == IS_BIGINT;
 	bool op2_is_big = Z_TYPE_P(op2) == IS_BIGINT;
 	zend_long op1_lval = 0, op2_lval = 0;
@@ -2005,6 +2035,35 @@ ZEND_API zend_result ZEND_FASTCALL mod_function(zval *result, zval *op1, zval *o
 
 	if (UNEXPECTED(Z_TYPE_P(op1) == IS_BIGINT) || UNEXPECTED(Z_TYPE_P(op2) == IS_BIGINT)) {
 		return mod_function_bigint(result, op1, op2);
+	}
+
+	if (UNEXPECTED(Z_TYPE_P(op1) == IS_STRING) || UNEXPECTED(Z_TYPE_P(op2) == IS_STRING)) {
+		zval op1_holder, op2_holder;
+		bool op1_big, op2_big;
+		if (UNEXPECTED(zend_op_to_bigint_holder(op1, &op1_holder, &op1_big) == FAILURE)) {
+			if (result != op1) {
+				ZVAL_UNDEF(result);
+			}
+			return FAILURE;
+		}
+		if (UNEXPECTED(zend_op_to_bigint_holder(op2, &op2_holder, &op2_big) == FAILURE)) {
+			zval_ptr_dtor(&op1_holder);
+			if (result != op1) {
+				ZVAL_UNDEF(result);
+			}
+			return FAILURE;
+		}
+		if (op1_big || op2_big) {
+			if (op1 == result) {
+				zval_ptr_dtor(result);
+			}
+			zend_result status = mod_function_bigint(result, &op1_holder, &op2_holder);
+			zval_ptr_dtor(&op1_holder);
+			zval_ptr_dtor(&op2_holder);
+			return status;
+		}
+		zval_ptr_dtor(&op1_holder);
+		zval_ptr_dtor(&op2_holder);
 	}
 
 	convert_op1_op2_long(op1, op1_lval, op2, op2_lval, result, ZEND_MOD, "%");
