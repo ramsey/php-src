@@ -3328,6 +3328,101 @@ static int compare_double_to_string(double dval, const zend_string *str) /* {{{ 
 }
 /* }}} */
 
+/* Locate the integer span of a numeric string already validated as an
+ * out-of-range integer. Skip leading whitespace. *start points at the optional
+ * sign or first digit. *digit_end points just past the digit run. The span
+ * [*start, *digit_end] is what the bigint parser consumes (sign and leading
+ * zeros included); the scan stops at the first non-digit (e.g., trailing
+ * whitespace). */
+static void zend_locate_integer_span(const char *s, size_t len, const char **start, const char **digit_end) /* {{{ */
+{
+	const char *p = s;
+	const char *end = s + len;
+	while (p < end && (*p == ' ' || *p == '\t' || *p == '\n' || *p == '\r' || *p == '\v' || *p == '\f')) {
+		p++;
+	}
+	*start = p;
+	if (p < end && (*p == '+' || *p == '-')) {
+		p++;
+	}
+	while (p < end && ZEND_IS_DIGIT(*p)) {
+		p++;
+	}
+	*digit_end = p;
+}
+/* }}} */
+
+/* Significant decimal-digit run (sign and leading zeros stripped) of an integer
+ * string, so we can compare the magnitude of two integers without materializing
+ * a bignum. */
+static void zend_extract_decimal_magnitude(const char *s, size_t len, const char **digits, size_t *ndigits) /* {{{ */
+{
+	const char *p, *end;
+	zend_locate_integer_span(s, len, &p, &end);
+	if (p < end && (*p == '+' || *p == '-')) {
+		p++;
+	}
+	while (p < end && *p == '0') {
+		p++;
+	}
+	*digits = p;
+	*ndigits = (size_t) (end - p);
+}
+/* }}} */
+
+/* Compare the magnitudes (ignoring sign) of two decimal integer strings by
+ * significant-digit count, then lexicographically. Returns -1, 0, or 1. */
+static int zend_compare_decimal_magnitude(const char *a, size_t alen, const char *b, size_t blen) /* {{{ */
+{
+	const char *ad, *bd;
+	size_t an, bn;
+	zend_extract_decimal_magnitude(a, alen, &ad, &an);
+	zend_extract_decimal_magnitude(b, blen, &bd, &bn);
+	if (an != bn) {
+		return an < bn ? -1 : 1;
+	}
+	return ZEND_NORMALIZE_BOOL(memcmp(ad, bd, an));
+}
+/* }}} */
+
+static int compare_bigint_to_string(const zend_bigint *big, const zend_string *str) /* {{{ */
+{
+	zend_long str_lval;
+	double str_dval;
+	int oflow;
+	uint8_t type = is_numeric_string_ex(ZSTR_VAL(str), ZSTR_LEN(str), &str_lval, &str_dval, 0, &oflow, NULL);
+
+	if (type == IS_LONG) {
+		return zend_bigint_cmp_long(big, str_lval);
+	}
+
+	if (type == IS_DOUBLE) {
+		if (oflow != 0) {
+			/* The string is an integer out of long range. Compare exactly by
+			 * sign and magnitude, without building a bigint from the string. */
+			int big_sign = zend_bigint_sign(big);
+			if (big_sign != oflow) {
+				return big_sign < oflow ? -1 : 1;
+			}
+			zend_string *big_str = zend_bigint_to_str(big);
+			int mag = zend_compare_decimal_magnitude(ZSTR_VAL(big_str), ZSTR_LEN(big_str), ZSTR_VAL(str), ZSTR_LEN(str));
+			zend_string_release(big_str);
+			return oflow > 0 ? mag : -mag;
+		}
+		/* str is a genuine float. A bigint compares to it in the same way a
+		 * long does (i.e., lossy). */
+		return ZEND_THREEWAY_COMPARE(zend_bigint_to_double(big), str_dval);
+	}
+
+	/* str is a non-numeric string. Cast the bigint to its decimal string value
+	 * and use byte comparison. */
+	zend_string *big_str = zend_bigint_to_str(big);
+	int cmp_result = zend_binary_strcmp(ZSTR_VAL(big_str), ZSTR_LEN(big_str), ZSTR_VAL(str), ZSTR_LEN(str));
+	zend_string_release(big_str);
+	return ZEND_NORMALIZE_BOOL(cmp_result);
+}
+/* }}} */
+
 ZEND_API int ZEND_FASTCALL zend_compare(zval *op1, zval *op2) /* {{{ */
 {
 	bool converted = false;
@@ -3403,6 +3498,12 @@ ZEND_API int ZEND_FASTCALL zend_compare(zval *op1, zval *op2) /* {{{ */
 				}
 
 				return -compare_double_to_string(Z_DVAL_P(op2), Z_STR_P(op1));
+
+			case TYPE_PAIR(IS_BIGINT, IS_STRING):
+				return compare_bigint_to_string(Z_BIG_P(op1), Z_STR_P(op2));
+
+			case TYPE_PAIR(IS_STRING, IS_BIGINT):
+				return -compare_bigint_to_string(Z_BIG_P(op2), Z_STR_P(op1));
 
 			case TYPE_PAIR(IS_OBJECT, IS_NULL):
 				return 1;
@@ -4836,27 +4937,11 @@ ZEND_API uint8_t ZEND_FASTCALL zend_string_to_number(const char *str, size_t len
 		return IS_DOUBLE;
 	}
 
-	/* Since oflow_info == 0, we have a pure integer.
-	 * An integer string out of long range becomes a bigint. Find the exact
-	 * integer span, skipping leading whitespace and keeping an optional sign.
-	 * The scan stops at the first non-digit. */
-	const char *p = str;
-	const char *end = str + len;
-
-	while (p < end && (*p == ' ' || *p == '\t' || *p == '\n' || *p == '\r' || *p == '\v' || *p == '\f')) {
-		p++;
-	}
-
-	const char *num = p;
-	if (p < end && (*p == '+' || *p == '-')) {
-		p++;
-	}
-
-	while (p < end && ZEND_IS_DIGIT(*p)) {
-		p++;
-	}
-
-	size_t num_len = (size_t) (p - num);
+	/* oflow_info != 0, so we have an integer out of long range. It becomes a
+	 * bigint, parsed from its exact integer span (sign and leading zeros kept). */
+	const char *num, *num_end;
+	zend_locate_integer_span(str, len, &num, &num_end);
+	size_t num_len = (size_t) (num_end - num);
 
 	if (!zend_check_int_string_digit_limit(num, num_len)) {
 		/* Over the digit limit. A catchable ValueError is pending. */
