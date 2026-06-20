@@ -2806,6 +2806,35 @@ ZEND_API zend_result ZEND_FASTCALL shift_left_function(zval *result, zval *op1, 
 		return shift_left_function_bigint(result, op1, op2);
 	}
 
+	if (UNEXPECTED(Z_TYPE_P(op1) == IS_STRING) || UNEXPECTED(Z_TYPE_P(op2) == IS_STRING)) {
+		zval op1_holder, op2_holder;
+		bool op1_big, op2_big;
+		if (UNEXPECTED(zend_op_to_bigint_holder(op1, &op1_holder, &op1_big) == FAILURE)) {
+			if (result != op1) {
+				ZVAL_UNDEF(result);
+			}
+			return FAILURE;
+		}
+		if (UNEXPECTED(zend_op_to_bigint_holder(op2, &op2_holder, &op2_big) == FAILURE)) {
+			zval_ptr_dtor(&op1_holder);
+			if (result != op1) {
+				ZVAL_UNDEF(result);
+			}
+			return FAILURE;
+		}
+		if (op1_big || op2_big) {
+			if (op1 == result) {
+				zval_ptr_dtor(result);
+			}
+			zend_result status = shift_left_function_bigint(result, &op1_holder, &op2_holder);
+			zval_ptr_dtor(&op1_holder);
+			zval_ptr_dtor(&op2_holder);
+			return status;
+		}
+		zval_ptr_dtor(&op1_holder);
+		zval_ptr_dtor(&op2_holder);
+	}
+
 	convert_op1_op2_long(op1, op1_lval, op2, op2_lval, result, ZEND_SL, "<<");
 
 	if (UNEXPECTED(op2_lval < 0)) {
@@ -2951,6 +2980,35 @@ ZEND_API zend_result ZEND_FASTCALL shift_right_function(zval *result, zval *op1,
 
 	if (UNEXPECTED(Z_TYPE_P(op1) == IS_BIGINT) || UNEXPECTED(Z_TYPE_P(op2) == IS_BIGINT)) {
 		return shift_right_function_bigint(result, op1, op2);
+	}
+
+	if (UNEXPECTED(Z_TYPE_P(op1) == IS_STRING) || UNEXPECTED(Z_TYPE_P(op2) == IS_STRING)) {
+		zval op1_holder, op2_holder;
+		bool op1_big, op2_big;
+		if (UNEXPECTED(zend_op_to_bigint_holder(op1, &op1_holder, &op1_big) == FAILURE)) {
+			if (result != op1) {
+				ZVAL_UNDEF(result);
+			}
+			return FAILURE;
+		}
+		if (UNEXPECTED(zend_op_to_bigint_holder(op2, &op2_holder, &op2_big) == FAILURE)) {
+			zval_ptr_dtor(&op1_holder);
+			if (result != op1) {
+				ZVAL_UNDEF(result);
+			}
+			return FAILURE;
+		}
+		if (op1_big || op2_big) {
+			if (op1 == result) {
+				zval_ptr_dtor(result);
+			}
+			zend_result status = shift_right_function_bigint(result, &op1_holder, &op2_holder);
+			zval_ptr_dtor(&op1_holder);
+			zval_ptr_dtor(&op2_holder);
+			return status;
+		}
+		zval_ptr_dtor(&op1_holder);
+		zval_ptr_dtor(&op2_holder);
 	}
 
 	convert_op1_op2_long(op1, op1_lval, op2, op2_lval, result, ZEND_SR, ">>");
