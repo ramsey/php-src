@@ -21,5 +21,5 @@ echo "Done\n";
 ?>
 --EXPECT--
 int(-2147483649)
-float(-2147483649)
+int(-2147483649)
 Done

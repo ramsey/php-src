@@ -3522,25 +3522,34 @@ try_again:
 			ZVAL_LONG(op1, 1);
 			break;
 		case IS_STRING: {
-				zend_long lval;
-				double dval;
+				zval holder;
 
-				switch (is_numeric_str_function(Z_STR_P(op1), &lval, &dval)) {
+				switch (zend_string_to_number(Z_STRVAL_P(op1), Z_STRLEN_P(op1), false, &holder, NULL)) {
 					case IS_LONG:
 						zval_ptr_dtor_str(op1);
-						if (lval == ZEND_LONG_MAX) {
-							/* switch to double */
-							double d = (double)lval;
-							ZVAL_DOUBLE(op1, d+1);
+						if (Z_LVAL(holder) == ZEND_LONG_MAX) {
+							zend_bigint_long_overflow_add(op1, Z_LVAL(holder), 1);
 						} else {
-							ZVAL_LONG(op1, lval+1);
+							ZVAL_LONG(op1, Z_LVAL(holder) + 1);
 						}
 						break;
+					case IS_BIGINT: {
+						zend_bigint *r = zend_bigint_init();
+						zend_bigint_add_long(r, Z_BIG(holder), 1);
+						zend_bigint_release(Z_BIG(holder));
+						zval_ptr_dtor_str(op1);
+						zend_bigint_result(op1, r);
+						break;
+					}
 					case IS_DOUBLE:
 						zval_ptr_dtor_str(op1);
-						ZVAL_DOUBLE(op1, dval+1);
+						ZVAL_DOUBLE(op1, Z_DVAL(holder) + 1);
 						break;
 					default:
+						if (UNEXPECTED(EG(exception))) {
+							/* We have a pending digit limit exception. */
+							return FAILURE;
+						}
 						/* Perl style string increment */
 						increment_string(op1);
 						if (EG(exception)) {
@@ -3595,8 +3604,7 @@ try_again:
 
 ZEND_API zend_result ZEND_FASTCALL decrement_function(zval *op1) /* {{{ */
 {
-	zend_long lval;
-	double dval;
+	zval holder;
 
 try_again:
 	switch (Z_TYPE_P(op1)) {
@@ -3624,21 +3632,32 @@ try_again:
 				ZVAL_LONG(op1, -1);
 				break;
 			}
-			switch (is_numeric_str_function(Z_STR_P(op1), &lval, &dval)) {
+			switch (zend_string_to_number(Z_STRVAL_P(op1), Z_STRLEN_P(op1), false, &holder, NULL)) {
 				case IS_LONG:
 					zval_ptr_dtor_str(op1);
-					if (lval == ZEND_LONG_MIN) {
-						double d = (double)lval;
-						ZVAL_DOUBLE(op1, d-1);
+					if (Z_LVAL(holder) == ZEND_LONG_MIN) {
+						zend_bigint_long_overflow_sub(op1, Z_LVAL(holder), 1);
 					} else {
-						ZVAL_LONG(op1, lval-1);
+						ZVAL_LONG(op1, Z_LVAL(holder) - 1);
 					}
 					break;
+				case IS_BIGINT: {
+					zend_bigint *r = zend_bigint_init();
+					zend_bigint_add_long(r, Z_BIG(holder), -1);
+					zend_bigint_release(Z_BIG(holder));
+					zval_ptr_dtor_str(op1);
+					zend_bigint_result(op1, r);
+					break;
+				}
 				case IS_DOUBLE:
 					zval_ptr_dtor_str(op1);
-					ZVAL_DOUBLE(op1, dval - 1);
+					ZVAL_DOUBLE(op1, Z_DVAL(holder) - 1);
 					break;
 				default: {
+					if (UNEXPECTED(EG(exception))) {
+						/* We have a pending digit limit exception. */
+						return FAILURE;
+					}
 					/* Error handler can unset the variable */
 					zend_string *zstr = Z_STR_P(op1);
 					zend_string_addref(zstr);
