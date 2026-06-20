@@ -1,23 +1,20 @@
 --TEST--
-Bigint: bitwise operators and comparison still degrade an out-of-range numeric string (deferred)
+Bigint: comparison still does not promote an out-of-range numeric string (deferred)
 --FILE--
 <?php
-// The bitwise operators (& | ^ << >>) and comparison do not yet promote an
-// out-of-range numeric string operand to a bigint; they saturate it to a long
-// (or compare without promotion). Promotion to bigint is deferred; the test pins
-// the current behavior so the follow-up that adds bigint promotion flips these
-// assertions deliberately rather than silently. (Modulo already promotes.)
+// Comparison (==, <=>, ...) does not yet promote an out-of-range numeric string
+// operand to a bigint; it still compares via the lossy silent double conversion.
+// The integer operators (% & | ^ << >>) already promote. Comparison promotion is
+// a separate follow-up; this pins the current behavior so that follow-up flips
+// these assertions deliberately rather than silently.
+$big = 2 ** 63;               // a bigint
+$str = '9223372036854775809'; // 2**63 + 1 as a string (differs by exactly 1)
 
-$big = '9223372036854775808'; // 2**63: an even number, but it saturates to the odd LONG_MAX
-
-// A promoted operand to & would give 0 (2**63 is even); the saturated LONG_MAX gives 1.
-var_dump($big & 1);
-var_dump($big | 0);
-
-// Comparison neither throws nor promotes.
-var_dump($big == $big);
+// Lossy: both collapse to the same double, so they compare equal even though the
+// exact integers differ by one. Exact promotion would give bool(false) / int(-1).
+var_dump($big == $str);
+var_dump($big <=> $str);
 ?>
 --EXPECT--
-int(1)
-int(9223372036854775807)
 bool(true)
+int(0)

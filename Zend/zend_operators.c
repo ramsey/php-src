@@ -2225,9 +2225,9 @@ try_again:
 static zend_never_inline zend_result ZEND_FASTCALL bitwise_or_function_bigint(zval *result, zval *op1, zval *op2)
 {
 	/* op1 and op2 are already dereferenced and at least one is an IS_BIGINT. "|"
-	 * coerces non-integer operands to integer; a bigint operand keeps its full
-	 * value, while a non-bigint operand is coerced to a long (the engine does not
-	 * yet coerce out-of-range values to bigints). OR is commutative, so a
+	 * coerces non-integer operands to integer; an out-of-range integer string is
+	 * promoted to a bigint before dispatch, so a non-bigint operand here is a long
+	 * or another value coerced via zendi_try_get_long. OR is commutative, so a
 	 * bigint|long pair uses zend_bigint_or_long regardless of operand order. */
 	bool op1_is_big = Z_TYPE_P(op1) == IS_BIGINT;
 	bool op2_is_big = Z_TYPE_P(op2) == IS_BIGINT;
@@ -2290,6 +2290,38 @@ ZEND_API zend_result ZEND_FASTCALL bitwise_or_function(zval *result, zval *op1, 
 
 	if (UNEXPECTED(Z_TYPE_P(op1) == IS_BIGINT) || UNEXPECTED(Z_TYPE_P(op2) == IS_BIGINT)) {
 		return bitwise_or_function_bigint(result, op1, op2);
+	}
+
+	/* When exactly one operand is a string, "|" is an integer operation: an
+	 * out-of-range integer string promotes to a bigint. Two strings stay byte-wise
+	 * (handled below), so this never fires for that case. */
+	if ((Z_TYPE_P(op1) == IS_STRING) != (Z_TYPE_P(op2) == IS_STRING)) {
+		zval op1_holder, op2_holder;
+		bool op1_big, op2_big;
+		if (UNEXPECTED(zend_op_to_bigint_holder(op1, &op1_holder, &op1_big) == FAILURE)) {
+			if (result != op1) {
+				ZVAL_UNDEF(result);
+			}
+			return FAILURE;
+		}
+		if (UNEXPECTED(zend_op_to_bigint_holder(op2, &op2_holder, &op2_big) == FAILURE)) {
+			zval_ptr_dtor(&op1_holder);
+			if (result != op1) {
+				ZVAL_UNDEF(result);
+			}
+			return FAILURE;
+		}
+		if (op1_big || op2_big) {
+			if (op1 == result) {
+				zval_ptr_dtor(result);
+			}
+			zend_result status = bitwise_or_function_bigint(result, &op1_holder, &op2_holder);
+			zval_ptr_dtor(&op1_holder);
+			zval_ptr_dtor(&op2_holder);
+			return status;
+		}
+		zval_ptr_dtor(&op1_holder);
+		zval_ptr_dtor(&op2_holder);
 	}
 
 	if (Z_TYPE_P(op1) == IS_STRING && EXPECTED(Z_TYPE_P(op2) == IS_STRING)) {
@@ -2365,9 +2397,9 @@ ZEND_API zend_result ZEND_FASTCALL bitwise_or_function(zval *result, zval *op1, 
 static zend_never_inline zend_result ZEND_FASTCALL bitwise_and_function_bigint(zval *result, zval *op1, zval *op2)
 {
 	/* op1 and op2 are already dereferenced and at least one is an IS_BIGINT. "&"
-	 * coerces non-integer operands to integer; a bigint operand keeps its full
-	 * value, while a non-bigint operand is coerced to a long (the engine does not
-	 * yet coerce out-of-range values to bigints). AND is commutative, so a
+	 * coerces non-integer operands to integer; an out-of-range integer string is
+	 * promoted to a bigint before dispatch, so a non-bigint operand here is a long
+	 * or another value coerced via zendi_try_get_long. AND is commutative, so a
 	 * bigint&long pair uses zend_bigint_and_long regardless of operand order. */
 	bool op1_is_big = Z_TYPE_P(op1) == IS_BIGINT;
 	bool op2_is_big = Z_TYPE_P(op2) == IS_BIGINT;
@@ -2430,6 +2462,38 @@ ZEND_API zend_result ZEND_FASTCALL bitwise_and_function(zval *result, zval *op1,
 
 	if (UNEXPECTED(Z_TYPE_P(op1) == IS_BIGINT) || UNEXPECTED(Z_TYPE_P(op2) == IS_BIGINT)) {
 		return bitwise_and_function_bigint(result, op1, op2);
+	}
+
+	/* When exactly one operand is a string, "&" is an integer operation: an
+	 * out-of-range integer string promotes to a bigint. Two strings stay byte-wise
+	 * (handled below), so this never fires for that case. */
+	if ((Z_TYPE_P(op1) == IS_STRING) != (Z_TYPE_P(op2) == IS_STRING)) {
+		zval op1_holder, op2_holder;
+		bool op1_big, op2_big;
+		if (UNEXPECTED(zend_op_to_bigint_holder(op1, &op1_holder, &op1_big) == FAILURE)) {
+			if (result != op1) {
+				ZVAL_UNDEF(result);
+			}
+			return FAILURE;
+		}
+		if (UNEXPECTED(zend_op_to_bigint_holder(op2, &op2_holder, &op2_big) == FAILURE)) {
+			zval_ptr_dtor(&op1_holder);
+			if (result != op1) {
+				ZVAL_UNDEF(result);
+			}
+			return FAILURE;
+		}
+		if (op1_big || op2_big) {
+			if (op1 == result) {
+				zval_ptr_dtor(result);
+			}
+			zend_result status = bitwise_and_function_bigint(result, &op1_holder, &op2_holder);
+			zval_ptr_dtor(&op1_holder);
+			zval_ptr_dtor(&op2_holder);
+			return status;
+		}
+		zval_ptr_dtor(&op1_holder);
+		zval_ptr_dtor(&op2_holder);
 	}
 
 	if (Z_TYPE_P(op1) == IS_STRING && Z_TYPE_P(op2) == IS_STRING) {
@@ -2505,9 +2569,9 @@ ZEND_API zend_result ZEND_FASTCALL bitwise_and_function(zval *result, zval *op1,
 static zend_never_inline zend_result ZEND_FASTCALL bitwise_xor_function_bigint(zval *result, zval *op1, zval *op2)
 {
 	/* op1 and op2 are already dereferenced and at least one is an IS_BIGINT. "^"
-	 * coerces non-integer operands to integer; a bigint operand keeps its full
-	 * value, while a non-bigint operand is coerced to a long (the engine does not
-	 * yet coerce out-of-range values to bigints). XOR is commutative, so a
+	 * coerces non-integer operands to integer; an out-of-range integer string is
+	 * promoted to a bigint before dispatch, so a non-bigint operand here is a long
+	 * or another value coerced via zendi_try_get_long. XOR is commutative, so a
 	 * bigint^long pair uses zend_bigint_xor_long regardless of operand order. */
 	bool op1_is_big = Z_TYPE_P(op1) == IS_BIGINT;
 	bool op2_is_big = Z_TYPE_P(op2) == IS_BIGINT;
@@ -2570,6 +2634,38 @@ ZEND_API zend_result ZEND_FASTCALL bitwise_xor_function(zval *result, zval *op1,
 
 	if (UNEXPECTED(Z_TYPE_P(op1) == IS_BIGINT) || UNEXPECTED(Z_TYPE_P(op2) == IS_BIGINT)) {
 		return bitwise_xor_function_bigint(result, op1, op2);
+	}
+
+	/* When exactly one operand is a string, "^" is an integer operation: an
+	 * out-of-range integer string promotes to a bigint. Two strings stay byte-wise
+	 * (handled below), so this never fires for that case. */
+	if ((Z_TYPE_P(op1) == IS_STRING) != (Z_TYPE_P(op2) == IS_STRING)) {
+		zval op1_holder, op2_holder;
+		bool op1_big, op2_big;
+		if (UNEXPECTED(zend_op_to_bigint_holder(op1, &op1_holder, &op1_big) == FAILURE)) {
+			if (result != op1) {
+				ZVAL_UNDEF(result);
+			}
+			return FAILURE;
+		}
+		if (UNEXPECTED(zend_op_to_bigint_holder(op2, &op2_holder, &op2_big) == FAILURE)) {
+			zval_ptr_dtor(&op1_holder);
+			if (result != op1) {
+				ZVAL_UNDEF(result);
+			}
+			return FAILURE;
+		}
+		if (op1_big || op2_big) {
+			if (op1 == result) {
+				zval_ptr_dtor(result);
+			}
+			zend_result status = bitwise_xor_function_bigint(result, &op1_holder, &op2_holder);
+			zval_ptr_dtor(&op1_holder);
+			zval_ptr_dtor(&op2_holder);
+			return status;
+		}
+		zval_ptr_dtor(&op1_holder);
+		zval_ptr_dtor(&op2_holder);
 	}
 
 	if (Z_TYPE_P(op1) == IS_STRING && Z_TYPE_P(op2) == IS_STRING) {
