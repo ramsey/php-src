@@ -5451,7 +5451,8 @@ static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_
 
 				ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 			}
-			ZVAL_LONG(result, zval_get_long(expr));
+			/* A numeric string out of long range becomes a bigint. */
+			zend_cast_to_int(result, expr);
 			break;
 		case IS_DOUBLE:
 			ZVAL_DOUBLE(result, zval_get_double(expr));
@@ -17619,7 +17620,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_CAST_SPEC_TMP
 
 				ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 			}
-			ZVAL_LONG(result, zval_get_long(expr));
+			/* A numeric string out of long range becomes a bigint. */
+			zend_cast_to_int(result, expr);
 			break;
 		case IS_DOUBLE:
 			ZVAL_DOUBLE(result, zval_get_double(expr));
@@ -40461,7 +40463,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_CAST_SPEC_CV_
 
 				ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 			}
-			ZVAL_LONG(result, zval_get_long(expr));
+			/* A numeric string out of long range becomes a bigint. */
+			zend_cast_to_int(result, expr);
 			break;
 		case IS_DOUBLE:
 			ZVAL_DOUBLE(result, zval_get_double(expr));
@@ -58523,7 +58526,8 @@ static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_CAST_
 
 				ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 			}
-			ZVAL_LONG(result, zval_get_long(expr));
+			/* A numeric string out of long range becomes a bigint. */
+			zend_cast_to_int(result, expr);
 			break;
 		case IS_DOUBLE:
 			ZVAL_DOUBLE(result, zval_get_double(expr));
@@ -70589,7 +70593,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_CAST_SPEC_TMP_TAIL
 
 				ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 			}
-			ZVAL_LONG(result, zval_get_long(expr));
+			/* A numeric string out of long range becomes a bigint. */
+			zend_cast_to_int(result, expr);
 			break;
 		case IS_DOUBLE:
 			ZVAL_DOUBLE(result, zval_get_double(expr));
@@ -93331,7 +93336,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_CAST_SPEC_CV_TAILC
 
 				ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 			}
-			ZVAL_LONG(result, zval_get_long(expr));
+			/* A numeric string out of long range becomes a bigint. */
+			zend_cast_to_int(result, expr);
 			break;
 		case IS_DOUBLE:
 			ZVAL_DOUBLE(result, zval_get_double(expr));

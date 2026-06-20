@@ -799,12 +799,7 @@ static zend_result ZEND_FASTCALL zend_ast_evaluate_inner(
 						ZVAL_BOOL(result, zend_is_true(&op1));
 						break;
 					case IS_LONG:
-						if (UNEXPECTED(Z_TYPE(op1) == IS_BIGINT)) {
-							/* A bigint is already an int: (int) is an identity. */
-							ZVAL_COPY(result, &op1);
-						} else {
-							ZVAL_LONG(result, zval_get_long_func(&op1, false));
-						}
+						zend_cast_to_int(result, &op1);
 						break;
 					case IS_DOUBLE:
 						ZVAL_DOUBLE(result, zval_get_double_func(&op1));

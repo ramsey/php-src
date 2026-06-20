@@ -6604,7 +6604,8 @@ ZEND_VM_COLD_CONST_HANDLER(51, ZEND_CAST, CONST|TMP|CV, ANY, TYPE)
 				FREE_OP1_IF_VAR();
 				ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 			}
-			ZVAL_LONG(result, zval_get_long(expr));
+			/* A numeric string out of long range becomes a bigint. */
+			zend_cast_to_int(result, expr);
 			break;
 		case IS_DOUBLE:
 			ZVAL_DOUBLE(result, zval_get_double(expr));

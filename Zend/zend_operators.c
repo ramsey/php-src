@@ -1212,6 +1212,37 @@ ZEND_API zend_string* ZEND_FASTCALL zval_try_get_string_func(const zval *op) /* 
 }
 /* }}} */
 
+ZEND_API void ZEND_FASTCALL zend_cast_to_int(zval *result, zval *op) /* {{{ */
+{
+	ZVAL_DEREF(op);
+	switch (Z_TYPE_P(op)) {
+		case IS_BIGINT:
+			ZVAL_COPY(result, op);
+			return;
+		case IS_STRING: {
+			zval holder;
+			switch (zend_string_to_number(Z_STRVAL_P(op), Z_STRLEN_P(op), true, &holder, NULL)) {
+				case IS_LONG:
+					ZVAL_LONG(result, Z_LVAL(holder));
+					return;
+				case IS_BIGINT:
+					ZVAL_COPY_VALUE(result, &holder);
+					return;
+				case IS_DOUBLE:
+					ZVAL_LONG(result, zend_dval_to_lval_cap(Z_DVAL(holder)));
+					return;
+				default:
+					ZVAL_LONG(result, 0);
+					return;
+			}
+		}
+		default:
+			ZVAL_LONG(result, zval_get_long(op));
+			return;
+	}
+}
+/* }}} */
+
 static ZEND_COLD zend_never_inline void ZEND_FASTCALL zend_binop_error(const char *operator, const zval *op1, const zval *op2) /* {{{ */ {
 	if (EG(exception)) {
 		return;

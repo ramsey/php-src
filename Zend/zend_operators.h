@@ -332,6 +332,7 @@ ZEND_API zend_long    ZEND_FASTCALL zval_try_get_long(const zval *op, bool *fail
 ZEND_API double       ZEND_FASTCALL zval_get_double_func(const zval *op);
 ZEND_API zend_string* ZEND_FASTCALL zval_get_string_func(const zval *op);
 ZEND_API zend_string* ZEND_FASTCALL zval_try_get_string_func(const zval *op);
+ZEND_API void         ZEND_FASTCALL zend_cast_to_int(zval *result, zval *op);
 
 /* Convert an integer's bigint payload to its decimal zend_string, enforcing
  * EG(int_string_max_digits). Returns NULL with a pending ValueError if the

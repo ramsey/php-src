@@ -12636,7 +12636,14 @@ bool zend_try_ct_eval_cast(zval *result, uint32_t type, zval *op1)
 				ZVAL_COPY(result, op1);
 				return true;
 			}
-			ZVAL_LONG(result, zval_get_long(op1));
+			/* A numeric string out of long range becomes a bigint. Defer a
+			 * string over zend.int_string_max_digits to run time so its
+			 * ValueError is thrown there and not during compilation. */
+			if (Z_TYPE_P(op1) == IS_STRING
+					&& zend_int_string_exceeds_digit_limit(Z_STRVAL_P(op1), Z_STRLEN_P(op1))) {
+				return false;
+			}
+			zend_cast_to_int(result, op1);
 			return true;
 		case IS_DOUBLE:
 			ZVAL_DOUBLE(result, zval_get_double(op1));

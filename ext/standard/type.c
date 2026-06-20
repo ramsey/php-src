@@ -102,7 +102,17 @@ PHP_FUNCTION(settype)
 			|| zend_string_equals_ci(type, ZSTR_KNOWN(ZEND_STR_INT))) {
 		/* A bigint is already an int: settype to 'integer'/'int' is an identity. */
 		if (Z_TYPE_P(ptr) != IS_BIGINT) {
-			convert_to_long(ptr);
+			/* A numeric string out of long range becomes a bigint. */
+			zval cast;
+			zend_cast_to_int(&cast, ptr);
+			if (UNEXPECTED(EG(exception))) {
+				if (ptr == &tmp) {
+					zval_ptr_dtor(&tmp);
+				}
+				RETURN_THROWS();
+			}
+			zval_ptr_dtor(ptr);
+			ZVAL_COPY_VALUE(ptr, &cast);
 		}
 	} else if (zend_string_equals_ci(type, ZSTR_KNOWN(ZEND_STR_FLOAT))) {
 		convert_to_double(ptr);
@@ -151,10 +161,15 @@ PHP_FUNCTION(intval)
 		Z_PARAM_LONG(base)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (Z_TYPE_P(num) != IS_STRING || base == 10) {
+	if (Z_TYPE_P(num) != IS_STRING) {
 		RETURN_LONG(zval_get_long(num));
 	}
 
+	if (base == 10) {
+		/* a base-10 integer string out of long range becomes a bigint */
+		zend_cast_to_int(return_value, num);
+		return;
+	}
 
 	if (base == 0 || base == 2) {
 		char *strval = Z_STRVAL_P(num);
