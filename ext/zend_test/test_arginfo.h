@@ -1,5 +1,5 @@
 /* This is a generated file, edit test.stub.php instead.
- * Stub hash: f6403f89d830073e8b85c2d4fa8be8f88963db93
+ * Stub hash: 308f61a3f238cf7be0d39ed5cd22ab9908d4d51a
  * Has decl header: yes */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_zend_trigger_bailout, 0, 0, IS_NEVER, 0)
@@ -237,6 +237,11 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_zend_test_array_key_classify, 0,
 	ZEND_ARG_TYPE_INFO(0, candidate, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_zend_test_string_to_number, 0, 1, IS_MIXED, 0)
+	ZEND_ARG_TYPE_INFO(0, candidate, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, allow_errors, _IS_BOOL, 0, "false")
+ZEND_END_ARG_INFO()
+
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_zend_test_zpp_int, 0, 1, IS_MIXED, 0)
 	ZEND_ARG_TYPE_INFO(0, i, IS_LONG, 0)
 ZEND_END_ARG_INFO()
@@ -432,6 +437,7 @@ static ZEND_FUNCTION(zend_test_bigint_fits_long);
 static ZEND_FUNCTION(zend_test_make_bigint);
 static ZEND_FUNCTION(zend_test_bigint_to_str);
 static ZEND_FUNCTION(zend_test_array_key_classify);
+static ZEND_FUNCTION(zend_test_string_to_number);
 static ZEND_FUNCTION(zend_test_zpp_int);
 static ZEND_FUNCTION(zend_test_zpp_int_or_null);
 static ZEND_FUNCTION(zend_test_zpp_int_or_float);
@@ -589,6 +595,7 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(zend_test_make_bigint, arginfo_zend_test_make_bigint)
 	ZEND_FE(zend_test_bigint_to_str, arginfo_zend_test_bigint_to_str)
 	ZEND_FE(zend_test_array_key_classify, arginfo_zend_test_array_key_classify)
+	ZEND_FE(zend_test_string_to_number, arginfo_zend_test_string_to_number)
 	ZEND_FE(zend_test_zpp_int, arginfo_zend_test_zpp_int)
 	ZEND_FE(zend_test_zpp_int_or_null, arginfo_zend_test_zpp_int_or_null)
 	ZEND_FE(zend_test_zpp_int_or_float, arginfo_zend_test_zpp_int_or_float)

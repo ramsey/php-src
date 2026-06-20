@@ -45,6 +45,11 @@ ZEND_API zend_bigint *zend_bigint_init_from_long(zend_long value)
 
 ZEND_API zend_bigint *zend_bigint_init_from_string_length(const char *str, size_t len, int base)
 {
+	/* mp_read_radix accepts a leading "-" but not "+"; skip an optional "+". */
+	if (len > 0 && *str == '+') {
+		str++;
+		len--;
+	}
 	/* mp_read_radix requires a NUL-terminated string */
 	char *tmp = estrndup(str, len);
 	zend_bigint *b = zend_bigint_init();

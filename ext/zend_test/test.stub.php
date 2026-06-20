@@ -389,6 +389,9 @@ function zend_test_override_libxml_global_state(): void {}
     function zend_test_array_key_classify(string $candidate): string {}
 
     /** @internal */
+    function zend_test_string_to_number(string $candidate, bool $allow_errors = false): mixed {}
+
+    /** @internal */
     function zend_test_zpp_int(int $i): mixed {}
 
     /** @internal */

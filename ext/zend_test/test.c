@@ -1208,6 +1208,28 @@ static ZEND_FUNCTION(zend_test_array_key_classify)
 	RETURN_STRING(label);
 }
 
+static ZEND_FUNCTION(zend_test_string_to_number)
+{
+	zend_string *in;
+	bool allow_errors = false;
+	ZEND_PARSE_PARAMETERS_START(1, 2)
+		Z_PARAM_STR(in)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_BOOL(allow_errors)
+	ZEND_PARSE_PARAMETERS_END();
+
+	zval result;
+	bool trailing_data = false;
+	uint8_t type = zend_string_to_number(ZSTR_VAL(in), ZSTR_LEN(in), allow_errors, &result, &trailing_data);
+	if (type == 0) {
+		if (EG(exception)) {
+			RETURN_THROWS();
+		}
+		RETURN_FALSE;
+	}
+	RETURN_COPY_VALUE(&result);
+}
+
 static ZEND_FUNCTION(zend_test_zpp_int)
 {
 	zval *v;

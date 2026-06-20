@@ -186,6 +186,12 @@ static zend_always_inline uint8_t is_numeric_string(const char *str, size_t leng
 
 ZEND_API uint8_t ZEND_FASTCALL is_numeric_str_function(const zend_string *str, zend_long *lval, double *dval);
 
+/* Classifies a numeric string and produces its value into result as IS_LONG,
+ * IS_DOUBLE, or IS_BIGINT. Returns 0 for a non-numeric string or an error (with
+ * a pending exception). */
+ZEND_API uint8_t ZEND_FASTCALL zend_string_to_number(const char *str, size_t len,
+	bool allow_errors, zval *result, bool *trailing_data);
+
 static zend_always_inline const char *
 zend_memnstr(const char *haystack, const char *needle, size_t needle_len, const char *end)
 {

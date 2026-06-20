@@ -4458,6 +4458,66 @@ process_double:
 }
 /* }}} */
 
+ZEND_API uint8_t ZEND_FASTCALL zend_string_to_number(const char *str, size_t len,
+	bool allow_errors, zval *result, bool *trailing_data) /* {{{ */
+{
+	zend_long lval;
+	double dval;
+	int oflow_info = 0;
+	uint8_t type = is_numeric_string_ex(str, len, &lval, &dval, allow_errors, &oflow_info, trailing_data);
+
+	if (type == IS_LONG) {
+		ZVAL_LONG(result, lval);
+		return IS_LONG;
+	}
+
+	if (type == 0) {
+		return 0;
+	}
+
+	if (oflow_info == 0) {
+		/* String is a genuine float and not an integer overflow. */
+		ZVAL_DOUBLE(result, dval);
+		return IS_DOUBLE;
+	}
+
+	/* Since oflow_info == 0, we have a pure integer.
+	 * An integer string out of long range becomes a bigint. Find the exact
+	 * integer span, skipping leading whitespace and keeping an optional sign.
+	 * The scan stops at the first non-digit. */
+	const char *p = str;
+	const char *end = str + len;
+
+	while (p < end && (*p == ' ' || *p == '\t' || *p == '\n' || *p == '\r' || *p == '\v' || *p == '\f')) {
+		p++;
+	}
+
+	const char *num = p;
+	if (p < end && (*p == '+' || *p == '-')) {
+		p++;
+	}
+
+	while (p < end && ZEND_IS_DIGIT(*p)) {
+		p++;
+	}
+
+	size_t num_len = (size_t) (p - num);
+
+	if (!zend_check_int_string_digit_limit(num, num_len)) {
+		/* Over the digit limit. A catchable ValueError is pending. */
+		return 0;
+	}
+
+	zend_bigint *big = zend_bigint_init_from_string_length(num, num_len, 10);
+	if (UNEXPECTED(big == NULL)) {
+		return 0;
+	}
+
+	zend_bigint_result(result, big);
+	return Z_TYPE_P(result);
+}
+/* }}} */
+
 /*
  * String matching - Sunday algorithm
  * http://www.iti.fh-flensburg.de/lang/algorithmen/pattern/sundayen.htm
