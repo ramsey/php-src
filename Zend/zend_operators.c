@@ -3286,13 +3286,20 @@ static int compare_long_to_string(zend_long lval, const zend_string *str) /* {{{
 {
 	zend_long str_lval;
 	double str_dval;
-	uint8_t type = is_numeric_string(ZSTR_VAL(str), ZSTR_LEN(str), &str_lval, &str_dval, 0);
+	int oflow;
+	uint8_t type = is_numeric_string_ex(ZSTR_VAL(str), ZSTR_LEN(str), &str_lval, &str_dval, 0, &oflow, NULL);
 
 	if (type == IS_LONG) {
 		return lval > str_lval ? 1 : lval < str_lval ? -1 : 0;
 	}
 
 	if (type == IS_DOUBLE) {
+		if (oflow != 0) {
+			/* The string is an integer out of long range. A long can never
+			 * equal it, and |str| > |lval|, so the order is the overflow sign
+			 * (positive overflow means the string is the larger value). */
+			return -oflow;
+		}
 		return ZEND_THREEWAY_COMPARE((double) lval, str_dval);
 	}
 
