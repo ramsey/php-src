@@ -84,9 +84,6 @@
 		zend_wrong_parameter_type_error(arg_num, Z_EXPECTED_LONG_OR_NULL, arg ## arg_num); \
 		goto flf_clean; \
 	}
-/* old "i", logical integer: IS_LONG or IS_BIGINT pass through at full precision.
- * dest is a zval*; the weak slow path stashes a coerced IS_LONG in tmp (long-weak
- * is non-mutating, so no copy and no free are needed, unlike Z_FLF_PARAM_STR). */
 #define Z_FLF_PARAM_INT(arg_num, dest, tmp) \
 	if (EXPECTED(Z_TYPE_P(arg ## arg_num) == IS_LONG || Z_TYPE_P(arg ## arg_num) == IS_BIGINT)) { \
 		dest = arg ## arg_num; \
@@ -102,6 +99,10 @@
 	} else if (!zend_flf_parse_arg_int_slow(arg ## arg_num, &tmp, &dest, arg_num)) { \
 		zend_wrong_parameter_type_error(arg_num, Z_EXPECTED_INT_OR_NULL, arg ## arg_num); \
 		goto flf_clean; \
+	}
+#define Z_FLF_PARAM_FREE_INT(dest, tmp) \
+	if (UNEXPECTED((dest) == &(tmp))) { \
+		zval_ptr_dtor(&(tmp)); \
 	}
 #define Z_FLF_PARAM_STR(arg_num, dest, tmp) \
 	if (Z_TYPE_P(arg ## arg_num) == IS_STRING) { \

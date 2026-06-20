@@ -1292,20 +1292,20 @@ static ZEND_FUNCTION(zend_test_flf_int_or_null)
 
 ZEND_FRAMELESS_FUNCTION(zend_test_flf_int, 1)
 {
-	zval *v;
+	zval *v = NULL;
 	zval tmp;
 
 	Z_FLF_PARAM_INT(1, v, tmp);
 
 	RETVAL_COPY(v);
 
-	/* Nothing to clean up, but required by the ZEND_FLF_PARAM_INT macros. */
-flf_clean:;
+flf_clean:
+	Z_FLF_PARAM_FREE_INT(v, tmp);
 }
 
 ZEND_FRAMELESS_FUNCTION(zend_test_flf_int_or_null, 1)
 {
-	zval *v;
+	zval *v = NULL;
 	zval tmp;
 
 	Z_FLF_PARAM_INT_OR_NULL(1, v, tmp);
@@ -1316,8 +1316,8 @@ ZEND_FRAMELESS_FUNCTION(zend_test_flf_int_or_null, 1)
 		RETVAL_COPY(v);
 	}
 
-	/* Nothing to clean up, but required by the ZEND_FLF_PARAM_INT macros. */
-flf_clean:;
+flf_clean:
+	Z_FLF_PARAM_FREE_INT(v, tmp);
 }
 
 static ZEND_FUNCTION(zend_test_check_int_string_digits)

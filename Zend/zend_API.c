@@ -878,6 +878,17 @@ ZEND_API bool ZEND_FASTCALL zend_flf_parse_arg_int_slow(const zval *arg, zval *t
 	if (UNEXPECTED(ZEND_FLF_ARG_USES_STRICT_TYPES())) {
 		return false;
 	}
+	if (Z_TYPE_P(arg) == IS_STRING) {
+		zval holder;
+		if (zend_string_to_number(Z_STRVAL_P(arg), Z_STRLEN_P(arg), false, &holder, NULL) == IS_BIGINT) {
+			ZVAL_COPY_VALUE(tmp, &holder);
+			*dest = tmp;
+			return true;
+		}
+		if (UNEXPECTED(EG(exception))) {
+			return false;
+		}
+	}
 	zend_long lval;
 	if (!zend_parse_arg_long_weak(arg, &lval, arg_num)) {
 		return false;

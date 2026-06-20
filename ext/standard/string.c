@@ -1549,7 +1549,7 @@ ZEND_FRAMELESS_FUNCTION(dirname, 2)
 {
 	zval str_tmp, levels_tmp;
 	zend_string *str;
-	zval *levels_arg;
+	zval *levels_arg = NULL;
 	zend_long levels;
 
 	Z_FLF_PARAM_STR(1, str, str_tmp);
@@ -1564,6 +1564,7 @@ ZEND_FRAMELESS_FUNCTION(dirname, 2)
 
 flf_clean:
 	Z_FLF_PARAM_FREE_STR(1, str_tmp);
+	Z_FLF_PARAM_FREE_INT(levels_arg, levels_tmp);
 }
 
 /* {{{ Returns information about a certain string */
@@ -1953,7 +1954,7 @@ ZEND_FRAMELESS_FUNCTION(strpos, 3)
 {
 	zval haystack_tmp, needle_tmp, offset_tmp;
 	zend_string *haystack, *needle;
-	zval *offset_arg;
+	zval *offset_arg = NULL;
 	zend_long offset;
 
 	Z_FLF_PARAM_STR(1, haystack, haystack_tmp);
@@ -1970,6 +1971,7 @@ ZEND_FRAMELESS_FUNCTION(strpos, 3)
 flf_clean:
 	Z_FLF_PARAM_FREE_STR(1, haystack_tmp);
 	Z_FLF_PARAM_FREE_STR(2, needle_tmp);
+	Z_FLF_PARAM_FREE_INT(offset_arg, offset_tmp);
 }
 
 /* {{{ Finds position of first occurrence of a string within another, case insensitive */
@@ -2323,7 +2325,7 @@ ZEND_FRAMELESS_FUNCTION(substr, 2)
 {
 	zval str_tmp, f_tmp;
 	zend_string *str;
-	zval *f_arg;
+	zval *f_arg = NULL;
 	zend_long f;
 
 	Z_FLF_PARAM_STR(1, str, str_tmp);
@@ -2338,13 +2340,14 @@ ZEND_FRAMELESS_FUNCTION(substr, 2)
 
 flf_clean:
 	Z_FLF_PARAM_FREE_STR(1, str_tmp);
+	Z_FLF_PARAM_FREE_INT(f_arg, f_tmp);
 }
 
 ZEND_FRAMELESS_FUNCTION(substr, 3)
 {
 	zval str_tmp, f_tmp, l_tmp;
 	zend_string *str;
-	zval *f_arg, *l_arg;
+	zval *f_arg = NULL, *l_arg = NULL;
 	zend_long f, l = 0;
 	bool len_is_null;
 
@@ -2366,6 +2369,8 @@ ZEND_FRAMELESS_FUNCTION(substr, 3)
 
 flf_clean:
 	Z_FLF_PARAM_FREE_STR(1, str_tmp);
+	Z_FLF_PARAM_FREE_INT(f_arg, f_tmp);
+	Z_FLF_PARAM_FREE_INT(l_arg, l_tmp);
 }
 
 /* {{{ Replaces part of a string with another string */

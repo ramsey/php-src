@@ -41,12 +41,8 @@ try {
     echo get_class($e) . ': ' . $e->getMessage() . "\n";
 }
 
-// Out-of-range numeric string results in a TypeError (string-to-bigint promotion deferred)
-try {
-    zend_test_flf_int('18446744073709551616');
-} catch (TypeError $e) {
-    echo get_class($e) . ': ' . $e->getMessage() . "\n";
-}
+// Out-of-range numeric string coerces to a bigint in weak mode
+var_dump(zend_test_flf_int('18446744073709551616') === 2 ** 64);
 
 // null emits a deprecation warning and coerces to int (null coercion via long-weak)
 var_dump(zend_test_flf_int(null));
@@ -85,7 +81,7 @@ int(0)
 Deprecated: Implicit conversion from float 5.5 to int loses precision in %s on line %d
 int(5)
 TypeError: zend_test_flf_int(): Argument #1 ($i) must be of type int, string given
-TypeError: zend_test_flf_int(): Argument #1 ($i) must be of type int, string given
+bool(true)
 
 Deprecated: zend_test_flf_int(): Passing null to parameter #1 ($i) of type int is deprecated in %s on line %d
 int(0)
