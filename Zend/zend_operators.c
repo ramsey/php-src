@@ -4551,9 +4551,9 @@ ZEND_API bool ZEND_FASTCALL zendi_smart_streq(const zend_string *s1, const zend_
 #else
 		if (oflow1 != 0 && oflow1 == oflow2 && dval1 - dval2 == 0.) {
 #endif
-			/* both values are integers overflown to the same side, and the
-			 * double comparison may have resulted in crucial accuracy lost */
-			goto string_cmp;
+			/* Both are integers out of long range with the same sign; they are
+			 * equal iff their magnitudes match exactly (leading zeros ignored). */
+			return zend_compare_decimal_magnitude(s1->val, s1->len, s2->val, s2->len) == 0;
 		}
 		if ((ret1 == IS_DOUBLE) || (ret2 == IS_DOUBLE)) {
 			if (ret1 != IS_DOUBLE) {
@@ -4599,9 +4599,12 @@ ZEND_API int ZEND_FASTCALL zendi_smart_strcmp(const zend_string *s1, const zend_
 #else
 		if (oflow1 != 0 && oflow1 == oflow2 && dval1 - dval2 == 0.) {
 #endif
-			/* both values are integers overflowed to the same side, and the
-			 * double comparison may have resulted in crucial accuracy lost */
-			goto string_cmp;
+			/* Both are integers out of long range with the same sign and an
+			 * equal double approximation. Compare them exactly by magnitude so
+			 * values of different decimal length (e.g., "10000000000000000000"
+			 * vs. "9999999999999999999") order correctly. */
+			int mag = zend_compare_decimal_magnitude(s1->val, s1->len, s2->val, s2->len);
+			return oflow1 > 0 ? mag : -mag;
 		}
 		if ((ret1 == IS_DOUBLE) || (ret2 == IS_DOUBLE)) {
 			if (ret1 != IS_DOUBLE) {
