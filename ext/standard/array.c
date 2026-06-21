@@ -6436,15 +6436,7 @@ static zend_always_inline void php_array_binop(INTERNAL_FUNCTION_PARAMETERS, con
 		zval *entry;
 		ZEND_HASH_FOREACH_VAL(input, entry) {
 			if (EXPECTED(Z_TYPE_P(entry) == IS_LONG) && EXPECTED(Z_TYPE_P(return_value) == IS_LONG)) {
-				zend_long lval;
-				double dval;
-				int overflow;
-				ZEND_SIGNED_MULTIPLY_LONG(Z_LVAL_P(return_value), Z_LVAL_P(entry), lval, dval, overflow);
-				if (UNEXPECTED(overflow)) {
-					ZVAL_DOUBLE(return_value, dval);
-				} else {
-					Z_LVAL_P(return_value) = lval;
-				}
+				fast_long_mul_function(return_value, return_value, entry);
 				continue;
 			}
 			php_array_binop_apply(return_value, entry, op_name, op);
