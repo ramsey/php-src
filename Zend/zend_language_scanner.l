@@ -2071,6 +2071,14 @@ OPTIONAL_WHITESPACE_OR_COMMENTS ({WHITESPACE}|{MULTI_LINE_COMMENT}|{SINGLE_LINE_
 		}
 		RETURN_TOKEN_WITH_VAL(T_LNUMBER);
 	} else {
+		zend_bigint *big = zend_bigint_init_from_string_length(bin, len, 2);
+		if (big) {
+			ZVAL_BIGINT(zendlval, big);
+			if (contains_underscores) {
+				efree(bin);
+			}
+			RETURN_TOKEN_WITH_VAL(T_LNUMBER);
+		}
 		ZVAL_DOUBLE(zendlval, zend_bin_strtod(bin, (const char **)&end));
 		/* errno isn't checked since we allow HUGE_VAL/INF overflow */
 		ZEND_ASSERT(end == bin + len);
