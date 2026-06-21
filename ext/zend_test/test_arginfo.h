@@ -1,5 +1,5 @@
 /* This is a generated file, edit test.stub.php instead.
- * Stub hash: 308f61a3f238cf7be0d39ed5cd22ab9908d4d51a
+ * Stub hash: 03115ab3f0c23152d2d7a8d4cad8227528a850bf
  * Has decl header: yes */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_zend_trigger_bailout, 0, 0, IS_NEVER, 0)
@@ -75,6 +75,10 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_zend_number_or_string_or_null, 0, 1, MAY_BE_STRING|MAY_BE_LONG|MAY_BE_DOUBLE|MAY_BE_NULL)
 	ZEND_ARG_TYPE_MASK(0, param, MAY_BE_STRING|MAY_BE_LONG|MAY_BE_DOUBLE|MAY_BE_NULL, NULL)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_zend_number, 0, 1, MAY_BE_LONG|MAY_BE_DOUBLE)
+	ZEND_ARG_TYPE_MASK(0, param, MAY_BE_LONG|MAY_BE_DOUBLE, NULL)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_zend_iterable, 0, 1, IS_VOID, 0)
@@ -388,6 +392,7 @@ static ZEND_FUNCTION(zend_string_or_stdclass);
 static ZEND_FUNCTION(zend_string_or_stdclass_or_null);
 static ZEND_FUNCTION(zend_number_or_string);
 static ZEND_FUNCTION(zend_number_or_string_or_null);
+static ZEND_FUNCTION(zend_number);
 static ZEND_FUNCTION(zend_iterable);
 static ZEND_FUNCTION(zend_weakmap_attach);
 static ZEND_FUNCTION(zend_weakmap_remove);
@@ -538,6 +543,7 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(zend_string_or_stdclass_or_null, arginfo_zend_string_or_stdclass_or_null)
 	ZEND_FE(zend_number_or_string, arginfo_zend_number_or_string)
 	ZEND_FE(zend_number_or_string_or_null, arginfo_zend_number_or_string_or_null)
+	ZEND_FE(zend_number, arginfo_zend_number)
 	ZEND_FE(zend_iterable, arginfo_zend_iterable)
 	ZEND_FE(zend_weakmap_attach, arginfo_zend_weakmap_attach)
 	ZEND_FE(zend_weakmap_remove, arginfo_zend_weakmap_remove)

@@ -350,6 +350,24 @@ static ZEND_FUNCTION(zend_number_or_string)
 	}
 }
 
+/* Tests Z_PARAM_NUMBER */
+static ZEND_FUNCTION(zend_number)
+{
+	zval *input;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_NUMBER(input)
+	ZEND_PARSE_PARAMETERS_END();
+
+	switch (Z_TYPE_P(input)) {
+		case IS_LONG:
+			RETURN_LONG(Z_LVAL_P(input));
+		case IS_DOUBLE:
+			RETURN_DOUBLE(Z_DVAL_P(input));
+		default: ZEND_UNREACHABLE();
+	}
+}
+
 /* Tests Z_PARAM_NUMBER_OR_STR_OR_NULL */
 static ZEND_FUNCTION(zend_number_or_string_or_null)
 {

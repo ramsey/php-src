@@ -287,6 +287,8 @@ namespace {
 
     function zend_number_or_string_or_null(string|int|float|null $param): string|int|float|null {}
 
+    function zend_number(int|float $param): int|float {}
+
     function zend_iterable(iterable $arg1, ?iterable $arg2 = null): void {}
 
     function zend_weakmap_attach(object $object, mixed $value): bool {}
