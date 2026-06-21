@@ -284,10 +284,11 @@ PHP_FUNCTION(ceil)
 	zval *value;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_NUMBER(value)
+		Z_PARAM_INT_OR_FLOAT(value)
 	ZEND_PARSE_PARAMETERS_END();
 
 	switch (Z_TYPE_P(value)) {
+		case IS_BIGINT:
 		case IS_LONG:
 			RETURN_DOUBLE(zval_get_double(value));
 		case IS_DOUBLE:
@@ -303,10 +304,11 @@ PHP_FUNCTION(floor)
 	zval *value;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_NUMBER(value)
+		Z_PARAM_INT_OR_FLOAT(value)
 	ZEND_PARSE_PARAMETERS_END();
 
 	switch (Z_TYPE_P(value)) {
+		case IS_BIGINT:
 		case IS_LONG:
 			RETURN_DOUBLE(zval_get_double(value));
 		case IS_DOUBLE:
@@ -351,7 +353,7 @@ PHP_FUNCTION(round)
 	zend_object *mode_object = NULL;
 
 	ZEND_PARSE_PARAMETERS_START(1, 3)
-		Z_PARAM_NUMBER(value)
+		Z_PARAM_INT_OR_FLOAT(value)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_INT(precision_arg)
 		Z_PARAM_OBJ_OF_CLASS_OR_LONG(mode_object, rounding_mode_ce, mode)
@@ -390,8 +392,9 @@ PHP_FUNCTION(round)
 	}
 
 	switch (Z_TYPE_P(value)) {
+		case IS_BIGINT:
 		case IS_LONG:
-			/* Simple case - long that doesn't need to be rounded. */
+			/* Simple case - integer that doesn't need to be rounded. */
 			if (places >= 0) {
 				RETURN_DOUBLE(zval_get_double(value));
 			}
