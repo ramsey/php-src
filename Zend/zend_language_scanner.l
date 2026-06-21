@@ -2129,6 +2129,15 @@ OPTIONAL_WHITESPACE_OR_COMMENTS ({WHITESPACE}|{MULTI_LINE_COMMENT}|{SINGLE_LINE_
 	/* Reset errno */
 	errno = 0;
 
+	zend_bigint *big = zend_bigint_init_from_string_length(octal, len, 8);
+	if (big) {
+		ZVAL_BIGINT(zendlval, big);
+		if (contains_underscores) {
+			efree(octal);
+		}
+		RETURN_TOKEN_WITH_VAL(T_LNUMBER);
+	}
+
 	/* zend_oct_strtod skips leading '0' */
 	ZVAL_DOUBLE(zendlval, zend_oct_strtod(octal, (const char **)&end));
 	ZEND_ASSERT(!errno);
@@ -2183,6 +2192,14 @@ OPTIONAL_WHITESPACE_OR_COMMENTS ({WHITESPACE}|{MULTI_LINE_COMMENT}|{SINGLE_LINE_
 		if (errno == ERANGE) { /* Overflow */
 			errno = 0;
 			if (is_octal) { /* octal overflow */
+				zend_bigint *big = zend_bigint_init_from_string_length(lnum, len, 8);
+				if (big) {
+					ZVAL_BIGINT(zendlval, big);
+					if (contains_underscores) {
+						efree(lnum);
+					}
+					RETURN_TOKEN_WITH_VAL(T_LNUMBER);
+				}
 				ZVAL_DOUBLE(zendlval, zend_oct_strtod(lnum, (const char **)&end));
 			} else {
 				zend_bigint *big = zend_bigint_init_from_string_length(lnum, len, 10);

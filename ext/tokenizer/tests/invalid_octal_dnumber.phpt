@@ -1,5 +1,5 @@
 --TEST--
-Invalid octal number that overflows to double
+Invalid octal number whose truncated prefix overflows to a bigint integer
 --EXTENSIONS--
 tokenizer
 --FILE--
@@ -7,4 +7,4 @@ tokenizer
 echo token_name(token_get_all('<?php 0177777777777777777777787')[1][0]), "\n";
 ?>
 --EXPECT--
-T_DNUMBER
+T_LNUMBER
