@@ -1,9 +1,5 @@
 --TEST--
 Test bindec() function : usage variations - different data types as $binary_string arg
---SKIPIF--
-<?php
-if (PHP_INT_SIZE != 4) die("skip this test is for 32bit platform only");
-?>
 --FILE--
 <?php
 echo "*** Testing bindec() : usage variations ***\n";
@@ -91,7 +87,7 @@ int(2)
 -- Iteration 6 --
 
 Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
-int(2)
+int(-2)
 
 -- Iteration 7 --
 

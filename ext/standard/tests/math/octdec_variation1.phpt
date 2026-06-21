@@ -78,9 +78,7 @@ int(1)
 int(5349)
 
 -- Iteration 4 --
-
-Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
-int(1253)
+int(-1253)
 
 -- Iteration 5 --
 
@@ -100,7 +98,7 @@ int(69)
 -- Iteration 8 --
 
 Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
-int(69)
+int(-69)
 
 -- Iteration 9 --
 

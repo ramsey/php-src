@@ -2,10 +2,6 @@
 Test hexdec() function : usage variations - different data types as $number arg
 --INI--
 precision=14
---SKIPIF--
-<?php
-if (PHP_INT_SIZE != 4) die("skip this test is for 32bit platform only");
-?>
 --FILE--
 <?php
 echo "*** Testing hexdec() : usage variations ***\n";
@@ -81,15 +77,13 @@ int(1)
 int(74565)
 
 -- Iteration 4 --
-
-Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
-int(9029)
+int(-9029)
 
 -- Iteration 5 --
-float(285960729237)
+int(285960729237)
 
 -- Iteration 6 --
-float(285960729238)
+int(285960729238)
 
 -- Iteration 7 --
 
@@ -99,15 +93,15 @@ int(261)
 -- Iteration 8 --
 
 Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
-int(261)
+int(-261)
 
 -- Iteration 9 --
-float(20015998341120)
+int(20015998341120)
 
 -- Iteration 10 --
 
 Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
-float(1250999896553)
+int(1250999896553)
 
 -- Iteration 11 --
 

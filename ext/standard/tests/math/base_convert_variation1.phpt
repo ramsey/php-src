@@ -74,9 +74,7 @@ string(1) "1"
 string(2) "14"
 
 -- Iteration 4 --
-
-Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
-string(2) "14"
+string(3) "-14"
 
 -- Iteration 5 --
 string(11) "17777777777"
@@ -89,7 +87,7 @@ string(3) "151"
 -- Iteration 7 --
 
 Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
-string(3) "151"
+string(4) "-151"
 
 -- Iteration 8 --
 

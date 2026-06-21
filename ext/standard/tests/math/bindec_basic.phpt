@@ -1,11 +1,8 @@
 --TEST--
 Test bindec() - basic function test bindec()
---SKIPIF--
-<?php
-if (PHP_INT_SIZE != 4) die("skip this test is for 32bit platform only");
-?>
 --INI--
 precision=14
+opcache.enable_cli=0
 --FILE--
 <?php
 $values = array(111000111,
@@ -38,19 +35,15 @@ int(455)
 
 Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
 int(0)
-
-Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
-int(32766)
-
-Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
-int(5)
+int(2147483647)
+int(2147483648)
 
 Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
 int(129)
 int(455)
 int(224)
 int(2147483647)
-float(2147483648)
+int(2147483648)
 
 Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
 int(129)

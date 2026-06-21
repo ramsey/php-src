@@ -1,9 +1,5 @@
 --TEST--
-Test octdec function : 64bit long tests
---SKIPIF--
-<?php
-if (PHP_INT_SIZE != 8) die("skip this test is for 64bit platform only");
-?>
+Test octdec - bigint values for 64bit and 32bit platforms
 --FILE--
 <?php
 
@@ -34,15 +30,15 @@ foreach ($octLongStrs as $strVal) {
 --- testing: 777777777777777777777 ---
 int(9223372036854775807)
 --- testing: 1777777777777777777777 ---
-float(1.8446744073709552E+19)
+int(18446744073709551615)
 --- testing: 17777777777 ---
 int(2147483647)
 --- testing: 37777777777 ---
 int(4294967295)
 --- testing: 377777777777777777777777 ---
-float(2.3611832414348226E+21)
+int(2361183241434822606847)
 --- testing: 17777777777777777777777777 ---
-float(7.555786372591432E+22)
+int(75557863725914323419135)
 --- testing: 377777777777 ---
 int(34359738367)
 --- testing: 777777777777 ---

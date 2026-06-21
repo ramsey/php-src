@@ -868,10 +868,11 @@ PHPAPI zend_long _php_math_basetolong(zval *arg, int base)
 /*
  * Convert a string representation of a base(2-36) number to a zval.
  */
-PHPAPI void _php_math_basetozval(zend_string *str, int base, zval *ret)
+PHPAPI bool _php_math_basetozval(zend_string *str, int base, zval *ret)
 {
 	zend_long num = 0;
-	double fnum = 0;
+	zend_bigint *big = NULL;
+	bool negative = false;
 	int mode = 0;
 	char c, *s, *e;
 	zend_long cutoff;
@@ -886,10 +887,28 @@ PHPAPI void _php_math_basetozval(zend_string *str, int base, zval *ret)
 	/* Skip trailing whitespace */
 	while (s < e && isspace((unsigned char)e[-1])) e--;
 
+	/* An optional leading sign precedes any base prefix (e.g. "-0xff"). */
+	if (s < e && (*s == '-' || *s == '+')) {
+		negative = (*s == '-');
+		s++;
+	}
+
 	if (e - s >= 2) {
 		if (base == 16 && s[0] == '0' && (s[1] == 'x' || s[1] == 'X')) s += 2;
 		if (base == 8 && s[0] == '0' && (s[1] == 'o' || s[1] == 'O')) s += 2;
 		if (base == 2 && s[0] == '0' && (s[1] == 'b' || s[1] == 'B')) s += 2;
+	}
+
+	/* A non-linear radix makes a huge input quadratic to parse; bound the cost
+	 * by the same digit limit the output side uses. */
+	zend_long limit = EG(int_string_max_digits);
+	if (limit != 0 && !zend_bigint_radix_conversion_is_linear(base)
+			&& (zend_long) (e - s) > limit) {
+		zend_value_error(
+			"Integer string too large to convert; it exceeds the limit of "
+			ZEND_LONG_FMT " digits, configurable via the "
+			"zend.int_string_max_digits setting", limit);
+		return false;
 	}
 
 	cutoff = ZEND_LONG_MAX / base;
@@ -920,13 +939,14 @@ PHPAPI void _php_math_basetozval(zend_string *str, int base, zval *ret)
 			if (num < cutoff || (num == cutoff && c <= cutlim)) {
 				num = num * base + c;
 				break;
-			} else {
-				fnum = (double)num;
-				mode = 1;
 			}
+			/* Overflow: promote to a bigint seeded with the accumulated long. */
+			big = zend_bigint_init_from_long(num);
+			mode = 1;
 			ZEND_FALLTHROUGH;
-		case 1: /* Float */
-			fnum = fnum * base + c;
+		case 1: /* Bigint */
+			zend_bigint_mul_long(big, big, base);
+			zend_bigint_add_long(big, big, c);
 		}
 	}
 
@@ -935,10 +955,15 @@ PHPAPI void _php_math_basetozval(zend_string *str, int base, zval *ret)
 	}
 
 	if (mode == 1) {
-		ZVAL_DOUBLE(ret, fnum);
+		if (negative) {
+			zend_bigint_long_sub(big, 0, big);
+		}
+		zend_bigint_result(ret, big);
 	} else {
-		ZVAL_LONG(ret, num);
+		ZVAL_LONG(ret, negative ? -num : num);
 	}
+
+	return true;
 }
 /* }}} */
 
@@ -1030,8 +1055,13 @@ PHPAPI zend_string * _php_math_zvaltobase(zval *arg, int base)
 {
 	static const char digits[] = "0123456789abcdefghijklmnopqrstuvwxyz";
 
-	if ((Z_TYPE_P(arg) != IS_LONG && Z_TYPE_P(arg) != IS_DOUBLE) || base < 2 || base > 36) {
+	if ((Z_TYPE_P(arg) != IS_LONG && Z_TYPE_P(arg) != IS_DOUBLE && Z_TYPE_P(arg) != IS_BIGINT) || base < 2 || base > 36) {
 		return ZSTR_EMPTY_ALLOC();
+	}
+
+	if (Z_TYPE_P(arg) == IS_BIGINT) {
+		/* May return NULL with a pending ValueError on the digit limit. */
+		return zend_bigint_to_string_base_checked(Z_BIG_P(arg), base);
 	}
 
 	if (Z_TYPE_P(arg) == IS_DOUBLE) {
@@ -1069,7 +1099,9 @@ PHP_FUNCTION(bindec)
 		Z_PARAM_STR(arg)
 	ZEND_PARSE_PARAMETERS_END();
 
-	_php_math_basetozval(arg, 2, return_value);
+	if (!_php_math_basetozval(arg, 2, return_value)) {
+		RETURN_THROWS();
+	}
 }
 /* }}} */
 
@@ -1082,7 +1114,9 @@ PHP_FUNCTION(hexdec)
 		Z_PARAM_STR(arg)
 	ZEND_PARSE_PARAMETERS_END();
 
-	_php_math_basetozval(arg, 16, return_value);
+	if (!_php_math_basetozval(arg, 16, return_value)) {
+		RETURN_THROWS();
+	}
 }
 /* }}} */
 
@@ -1095,7 +1129,9 @@ PHP_FUNCTION(octdec)
 		Z_PARAM_STR(arg)
 	ZEND_PARSE_PARAMETERS_END();
 
-	_php_math_basetozval(arg, 8, return_value);
+	if (!_php_math_basetozval(arg, 8, return_value)) {
+		RETURN_THROWS();
+	}
 }
 /* }}} */
 
@@ -1206,8 +1242,11 @@ PHP_FUNCTION(base_convert)
 		RETURN_THROWS();
 	}
 
-	_php_math_basetozval(number, (int)frombase, &temp);
+	if (!_php_math_basetozval(number, (int)frombase, &temp)) {
+		RETURN_THROWS();
+	}
 	result = _php_math_zvaltobase(&temp, (int)tobase);
+	zval_ptr_dtor(&temp); /* temp may hold a bigint */
 	if (!result) {
 		RETURN_THROWS();
 	}

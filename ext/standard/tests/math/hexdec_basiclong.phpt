@@ -1,9 +1,5 @@
 --TEST--
-Test hexdec function : 64bit long tests
---SKIPIF--
-<?php
-if (PHP_INT_SIZE != 8) die("skip this test is for 64bit platform only");
-?>
+Test hexdec - bigint values for 64bit and 32bit platforms
 --FILE--
 <?php
 
@@ -34,15 +30,15 @@ foreach ($hexLongStrs as $strVal) {
 --- testing: 7fffffffffffffff ---
 int(9223372036854775807)
 --- testing: ffffffffffffffff ---
-float(1.8446744073709552E+19)
+int(18446744073709551615)
 --- testing: 7fffffff ---
 int(2147483647)
 --- testing: ffffffff ---
 int(4294967295)
 --- testing: 7ffffffffffffffff ---
-float(1.4757395258967641E+20)
+int(147573952589676412927)
 --- testing: ffffffffffffffffff ---
-float(4.722366482869645E+21)
+int(4722366482869645213695)
 --- testing: 7ffffffff ---
 int(34359738367)
 --- testing: fffffffff ---
