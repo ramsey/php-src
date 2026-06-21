@@ -374,6 +374,32 @@ ZEND_API zend_string *zend_bigint_to_str(const zend_bigint *big)
 	return str;
 }
 
+ZEND_API char *zend_bigint_to_string_base(const zend_bigint *big, int base, size_t *len)
+{
+	int size = 0;
+	mp_radix_size((const mp_int *) big->mp, base, &size);
+	/* size includes the NUL terminator */
+	char *out = emalloc((size_t) size);
+	size_t written = 0;
+	mp_to_radix((const mp_int *) big->mp, out, (size_t) size, &written, base);
+	/* libtommath emits uppercase A-Z for digit values >= 10; PHP's base
+	 * conversions use lowercase a-z (see _php_math_longtobase). */
+	for (char *p = out; *p != '\0'; p++) {
+		if (*p >= 'A' && *p <= 'Z') {
+			*p += 'a' - 'A';
+		}
+	}
+	*len = strlen(out);
+	return out;
+}
+
+ZEND_API bool zend_bigint_radix_conversion_is_linear(int base)
+{
+	/* libtommath converts to/from every radix in O(n^2) time. */
+	(void) base;
+	return false;
+}
+
 /* Reports whether the decimal form of big would run longer than max_digits,
  * which is how we enforce zend.int_string_max_digits without building the
  * string first.

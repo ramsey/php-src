@@ -2,6 +2,7 @@
 Test decoct() function : usage variations - different data types as $number arg
 --INI--
 precision=14
+opcache.enable_cli=0
 --SKIPIF--
 <?php
 if (PHP_INT_SIZE != 8) die("skip this test is for 64bit platform only");
@@ -58,13 +59,13 @@ string(1) "1"
 string(5) "30071"
 
 -- Iteration 4 --
-string(22) "1777777777777777773327"
+string(5) "-4451"
 
 -- Iteration 5 --
-decoct(): Argument #1 ($num) must be of type int, float given
+string(22) "1777777777777777777777"
 
 -- Iteration 6 --
-decoct(): Argument #1 ($num) must be of type int, float given
+string(22) "2000000000000000000000"
 
 -- Iteration 7 --
 string(13) "1627646215010"

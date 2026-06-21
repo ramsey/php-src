@@ -1,26 +1,31 @@
 --TEST--
-Bigint: Z_PARAM_LONG via the frameless-function (FLF) slow path converts in-range and throws ValueError for out-of-range
---SKIPIF--
-<?php if (PHP_INT_SIZE < 8) die("skip this test is for 64-bit platform only"); ?>
+Bigint: the frameless dechex() path accepts a bigint via Z_FLF_PARAM_INT
+--INI--
+opcache.enable_cli=0
 --EXTENSIONS--
 zend_test
 --FILE--
 <?php
 // dechex() has a @frameless-function {"arity": 1} annotation; calling it with a
 // literal positional argument exercises the ZEND_FRAMELESS_FUNCTION(dechex, 1)
-// opcode path which uses Z_FLF_PARAM_LONG -> zend_flf_parse_arg_long_slow.
+// opcode path, which now uses Z_FLF_PARAM_INT and accepts a bigint.
 
-// Out-of-range bigint via FLF -> ValueError; message names long bounds.
-try {
-    dechex(2 ** 64);
-} catch (ValueError $e) {
-    echo get_class($e) . ': ' . $e->getMessage() . "\n";
-}
+// Out-of-long-range bigint via FLF is converted.
+var_dump(dechex(2 ** 64) === '10000000000000000');
+var_dump(dechex(2 ** 32) === '100000000');
 
-// In-range non-canonical bigint via FLF -> lossless conversion.
+// A numeric string coerces to a bigint in the FLF tmp (weak mode), which
+// Z_FLF_PARAM_FREE_INT must release.
+var_dump(dechex('18446744073709551616') === '10000000000000000');
+var_dump(dechex('4294967296') === '100000000');
+
+// In-range non-canonical bigint via FLF uses lossless conversion.
 $b = zend_test_make_bigint('255');
 var_dump(dechex($b));
 ?>
 --EXPECT--
-ValueError: dechex(): Argument #1 ($num) must be between -9223372036854775808 and 9223372036854775807
+bool(true)
+bool(true)
+bool(true)
+bool(true)
 string(2) "ff"

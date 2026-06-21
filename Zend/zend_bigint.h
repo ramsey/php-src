@@ -123,6 +123,19 @@ ZEND_API char     *zend_bigint_to_string(const zend_bigint *big, size_t *len);
  * holding the canonical decimal. Does not apply any display digit limit. */
 ZEND_API zend_string *zend_bigint_to_str(const zend_bigint *big);
 
+/* Like zend_bigint_to_string(), but emits the value in an arbitrary radix
+ * (2-36), signed, and with lowercase a-z digits. Returns an owned C string
+ * (caller must efree()); *len receives strlen.
+ *
+ * This function does not apply a digit limit. Callers must gate calls with
+ * zend_bigint_radix_conversion_is_linear() and zend_bigint_string_exceeds_digits(). */
+ZEND_API char *zend_bigint_to_string_base(const zend_bigint *big, int base, size_t *len);
+
+/* Whether the active backend converts to/from the given radix in linear time.
+ * The engine uses this to decide whether the zend.int_string_max_digits gate
+ * is necessary. A linear radix is cheap and may skip the gate. */
+ZEND_API bool zend_bigint_radix_conversion_is_linear(int base);
+
 /* True if the decimal representation of |big| has more than max_digits digits
  * (the sign is not counted). */
 ZEND_API bool zend_bigint_string_exceeds_digits(const zend_bigint *big, zend_long max_digits);

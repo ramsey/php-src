@@ -801,6 +801,26 @@ ZEND_API zend_string* ZEND_FASTCALL zend_bigint_to_string_checked(const zend_big
 }
 /* }}} */
 
+ZEND_API zend_string* ZEND_FASTCALL zend_bigint_to_string_base_checked(const zend_bigint *big, int base) /* {{{ */
+{
+	zend_long limit = EG(int_string_max_digits);
+	if (limit != 0
+			&& !zend_bigint_radix_conversion_is_linear(base)
+			&& zend_bigint_string_exceeds_digits(big, limit)) {
+		zend_value_error(
+			"Integer too large to convert to string; it exceeds the limit of "
+			ZEND_LONG_FMT " digits, configurable via the "
+			"zend.int_string_max_digits setting", limit);
+		return NULL;
+	}
+	size_t len;
+	char *s = zend_bigint_to_string_base(big, base, &len);
+	zend_string *str = zend_string_init(s, len, 0);
+	efree(s);
+	return str;
+}
+/* }}} */
+
 ZEND_API bool ZEND_FASTCALL zend_int_string_exceeds_digit_limit(const char *str, size_t len) /* {{{ */
 {
 	zend_long limit = EG(int_string_max_digits);

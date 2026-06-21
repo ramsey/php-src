@@ -342,16 +342,23 @@ ZEND_API zend_string* ZEND_FASTCALL zval_try_get_string_func(const zval *op);
 ZEND_API void         ZEND_FASTCALL zend_cast_to_int(zval *result, zval *op);
 
 /* Convert an integer's bigint payload to its decimal zend_string, enforcing
- * EG(int_string_max_digits). Returns NULL with a pending ValueError if the
+ * zend.int_string_max_digits. Returns NULL with a pending ValueError if the
  * digit count exceeds the limit; otherwise a new zend_string (caller owns it). */
 ZEND_API zend_string* ZEND_FASTCALL zend_bigint_to_string_checked(const zend_bigint *big);
 
-/* True if the decimal string has more digits than EG(int_string_max_digits)
+/* Like zend_bigint_to_string_checked(), but emits radix base (2-36). The result
+ * string is signed and lowercase. The zend.int_string_max_digits limit is
+ * enforced when the backend reports the radix as non-linear (see
+ * zend_bigint_radix_conversion_is_linear()). Returns NULL with a pending
+ * ValueError when the limit is exceeded. */
+ZEND_API zend_string* ZEND_FASTCALL zend_bigint_to_string_base_checked(const zend_bigint *big, int base);
+
+/* True if the decimal string has more digits than zend.int_string_max_digits
  * (0 disables the limit). A leading '+' or '-' symbol is not counted. Tests the
  * literal length only, so nothing is allocated; does not throw. */
 ZEND_API bool ZEND_FASTCALL zend_int_string_exceeds_digit_limit(const char *str, size_t len);
 
-/* Enforce EG(int_string_max_digits) on a decimal string before it is parsed
+/* Enforce zend.int_string_max_digits on a decimal string before it is parsed
  * into a bigint (the input-side counterpart of zend_bigint_to_string_checked).
  * Returns false with a pending ValueError when zend_int_string_exceeds_digit_limit()
  * is true; otherwise true. */

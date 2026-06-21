@@ -950,15 +950,17 @@ PHPAPI void _php_math_basetozval(zend_string *str, int base, zval *ret)
 PHPAPI zend_string * _php_math_longtobase(zend_long arg, int base)
 {
 	static const char digits[] = "0123456789abcdefghijklmnopqrstuvwxyz";
-	char buf[(sizeof(zend_ulong) << 3) + 1];
+	char buf[(sizeof(zend_ulong) << 3) + 2];
 	char *ptr, *end;
 	zend_ulong value;
+	bool negative = arg < 0;
 
 	if (base < 2 || base > 36) {
 		return ZSTR_EMPTY_ALLOC();
 	}
 
-	value = arg;
+	/* Sign-magnitude: emit a leading '-' and convert the magnitude (PHP_INT_MIN-safe). */
+	value = negative ? (zend_ulong) -(arg + 1) + 1 : (zend_ulong) arg;
 
 	end = ptr = buf + sizeof(buf) - 1;
 	*ptr = '\0';
@@ -968,6 +970,10 @@ PHPAPI zend_string * _php_math_longtobase(zend_long arg, int base)
 		*--ptr = digits[value % base];
 		value /= base;
 	} while (value);
+
+	if (negative) {
+		*--ptr = '-';
+	}
 
 	return zend_string_init(ptr, end - ptr, 0);
 }
@@ -982,17 +988,20 @@ static zend_always_inline zend_string * _php_math_longtobase_pwr2(zend_long arg,
 {
 	static const char digits[] = "0123456789abcdefghijklmnopqrstuvwxyz";
 	zend_ulong value;
+	bool negative = arg < 0;
 	size_t len;
 	zend_string *ret;
 	char *ptr;
 
-	value = arg;
+	/* Sign-magnitude: emit a leading '-' and convert the magnitude (PHP_INT_MIN-safe). */
+	value = negative ? (zend_ulong) -(arg + 1) + 1 : (zend_ulong) arg;
 
 	if (value == 0) {
 		len = 1;
 	} else {
 		len = ((sizeof(value) * 8 - zend_ulong_nlz(value)) + (base_log2 - 1)) / base_log2;
 	}
+	len += negative;
 
 	ret = zend_string_alloc(len, 0);
 	ptr = ZSTR_VAL(ret) + len;
@@ -1003,6 +1012,10 @@ static zend_always_inline zend_string * _php_math_longtobase_pwr2(zend_long arg,
 		*--ptr = digits[value & ((1 << base_log2) - 1)];
 		value >>= base_log2;
 	} while (value);
+
+	if (negative) {
+		*--ptr = '-';
+	}
 
 	return ret;
 }
@@ -1089,51 +1102,85 @@ PHP_FUNCTION(octdec)
 /* {{{ Returns a string containing a binary representation of the number */
 PHP_FUNCTION(decbin)
 {
-	zend_long arg;
+	zval *arg;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_LONG(arg)
+		Z_PARAM_INT(arg)
 	ZEND_PARSE_PARAMETERS_END();
 
-	RETURN_STR(_php_math_longtobase_pwr2(arg, 1));
+	if (EXPECTED(Z_TYPE_P(arg) == IS_LONG)) {
+		RETURN_STR(_php_math_longtobase_pwr2(Z_LVAL_P(arg), 1));
+	}
+
+	zend_string *str = zend_bigint_to_string_base_checked(Z_BIG_P(arg), 2);
+	if (!str) {
+		RETURN_THROWS();
+	}
+	RETURN_STR(str);
 }
 /* }}} */
 
 /* {{{ Returns a string containing an octal representation of the given number */
 PHP_FUNCTION(decoct)
 {
-	zend_long arg;
+	zval *arg;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_LONG(arg)
+		Z_PARAM_INT(arg)
 	ZEND_PARSE_PARAMETERS_END();
 
-	RETURN_STR(_php_math_longtobase_pwr2(arg, 3));
+	if (EXPECTED(Z_TYPE_P(arg) == IS_LONG)) {
+		RETURN_STR(_php_math_longtobase_pwr2(Z_LVAL_P(arg), 3));
+	}
+
+	zend_string *str = zend_bigint_to_string_base_checked(Z_BIG_P(arg), 8);
+	if (!str) {
+		RETURN_THROWS();
+	}
+	RETURN_STR(str);
 }
 /* }}} */
 
 /* {{{ Returns a string containing a hexadecimal representation of the given number */
 PHP_FUNCTION(dechex)
 {
-	zend_long arg;
+	zval *arg;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_LONG(arg)
+		Z_PARAM_INT(arg)
 	ZEND_PARSE_PARAMETERS_END();
 
-	RETURN_STR(_php_math_longtobase_pwr2(arg, 4));
+	if (EXPECTED(Z_TYPE_P(arg) == IS_LONG)) {
+		RETURN_STR(_php_math_longtobase_pwr2(Z_LVAL_P(arg), 4));
+	}
+
+	zend_string *str = zend_bigint_to_string_base_checked(Z_BIG_P(arg), 16);
+	if (!str) {
+		RETURN_THROWS();
+	}
+	RETURN_STR(str);
 }
 /* }}} */
 
 ZEND_FRAMELESS_FUNCTION(dechex, 1)
 {
-	zend_long arg;
+	zval arg_tmp;
+	zval *arg = NULL;
 
-	Z_FLF_PARAM_LONG(1, arg);
+	Z_FLF_PARAM_INT(1, arg, arg_tmp);
 
-	RETVAL_STR(_php_math_longtobase_pwr2(arg, 4));
+	if (EXPECTED(Z_TYPE_P(arg) == IS_LONG)) {
+		RETVAL_STR(_php_math_longtobase_pwr2(Z_LVAL_P(arg), 4));
+	} else {
+		zend_string *str = zend_bigint_to_string_base_checked(Z_BIG_P(arg), 16);
+		if (!str) {
+			goto flf_clean;
+		}
+		RETVAL_STR(str);
+	}
 
-flf_clean:;
+flf_clean:
+	Z_FLF_PARAM_FREE_INT(arg, arg_tmp);
 }
 
 /* {{{ Converts a number in a string from any base <= 36 to any base <= 36 */

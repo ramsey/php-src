@@ -1,9 +1,5 @@
 --TEST--
-Test dechex function : 64bit long tests
---SKIPIF--
-<?php
-if (PHP_INT_SIZE != 8) die("skip this test is for 64bit platform only");
-?>
+Test decoct - bigint values for 64bit and 32bit platforms
 --FILE--
 <?php
 
@@ -20,43 +16,43 @@ $longVals = array(
 
 
 foreach ($longVals as $longVal) {
-    echo "--- testing: $longVal ---\n";
-    try {
-        var_dump(dechex($longVal));
-    } catch (TypeError $exception) {
-        echo $exception->getMessage() . "\n";
-    }
+   echo "--- testing: $longVal ---\n";
+   try {
+      var_dump(decoct($longVal));
+   } catch (TypeError $exception) {
+       echo $exception->getMessage() . "\n";
+   }
 }
 
 ?>
 --EXPECT--
 --- testing: 9223372036854775807 ---
-string(16) "7fffffffffffffff"
+string(21) "777777777777777777777"
 --- testing: -9223372036854775808 ---
-string(16) "8000000000000000"
+string(23) "-1000000000000000000000"
 --- testing: 2147483647 ---
-string(8) "7fffffff"
+string(11) "17777777777"
 --- testing: -2147483648 ---
-string(16) "ffffffff80000000"
+string(12) "-20000000000"
 --- testing: 9223372034707292160 ---
-string(16) "7fffffff80000000"
+string(21) "777777777760000000000"
 --- testing: -9223372034707292160 ---
-string(16) "8000000080000000"
+string(22) "-777777777760000000000"
 --- testing: 2147483648 ---
-string(8) "80000000"
+string(11) "20000000000"
 --- testing: -2147483649 ---
-string(16) "ffffffff7fffffff"
+string(12) "-20000000001"
 --- testing: 4294967294 ---
-string(8) "fffffffe"
+string(11) "37777777776"
 --- testing: 4294967295 ---
-string(8) "ffffffff"
+string(11) "37777777777"
 --- testing: 4294967293 ---
-string(8) "fffffffd"
+string(11) "37777777775"
 --- testing: 9223372036854775806 ---
-string(16) "7ffffffffffffffe"
---- testing: 9.2233720368548E+18 ---
-dechex(): Argument #1 ($num) must be of type int, float given
+string(21) "777777777777777777776"
+--- testing: 9223372036854775808 ---
+string(22) "1000000000000000000000"
 --- testing: -9223372036854775807 ---
-string(16) "8000000000000001"
---- testing: -9.2233720368548E+18 ---
-string(16) "8000000000000000"
+string(22) "-777777777777777777777"
+--- testing: -9223372036854775809 ---
+string(23) "-1000000000000000000001"

@@ -2,10 +2,7 @@
 Test decbin() function : usage variations - different data types as $num arg
 --INI--
 precision=14
---SKIPIF--
-<?php
-if (PHP_INT_SIZE != 4) die("skip this test is for 32bit platform only");
-?>
+opcache.enable_cli=0
 --FILE--
 <?php
 echo "*** Testing decbin() : usage variations ***\n";
@@ -16,7 +13,9 @@ $inputs = [
        1,
        12345,
        -2345,
-       4294967295,  // largest decimal
+       18446744073709551615,
+       18446744073709551616,
+       4294967295,
        4294967296,
 
        // float data
@@ -58,22 +57,22 @@ string(1) "1"
 string(14) "11000000111001"
 
 -- Iteration 4 --
-string(32) "11111111111111111111011011010111"
+string(13) "-100100101001"
 
 -- Iteration 5 --
-decbin(): Argument #1 ($num) must be of type int, float given
+string(64) "1111111111111111111111111111111111111111111111111111111111111111"
 
 -- Iteration 6 --
-decbin(): Argument #1 ($num) must be of type int, float given
+string(65) "10000000000000000000000000000000000000000000000000000000000000000"
 
 -- Iteration 7 --
-decbin(): Argument #1 ($num) must be of type int, float given
+string(32) "11111111111111111111111111111111"
 
 -- Iteration 8 --
-string(1) "1"
+string(33) "100000000000000000000000000000000"
 
 -- Iteration 9 --
-string(1) "0"
+string(37) "1110010111110100110010001101000001000"
 
 -- Iteration 10 --
 string(1) "1"
@@ -82,7 +81,13 @@ string(1) "1"
 string(1) "0"
 
 -- Iteration 12 --
-decbin(): Argument #1 ($num) must be of type int, string given
+string(1) "1"
 
 -- Iteration 13 --
+string(1) "0"
+
+-- Iteration 14 --
+decbin(): Argument #1 ($num) must be of type int, string given
+
+-- Iteration 15 --
 decbin(): Argument #1 ($num) must be of type int, string given

@@ -9,12 +9,12 @@ zend_test
 declare(strict_types=1);
 
 // In-range bigint in strict mode -> accepted (lossless conversion).
-$b = zend_test_make_bigint('255');
-var_dump(dechex($b));
+$b = zend_test_make_bigint('65');
+var_dump(chr($b));
 
 // Out-of-range bigint in strict mode -> ValueError.
 try {
-    dechex(2 ** 64);
+    chr(2 ** 32);
 } catch (Throwable $e) {
     echo get_class($e) . ': ' . $e->getMessage() . "\n";
 }
@@ -26,6 +26,6 @@ $ao->setFlags(zend_test_make_bigint('2'));
 var_dump($ao->getFlags());
 ?>
 --EXPECT--
-string(2) "ff"
-ValueError: dechex(): Argument #1 ($num) must be between -2147483648 and 2147483647
+string(1) "A"
+ValueError: chr(): Argument #1 ($codepoint) must be between -2147483648 and 2147483647
 int(2)

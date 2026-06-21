@@ -2,10 +2,7 @@
 Test dechex() function : usage variations - different data types as $num arg
 --INI--
 precision=14
---SKIPIF--
-<?php
-if (PHP_INT_SIZE != 4) die("skip this test is for 32bit platform only");
-?>
+opcache.enable_cli=0
 --FILE--
 <?php
 echo "*** Testing dechex() : usage variations ***\n";
@@ -16,7 +13,9 @@ $inputs = [
        1,
        12345,
        -2345,
-       4294967295,  // largest decimal
+       18446744073709551615,
+       18446744073709551616,
+       4294967295,
        4294967296,
 
        // float data
@@ -58,22 +57,22 @@ string(1) "1"
 string(4) "3039"
 
 -- Iteration 4 --
-string(8) "fffff6d7"
+string(4) "-929"
 
 -- Iteration 5 --
-dechex(): Argument #1 ($num) must be of type int, float given
+string(16) "ffffffffffffffff"
 
 -- Iteration 6 --
-dechex(): Argument #1 ($num) must be of type int, float given
+string(17) "10000000000000000"
 
 -- Iteration 7 --
-dechex(): Argument #1 ($num) must be of type int, float given
+string(8) "ffffffff"
 
 -- Iteration 8 --
-string(1) "1"
+string(9) "100000000"
 
 -- Iteration 9 --
-string(1) "0"
+string(10) "1cbe991a08"
 
 -- Iteration 10 --
 string(1) "1"
@@ -82,7 +81,13 @@ string(1) "1"
 string(1) "0"
 
 -- Iteration 12 --
-dechex(): Argument #1 ($num) must be of type int, string given
+string(1) "1"
 
 -- Iteration 13 --
+string(1) "0"
+
+-- Iteration 14 --
+dechex(): Argument #1 ($num) must be of type int, string given
+
+-- Iteration 15 --
 dechex(): Argument #1 ($num) must be of type int, string given
