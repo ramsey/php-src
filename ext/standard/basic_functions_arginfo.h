@@ -1,5 +1,5 @@
 /* This is a generated file, edit basic_functions.stub.php instead.
- * Stub hash: 3b1649a3abb3cfb5cb39d93f30a97765fe862d67
+ * Stub hash: c90be19cee5cb3285a40a439d69b8262d9454e50
  * Has decl header: yes */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_set_time_limit, 0, 1, _IS_BOOL, 0)
@@ -1722,7 +1722,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_base_convert, 0, 3, IS_STRING, 0
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_number_format, 0, 1, IS_STRING, 0)
-	ZEND_ARG_TYPE_INFO(0, num, IS_DOUBLE, 0)
+	ZEND_ARG_TYPE_MASK(0, num, MAY_BE_LONG|MAY_BE_DOUBLE, NULL)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, decimals, IS_LONG, 0, "0")
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, decimal_separator, IS_STRING, 1, "\".\"")
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, thousands_separator, IS_STRING, 1, "\",\"")

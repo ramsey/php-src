@@ -1411,6 +1411,139 @@ PHPAPI zend_string *_php_math_number_format_long(zend_long num, zend_long dec, c
 	return res;
 }
 
+/* Format a bigint exactly as a grouped decimal string. Mirrors
+ * _php_math_number_format_long but sources the digits from the bigint's exact
+ * decimal expansion, so no precision is lost. Honors zend.int_string_max_digits
+ * and returns NULL with a pending ValueError when the value exceeds the limit. */
+static zend_string *php_math_number_format_bigint(const zend_bigint *num, zend_long dec,
+		const char *dec_point, size_t dec_point_len, const char *thousand_sep, size_t thousand_sep_len)
+{
+	zend_string *decimal = zend_bigint_to_string_checked(num);
+	if (!decimal) {
+		return NULL;
+	}
+
+	int is_negative = 0;
+	const char *mag = ZSTR_VAL(decimal);
+	size_t maglen = ZSTR_LEN(decimal);
+
+	if (mag[0] == '-') {
+		is_negative = 1;
+		mag++;
+		maglen--;
+	}
+
+	/* Round to 10^(-dec), half away from zero, on the decimal digits. */
+	char *rbuf = NULL;
+	if (dec < 0) {
+		size_t drop = (size_t) -dec;
+		size_t rlen;
+
+		if (drop >= maglen) {
+			/* Rounding past the most significant digit: 0, unless the value is
+			 * at least half of 10^drop (only possible when drop == maglen). */
+			if (drop == maglen && mag[0] >= '5') {
+				rbuf = emalloc(drop + 2);
+				rbuf[0] = '1';
+				memset(rbuf + 1, '0', drop);
+				rlen = drop + 1;
+			} else {
+				rbuf = emalloc(2);
+				rbuf[0] = '0';
+				rlen = 1;
+			}
+		} else {
+			size_t keep = maglen - drop;
+			bool roundup = mag[keep] >= '5';
+
+			rbuf = emalloc(maglen + 2);
+			memcpy(rbuf, mag, keep);
+			rlen = keep;
+
+			if (roundup) {
+				size_t i = keep;
+				while (i > 0 && rbuf[i - 1] == '9') {
+					rbuf[i - 1] = '0';
+					i--;
+				}
+				if (i == 0) {
+					memmove(rbuf + 1, rbuf, keep);
+					rbuf[0] = '1';
+					rlen = keep + 1;
+				} else {
+					rbuf[i - 1]++;
+				}
+			}
+
+			memset(rbuf + rlen, '0', drop);
+			rlen += drop;
+		}
+
+		mag = rbuf;
+		maglen = rlen;
+
+		/* prevent resulting in negative zero */
+		if (maglen == 1 && mag[0] == '0') {
+			is_negative = 0;
+		}
+	}
+
+	size_t reslen = maglen;
+
+	if (thousand_sep) {
+		reslen = zend_safe_addmult((reslen - 1) / 3, thousand_sep_len, reslen, "number formatting");
+	}
+
+	reslen += is_negative;
+
+	if (dec > 0) {
+		reslen += dec;
+
+		if (dec_point) {
+			reslen = zend_safe_addmult(reslen, 1, dec_point_len, "number formatting");
+		}
+	}
+
+	zend_string *res = zend_string_alloc(reslen, 0);
+	const char *s = mag + maglen - 1;
+	char *t = ZSTR_VAL(res) + reslen;
+	int count = 0;
+
+	*t-- = '\0';
+
+	if (dec > 0) {
+		size_t topad = (size_t) dec;
+
+		while (topad--) {
+			*t-- = '0';
+		}
+
+		if (dec_point) {
+			t -= dec_point_len;
+			memcpy(t + 1, dec_point, dec_point_len);
+		}
+	}
+
+	while (s >= mag) {
+		*t-- = *s--;
+		if (thousand_sep && (++count % 3) == 0 && s >= mag) {
+			t -= thousand_sep_len;
+			memcpy(t + 1, thousand_sep, thousand_sep_len);
+		}
+	}
+
+	if (is_negative) {
+		*t-- = '-';
+	}
+
+	ZSTR_LEN(res) = reslen;
+	zend_string_release_ex(decimal, 0);
+	if (rbuf) {
+		efree(rbuf);
+	}
+	return res;
+}
+
 /* {{{ Formats a number with grouped thousands */
 PHP_FUNCTION(number_format)
 {
@@ -1421,7 +1554,7 @@ PHP_FUNCTION(number_format)
 	size_t thousand_sep_len = 0, dec_point_len = 0;
 
 	ZEND_PARSE_PARAMETERS_START(1, 4)
-		Z_PARAM_NUMBER(num)
+		Z_PARAM_INT_OR_FLOAT(num)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_LONG(dec)
 		Z_PARAM_STRING_OR_NULL(dec_point, dec_point_len)
@@ -1445,6 +1578,14 @@ PHP_FUNCTION(number_format)
 	switch (Z_TYPE_P(num)) {
 		case IS_LONG:
 			RETURN_STR(_php_math_number_format_long(Z_LVAL_P(num), dec, dec_point, dec_point_len, thousand_sep, thousand_sep_len));
+
+		case IS_BIGINT: {
+			zend_string *formatted = php_math_number_format_bigint(Z_BIG_P(num), dec, dec_point, dec_point_len, thousand_sep, thousand_sep_len);
+			if (!formatted) {
+				RETURN_THROWS();
+			}
+			RETURN_STR(formatted);
+		}
 
 		case IS_DOUBLE:
 			// double values of >= 2^52 can not have fractional digits anymore

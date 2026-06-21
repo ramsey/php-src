@@ -3265,7 +3265,7 @@ function base_convert(string $num, int $from_base, int $to_base): string {}
  * @compile-time-eval
  * @refcount 1
  */
-function number_format(float $num, int $decimals = 0, ?string $decimal_separator = ".", ?string $thousands_separator = ","): string {}
+function number_format(int|float $num, int $decimals = 0, ?string $decimal_separator = ".", ?string $thousands_separator = ","): string {}
 
 /**
  * @compile-time-eval
