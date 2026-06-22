@@ -29,6 +29,7 @@ ZEND_API const char *zend_bigint_backend_name(void);
 /* Lifecycle */
 ZEND_API zend_bigint *zend_bigint_init(void);
 ZEND_API zend_bigint *zend_bigint_init_from_long(zend_long value);
+ZEND_API zend_bigint *zend_bigint_init_from_unsigned_long(zend_ulong value);
 ZEND_API zend_bigint *zend_bigint_init_from_string_length(const char *str, size_t len, int base);
 ZEND_API zend_bigint *zend_bigint_dup(const zend_bigint *src);
 ZEND_API void         zend_bigint_free(zend_bigint *big);

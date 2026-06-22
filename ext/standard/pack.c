@@ -1060,18 +1060,25 @@ PHP_FUNCTION(unpack)
 					case 'Q':   /* unsigned machine endian */
 					case 'J':   /* unsigned big endian     */
 					case 'P': { /* unsigned little endian  */
-						zend_long v = 0;
 						uint64_t x = *((unaligned_uint64_t*) &input[inputpos]);
 
 						if (type == 'q') {
-							v = (int64_t) x;
-						} else if ((type == 'J' && MACHINE_LITTLE_ENDIAN) || (type == 'P' && !MACHINE_LITTLE_ENDIAN)) {
-							v = php_pack_reverse_int64(x);
-						} else {
-							v = x;
+							/* Signed. The bit pattern is the value and always fits a long. */
+							ZVAL_LONG(&val, (int64_t) x);
+							break;
 						}
 
-						ZVAL_LONG(&val, v);
+						if ((type == 'J' && MACHINE_LITTLE_ENDIAN) || (type == 'P' && !MACHINE_LITTLE_ENDIAN)) {
+							x = php_pack_reverse_int64(x);
+						}
+
+						/* Unsigned. A value above PHP_INT_MAX is preserved as a bigint
+						 * rather than wrapping to a negative long. */
+						if (x > (uint64_t) ZEND_LONG_MAX) {
+							ZVAL_BIGINT(&val, zend_bigint_init_from_unsigned_long(x));
+						} else {
+							ZVAL_LONG(&val, (zend_long) x);
+						}
 						break;
 					}
 #endif

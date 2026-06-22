@@ -43,6 +43,13 @@ ZEND_API zend_bigint *zend_bigint_init_from_long(zend_long value)
 	return b;
 }
 
+ZEND_API zend_bigint *zend_bigint_init_from_unsigned_long(zend_ulong value)
+{
+	zend_bigint *b = zend_bigint_init();
+	mp_set_u64((mp_int *) b->mp, (uint64_t) value);
+	return b;
+}
+
 ZEND_API zend_bigint *zend_bigint_init_from_string_length(const char *str, size_t len, int base)
 {
 	/* mp_read_radix accepts a leading "-" but not "+"; skip an optional "+". */

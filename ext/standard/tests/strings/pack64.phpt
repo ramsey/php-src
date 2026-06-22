@@ -37,7 +37,7 @@ print_r(unpack("i", pack("i", -2147483647)));
 print_r(unpack("i", pack("i", -2147483648))); // Min int32
 print_r(unpack("I", pack("I",  4294967295))); // Max uint32
 ?>
---EXPECTF--
+--EXPECT--
 Array
 (
     [1] => 281474976710654
@@ -46,45 +46,17 @@ Array
 (
     [1] => 0
 )
-
-Warning: The float 9.223372036854776E+18 is not representable as an int, cast occurred in %s on line %d
 Array
 (
-    [1] => -9223372036854775808
+    [1] => 9223372036854775810
 )
 Array
 (
-    [1] => -1
-)
-
-Warning: The float 9.223372036854776E+18 is not representable as an int, cast occurred in %s on line %d
-Array
-(
-    [1] => -9223372036854775808
+    [1] => 18446744073709551615
 )
 Array
 (
-    [1] => 281474976710654
-)
-Array
-(
-    [1] => 0
-)
-
-Warning: The float 9.223372036854776E+18 is not representable as an int, cast occurred in %s on line %d
-Array
-(
-    [1] => -9223372036854775808
-)
-Array
-(
-    [1] => -1
-)
-
-Warning: The float 9.223372036854776E+18 is not representable as an int, cast occurred in %s on line %d
-Array
-(
-    [1] => -9223372036854775808
+    [1] => 9223372036854775808
 )
 Array
 (
@@ -94,21 +66,17 @@ Array
 (
     [1] => 0
 )
-
-Warning: The float 9.223372036854776E+18 is not representable as an int, cast occurred in %s on line %d
 Array
 (
-    [1] => -9223372036854775808
+    [1] => 9223372036854775810
 )
 Array
 (
-    [1] => -1
+    [1] => 18446744073709551615
 )
-
-Warning: The float 9.223372036854776E+18 is not representable as an int, cast occurred in %s on line %d
 Array
 (
-    [1] => -9223372036854775808
+    [1] => 9223372036854775808
 )
 Array
 (
@@ -118,18 +86,34 @@ Array
 (
     [1] => 0
 )
-
-Warning: The float 9.223372036854776E+18 is not representable as an int, cast occurred in %s on line %d
 Array
 (
-    [1] => -9223372036854775808
+    [1] => 9223372036854775810
+)
+Array
+(
+    [1] => 18446744073709551615
+)
+Array
+(
+    [1] => 9223372036854775808
+)
+Array
+(
+    [1] => 281474976710654
+)
+Array
+(
+    [1] => 0
+)
+Array
+(
+    [1] => -9223372036854775806
 )
 Array
 (
     [1] => -1
 )
-
-Warning: The float 9.223372036854776E+18 is not representable as an int, cast occurred in %s on line %d
 Array
 (
     [1] => -9223372036854775808
