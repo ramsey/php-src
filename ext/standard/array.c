@@ -6989,6 +6989,17 @@ PHP_FUNCTION(array_key_exists)
 			zend_use_resource_as_offset(key);
 			RETVAL_BOOL(zend_hash_index_exists(ht, Z_RES_HANDLE_P(key)));
 			break;
+		case IS_BIGINT: {
+			zend_long lval;
+			if (zend_logical_int_to_long(key, &lval)) {
+				RETVAL_BOOL(zend_hash_index_exists(ht, lval));
+			} else {
+				zend_string *str = zend_bigint_to_str(Z_BIG_P(key));
+				RETVAL_BOOL(zend_hash_exists(ht, str));
+				zend_string_release(str);
+			}
+			break;
+		}
 		default:
 			zend_argument_type_error(1, "must be a valid array offset type");
 			break;

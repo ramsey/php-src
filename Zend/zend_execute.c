@@ -3513,6 +3513,16 @@ num_key:
 		zend_use_resource_as_offset(key);
 		hval = Z_RES_HANDLE_P(key);
 		goto num_key;
+	} else if (Z_TYPE_P(key) == IS_BIGINT) {
+		zend_long lval;
+		if (zend_logical_int_to_long(key, &lval)) {
+			hval = lval;
+			goto num_key;
+		}
+		str = zend_bigint_to_str(Z_BIG_P(key));
+		bool exists = zend_hash_exists(ht, str);
+		zend_string_release(str);
+		return exists;
 	} else if (Z_TYPE_P(key) <= IS_NULL) {
 		if (UNEXPECTED(Z_TYPE_P(key) == IS_UNDEF)) {
 			ZVAL_UNDEFINED_OP1();
