@@ -1806,6 +1806,8 @@ try_again:
 		case IS_TRUE:
 			zend_error(E_WARNING, "String offset cast occurred");
 			break;
+		case IS_BIGINT:
+			return zend_bigint_sign(Z_BIG_P(dim)) < 0 ? ZEND_LONG_MIN : ZEND_LONG_MAX;
 		case IS_REFERENCE:
 			dim = Z_REFVAL_P(dim);
 			goto try_again;
@@ -3223,6 +3225,9 @@ try_string_offset:
 						goto out;
 					}
 					break;
+				case IS_BIGINT:
+					offset = zend_bigint_sign(Z_BIG_P(dim)) < 0 ? ZEND_LONG_MIN : ZEND_LONG_MAX;
+					goto out;
 				case IS_REFERENCE:
 					dim = Z_REFVAL_P(dim);
 					goto try_string_offset;
