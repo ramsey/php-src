@@ -529,7 +529,13 @@ PHP_FUNCTION(file_put_contents)
 		case IS_DOUBLE:
 		case IS_FALSE:
 		case IS_TRUE:
+		case IS_BIGINT:
 			convert_to_string(data);
+			/* Converting a bigint honors zend.int_string_max_digits and may throw. */
+			if (UNEXPECTED(EG(exception))) {
+				numbytes = -1;
+				break;
+			}
 			ZEND_FALLTHROUGH;
 		case IS_STRING:
 			if (Z_STRLEN_P(data)) {
