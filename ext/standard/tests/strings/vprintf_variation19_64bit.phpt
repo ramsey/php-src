@@ -77,20 +77,20 @@ int(7)
 int(38)
 
 -- Iteration 7 --
-18446744073709551605  22  33
-int(28)
+-11  22  33
+int(11)
 
 -- Iteration 8 --
-12  1777777777777777777755  23
-int(30)
+12  -23  23
+int(11)
 
 -- Iteration 9 --
-11  ffffffffffffffde  33
-int(24)
+11  -22  33
+int(11)
 
 -- Iteration 10 --
-11  FFFFFFFFFFFFFFDE  33
-int(24)
+11  -22  33
+int(11)
 
 -- Iteration 11 --
 2.000000E+1  2.000000E-1  -2.000000E+1

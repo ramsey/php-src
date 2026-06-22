@@ -32,9 +32,9 @@ var_dump($result);
 ?>
 --EXPECT--
 *** Testing vprintf() : basic functionality - using unsigned format ***
-4294966185
-int(10)
-4294966185 4293732729
-int(21)
-4294966185 4293732729 4292621864
-int(32)
+-1111
+int(5)
+-1111 -1234567
+int(14)
+-1111 -1234567 -2345432
+int(23)

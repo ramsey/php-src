@@ -175,38 +175,6 @@ php_sprintf_appendint(zend_string **buffer, size_t *pos, zend_long number,
 }
 /* }}} */
 
-/* php_spintf_appenduint() {{{ */
-inline static void
-php_sprintf_appenduint(zend_string **buffer, size_t *pos,
-					   zend_ulong number,
-					   size_t width, char padding, size_t alignment)
-{
-	char numbuf[NUM_BUF_SIZE];
-	zend_ulong magn, nmagn;
-	unsigned int i = NUM_BUF_SIZE - 1;
-
-	PRINTF_DEBUG(("sprintf: appenduint(%p, %zu, %zu, " ZEND_LONG_FMT ", %zu, '%c', %zu)\n",
-				  *buffer, *pos, ZSTR_LEN(*buffer), number, width, padding, alignment));
-	magn = (zend_ulong) number;
-
-	/* Can't right-pad 0's on integers */
-	if (alignment == 0 && padding == '0') padding = ' ';
-
-	numbuf[i] = '\0';
-
-	do {
-		nmagn = magn / 10;
-
-		numbuf[--i] = (unsigned char)(magn - (nmagn * 10)) + '0';
-		magn = nmagn;
-	} while (magn > 0 && i > 0);
-
-	PRINTF_DEBUG(("sprintf: appending " ZEND_LONG_FMT " as \"%s\", i=%d\n", number, &numbuf[i], i));
-	php_sprintf_appendstring(buffer, pos, &numbuf[i], width, 0,
-							 padding, alignment, (NUM_BUF_SIZE - 1) - i, /* neg */ false, 0, 0);
-}
-/* }}} */
-
 /* php_spintf_appenddouble() {{{ */
 inline static void
 php_sprintf_appenddouble(zend_string **buffer, size_t *pos,
@@ -331,7 +299,12 @@ php_sprintf_append2n(zend_string **buffer, size_t *pos, zend_long number,
 				  chartable));
 	PRINTF_DEBUG(("sprintf: append2n 2^%d andbits=%x\n", n, andbits));
 
-	num = (zend_ulong) number;
+	bool neg = number < 0;
+	/* Sign-magnitude: format the magnitude and prepend '-' for negatives. Compute
+	 * |number| via -(number + 1) + 1 rather than -number, because negating
+	 * ZEND_LONG_MIN overflows a signed long (undefined behavior); this keeps every
+	 * intermediate in range. */
+	num = neg ? (((zend_ulong) -(number + 1)) + 1) : (zend_ulong) number;
 	numbuf[i] = '\0';
 
 	do {
@@ -340,9 +313,57 @@ php_sprintf_append2n(zend_string **buffer, size_t *pos, zend_long number,
 	}
 	while (num > 0);
 
+	if (neg) {
+		numbuf[--i] = '-';
+	}
+
 	php_sprintf_appendstring(buffer, pos, &numbuf[i], width, 0,
 							 padding, alignment, (NUM_BUF_SIZE - 1) - i,
-							 /* neg */ false, expprec, 0);
+							 neg, expprec, 0);
+}
+/* }}} */
+
+/* php_sprintf_append_bigint() {{{ */
+/* Append a bigint in base 10, 16, 8, or 2, sign-magnitude, honoring
+ * zend.int_string_max_digits. `uppercase` upper-cases the hex letters (for %X).
+ * Returns FAILURE with a pending ValueError when the digit limit is exceeded;
+ * the caller must then bail. */
+static zend_result
+php_sprintf_append_bigint(zend_string **buffer, size_t *pos, const zend_bigint *big,
+						  size_t width, char padding, size_t alignment, int base,
+						  bool uppercase, int expprec, int always_sign)
+{
+	zend_string *str = (base == 10)
+		? zend_bigint_to_string_checked(big)
+		: zend_bigint_to_string_base_checked(big, base);
+	if (!str) {
+		return FAILURE;
+	}
+
+	if (uppercase) {
+		char *s = ZSTR_VAL(str);
+		for (size_t i = 0; i < ZSTR_LEN(str); i++) {
+			if (s[i] >= 'a' && s[i] <= 'z') {
+				s[i] = (char) (s[i] - ('a' - 'A'));
+			}
+		}
+	}
+
+	bool neg = ZSTR_VAL(str)[0] == '-';
+
+	/* A non-negative value with the '+' flag needs an explicit leading '+'. */
+	if (!neg && always_sign) {
+		zend_string *signed_str = zend_string_alloc(ZSTR_LEN(str) + 1, 0);
+		ZSTR_VAL(signed_str)[0] = '+';
+		memcpy(ZSTR_VAL(signed_str) + 1, ZSTR_VAL(str), ZSTR_LEN(str) + 1);
+		zend_string_release(str);
+		str = signed_str;
+	}
+
+	php_sprintf_appendstring(buffer, pos, ZSTR_VAL(str), width, 0, padding,
+							 alignment, ZSTR_LEN(str), neg, expprec, always_sign);
+	zend_string_release(str);
+	return SUCCESS;
 }
 /* }}} */
 
@@ -633,17 +654,22 @@ php_formatted_print(char *format, size_t format_len, zval *args, int argc, int n
 					break;
 				}
 
+				/* %u is a deprecated alias of %d. It renders the signed value
+				 * (sign-magnitude), not a fixed-width unsigned reinterpretation. */
 				case 'd':
-					php_sprintf_appendint(&result, &outpos,
-										  zval_get_long(tmp),
-										  width, padding, alignment,
-										  always_sign);
-					break;
-
 				case 'u':
-					php_sprintf_appenduint(&result, &outpos,
-										  zval_get_long(tmp),
-										  width, padding, alignment);
+					ZVAL_DEREF(tmp);
+					if (Z_TYPE_P(tmp) == IS_BIGINT) {
+						if (php_sprintf_append_bigint(&result, &outpos, Z_BIG_P(tmp),
+								width, padding, alignment, 10, false, 0, always_sign) == FAILURE) {
+							goto fail;
+						}
+					} else {
+						php_sprintf_appendint(&result, &outpos,
+											  zval_get_long(tmp),
+											  width, padding, alignment,
+											  always_sign);
+					}
 					break;
 
 				case 'e':
@@ -668,31 +694,63 @@ php_formatted_print(char *format, size_t format_len, zval *args, int argc, int n
 					break;
 
 				case 'o':
-					php_sprintf_append2n(&result, &outpos,
-										 zval_get_long(tmp),
-										 width, padding, alignment, 3,
-										 hexchars, expprec);
+					ZVAL_DEREF(tmp);
+					if (Z_TYPE_P(tmp) == IS_BIGINT) {
+						if (php_sprintf_append_bigint(&result, &outpos, Z_BIG_P(tmp),
+								width, padding, alignment, 8, false, expprec, 0) == FAILURE) {
+							goto fail;
+						}
+					} else {
+						php_sprintf_append2n(&result, &outpos,
+											 zval_get_long(tmp),
+											 width, padding, alignment, 3,
+											 hexchars, expprec);
+					}
 					break;
 
 				case 'x':
-					php_sprintf_append2n(&result, &outpos,
-										 zval_get_long(tmp),
-										 width, padding, alignment, 4,
-										 hexchars, expprec);
+					ZVAL_DEREF(tmp);
+					if (Z_TYPE_P(tmp) == IS_BIGINT) {
+						if (php_sprintf_append_bigint(&result, &outpos, Z_BIG_P(tmp),
+								width, padding, alignment, 16, false, expprec, 0) == FAILURE) {
+							goto fail;
+						}
+					} else {
+						php_sprintf_append2n(&result, &outpos,
+											 zval_get_long(tmp),
+											 width, padding, alignment, 4,
+											 hexchars, expprec);
+					}
 					break;
 
 				case 'X':
-					php_sprintf_append2n(&result, &outpos,
-										 zval_get_long(tmp),
-										 width, padding, alignment, 4,
-										 HEXCHARS, expprec);
+					ZVAL_DEREF(tmp);
+					if (Z_TYPE_P(tmp) == IS_BIGINT) {
+						if (php_sprintf_append_bigint(&result, &outpos, Z_BIG_P(tmp),
+								width, padding, alignment, 16, true, expprec, 0) == FAILURE) {
+							goto fail;
+						}
+					} else {
+						php_sprintf_append2n(&result, &outpos,
+											 zval_get_long(tmp),
+											 width, padding, alignment, 4,
+											 HEXCHARS, expprec);
+					}
 					break;
 
 				case 'b':
-					php_sprintf_append2n(&result, &outpos,
-										 zval_get_long(tmp),
-										 width, padding, alignment, 1,
-										 hexchars, expprec);
+					ZVAL_DEREF(tmp);
+					if (Z_TYPE_P(tmp) == IS_BIGINT) {
+						if (php_sprintf_append_bigint(&result, &outpos, Z_BIG_P(tmp),
+								width, padding, alignment, 2, false, expprec, 0) == FAILURE) {
+							goto fail;
+						}
+					} else {
+						php_sprintf_append2n(&result, &outpos,
+											 zval_get_long(tmp),
+											 width, padding, alignment, 1,
+											 hexchars, expprec);
+					}
 					break;
 
 				case '%':

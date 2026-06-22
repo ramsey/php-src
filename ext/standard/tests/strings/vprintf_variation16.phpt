@@ -76,33 +76,33 @@ Warning: The float 20000000000 is not representable as an int, cast occurred in 
 Warning: The float 2000000000000 is not representable as an int, cast occurred in %s on line %d
 
 Warning: The float 22000000000000 is not representable as an int, cast occurred in %s on line %d
-2 0 10
+2 +0 10
    123456 123456 1234
-   2820130816 2840207360 1177509888
-   12345 12 4294967284 4294843840
+   -1474836480 -1454759936 1177509888
+   12345 12 -12 -123456
    10 123456 2 0
-int(115)
+int(108)
 
 -- Iteration 2 --
-0 0 0
-   123 4294967173 123 
+0 +0 0
+   123 -123 123 
             0 0          0
    1234 0 $0 _0
    0 123 0 0
-int(84)
+int(79)
 
 -- Iteration 3 --
-1 1 1
+1 +1 1
    1    1 1   
             1 1          1
    #1 1 $1 _1
    1 1 1 1
-int(72)
+int(73)
 
 -- Iteration 4 --
-1 1 0
+1 +1 0
    1    0 1   
             1 1          0
    #0 1 $1 _0
    0 1 1 1
-int(72)
+int(73)

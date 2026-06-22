@@ -25,7 +25,7 @@ echo "Done";
 ?>
 --EXPECT--
 *** Testing vsprintf() : basic functionality - using unsigned format ***
-string(20) "18446744073709550505"
-string(41) "18446744073709550505 18446744073708317049"
-string(62) "18446744073709550505 18446744073708317049 18446744073707206184"
+string(5) "-1111"
+string(14) "-1111 -1234567"
+string(23) "-1111 -1234567 -2345432"
 Done

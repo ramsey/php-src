@@ -48,8 +48,8 @@ foreach($formats as $format) {
 *** Testing vprintf() : unsigned formats and unsigned values ***
 
 -- Iteration 1 --
-1234567 342391 0
-int(16)
+1234567 +342391 0
+int(17)
 
 -- Iteration 2 --
 12345678900 1234 12345

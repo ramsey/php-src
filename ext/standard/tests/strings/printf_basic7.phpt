@@ -49,13 +49,13 @@ format
 int(6)
 
 -- Calling printf() with one arguments --
-4294966185
-int(10)
+-1111
+int(5)
 
 -- Calling printf() with two arguments --
-4294966185 4293732729
-int(21)
+-1111 -1234567
+int(14)
 
 -- Calling printf() with three arguments --
-4294966185 4293732729 2345432
-int(29)
+-1111 -1234567 2345432
+int(22)

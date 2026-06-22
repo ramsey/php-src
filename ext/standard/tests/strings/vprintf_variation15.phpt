@@ -48,20 +48,20 @@ foreach($formats as $format) {
 *** Testing vprintf() : unsigned formats and unsigned values ***
 
 -- Iteration 1 --
-1234567 342391 0
-int(16)
+1234567 +342391 0
+int(17)
 
 -- Iteration 2 --
 
 Warning: The float 12345678900 is not representable as an int, cast occurred in %s on line %d
-3755744308 1234 12345
+-539222988 1234 12345
 int(21)
 
 -- Iteration 3 --
 
 Warning: The float 101234567000 is not representable as an int, cast occurred in %s on line %d
-   1234000 2450319192 120
-int(25)
+   1234000 -1844648104 120
+int(26)
 
 -- Iteration 4 --
 #1 0 $0 10

@@ -33,7 +33,7 @@ echo "Done";
 --EXPECT--
 *** Testing sprintf() : basic functionality - using unsigned format ***
 string(6) "format"
-string(20) "18446744073709550505"
-string(41) "18446744073709550505 18446744073708317049"
-string(49) "18446744073709550505 18446744073708317049 2345432"
+string(5) "-1111"
+string(14) "-1111 -1234567"
+string(22) "-1111 -1234567 2345432"
 Done

@@ -39,6 +39,6 @@ unlink($data_file);
 ?>
 --EXPECT--
 *** Testing vfprintf() : basic functionality - using unsigned format ***
-4294966185
-4294966185 4293732729
-4294966185 4293732729 4292621864
+-1111
+-1111 -1234567
+-1111 -1234567 -2345432

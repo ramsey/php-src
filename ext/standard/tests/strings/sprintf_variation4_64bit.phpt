@@ -20,5 +20,5 @@ var_dump(sprintf("%%u = '%u'", $u)); // unsigned integer representation of a neg
 ?>
 --EXPECT--
 string(15) "%u = '43951789'"
-string(27) "%u = '18446744073665599827'"
+string(16) "%u = '-43951789'"
 

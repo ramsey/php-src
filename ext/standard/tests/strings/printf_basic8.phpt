@@ -52,9 +52,9 @@ int(6)
 int(2)
 
 -- Calling printf() with two arguments --
-21 37777777431
-int(14)
+21 -347
+int(7)
 
 -- Calling printf() with three arguments --
-21 37777777431 567
-int(18)
+21 -347 567
+int(11)

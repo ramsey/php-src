@@ -86,27 +86,27 @@ Warning: The float 2000000000000 is not representable as an int, cast occurred i
 
 Warning: The float 22000000000000 is not representable as an int, cast occurred in %s on line %d
 2 0 a
-   1e240 x fffffb2e 4d2 
+   1e240 x -4d2 4d2 
                          
-   3039 c fffffff4 fffe1dc0
+   3039 c -c -1e240
    a 1e240 2 0
-int(99)
+int(87)
 
 -- Iteration 2 --
-2 fffffffe 2
-   1e240 x ff439a5b bc65a5
+2 -2 2
+   1e240 x -bc65a5 bc65a5
                          
-   bc61b4 127ae7 ff4732f9 ff439ede
-   2 1e240 2 fffffffe
-int(122)
+   bc61b4 127ae7 -b8cd07 -bc6122
+   2 1e240 2 -2
+int(107)
 
 -- Iteration 3 --
 0 0 0
-   7b x ffffff85 7b  
+   7b x  -7b 7b  
                          
    4d2 0 $0 _0
    0 7b 0 0
-int(80)
+int(76)
 
 -- Iteration 4 --
 1 1 1

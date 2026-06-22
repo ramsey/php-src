@@ -37,6 +37,6 @@ echo "Done";
 *** Testing sprintf() : basic functionality - using octal format ***
 string(6) "format"
 string(2) "21"
-string(14) "21 37777777431"
-string(18) "21 37777777431 567"
+string(7) "21 -347"
+string(11) "21 -347 567"
 Done

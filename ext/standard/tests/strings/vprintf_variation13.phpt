@@ -59,20 +59,20 @@ foreach($formats as $format) {
 int(1)
 
 -- Iteration 2 --
-ffffffff 1 22
-int(13)
+-1 1 22
+int(7)
 
 -- Iteration 3 --
-7fffffff 7000000 80000000
-int(25)
+7fffffff 7000000 -80000000
+int(26)
 
 -- Iteration 4 --
-                      ffed2979 0000
-int(35)
+                      -12d687 0000
+int(34)
 
 -- Iteration 5 --
-#1 2222 1b6db bbbbbbbc
-int(22)
+#1 2222 1b6db -44444444
+int(23)
 
 -- Iteration 6 --
 123b fab 0 a
