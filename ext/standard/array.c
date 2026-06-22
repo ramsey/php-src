@@ -2781,12 +2781,22 @@ PHP_FUNCTION(array_fill_keys)
  * IS_DOUBLE if only interpretable as float
  * IS_STRING if only interpretable as string
  * IS_ARRAY (as IS_LONG < IS_STRING < IS_ARRAY) for ambiguity of single byte strings which contains a digit */
-static uint8_t php_range_process_input(const zval *input, uint32_t arg_num, zend_long /* restrict */ *lval, double /* restrict */ *dval)
+static uint8_t php_range_process_input(const zval *input, uint32_t arg_num, zend_long /* restrict */ *lval, double /* restrict */ *dval, const zend_bigint **bval)
 {
+	*bval = NULL;
 	switch (Z_TYPE_P(input)) {
 		case IS_LONG:
 			*lval = Z_LVAL_P(input);
 			*dval = (double) Z_LVAL_P(input);
+			return IS_LONG;
+		case IS_BIGINT:
+			/* Report as a logical integer (IS_LONG) so it never sorts as a string,
+			 * carrying the value out via *bval for the exact-integer range path. A
+			 * saturated *lval and a double approximation keep the long and double
+			 * fallbacks well-defined when the other bound forces one of those paths. */
+			*bval = Z_BIG_P(input);
+			*lval = zend_bigint_sign(Z_BIG_P(input)) < 0 ? ZEND_LONG_MIN : ZEND_LONG_MAX;
+			*dval = zend_bigint_to_double(Z_BIG_P(input));
 			return IS_LONG;
 		case IS_DOUBLE:
 			*dval = Z_DVAL_P(input);
@@ -2847,6 +2857,69 @@ static uint8_t php_range_process_input(const zval *input, uint32_t arg_num, zend
 	}
 }
 
+/* Build an exact integer range when at least one bound is a bigint. step is the
+ * positive magnitude of the user's step; is_step_negative records its sign. */
+static void php_range_bigint(zval *return_value, const zend_bigint *start, const zend_bigint *end, zend_long step, bool is_step_negative)
+{
+	int cmp = zend_bigint_cmp(start, end);
+
+	if (cmp == 0) {
+		zval tmp;
+		array_init(return_value);
+		zend_bigint_result(&tmp, zend_bigint_dup(start));
+		zend_hash_next_index_insert_new(Z_ARRVAL_P(return_value), &tmp);
+		return;
+	}
+
+	bool decreasing = cmp > 0;
+	if (!decreasing && is_step_negative) {
+		zend_argument_value_error(3, "must be greater than 0 for increasing ranges");
+		return;
+	}
+
+	zend_bigint *span = zend_bigint_init();
+	if (decreasing) {
+		zend_bigint_sub(span, start, end);
+	} else {
+		zend_bigint_sub(span, end, start);
+	}
+
+	if (!zend_bigint_can_fit_long(span)) {
+		zend_bigint_release(span);
+		zend_value_error("The supplied range exceeds the maximum array size");
+		return;
+	}
+	zend_ulong uspan = (zend_ulong) zend_bigint_to_long(span);
+	zend_bigint_release(span);
+
+	if (uspan < (zend_ulong) step) {
+		zend_argument_value_error(3, "must be less than the range spanned by argument #1 ($start) and argument #2 ($end)");
+		return;
+	}
+
+	zend_ulong calc_size = uspan / (zend_ulong) step;
+	if (calc_size >= HT_MAX_SIZE - 1) {
+		zend_value_error("The supplied range exceeds the maximum array size");
+		return;
+	}
+	uint32_t size = (uint32_t) (calc_size + 1);
+
+	array_init_size(return_value, size);
+	zend_hash_real_init_packed(Z_ARRVAL_P(return_value));
+	zend_bigint *cur = zend_bigint_dup(start);
+	for (uint32_t i = 0; i < size; i++) {
+		zval tmp;
+		zend_bigint_result(&tmp, zend_bigint_dup(cur));
+		zend_hash_next_index_insert_new(Z_ARRVAL_P(return_value), &tmp);
+		if (decreasing) {
+			zend_bigint_sub_long(cur, cur, step);
+		} else {
+			zend_bigint_add_long(cur, cur, step);
+		}
+	}
+	zend_bigint_release(cur);
+}
+
 /* {{{ Create an array containing the range of integers or characters from low to high (inclusive) */
 PHP_FUNCTION(range)
 {
@@ -2857,10 +2930,10 @@ PHP_FUNCTION(range)
 	zend_long step = 1;
 
 	ZEND_PARSE_PARAMETERS_START(2, 3)
-		Z_PARAM_NUMBER_OR_STR(user_start)
-		Z_PARAM_NUMBER_OR_STR(user_end)
+		Z_PARAM_INT_OR_FLOAT_OR_STR(user_start)
+		Z_PARAM_INT_OR_FLOAT_OR_STR(user_end)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_NUMBER(user_step)
+		Z_PARAM_INT_OR_FLOAT(user_step)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (user_step) {
@@ -2885,6 +2958,14 @@ PHP_FUNCTION(range)
 			if (!zend_is_long_compatible(step_double, step)) {
 				is_step_double = true;
 			}
+		} else if (Z_TYPE_P(user_step) == IS_BIGINT) {
+			/* A bigint step exceeds any representable span; saturate its magnitude
+			 * so the normal "step larger than the range" handling applies. */
+			if (zend_bigint_sign(Z_BIG_P(user_step)) < 0) {
+				is_step_negative = true;
+			}
+			step = ZEND_LONG_MAX;
+			step_double = (double) step;
 		} else {
 			step = Z_LVAL_P(user_step);
 			/* We only want positive step values. */
@@ -2907,17 +2988,30 @@ PHP_FUNCTION(range)
 	uint8_t start_type;
 	double start_double;
 	zend_long start_long;
+	const zend_bigint *start_big;
 	uint8_t end_type;
 	double end_double;
 	zend_long end_long;
+	const zend_bigint *end_big;
 
-	start_type = php_range_process_input(user_start, 1, &start_long, &start_double);
+	start_type = php_range_process_input(user_start, 1, &start_long, &start_double, &start_big);
 	if (start_type == 0) {
 		RETURN_THROWS();
 	}
-	end_type = php_range_process_input(user_end, 2, &end_long, &end_double);
+	end_type = php_range_process_input(user_end, 2, &end_long, &end_double, &end_big);
 	if (end_type == 0) {
 		RETURN_THROWS();
+	}
+
+	/* When a bound is a bigint and both bounds are integers, build an exact integer
+	 * sequence instead of a lossy float one. */
+	if ((start_big || end_big) && start_type == IS_LONG && end_type == IS_LONG && !is_step_double) {
+		zend_bigint *sb = start_big ? zend_bigint_dup(start_big) : zend_bigint_init_from_long(start_long);
+		zend_bigint *eb = end_big ? zend_bigint_dup(end_big) : zend_bigint_init_from_long(end_long);
+		php_range_bigint(return_value, sb, eb, step, is_step_negative);
+		zend_bigint_release(sb);
+		zend_bigint_release(eb);
+		return;
 	}
 
 	/* If the range is given as strings, generate an array of characters. */

@@ -1981,6 +1981,21 @@ ZEND_API ZEND_COLD void zend_class_redeclaration_error_ex(int type, zend_string 
 #define Z_PARAM_INT_OR_FLOAT_OR_NULL(dest) \
 	Z_PARAM_INT_OR_FLOAT_EX(dest, 1)
 
+/* logical int|float|string: bigint-preserving analog of Z_PARAM_NUMBER_OR_STR */
+#define Z_PARAM_INT_OR_FLOAT_OR_STR_EX(dest, check_null) \
+	Z_PARAM_PROLOGUE(0, 0); \
+	if (UNEXPECTED(!zend_parse_arg_int_or_float_or_str(_arg, &dest, check_null, _i))) { \
+		_expected_type = check_null ? Z_EXPECTED_NUMBER_OR_STRING_OR_NULL : Z_EXPECTED_NUMBER_OR_STRING; \
+		_error_code = ZPP_ERROR_WRONG_ARG; \
+		break; \
+	}
+
+#define Z_PARAM_INT_OR_FLOAT_OR_STR(dest) \
+	Z_PARAM_INT_OR_FLOAT_OR_STR_EX(dest, false)
+
+#define Z_PARAM_INT_OR_FLOAT_OR_STR_OR_NULL(dest) \
+	Z_PARAM_INT_OR_FLOAT_OR_STR_EX(dest, true)
+
 /* old "o" */
 #define Z_PARAM_OBJECT_EX(dest, check_null, deref) \
 		Z_PARAM_PROLOGUE(deref, 0); \
@@ -2369,8 +2384,7 @@ static zend_always_inline bool zend_parse_arg_int(zval *arg, zval **dest, bool c
 	return true;
 }
 
-/* logical int|float: IS_LONG, IS_DOUBLE, or IS_BIGINT pass through at full precision.
- * A bigint never reaches the slow path. */
+/* logical int|float: IS_LONG, IS_DOUBLE, or IS_BIGINT pass through at full precision. */
 static zend_always_inline bool zend_parse_arg_int_or_float(zval *arg, zval **dest, bool check_null, uint32_t arg_num)
 {
 	if (EXPECTED(Z_TYPE_P(arg) == IS_LONG || Z_TYPE_P(arg) == IS_DOUBLE || Z_TYPE_P(arg) == IS_BIGINT)) {
@@ -2380,6 +2394,20 @@ static zend_always_inline bool zend_parse_arg_int_or_float(zval *arg, zval **des
 	} else {
 		/* Bigint is already handled above; this slow path is for weak coercions only. */
 		return zend_parse_arg_int_or_float_slow(arg, dest, arg_num);
+	}
+	return true;
+}
+
+/* logical int|float|string: IS_LONG, IS_DOUBLE, IS_BIGINT, or IS_STRING pass through at full precision. */
+static zend_always_inline bool zend_parse_arg_int_or_float_or_str(zval *arg, zval **dest, bool check_null, uint32_t arg_num)
+{
+	if (EXPECTED(Z_TYPE_P(arg) == IS_LONG || Z_TYPE_P(arg) == IS_DOUBLE || Z_TYPE_P(arg) == IS_BIGINT || Z_TYPE_P(arg) == IS_STRING)) {
+		*dest = arg;
+	} else if (check_null && EXPECTED(Z_TYPE_P(arg) == IS_NULL)) {
+		*dest = NULL;
+	} else {
+		/* Bigint is already handled above; this slow path is for weak coercions only. */
+		return zend_parse_arg_number_or_str_slow(arg, dest, arg_num);
 	}
 	return true;
 }
