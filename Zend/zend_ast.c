@@ -1937,6 +1937,12 @@ static ZEND_COLD void zend_ast_export_zval(smart_str *str, const zval *zv, int p
 		case IS_LONG:
 			smart_str_append_long(str, Z_LVAL_P(zv));
 			break;
+		case IS_BIGINT: {
+			zend_string *s = zend_bigint_to_str(Z_BIG_P(zv));
+			smart_str_append(str, s);
+			zend_string_release(s);
+			break;
+		}
 		case IS_DOUBLE:
 			smart_str_append_double(
 				str, Z_DVAL_P(zv), (int) EG(precision), /* zero_fraction */ true);
