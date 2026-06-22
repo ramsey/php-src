@@ -197,7 +197,7 @@ ZEND_API void ZEND_FASTCALL smart_str_append_escaped_truncated(smart_str *str, c
 }
 
 ZEND_API void ZEND_FASTCALL smart_str_append_scalar(smart_str *dest, const zval *value, size_t truncate) {
-	ZEND_ASSERT(Z_TYPE_P(value) <= IS_STRING);
+	ZEND_ASSERT(Z_TYPE_P(value) <= IS_STRING || Z_TYPE_P(value) == IS_BIGINT);
 
 	switch (Z_TYPE_P(value)) {
 		case IS_UNDEF:
@@ -221,6 +221,13 @@ ZEND_API void ZEND_FASTCALL smart_str_append_scalar(smart_str *dest, const zval 
 			smart_str_append_long(dest, Z_LVAL_P(value));
 		break;
 
+		case IS_BIGINT: {
+			zend_string *s = zend_bigint_to_str(Z_BIG_P(value));
+			smart_str_append(dest, s);
+			zend_string_release(s);
+		}
+		break;
+
 		case IS_STRING:
 			smart_str_appendc(dest, '\'');
 			smart_str_append_escaped_truncated(dest, Z_STR_P(value), truncate);
@@ -233,7 +240,7 @@ ZEND_API void ZEND_FASTCALL smart_str_append_scalar(smart_str *dest, const zval 
 
 ZEND_API zend_result ZEND_FASTCALL smart_str_append_zval(smart_str *dest, const zval *value, size_t truncate)
 {
-	if (Z_TYPE_P(value) <= IS_STRING) {
+	if (Z_TYPE_P(value) <= IS_STRING || Z_TYPE_P(value) == IS_BIGINT) {
 		smart_str_append_scalar(dest, value, truncate);
 	} else if (Z_TYPE_P(value) == IS_OBJECT && (Z_OBJCE_P(value)->ce_flags & ZEND_ACC_ENUM)) {
 		smart_str_append(dest, Z_OBJCE_P(value)->name);
