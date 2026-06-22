@@ -56,6 +56,15 @@ try_again:
 		case IS_LONG:
 			smart_str_append_long(form_str, Z_LVAL_P(scalar));
 			break;
+		case IS_BIGINT: {
+			zend_string *tmp = zend_bigint_to_string_checked(Z_BIG_P(scalar));
+			if (!tmp) {
+				return;
+			}
+			smart_str_append(form_str, tmp);
+			zend_string_release(tmp);
+			break;
+		}
 		case IS_DOUBLE: {
 			zend_string *tmp = zend_double_to_str(Z_DVAL_P(scalar));
 			php_url_encode_to_smart_str(form_str, ZSTR_VAL(tmp), ZSTR_LEN(tmp), encoding_type == PHP_QUERY_RFC3986);
