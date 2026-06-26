@@ -113,6 +113,7 @@ ZEND_API bool zend_bigint_can_pow_exponent(zend_long exp);
 
 /* Information / conversion */
 ZEND_API int       zend_bigint_sign(const zend_bigint *big);
+ZEND_API uint64_t  zend_bigint_bit_length(const zend_bigint *big);
 ZEND_API bool      zend_bigint_can_fit_long(const zend_bigint *big);
 ZEND_API zend_long zend_bigint_to_long(const zend_bigint *big);
 ZEND_API double    zend_bigint_to_double(const zend_bigint *big);

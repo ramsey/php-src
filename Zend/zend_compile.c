@@ -10539,6 +10539,13 @@ ZEND_API bool zend_binary_op_produces_error(uint32_t opcode, const zval *op1, co
 		 * ArithmeticError. */
 		return 1;
 	}
+	if (opcode == ZEND_POW
+			&& Z_TYPE_P(op2) == IS_LONG && Z_LVAL_P(op2) > 0
+			&& zend_pow_result_exceeds_memory(op1, Z_LVAL_P(op2))) {
+		/* A power whose exact result cannot fit the memory limit throws an
+		 * ArithmeticError; defer the fold so it stays catchable at runtime. */
+		return 1;
+	}
 	if ((opcode == ZEND_SL || opcode == ZEND_SR) && zval_get_long(op2) < 0) {
 		/* Shift by negative number throws an error. */
 		return 1;

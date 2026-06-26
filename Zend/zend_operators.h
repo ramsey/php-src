@@ -86,6 +86,13 @@ static zend_always_inline bool instanceof_function(
 
 ZEND_API bool zend_string_only_has_ascii_alphanumeric(const zend_string *str);
 
+/* Whether raising base to the given non-negative long exponent would produce an
+ * integer too large to fit in the configured memory limit. This reads the live
+ * memory_limit/usage and never throws, so the constant-folder can consult it
+ * during compilation to defer the fold. pow itself throws the catchable
+ * ArithmeticError at runtime. */
+ZEND_API bool zend_pow_result_exceeds_memory(const zval *base, zend_long exp);
+
 /**
  * Checks whether the string "str" with length "length" is numeric. The value
  * of allow_errors determines whether it's required to be entirely numeric, or

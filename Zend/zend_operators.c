@@ -21,6 +21,7 @@
 
 #include "zend.h"
 #include "zend_operators.h"
+#include "zend_bitset.h"
 #include "zend_variables.h"
 #include "zend_globals.h"
 #include "zend_list.h"
@@ -1664,6 +1665,46 @@ static double safe_pow(double base, double exponent)
 	return pow(base, exponent);
 }
 
+ZEND_API bool zend_pow_result_exceeds_memory(const zval *base, zend_long exp)
+{
+	uint64_t base_bits;
+
+	if (exp <= 0 || !zend_bigint_can_pow_exponent(exp)) {
+		return false;
+	}
+
+	if (Z_TYPE_P(base) == IS_LONG) {
+		zend_long b = Z_LVAL_P(base);
+		zend_ulong mag = (b < 0) ? (0 - (zend_ulong) b) : (zend_ulong) b;
+		base_bits = mag ? (uint64_t) (sizeof(mag) * 8 - zend_ulong_nlz(mag)) : 0;
+	} else if (Z_TYPE_P(base) == IS_BIGINT) {
+		base_bits = zend_bigint_bit_length(Z_BIG_P(base));
+	} else {
+		return false;
+	}
+
+	if (base_bits <= 1) {
+		return false;
+	}
+
+	/* Estimate the result's bit length, saturating instead of wrapping so an
+	 * astronomical product still compares as "too large". */
+	uint64_t exp_u = (uint64_t) exp;
+	uint64_t est_bits = (base_bits > UINT64_MAX / exp_u)
+		? UINT64_MAX
+		: base_bits * exp_u;
+
+	/* The estimated peak working set is roughly twice the result's packed size,
+	 * so we multiply by two to create an estimate. */
+	uint64_t est_bytes = (est_bits / 8) * 2;
+
+	size_t limit = zend_memory_limit();
+	size_t usage = zend_memory_usage(true);
+	size_t available = (limit > usage) ? (limit - usage) : 0;
+
+	return est_bytes > (uint64_t) available;
+}
+
 /* Tidy up after the bigint backend has refused to compute a power (it has
  * already thrown). A result that aliases op1 keeps its old value. The refused
  * bigint temp is released. */
@@ -1684,6 +1725,14 @@ static zend_always_inline void pow_long_overflow_result(zval *result, zval *op1,
 {
 	zend_long base = Z_LVAL_P(op1), exp = Z_LVAL_P(op2);
 	ZEND_ASSERT(exp >= 0 && "pow_long_overflow_result requires a non-negative exponent");
+	if (UNEXPECTED(zend_pow_result_exceeds_memory(op1, exp))) {
+		zend_throw_error(zend_ce_arithmetic_error,
+			"Exponentiation produces an integer too large to fit in the configured memory limit");
+		if (result != op1) {
+			ZVAL_UNDEF(result);
+		}
+		return;
+	}
 	zend_bigint *r = zend_bigint_init();
 	if (UNEXPECTED(!zend_bigint_long_pow_long(r, base, exp))) {
 		pow_backend_refused(result, op1, r);
@@ -1750,6 +1799,14 @@ static zend_result ZEND_FASTCALL pow_function_base(zval *result, zval *op1, zval
 			zend_bigint_release_result_alias(result, op1, op2);
 			ZVAL_LONG(result, 1);
 		} else if (exp > 0) {
+			if (UNEXPECTED(zend_pow_result_exceeds_memory(op1, exp))) {
+				zend_throw_error(zend_ce_arithmetic_error,
+					"Exponentiation produces an integer too large to fit in the configured memory limit");
+				if (result != op1) {
+					ZVAL_UNDEF(result);
+				}
+				return SUCCESS;
+			}
 			zend_bigint *r = zend_bigint_init();
 			if (UNEXPECTED(!zend_bigint_pow_long(r, Z_BIG_P(op1), exp))) {
 				pow_backend_refused(result, op1, r);

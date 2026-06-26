@@ -317,6 +317,24 @@ ZEND_API int zend_bigint_sign(const zend_bigint *big)
 	return mp_isneg((const mp_int *) big->mp) ? -1 : 1;
 }
 
+ZEND_API uint64_t zend_bigint_bit_length(const zend_bigint *big)
+{
+	const mp_int *a = (const mp_int *) big->mp;
+	if (a->used == 0) {
+		return 0;
+	}
+	/* (used - 1) full limbs of MP_DIGIT_BIT bits, plus the bit length of the
+	 * top limb. Computed in 64-bit because a near-INT_MAX-bit value overflows
+	 * the int that mp_count_bits() returns. */
+	uint64_t bits = (uint64_t) (a->used - 1) * (uint64_t) MP_DIGIT_BIT;
+	mp_digit top = a->dp[a->used - 1];
+	while (top != 0) {
+		bits++;
+		top >>= 1;
+	}
+	return bits;
+}
+
 ZEND_API bool zend_bigint_can_fit_long(const zend_bigint *big)
 {
 	/* fits if within [ZEND_LONG_MIN, ZEND_LONG_MAX] */
