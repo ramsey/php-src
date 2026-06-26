@@ -151,11 +151,7 @@ again:
 			php_printf("%sint(" ZEND_LONG_FMT ")\n", COMMON, Z_LVAL_P(struc));
 			break;
 		case IS_BIGINT: {
-			zend_string *str = zend_bigint_to_string_checked(Z_BIG_P(struc));
-			if (UNEXPECTED(!str)) {
-				/* integer to large for string: exception pending */
-				return;
-			}
+			zend_string *str = zend_bigint_to_string_or_placeholder(Z_BIG_P(struc));
 			php_printf("%sint(%s)\n", COMMON, ZSTR_VAL(str));
 			zend_string_release(str);
 			break;
@@ -361,11 +357,7 @@ PHPAPI void php_debug_zval_dump(zval *struc, int level) /* {{{ */
 		php_printf("int(" ZEND_LONG_FMT ")\n", Z_LVAL_P(struc));
 		break;
 	case IS_BIGINT: {
-		zend_string *str = zend_bigint_to_string_checked(Z_BIG_P(struc));
-		if (UNEXPECTED(!str)) {
-			/* integer to large for string: exception pending */
-			return;
-		}
+		zend_string *str = zend_bigint_to_string_or_placeholder(Z_BIG_P(struc));
 		php_printf("int(%s)\n", ZSTR_VAL(str));
 		zend_string_release(str);
 		break;

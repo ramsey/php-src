@@ -353,6 +353,13 @@ ZEND_API void         ZEND_FASTCALL zend_cast_to_int(zval *result, zval *op);
  * digit count exceeds the limit; otherwise a new zend_string (caller owns it). */
 ZEND_API zend_string* ZEND_FASTCALL zend_bigint_to_string_checked(const zend_bigint *big);
 
+/* Render a bigint for diagnostic output (i.e., var_dump, print_r, stack trace
+ * args, debug_zval_dump, unhandled-match error, AST export). This returns the
+ * decimal digits or a fixed placeholder string when the value exceeds the
+ * zend.int_string_max_digits display limit. Returns a new zend_string (caller
+ * owns it). */
+ZEND_API zend_string* ZEND_FASTCALL zend_bigint_to_string_or_placeholder(const zend_bigint *big);
+
 /* Like zend_bigint_to_string_checked(), but emits radix base (2-36). The result
  * string is signed and lowercase. The zend.int_string_max_digits limit is
  * enforced when the backend reports the radix as non-linear (see

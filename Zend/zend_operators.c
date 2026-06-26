@@ -802,6 +802,20 @@ ZEND_API zend_string* ZEND_FASTCALL zend_bigint_to_string_checked(const zend_big
 }
 /* }}} */
 
+ZEND_API zend_string* ZEND_FASTCALL zend_bigint_to_string_or_placeholder(const zend_bigint *big) /* {{{ */
+{
+	zend_long limit = EG(int_string_max_digits);
+	if (limit != 0 && zend_bigint_string_exceeds_digits(big, limit)) {
+		return zend_string_init(ZEND_STRL("<integer too large to display>"), 0);
+	}
+	size_t len;
+	char *s = zend_bigint_to_string(big, &len);
+	zend_string *str = zend_string_init(s, len, 0);
+	efree(s);
+	return str;
+}
+/* }}} */
+
 ZEND_API zend_string* ZEND_FASTCALL zend_bigint_to_string_base_checked(const zend_bigint *big, int base) /* {{{ */
 {
 	zend_long limit = EG(int_string_max_digits);

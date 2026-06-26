@@ -617,6 +617,12 @@ static void zend_print_zval_r_to_buf(smart_str *buf, zval *expr, int indent) /* 
 		case IS_LONG:
 			smart_str_append_long(buf, Z_LVAL_P(expr));
 			break;
+		case IS_BIGINT: {
+			zend_string *str = zend_bigint_to_string_or_placeholder(Z_BIG_P(expr));
+			smart_str_append(buf, str);
+			zend_string_release(str);
+			break;
+		}
 		case IS_REFERENCE:
 			zend_print_zval_r_to_buf(buf, Z_REFVAL_P(expr), indent);
 			break;

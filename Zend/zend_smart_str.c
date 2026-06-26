@@ -222,7 +222,7 @@ ZEND_API void ZEND_FASTCALL smart_str_append_scalar(smart_str *dest, const zval 
 		break;
 
 		case IS_BIGINT: {
-			zend_string *s = zend_bigint_to_str(Z_BIG_P(value));
+			zend_string *s = zend_bigint_to_string_or_placeholder(Z_BIG_P(value));
 			smart_str_append(dest, s);
 			zend_string_release(s);
 		}
