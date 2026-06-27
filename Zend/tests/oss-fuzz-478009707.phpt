@@ -22,6 +22,6 @@ $c->prop = PHP_INT_MAX;
 var_dump($c->prop);
 
 ?>
---EXPECTF--
+--EXPECT--
 int(4)
-float(%s)
+int(9223372036854775810)

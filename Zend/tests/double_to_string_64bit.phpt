@@ -7,6 +7,10 @@ precision=14
 --FILE--
 <?php
 
+// With the move to arbitrary precision numbers, integers above PHP_INT_MAX
+// no longer fold into doubles, so their string representation is as an exact
+// integer.
+
 $doubles = array(
         29000000000000000000000000000000000000,
         290000000000000000,
@@ -36,7 +40,7 @@ foreach ($doubles as $d) {
 echo "Done\n";
 ?>
 --EXPECT--
-string(7) "2.9E+37"
+string(38) "29000000000000000000000000000000000000"
 string(18) "290000000000000000"
 string(15) "290000000000000"
 string(14) "29000000000000"
@@ -45,14 +49,14 @@ string(14) "29000000000001"
 string(13) "29000.7123123"
 string(15) "239234242.71231"
 string(16) "0.12345678901235"
-string(7) "1.0E+46"
-string(7) "1.0E+33"
+string(47) "10000000000000000000000000000000000000000000000"
+string(34) "1000000000000000000000000000000000"
 string(18) "100000000000000001"
 string(19) "1000006000000000011"
 string(15) "100000000000001"
 string(11) "10000000000"
 string(18) "999999999999999999"
-string(7) "1.0E+19"
-string(7) "1.0E+37"
+string(19) "9999999999999999999"
+string(37) "9999999999999999999999999999999999999"
 string(1) "0"
 Done

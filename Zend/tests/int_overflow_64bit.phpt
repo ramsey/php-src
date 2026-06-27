@@ -5,6 +5,8 @@ testing integer overflow (64bit)
 --FILE--
 <?php
 
+// With the move to arbitrary precision numbers, integers no longer overflow.
+
 $doubles = array(
         PHP_INT_MAX,
         PHP_INT_MAX + 1,
@@ -22,18 +24,12 @@ foreach ($doubles as $d) {
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 int(9223372036854775807)
-
-Warning: The float %f is not representable as an int, cast occurred in %s on line %d
+int(9223372036854775808)
+int(9223372036854776807)
+int(18446744073709551618)
 int(-9223372036854775808)
-
-Warning: The float %f is not representable as an int, cast occurred in %s on line %d
-int(-9223372036854775808)
-
-Warning: The float %f is not representable as an int, cast occurred in %s on line %d
-int(0)
-int(-9223372036854775808)
-int(-9223372036854775808)
-int(-9223372036854775808)
+int(-9223372036854775809)
+int(-9223372036854776807)
 Done

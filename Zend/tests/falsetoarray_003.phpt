@@ -7,7 +7,7 @@ set_error_handler(function($code, $msg) {
     $GLOBALS['a']=9;
 });
 $a=[];
-($a[PHP_INT_MAX+1]);
+($a[(float) PHP_INT_MAX+1]);
 ?>
 DONE
 --EXPECTF--

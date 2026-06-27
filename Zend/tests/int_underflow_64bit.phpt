@@ -5,6 +5,8 @@ testing integer underflow (64bit)
 --FILE--
 <?php
 
+// With the move to arbitrary precision numbers, integers no longer clamp on underflow.
+
 $doubles = array(
         -9223372036854775808,
         -9223372036854775809,
@@ -22,8 +24,8 @@ echo "Done\n";
 ?>
 --EXPECT--
 int(-9223372036854775808)
-int(-9223372036854775808)
-int(-9223372036854775808)
-int(-9223372036854775808)
-int(-9223372036854775808)
+int(-9223372036854775809)
+int(-9223372036854775818)
+int(-9223372036854775908)
+int(-9223372036854776808)
 Done

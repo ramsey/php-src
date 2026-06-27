@@ -62,19 +62,13 @@ print "\nDone\n";
 
 ?>
 --EXPECTF--
-Warning: String offset cast occurred in %s on line %d
-
 Warning: Uninitialized string offset %d in %s on line %d
 
 Warning: Uninitialized string offset 0 in %s on line %d
 
 Warning: Uninitialized string offset 0 in %s on line %d
 
-Warning: String offset cast occurred in %s on line %d
-
 Warning: Uninitialized string offset %i in %s on line %d
-
-Warning: String offset cast occurred in %s on line %d
 
 Warning: Uninitialized string offset %i in %s on line %d
 
