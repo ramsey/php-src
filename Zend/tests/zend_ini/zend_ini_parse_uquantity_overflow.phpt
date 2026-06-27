@@ -49,7 +49,7 @@ var_dump(zend_test_zend_ini_parse_uquantity("-1") === -1);
 
 ----------
 # No overflow 004: "%d"
-%d
+%i
 
 ----------
 # No overflow 005: "2K"
@@ -57,61 +57,61 @@ var_dump(zend_test_zend_ini_parse_uquantity("-1") === -1);
 
 ----------
 # No overflow 006: "-1"
-%d
+%i
 
 ----------
 # No overflow 007: " -1"
-%d
+%i
 
 ----------
 # No overflow 008: "-1 "
-%d
+%i
 
 ----------
 # No overflow 009: " -1 "
-%d
+%i
 
 ----------
 # Subject overflow 001: "%d"
 
 Warning: Invalid quantity "%d": value is out of range, using overflow result for backwards compatibility in %s on line %d
-%d
+%i
 
 ----------
 # Subject overflow 002: "-%d"
 
 Warning: Invalid quantity "-%d": value is out of range, using overflow result for backwards compatibility in %s on line %d
-%d
+%i
 
 ----------
 # Subject overflow 003: "-%d"
 
 Warning: Invalid quantity "-%d": value is out of range, using overflow result for backwards compatibility in %s on line %d
-%d
+%i
 
 ----------
 # Subject overflow 004: "-2"
 
 Warning: Invalid quantity "-2": value is out of range, using overflow result for backwards compatibility in %s on line %d
-%d
+%i
 
 ----------
 # Subject overflow 005: "-1K"
 
 Warning: Invalid quantity "-1K": value is out of range, using overflow result for backwards compatibility in %s on line %d
-%d
+%i
 
 ----------
 # Subject overflow 006: "-1 K"
 
 Warning: Invalid quantity "-1 K": value is out of range, using overflow result for backwards compatibility in %s on line %d
-%d
+%i
 
 ----------
 # Multiplier overflow 001: "%dK"
 
 Warning: Invalid quantity "%dK": value is out of range, using overflow result for backwards compatibility in %s on line %d
-%d
+%i
 
 ----------
 # zend_test_zend_ini_parse_uquantity("-1") === -1

@@ -28,7 +28,8 @@ var_dump(is_long(filter_var('0x'.$s, FILTER_VALIDATE_INT, array("flags"=>FILTER_
 $s = hex_inc($s);
 var_dump(is_long(filter_var('0x'.$s, FILTER_VALIDATE_INT, array("flags"=>FILTER_FLAG_ALLOW_HEX))));
 
-$s = sprintf("%x", ~0);
+// 2 ** 64 - 1 is the all-ones 64-bit value.
+$s = sprintf("%x", 2 ** 64 - 1);
 var_dump(is_long(filter_var('0x'.$s, FILTER_VALIDATE_INT, array("flags"=>FILTER_FLAG_ALLOW_HEX))));
 
 $s = hex_inc($s);

@@ -24,7 +24,8 @@ var_dump(is_long(filter_var('0'.$s, FILTER_VALIDATE_INT, array("flags"=>FILTER_F
 $s = octal_inc($s);
 var_dump(is_long(filter_var('0'.$s, FILTER_VALIDATE_INT, array("flags"=>FILTER_FLAG_ALLOW_OCTAL))));
 
-$s = sprintf("%o", ~0);
+// 2 ** 64 - 1 is the all-ones 64-bit value.
+$s = sprintf("%o", 2 ** 64 - 1);
 var_dump(is_long(filter_var('0'.$s, FILTER_VALIDATE_INT, array("flags"=>FILTER_FLAG_ALLOW_OCTAL))));
 
 $s = octal_inc($s);
