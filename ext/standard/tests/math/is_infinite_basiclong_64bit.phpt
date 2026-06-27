@@ -54,5 +54,5 @@ bool(false)
 bool(false)
 --- testing: -9223372036854775807 ---
 bool(false)
---- testing: -9.2233720368548E+18 ---
+--- testing: -9223372036854775809 ---
 bool(false)

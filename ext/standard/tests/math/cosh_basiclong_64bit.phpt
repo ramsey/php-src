@@ -54,5 +54,5 @@ float(INF)
 float(INF)
 --- testing: -9223372036854775807 ---
 float(INF)
---- testing: -9.2233720368548E+18 ---
+--- testing: -9223372036854775809 ---
 float(INF)
