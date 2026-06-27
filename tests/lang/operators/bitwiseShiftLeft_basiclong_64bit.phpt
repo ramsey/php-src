@@ -4,6 +4,8 @@ Test << operator : 64bit long tests
 <?php
 if (PHP_INT_SIZE != 8) die("skip this test is for 64bit platform only");
 ?>
+--INI--
+memory_limit=128M
 --FILE--
 <?php
 
@@ -57,13 +59,13 @@ int(-128)
 --- testing: 9223372036854775807 << 9 ---
 int(-512)
 --- testing: 9223372036854775807 << 65 ---
-int(0)
+int(340282366920938463426481119284349108224)
 --- testing: 9223372036854775807 << -44 ---
 Exception: Bit shift by negative number
 --- testing: 9223372036854775807 << 2147483647 ---
-int(0)
+Exception: Bit shift produces an integer too large to fit in the configured memory limit
 --- testing: 9223372036854775807 << 9223372036854775807 ---
-int(0)
+Exception: The libtommath bigint backend cannot shift left by more than 2147483647 bits
 --- testing: -9223372036854775808 << 0 ---
 int(-9223372036854775808)
 --- testing: -9223372036854775808 << 1 ---
@@ -75,13 +77,13 @@ int(0)
 --- testing: -9223372036854775808 << 9 ---
 int(0)
 --- testing: -9223372036854775808 << 65 ---
-int(0)
+int(-340282366920938463463374607431768211456)
 --- testing: -9223372036854775808 << -44 ---
 Exception: Bit shift by negative number
 --- testing: -9223372036854775808 << 2147483647 ---
-int(0)
+Exception: Bit shift produces an integer too large to fit in the configured memory limit
 --- testing: -9223372036854775808 << 9223372036854775807 ---
-int(0)
+Exception: The libtommath bigint backend cannot shift left by more than 2147483647 bits
 --- testing: 2147483647 << 0 ---
 int(2147483647)
 --- testing: 2147483647 << 1 ---
@@ -93,13 +95,13 @@ int(274877906816)
 --- testing: 2147483647 << 9 ---
 int(1099511627264)
 --- testing: 2147483647 << 65 ---
-int(0)
+int(79228162477370849446124847104)
 --- testing: 2147483647 << -44 ---
 Exception: Bit shift by negative number
 --- testing: 2147483647 << 2147483647 ---
-int(0)
+Exception: Bit shift produces an integer too large to fit in the configured memory limit
 --- testing: 2147483647 << 9223372036854775807 ---
-int(0)
+Exception: The libtommath bigint backend cannot shift left by more than 2147483647 bits
 --- testing: -2147483648 << 0 ---
 int(-2147483648)
 --- testing: -2147483648 << 1 ---
@@ -111,13 +113,13 @@ int(-274877906944)
 --- testing: -2147483648 << 9 ---
 int(-1099511627776)
 --- testing: -2147483648 << 65 ---
-int(0)
+int(-79228162514264337593543950336)
 --- testing: -2147483648 << -44 ---
 Exception: Bit shift by negative number
 --- testing: -2147483648 << 2147483647 ---
-int(0)
+Exception: Bit shift produces an integer too large to fit in the configured memory limit
 --- testing: -2147483648 << 9223372036854775807 ---
-int(0)
+Exception: The libtommath bigint backend cannot shift left by more than 2147483647 bits
 --- testing: 9223372034707292160 << 0 ---
 int(9223372034707292160)
 --- testing: 9223372034707292160 << 1 ---
@@ -129,13 +131,13 @@ int(-274877906944)
 --- testing: 9223372034707292160 << 9 ---
 int(-1099511627776)
 --- testing: 9223372034707292160 << 65 ---
-int(0)
+int(340282366841710300949110269838224261120)
 --- testing: 9223372034707292160 << -44 ---
 Exception: Bit shift by negative number
 --- testing: 9223372034707292160 << 2147483647 ---
-int(0)
+Exception: Bit shift produces an integer too large to fit in the configured memory limit
 --- testing: 9223372034707292160 << 9223372036854775807 ---
-int(0)
+Exception: The libtommath bigint backend cannot shift left by more than 2147483647 bits
 --- testing: -9223372034707292160 << 0 ---
 int(-9223372034707292160)
 --- testing: -9223372034707292160 << 1 ---
@@ -147,13 +149,13 @@ int(274877906944)
 --- testing: -9223372034707292160 << 9 ---
 int(1099511627776)
 --- testing: -9223372034707292160 << 65 ---
-int(0)
+int(-340282366841710300949110269838224261120)
 --- testing: -9223372034707292160 << -44 ---
 Exception: Bit shift by negative number
 --- testing: -9223372034707292160 << 2147483647 ---
-int(0)
+Exception: Bit shift produces an integer too large to fit in the configured memory limit
 --- testing: -9223372034707292160 << 9223372036854775807 ---
-int(0)
+Exception: The libtommath bigint backend cannot shift left by more than 2147483647 bits
 --- testing: 2147483648 << 0 ---
 int(2147483648)
 --- testing: 2147483648 << 1 ---
@@ -165,13 +167,13 @@ int(274877906944)
 --- testing: 2147483648 << 9 ---
 int(1099511627776)
 --- testing: 2147483648 << 65 ---
-int(0)
+int(79228162514264337593543950336)
 --- testing: 2147483648 << -44 ---
 Exception: Bit shift by negative number
 --- testing: 2147483648 << 2147483647 ---
-int(0)
+Exception: Bit shift produces an integer too large to fit in the configured memory limit
 --- testing: 2147483648 << 9223372036854775807 ---
-int(0)
+Exception: The libtommath bigint backend cannot shift left by more than 2147483647 bits
 --- testing: -2147483649 << 0 ---
 int(-2147483649)
 --- testing: -2147483649 << 1 ---
@@ -183,13 +185,13 @@ int(-274877907072)
 --- testing: -2147483649 << 9 ---
 int(-1099511628288)
 --- testing: -2147483649 << 65 ---
-int(0)
+int(-79228162551157825740963053568)
 --- testing: -2147483649 << -44 ---
 Exception: Bit shift by negative number
 --- testing: -2147483649 << 2147483647 ---
-int(0)
+Exception: Bit shift produces an integer too large to fit in the configured memory limit
 --- testing: -2147483649 << 9223372036854775807 ---
-int(0)
+Exception: The libtommath bigint backend cannot shift left by more than 2147483647 bits
 --- testing: 4294967294 << 0 ---
 int(4294967294)
 --- testing: 4294967294 << 1 ---
@@ -201,13 +203,13 @@ int(549755813632)
 --- testing: 4294967294 << 9 ---
 int(2199023254528)
 --- testing: 4294967294 << 65 ---
-int(0)
+int(158456324954741698892249694208)
 --- testing: 4294967294 << -44 ---
 Exception: Bit shift by negative number
 --- testing: 4294967294 << 2147483647 ---
-int(0)
+Exception: Bit shift produces an integer too large to fit in the configured memory limit
 --- testing: 4294967294 << 9223372036854775807 ---
-int(0)
+Exception: The libtommath bigint backend cannot shift left by more than 2147483647 bits
 --- testing: 4294967295 << 0 ---
 int(4294967295)
 --- testing: 4294967295 << 1 ---
@@ -219,13 +221,13 @@ int(549755813760)
 --- testing: 4294967295 << 9 ---
 int(2199023255040)
 --- testing: 4294967295 << 65 ---
-int(0)
+int(158456324991635187039668797440)
 --- testing: 4294967295 << -44 ---
 Exception: Bit shift by negative number
 --- testing: 4294967295 << 2147483647 ---
-int(0)
+Exception: Bit shift produces an integer too large to fit in the configured memory limit
 --- testing: 4294967295 << 9223372036854775807 ---
-int(0)
+Exception: The libtommath bigint backend cannot shift left by more than 2147483647 bits
 --- testing: 4294967293 << 0 ---
 int(4294967293)
 --- testing: 4294967293 << 1 ---
@@ -237,13 +239,13 @@ int(549755813504)
 --- testing: 4294967293 << 9 ---
 int(2199023254016)
 --- testing: 4294967293 << 65 ---
-int(0)
+int(158456324917848210744830590976)
 --- testing: 4294967293 << -44 ---
 Exception: Bit shift by negative number
 --- testing: 4294967293 << 2147483647 ---
-int(0)
+Exception: Bit shift produces an integer too large to fit in the configured memory limit
 --- testing: 4294967293 << 9223372036854775807 ---
-int(0)
+Exception: The libtommath bigint backend cannot shift left by more than 2147483647 bits
 --- testing: 9223372036854775806 << 0 ---
 int(9223372036854775806)
 --- testing: 9223372036854775806 << 1 ---
@@ -255,31 +257,31 @@ int(-256)
 --- testing: 9223372036854775806 << 9 ---
 int(-1024)
 --- testing: 9223372036854775806 << 65 ---
-int(0)
+int(340282366920938463389587631136930004992)
 --- testing: 9223372036854775806 << -44 ---
 Exception: Bit shift by negative number
 --- testing: 9223372036854775806 << 2147483647 ---
-int(0)
+Exception: Bit shift produces an integer too large to fit in the configured memory limit
 --- testing: 9223372036854775806 << 9223372036854775807 ---
-int(0)
---- testing: 9.2233720368548E+18 << 0 ---
-int(-9223372036854775808)
---- testing: 9.2233720368548E+18 << 1 ---
-int(0)
---- testing: 9.2233720368548E+18 << -1 ---
+Exception: The libtommath bigint backend cannot shift left by more than 2147483647 bits
+--- testing: 9223372036854775808 << 0 ---
+int(9223372036854775808)
+--- testing: 9223372036854775808 << 1 ---
+int(18446744073709551616)
+--- testing: 9223372036854775808 << -1 ---
 Exception: Bit shift by negative number
---- testing: 9.2233720368548E+18 << 7 ---
-int(0)
---- testing: 9.2233720368548E+18 << 9 ---
-int(0)
---- testing: 9.2233720368548E+18 << 65 ---
-int(0)
---- testing: 9.2233720368548E+18 << -44 ---
+--- testing: 9223372036854775808 << 7 ---
+int(1180591620717411303424)
+--- testing: 9223372036854775808 << 9 ---
+int(4722366482869645213696)
+--- testing: 9223372036854775808 << 65 ---
+int(340282366920938463463374607431768211456)
+--- testing: 9223372036854775808 << -44 ---
 Exception: Bit shift by negative number
---- testing: 9.2233720368548E+18 << 2147483647 ---
-int(0)
---- testing: 9.2233720368548E+18 << 9223372036854775807 ---
-int(0)
+--- testing: 9223372036854775808 << 2147483647 ---
+Exception: Bit shift produces an integer too large to fit in the configured memory limit
+--- testing: 9223372036854775808 << 9223372036854775807 ---
+Exception: The libtommath bigint backend cannot shift left by more than 2147483647 bits
 --- testing: -9223372036854775807 << 0 ---
 int(-9223372036854775807)
 --- testing: -9223372036854775807 << 1 ---
@@ -291,31 +293,31 @@ int(128)
 --- testing: -9223372036854775807 << 9 ---
 int(512)
 --- testing: -9223372036854775807 << 65 ---
-int(0)
+int(-340282366920938463426481119284349108224)
 --- testing: -9223372036854775807 << -44 ---
 Exception: Bit shift by negative number
 --- testing: -9223372036854775807 << 2147483647 ---
-int(0)
+Exception: Bit shift produces an integer too large to fit in the configured memory limit
 --- testing: -9223372036854775807 << 9223372036854775807 ---
-int(0)
---- testing: -9.2233720368548E+18 << 0 ---
-int(-9223372036854775808)
---- testing: -9.2233720368548E+18 << 1 ---
-int(0)
---- testing: -9.2233720368548E+18 << -1 ---
+Exception: The libtommath bigint backend cannot shift left by more than 2147483647 bits
+--- testing: -9223372036854775809 << 0 ---
+int(-9223372036854775809)
+--- testing: -9223372036854775809 << 1 ---
+int(-18446744073709551618)
+--- testing: -9223372036854775809 << -1 ---
 Exception: Bit shift by negative number
---- testing: -9.2233720368548E+18 << 7 ---
-int(0)
---- testing: -9.2233720368548E+18 << 9 ---
-int(0)
---- testing: -9.2233720368548E+18 << 65 ---
-int(0)
---- testing: -9.2233720368548E+18 << -44 ---
+--- testing: -9223372036854775809 << 7 ---
+int(-1180591620717411303552)
+--- testing: -9223372036854775809 << 9 ---
+int(-4722366482869645214208)
+--- testing: -9223372036854775809 << 65 ---
+int(-340282366920938463500268095579187314688)
+--- testing: -9223372036854775809 << -44 ---
 Exception: Bit shift by negative number
---- testing: -9.2233720368548E+18 << 2147483647 ---
-int(0)
---- testing: -9.2233720368548E+18 << 9223372036854775807 ---
-int(0)
+--- testing: -9223372036854775809 << 2147483647 ---
+Exception: Bit shift produces an integer too large to fit in the configured memory limit
+--- testing: -9223372036854775809 << 9223372036854775807 ---
+Exception: The libtommath bigint backend cannot shift left by more than 2147483647 bits
 --- testing: 0 << 9223372036854775807 ---
 int(0)
 --- testing: 0 << -9223372036854775808 ---
@@ -340,249 +342,249 @@ int(0)
 int(0)
 --- testing: 0 << 9223372036854775806 ---
 int(0)
---- testing: 0 << 9.2233720368548E+18 ---
-Exception: Bit shift by negative number
+--- testing: 0 << 9223372036854775808 ---
+Exception: The libtommath bigint backend cannot shift left by more than 2147483647 bits
 --- testing: 0 << -9223372036854775807 ---
 Exception: Bit shift by negative number
---- testing: 0 << -9.2233720368548E+18 ---
+--- testing: 0 << -9223372036854775809 ---
 Exception: Bit shift by negative number
 --- testing: 1 << 9223372036854775807 ---
-int(0)
+Exception: The libtommath bigint backend cannot shift left by more than 2147483647 bits
 --- testing: 1 << -9223372036854775808 ---
 Exception: Bit shift by negative number
 --- testing: 1 << 2147483647 ---
-int(0)
+Exception: Bit shift produces an integer too large to fit in the configured memory limit
 --- testing: 1 << -2147483648 ---
 Exception: Bit shift by negative number
 --- testing: 1 << 9223372034707292160 ---
-int(0)
+Exception: The libtommath bigint backend cannot shift left by more than 2147483647 bits
 --- testing: 1 << -9223372034707292160 ---
 Exception: Bit shift by negative number
 --- testing: 1 << 2147483648 ---
-int(0)
+Exception: The libtommath bigint backend cannot shift left by more than 2147483647 bits
 --- testing: 1 << -2147483649 ---
 Exception: Bit shift by negative number
 --- testing: 1 << 4294967294 ---
-int(0)
+Exception: The libtommath bigint backend cannot shift left by more than 2147483647 bits
 --- testing: 1 << 4294967295 ---
-int(0)
+Exception: The libtommath bigint backend cannot shift left by more than 2147483647 bits
 --- testing: 1 << 4294967293 ---
-int(0)
+Exception: The libtommath bigint backend cannot shift left by more than 2147483647 bits
 --- testing: 1 << 9223372036854775806 ---
-int(0)
---- testing: 1 << 9.2233720368548E+18 ---
-Exception: Bit shift by negative number
+Exception: The libtommath bigint backend cannot shift left by more than 2147483647 bits
+--- testing: 1 << 9223372036854775808 ---
+Exception: The libtommath bigint backend cannot shift left by more than 2147483647 bits
 --- testing: 1 << -9223372036854775807 ---
 Exception: Bit shift by negative number
---- testing: 1 << -9.2233720368548E+18 ---
+--- testing: 1 << -9223372036854775809 ---
 Exception: Bit shift by negative number
 --- testing: -1 << 9223372036854775807 ---
-int(0)
+Exception: The libtommath bigint backend cannot shift left by more than 2147483647 bits
 --- testing: -1 << -9223372036854775808 ---
 Exception: Bit shift by negative number
 --- testing: -1 << 2147483647 ---
-int(0)
+Exception: Bit shift produces an integer too large to fit in the configured memory limit
 --- testing: -1 << -2147483648 ---
 Exception: Bit shift by negative number
 --- testing: -1 << 9223372034707292160 ---
-int(0)
+Exception: The libtommath bigint backend cannot shift left by more than 2147483647 bits
 --- testing: -1 << -9223372034707292160 ---
 Exception: Bit shift by negative number
 --- testing: -1 << 2147483648 ---
-int(0)
+Exception: The libtommath bigint backend cannot shift left by more than 2147483647 bits
 --- testing: -1 << -2147483649 ---
 Exception: Bit shift by negative number
 --- testing: -1 << 4294967294 ---
-int(0)
+Exception: The libtommath bigint backend cannot shift left by more than 2147483647 bits
 --- testing: -1 << 4294967295 ---
-int(0)
+Exception: The libtommath bigint backend cannot shift left by more than 2147483647 bits
 --- testing: -1 << 4294967293 ---
-int(0)
+Exception: The libtommath bigint backend cannot shift left by more than 2147483647 bits
 --- testing: -1 << 9223372036854775806 ---
-int(0)
---- testing: -1 << 9.2233720368548E+18 ---
-Exception: Bit shift by negative number
+Exception: The libtommath bigint backend cannot shift left by more than 2147483647 bits
+--- testing: -1 << 9223372036854775808 ---
+Exception: The libtommath bigint backend cannot shift left by more than 2147483647 bits
 --- testing: -1 << -9223372036854775807 ---
 Exception: Bit shift by negative number
---- testing: -1 << -9.2233720368548E+18 ---
+--- testing: -1 << -9223372036854775809 ---
 Exception: Bit shift by negative number
 --- testing: 7 << 9223372036854775807 ---
-int(0)
+Exception: The libtommath bigint backend cannot shift left by more than 2147483647 bits
 --- testing: 7 << -9223372036854775808 ---
 Exception: Bit shift by negative number
 --- testing: 7 << 2147483647 ---
-int(0)
+Exception: Bit shift produces an integer too large to fit in the configured memory limit
 --- testing: 7 << -2147483648 ---
 Exception: Bit shift by negative number
 --- testing: 7 << 9223372034707292160 ---
-int(0)
+Exception: The libtommath bigint backend cannot shift left by more than 2147483647 bits
 --- testing: 7 << -9223372034707292160 ---
 Exception: Bit shift by negative number
 --- testing: 7 << 2147483648 ---
-int(0)
+Exception: The libtommath bigint backend cannot shift left by more than 2147483647 bits
 --- testing: 7 << -2147483649 ---
 Exception: Bit shift by negative number
 --- testing: 7 << 4294967294 ---
-int(0)
+Exception: The libtommath bigint backend cannot shift left by more than 2147483647 bits
 --- testing: 7 << 4294967295 ---
-int(0)
+Exception: The libtommath bigint backend cannot shift left by more than 2147483647 bits
 --- testing: 7 << 4294967293 ---
-int(0)
+Exception: The libtommath bigint backend cannot shift left by more than 2147483647 bits
 --- testing: 7 << 9223372036854775806 ---
-int(0)
---- testing: 7 << 9.2233720368548E+18 ---
-Exception: Bit shift by negative number
+Exception: The libtommath bigint backend cannot shift left by more than 2147483647 bits
+--- testing: 7 << 9223372036854775808 ---
+Exception: The libtommath bigint backend cannot shift left by more than 2147483647 bits
 --- testing: 7 << -9223372036854775807 ---
 Exception: Bit shift by negative number
---- testing: 7 << -9.2233720368548E+18 ---
+--- testing: 7 << -9223372036854775809 ---
 Exception: Bit shift by negative number
 --- testing: 9 << 9223372036854775807 ---
-int(0)
+Exception: The libtommath bigint backend cannot shift left by more than 2147483647 bits
 --- testing: 9 << -9223372036854775808 ---
 Exception: Bit shift by negative number
 --- testing: 9 << 2147483647 ---
-int(0)
+Exception: Bit shift produces an integer too large to fit in the configured memory limit
 --- testing: 9 << -2147483648 ---
 Exception: Bit shift by negative number
 --- testing: 9 << 9223372034707292160 ---
-int(0)
+Exception: The libtommath bigint backend cannot shift left by more than 2147483647 bits
 --- testing: 9 << -9223372034707292160 ---
 Exception: Bit shift by negative number
 --- testing: 9 << 2147483648 ---
-int(0)
+Exception: The libtommath bigint backend cannot shift left by more than 2147483647 bits
 --- testing: 9 << -2147483649 ---
 Exception: Bit shift by negative number
 --- testing: 9 << 4294967294 ---
-int(0)
+Exception: The libtommath bigint backend cannot shift left by more than 2147483647 bits
 --- testing: 9 << 4294967295 ---
-int(0)
+Exception: The libtommath bigint backend cannot shift left by more than 2147483647 bits
 --- testing: 9 << 4294967293 ---
-int(0)
+Exception: The libtommath bigint backend cannot shift left by more than 2147483647 bits
 --- testing: 9 << 9223372036854775806 ---
-int(0)
---- testing: 9 << 9.2233720368548E+18 ---
-Exception: Bit shift by negative number
+Exception: The libtommath bigint backend cannot shift left by more than 2147483647 bits
+--- testing: 9 << 9223372036854775808 ---
+Exception: The libtommath bigint backend cannot shift left by more than 2147483647 bits
 --- testing: 9 << -9223372036854775807 ---
 Exception: Bit shift by negative number
---- testing: 9 << -9.2233720368548E+18 ---
+--- testing: 9 << -9223372036854775809 ---
 Exception: Bit shift by negative number
 --- testing: 65 << 9223372036854775807 ---
-int(0)
+Exception: The libtommath bigint backend cannot shift left by more than 2147483647 bits
 --- testing: 65 << -9223372036854775808 ---
 Exception: Bit shift by negative number
 --- testing: 65 << 2147483647 ---
-int(0)
+Exception: Bit shift produces an integer too large to fit in the configured memory limit
 --- testing: 65 << -2147483648 ---
 Exception: Bit shift by negative number
 --- testing: 65 << 9223372034707292160 ---
-int(0)
+Exception: The libtommath bigint backend cannot shift left by more than 2147483647 bits
 --- testing: 65 << -9223372034707292160 ---
 Exception: Bit shift by negative number
 --- testing: 65 << 2147483648 ---
-int(0)
+Exception: The libtommath bigint backend cannot shift left by more than 2147483647 bits
 --- testing: 65 << -2147483649 ---
 Exception: Bit shift by negative number
 --- testing: 65 << 4294967294 ---
-int(0)
+Exception: The libtommath bigint backend cannot shift left by more than 2147483647 bits
 --- testing: 65 << 4294967295 ---
-int(0)
+Exception: The libtommath bigint backend cannot shift left by more than 2147483647 bits
 --- testing: 65 << 4294967293 ---
-int(0)
+Exception: The libtommath bigint backend cannot shift left by more than 2147483647 bits
 --- testing: 65 << 9223372036854775806 ---
-int(0)
---- testing: 65 << 9.2233720368548E+18 ---
-Exception: Bit shift by negative number
+Exception: The libtommath bigint backend cannot shift left by more than 2147483647 bits
+--- testing: 65 << 9223372036854775808 ---
+Exception: The libtommath bigint backend cannot shift left by more than 2147483647 bits
 --- testing: 65 << -9223372036854775807 ---
 Exception: Bit shift by negative number
---- testing: 65 << -9.2233720368548E+18 ---
+--- testing: 65 << -9223372036854775809 ---
 Exception: Bit shift by negative number
 --- testing: -44 << 9223372036854775807 ---
-int(0)
+Exception: The libtommath bigint backend cannot shift left by more than 2147483647 bits
 --- testing: -44 << -9223372036854775808 ---
 Exception: Bit shift by negative number
 --- testing: -44 << 2147483647 ---
-int(0)
+Exception: Bit shift produces an integer too large to fit in the configured memory limit
 --- testing: -44 << -2147483648 ---
 Exception: Bit shift by negative number
 --- testing: -44 << 9223372034707292160 ---
-int(0)
+Exception: The libtommath bigint backend cannot shift left by more than 2147483647 bits
 --- testing: -44 << -9223372034707292160 ---
 Exception: Bit shift by negative number
 --- testing: -44 << 2147483648 ---
-int(0)
+Exception: The libtommath bigint backend cannot shift left by more than 2147483647 bits
 --- testing: -44 << -2147483649 ---
 Exception: Bit shift by negative number
 --- testing: -44 << 4294967294 ---
-int(0)
+Exception: The libtommath bigint backend cannot shift left by more than 2147483647 bits
 --- testing: -44 << 4294967295 ---
-int(0)
+Exception: The libtommath bigint backend cannot shift left by more than 2147483647 bits
 --- testing: -44 << 4294967293 ---
-int(0)
+Exception: The libtommath bigint backend cannot shift left by more than 2147483647 bits
 --- testing: -44 << 9223372036854775806 ---
-int(0)
---- testing: -44 << 9.2233720368548E+18 ---
-Exception: Bit shift by negative number
+Exception: The libtommath bigint backend cannot shift left by more than 2147483647 bits
+--- testing: -44 << 9223372036854775808 ---
+Exception: The libtommath bigint backend cannot shift left by more than 2147483647 bits
 --- testing: -44 << -9223372036854775807 ---
 Exception: Bit shift by negative number
---- testing: -44 << -9.2233720368548E+18 ---
+--- testing: -44 << -9223372036854775809 ---
 Exception: Bit shift by negative number
 --- testing: 2147483647 << 9223372036854775807 ---
-int(0)
+Exception: The libtommath bigint backend cannot shift left by more than 2147483647 bits
 --- testing: 2147483647 << -9223372036854775808 ---
 Exception: Bit shift by negative number
 --- testing: 2147483647 << 2147483647 ---
-int(0)
+Exception: Bit shift produces an integer too large to fit in the configured memory limit
 --- testing: 2147483647 << -2147483648 ---
 Exception: Bit shift by negative number
 --- testing: 2147483647 << 9223372034707292160 ---
-int(0)
+Exception: The libtommath bigint backend cannot shift left by more than 2147483647 bits
 --- testing: 2147483647 << -9223372034707292160 ---
 Exception: Bit shift by negative number
 --- testing: 2147483647 << 2147483648 ---
-int(0)
+Exception: The libtommath bigint backend cannot shift left by more than 2147483647 bits
 --- testing: 2147483647 << -2147483649 ---
 Exception: Bit shift by negative number
 --- testing: 2147483647 << 4294967294 ---
-int(0)
+Exception: The libtommath bigint backend cannot shift left by more than 2147483647 bits
 --- testing: 2147483647 << 4294967295 ---
-int(0)
+Exception: The libtommath bigint backend cannot shift left by more than 2147483647 bits
 --- testing: 2147483647 << 4294967293 ---
-int(0)
+Exception: The libtommath bigint backend cannot shift left by more than 2147483647 bits
 --- testing: 2147483647 << 9223372036854775806 ---
-int(0)
---- testing: 2147483647 << 9.2233720368548E+18 ---
-Exception: Bit shift by negative number
+Exception: The libtommath bigint backend cannot shift left by more than 2147483647 bits
+--- testing: 2147483647 << 9223372036854775808 ---
+Exception: The libtommath bigint backend cannot shift left by more than 2147483647 bits
 --- testing: 2147483647 << -9223372036854775807 ---
 Exception: Bit shift by negative number
---- testing: 2147483647 << -9.2233720368548E+18 ---
+--- testing: 2147483647 << -9223372036854775809 ---
 Exception: Bit shift by negative number
 --- testing: 9223372036854775807 << 9223372036854775807 ---
-int(0)
+Exception: The libtommath bigint backend cannot shift left by more than 2147483647 bits
 --- testing: 9223372036854775807 << -9223372036854775808 ---
 Exception: Bit shift by negative number
 --- testing: 9223372036854775807 << 2147483647 ---
-int(0)
+Exception: Bit shift produces an integer too large to fit in the configured memory limit
 --- testing: 9223372036854775807 << -2147483648 ---
 Exception: Bit shift by negative number
 --- testing: 9223372036854775807 << 9223372034707292160 ---
-int(0)
+Exception: The libtommath bigint backend cannot shift left by more than 2147483647 bits
 --- testing: 9223372036854775807 << -9223372034707292160 ---
 Exception: Bit shift by negative number
 --- testing: 9223372036854775807 << 2147483648 ---
-int(0)
+Exception: The libtommath bigint backend cannot shift left by more than 2147483647 bits
 --- testing: 9223372036854775807 << -2147483649 ---
 Exception: Bit shift by negative number
 --- testing: 9223372036854775807 << 4294967294 ---
-int(0)
+Exception: The libtommath bigint backend cannot shift left by more than 2147483647 bits
 --- testing: 9223372036854775807 << 4294967295 ---
-int(0)
+Exception: The libtommath bigint backend cannot shift left by more than 2147483647 bits
 --- testing: 9223372036854775807 << 4294967293 ---
-int(0)
+Exception: The libtommath bigint backend cannot shift left by more than 2147483647 bits
 --- testing: 9223372036854775807 << 9223372036854775806 ---
-int(0)
---- testing: 9223372036854775807 << 9.2233720368548E+18 ---
-Exception: Bit shift by negative number
+Exception: The libtommath bigint backend cannot shift left by more than 2147483647 bits
+--- testing: 9223372036854775807 << 9223372036854775808 ---
+Exception: The libtommath bigint backend cannot shift left by more than 2147483647 bits
 --- testing: 9223372036854775807 << -9223372036854775807 ---
 Exception: Bit shift by negative number
---- testing: 9223372036854775807 << -9.2233720368548E+18 ---
+--- testing: 9223372036854775807 << -9223372036854775809 ---
 Exception: Bit shift by negative number
