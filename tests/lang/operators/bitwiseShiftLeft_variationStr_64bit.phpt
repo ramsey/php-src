@@ -59,7 +59,7 @@ TypeError: Unsupported operand types: string << string
 --- testing: '65' << '0' ---
 int(65)
 --- testing: '65' << '65' ---
-int(0)
+int(2398076729582241710080)
 --- testing: '65' << '-44' ---
 ArithmeticError: Bit shift by negative number
 --- testing: '65' << '1.2' ---
@@ -69,17 +69,17 @@ ArithmeticError: Bit shift by negative number
 --- testing: '65' << 'abc' ---
 TypeError: Unsupported operand types: string << string
 --- testing: '65' << '123abc' ---
-int(0)
+int(691198557808156253909979671345779179520)
 --- testing: '65' << '123e5' ---
-int(0)
+int(<integer too large to display>)
 --- testing: '65' << '123e5xyz' ---
-int(0)
+int(<integer too large to display>)
 --- testing: '65' << ' 123abc' ---
-int(0)
+int(691198557808156253909979671345779179520)
 --- testing: '65' << '123 abc' ---
-int(0)
+int(691198557808156253909979671345779179520)
 --- testing: '65' << '123abc ' ---
-int(0)
+int(691198557808156253909979671345779179520)
 --- testing: '65' << '3.4a' ---
 int(520)
 --- testing: '65' << 'a5.9' ---
@@ -87,7 +87,7 @@ TypeError: Unsupported operand types: string << string
 --- testing: '-44' << '0' ---
 int(-44)
 --- testing: '-44' << '65' ---
-int(0)
+int(-1623313478486440542208)
 --- testing: '-44' << '-44' ---
 ArithmeticError: Bit shift by negative number
 --- testing: '-44' << '1.2' ---
@@ -97,17 +97,17 @@ ArithmeticError: Bit shift by negative number
 --- testing: '-44' << 'abc' ---
 TypeError: Unsupported operand types: string << string
 --- testing: '-44' << '123abc' ---
-int(0)
+int(-467888254516290387262140085218681290752)
 --- testing: '-44' << '123e5' ---
-int(0)
+int(<integer too large to display>)
 --- testing: '-44' << '123e5xyz' ---
-int(0)
+int(<integer too large to display>)
 --- testing: '-44' << ' 123abc' ---
-int(0)
+int(-467888254516290387262140085218681290752)
 --- testing: '-44' << '123 abc' ---
-int(0)
+int(-467888254516290387262140085218681290752)
 --- testing: '-44' << '123abc ' ---
-int(0)
+int(-467888254516290387262140085218681290752)
 --- testing: '-44' << '3.4a' ---
 int(-352)
 --- testing: '-44' << 'a5.9' ---
@@ -115,7 +115,7 @@ TypeError: Unsupported operand types: string << string
 --- testing: '1.2' << '0' ---
 int(1)
 --- testing: '1.2' << '65' ---
-int(0)
+int(36893488147419103232)
 --- testing: '1.2' << '-44' ---
 ArithmeticError: Bit shift by negative number
 --- testing: '1.2' << '1.2' ---
@@ -125,17 +125,17 @@ ArithmeticError: Bit shift by negative number
 --- testing: '1.2' << 'abc' ---
 TypeError: Unsupported operand types: string << string
 --- testing: '1.2' << '123abc' ---
-int(0)
+int(10633823966279326983230456482242756608)
 --- testing: '1.2' << '123e5' ---
-int(0)
+int(<integer too large to display>)
 --- testing: '1.2' << '123e5xyz' ---
-int(0)
+int(<integer too large to display>)
 --- testing: '1.2' << ' 123abc' ---
-int(0)
+int(10633823966279326983230456482242756608)
 --- testing: '1.2' << '123 abc' ---
-int(0)
+int(10633823966279326983230456482242756608)
 --- testing: '1.2' << '123abc ' ---
-int(0)
+int(10633823966279326983230456482242756608)
 --- testing: '1.2' << '3.4a' ---
 int(8)
 --- testing: '1.2' << 'a5.9' ---
@@ -143,7 +143,7 @@ TypeError: Unsupported operand types: string << string
 --- testing: '-7.7' << '0' ---
 int(-7)
 --- testing: '-7.7' << '65' ---
-int(0)
+int(-258254417031933722624)
 --- testing: '-7.7' << '-44' ---
 ArithmeticError: Bit shift by negative number
 --- testing: '-7.7' << '1.2' ---
@@ -153,17 +153,17 @@ ArithmeticError: Bit shift by negative number
 --- testing: '-7.7' << 'abc' ---
 TypeError: Unsupported operand types: string << string
 --- testing: '-7.7' << '123abc' ---
-int(0)
+int(-74436767763955288882613195375699296256)
 --- testing: '-7.7' << '123e5' ---
-int(0)
+int(<integer too large to display>)
 --- testing: '-7.7' << '123e5xyz' ---
-int(0)
+int(<integer too large to display>)
 --- testing: '-7.7' << ' 123abc' ---
-int(0)
+int(-74436767763955288882613195375699296256)
 --- testing: '-7.7' << '123 abc' ---
-int(0)
+int(-74436767763955288882613195375699296256)
 --- testing: '-7.7' << '123abc ' ---
-int(0)
+int(-74436767763955288882613195375699296256)
 --- testing: '-7.7' << '3.4a' ---
 int(-56)
 --- testing: '-7.7' << 'a5.9' ---
@@ -199,7 +199,7 @@ TypeError: Unsupported operand types: string << string
 --- testing: '123abc' << '0' ---
 int(123)
 --- testing: '123abc' << '65' ---
-int(0)
+int(4537899042132549697536)
 --- testing: '123abc' << '-44' ---
 ArithmeticError: Bit shift by negative number
 --- testing: '123abc' << '1.2' ---
@@ -209,17 +209,17 @@ ArithmeticError: Bit shift by negative number
 --- testing: '123abc' << 'abc' ---
 TypeError: Unsupported operand types: string << string
 --- testing: '123abc' << '123abc' ---
-int(0)
+int(1307960347852357218937346147315859062784)
 --- testing: '123abc' << '123e5' ---
-int(0)
+int(<integer too large to display>)
 --- testing: '123abc' << '123e5xyz' ---
-int(0)
+int(<integer too large to display>)
 --- testing: '123abc' << ' 123abc' ---
-int(0)
+int(1307960347852357218937346147315859062784)
 --- testing: '123abc' << '123 abc' ---
-int(0)
+int(1307960347852357218937346147315859062784)
 --- testing: '123abc' << '123abc ' ---
-int(0)
+int(1307960347852357218937346147315859062784)
 --- testing: '123abc' << '3.4a' ---
 int(984)
 --- testing: '123abc' << 'a5.9' ---
@@ -227,7 +227,7 @@ TypeError: Unsupported operand types: string << string
 --- testing: '123e5' << '0' ---
 int(12300000)
 --- testing: '123e5' << '65' ---
-int(0)
+int(453789904213254969753600000)
 --- testing: '123e5' << '-44' ---
 ArithmeticError: Bit shift by negative number
 --- testing: '123e5' << '1.2' ---
@@ -237,17 +237,17 @@ ArithmeticError: Bit shift by negative number
 --- testing: '123e5' << 'abc' ---
 TypeError: Unsupported operand types: string << string
 --- testing: '123e5' << '123abc' ---
-int(0)
+int(130796034785235721893734614731585906278400000)
 --- testing: '123e5' << '123e5' ---
-int(0)
+int(<integer too large to display>)
 --- testing: '123e5' << '123e5xyz' ---
-int(0)
+int(<integer too large to display>)
 --- testing: '123e5' << ' 123abc' ---
-int(0)
+int(130796034785235721893734614731585906278400000)
 --- testing: '123e5' << '123 abc' ---
-int(0)
+int(130796034785235721893734614731585906278400000)
 --- testing: '123e5' << '123abc ' ---
-int(0)
+int(130796034785235721893734614731585906278400000)
 --- testing: '123e5' << '3.4a' ---
 int(98400000)
 --- testing: '123e5' << 'a5.9' ---
@@ -255,7 +255,7 @@ TypeError: Unsupported operand types: string << string
 --- testing: '123e5xyz' << '0' ---
 int(12300000)
 --- testing: '123e5xyz' << '65' ---
-int(0)
+int(453789904213254969753600000)
 --- testing: '123e5xyz' << '-44' ---
 ArithmeticError: Bit shift by negative number
 --- testing: '123e5xyz' << '1.2' ---
@@ -265,17 +265,17 @@ ArithmeticError: Bit shift by negative number
 --- testing: '123e5xyz' << 'abc' ---
 TypeError: Unsupported operand types: string << string
 --- testing: '123e5xyz' << '123abc' ---
-int(0)
+int(130796034785235721893734614731585906278400000)
 --- testing: '123e5xyz' << '123e5' ---
-int(0)
+int(<integer too large to display>)
 --- testing: '123e5xyz' << '123e5xyz' ---
-int(0)
+int(<integer too large to display>)
 --- testing: '123e5xyz' << ' 123abc' ---
-int(0)
+int(130796034785235721893734614731585906278400000)
 --- testing: '123e5xyz' << '123 abc' ---
-int(0)
+int(130796034785235721893734614731585906278400000)
 --- testing: '123e5xyz' << '123abc ' ---
-int(0)
+int(130796034785235721893734614731585906278400000)
 --- testing: '123e5xyz' << '3.4a' ---
 int(98400000)
 --- testing: '123e5xyz' << 'a5.9' ---
@@ -283,7 +283,7 @@ TypeError: Unsupported operand types: string << string
 --- testing: ' 123abc' << '0' ---
 int(123)
 --- testing: ' 123abc' << '65' ---
-int(0)
+int(4537899042132549697536)
 --- testing: ' 123abc' << '-44' ---
 ArithmeticError: Bit shift by negative number
 --- testing: ' 123abc' << '1.2' ---
@@ -293,17 +293,17 @@ ArithmeticError: Bit shift by negative number
 --- testing: ' 123abc' << 'abc' ---
 TypeError: Unsupported operand types: string << string
 --- testing: ' 123abc' << '123abc' ---
-int(0)
+int(1307960347852357218937346147315859062784)
 --- testing: ' 123abc' << '123e5' ---
-int(0)
+int(<integer too large to display>)
 --- testing: ' 123abc' << '123e5xyz' ---
-int(0)
+int(<integer too large to display>)
 --- testing: ' 123abc' << ' 123abc' ---
-int(0)
+int(1307960347852357218937346147315859062784)
 --- testing: ' 123abc' << '123 abc' ---
-int(0)
+int(1307960347852357218937346147315859062784)
 --- testing: ' 123abc' << '123abc ' ---
-int(0)
+int(1307960347852357218937346147315859062784)
 --- testing: ' 123abc' << '3.4a' ---
 int(984)
 --- testing: ' 123abc' << 'a5.9' ---
@@ -311,7 +311,7 @@ TypeError: Unsupported operand types: string << string
 --- testing: '123 abc' << '0' ---
 int(123)
 --- testing: '123 abc' << '65' ---
-int(0)
+int(4537899042132549697536)
 --- testing: '123 abc' << '-44' ---
 ArithmeticError: Bit shift by negative number
 --- testing: '123 abc' << '1.2' ---
@@ -321,17 +321,17 @@ ArithmeticError: Bit shift by negative number
 --- testing: '123 abc' << 'abc' ---
 TypeError: Unsupported operand types: string << string
 --- testing: '123 abc' << '123abc' ---
-int(0)
+int(1307960347852357218937346147315859062784)
 --- testing: '123 abc' << '123e5' ---
-int(0)
+int(<integer too large to display>)
 --- testing: '123 abc' << '123e5xyz' ---
-int(0)
+int(<integer too large to display>)
 --- testing: '123 abc' << ' 123abc' ---
-int(0)
+int(1307960347852357218937346147315859062784)
 --- testing: '123 abc' << '123 abc' ---
-int(0)
+int(1307960347852357218937346147315859062784)
 --- testing: '123 abc' << '123abc ' ---
-int(0)
+int(1307960347852357218937346147315859062784)
 --- testing: '123 abc' << '3.4a' ---
 int(984)
 --- testing: '123 abc' << 'a5.9' ---
@@ -339,7 +339,7 @@ TypeError: Unsupported operand types: string << string
 --- testing: '123abc ' << '0' ---
 int(123)
 --- testing: '123abc ' << '65' ---
-int(0)
+int(4537899042132549697536)
 --- testing: '123abc ' << '-44' ---
 ArithmeticError: Bit shift by negative number
 --- testing: '123abc ' << '1.2' ---
@@ -349,17 +349,17 @@ ArithmeticError: Bit shift by negative number
 --- testing: '123abc ' << 'abc' ---
 TypeError: Unsupported operand types: string << string
 --- testing: '123abc ' << '123abc' ---
-int(0)
+int(1307960347852357218937346147315859062784)
 --- testing: '123abc ' << '123e5' ---
-int(0)
+int(<integer too large to display>)
 --- testing: '123abc ' << '123e5xyz' ---
-int(0)
+int(<integer too large to display>)
 --- testing: '123abc ' << ' 123abc' ---
-int(0)
+int(1307960347852357218937346147315859062784)
 --- testing: '123abc ' << '123 abc' ---
-int(0)
+int(1307960347852357218937346147315859062784)
 --- testing: '123abc ' << '123abc ' ---
-int(0)
+int(1307960347852357218937346147315859062784)
 --- testing: '123abc ' << '3.4a' ---
 int(984)
 --- testing: '123abc ' << 'a5.9' ---
@@ -367,7 +367,7 @@ TypeError: Unsupported operand types: string << string
 --- testing: '3.4a' << '0' ---
 int(3)
 --- testing: '3.4a' << '65' ---
-int(0)
+int(110680464442257309696)
 --- testing: '3.4a' << '-44' ---
 ArithmeticError: Bit shift by negative number
 --- testing: '3.4a' << '1.2' ---
@@ -377,17 +377,17 @@ ArithmeticError: Bit shift by negative number
 --- testing: '3.4a' << 'abc' ---
 TypeError: Unsupported operand types: string << string
 --- testing: '3.4a' << '123abc' ---
-int(0)
+int(31901471898837980949691369446728269824)
 --- testing: '3.4a' << '123e5' ---
-int(0)
+int(<integer too large to display>)
 --- testing: '3.4a' << '123e5xyz' ---
-int(0)
+int(<integer too large to display>)
 --- testing: '3.4a' << ' 123abc' ---
-int(0)
+int(31901471898837980949691369446728269824)
 --- testing: '3.4a' << '123 abc' ---
-int(0)
+int(31901471898837980949691369446728269824)
 --- testing: '3.4a' << '123abc ' ---
-int(0)
+int(31901471898837980949691369446728269824)
 --- testing: '3.4a' << '3.4a' ---
 int(24)
 --- testing: '3.4a' << 'a5.9' ---
