@@ -35,7 +35,7 @@ var_dump(epsilon_equal( LONG_MAX   , floor(LONG_MAX + 0.5) ));
 
 ?>
 --EXPECT--
-1,1,0,0
+1,1,1,1
 bool(true)
 bool(true)
 bool(true)

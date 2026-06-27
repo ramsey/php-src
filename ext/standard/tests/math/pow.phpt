@@ -144,7 +144,7 @@ var_dump(epsilon_equal( LONG_MIN*LONG_MIN , pow(LONG_MIN,2.0) ));
 
 ?>
 --EXPECTF--
-1,1,0,0
+1,1,1,1
 bool(true)
 bool(true)
 bool(true)

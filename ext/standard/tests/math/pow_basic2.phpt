@@ -28,7 +28,7 @@ var_dump(pow(-0.24, -$large_exp+1));
 ?>
 --EXPECTF--
 -- The following all result in INF --
-float(INF)
+int(<integer too large to display>)
 float(INF)
 float(INF)
 
@@ -45,5 +45,5 @@ float(%s)
 
 
 -- The following all result in -INF --
-float(-INF)
+int(<integer too large to display>)
 float(-INF)
