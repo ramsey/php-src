@@ -343,7 +343,7 @@ int(0)
 --- testing: 0 << 9223372036854775806 ---
 int(0)
 --- testing: 0 << 9223372036854775808 ---
-Exception: The libtommath bigint backend cannot shift left by more than 2147483647 bits
+int(0)
 --- testing: 0 << -9223372036854775807 ---
 Exception: Bit shift by negative number
 --- testing: 0 << -9223372036854775809 ---

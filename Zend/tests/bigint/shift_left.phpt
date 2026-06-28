@@ -24,8 +24,11 @@ var_dump(1 << 63);
 $big64 = 9223372036854775807 + 1; // long (64-bit) + long promotes to bigint.
 var_dump($big64 << 4);
 
-// Zero is unaffected.
+// 0 << anything non-negative is 0, whether it fits in a long or not.
 var_dump(0 << 100);
+var_dump(0 << (2 ** 70));                 // bigint count
+$strCount = '1180591620717411303424';     // 2 ** 70 as a string
+var_dump(0 << $strCount);                  // numeric-string bigint count
 
 // Negative shift count throws.
 try {
@@ -44,6 +47,8 @@ int(2147483648)
 int(34359738368)
 int(9223372036854775808)
 int(147573952589676412928)
+int(0)
+int(0)
 int(0)
 Bit shift by negative number
 int(-1180591620717411303424)

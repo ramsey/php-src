@@ -2987,6 +2987,12 @@ static zend_never_inline zend_result ZEND_FASTCALL shift_left_function_bigint(zv
 		}
 	}
 
+	if (Z_TYPE_P(op1) == IS_LONG && Z_LVAL_P(op1) == 0) {
+		zend_bigint_release_result_alias(result, op1, op2);
+		ZVAL_LONG(result, 0);
+		return SUCCESS;
+	}
+
 	if (UNEXPECTED(zend_shift_left_result_exceeds_memory(op1, count, count_big))) {
 		zend_throw_error(zend_ce_arithmetic_error,
 			"Bit shift produces an integer too large to fit in the configured memory limit");
