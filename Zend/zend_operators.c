@@ -1719,6 +1719,43 @@ ZEND_API bool zend_pow_result_exceeds_memory(const zval *base, zend_long exp)
 	return est_bytes > (uint64_t) available;
 }
 
+ZEND_API bool zend_shift_left_result_exceeds_memory(const zval *op1, zend_long count)
+{
+	uint64_t base_bits;
+
+	if (count <= 0 || !zend_bigint_can_shift_left(count)) {
+		return false;
+	}
+
+	if (Z_TYPE_P(op1) == IS_LONG) {
+		zend_long b = Z_LVAL_P(op1);
+		if (b == 0) {
+			return false;
+		}
+		zend_ulong mag = (b < 0) ? (0 - (zend_ulong) b) : (zend_ulong) b;
+		base_bits = (uint64_t) (sizeof(mag) * 8 - zend_ulong_nlz(mag));
+	} else if (Z_TYPE_P(op1) == IS_BIGINT) {
+		base_bits = zend_bigint_bit_length(Z_BIG_P(op1));
+	} else {
+		return false;
+	}
+
+	/* The result spans bitlen(op1) + count bits; saturate the add so an
+	 * astronomical shift still compares as "too large". */
+	uint64_t count_u = (uint64_t) count;
+	uint64_t est_bits = (base_bits > UINT64_MAX - count_u) ? UINT64_MAX : base_bits + count_u;
+
+	/* The estimated peak working set is roughly twice the result's packed size,
+	 * so we multiply by two to create an estimate. */
+	uint64_t est_bytes = (est_bits / 8) * 2;
+
+	size_t limit = zend_memory_limit();
+	size_t usage = zend_memory_usage(true);
+	size_t available = (limit > usage) ? (limit - usage) : 0;
+
+	return est_bytes > (uint64_t) available;
+}
+
 /* Tidy up after the bigint backend has refused to compute a power (it has
  * already thrown). A result that aliases op1 keeps its old value. The refused
  * bigint temp is released. */
@@ -2870,6 +2907,15 @@ static zend_never_inline zend_result ZEND_FASTCALL shift_left_function_bigint(zv
 		return FAILURE;
 	}
 
+	if (UNEXPECTED(zend_shift_left_result_exceeds_memory(op1, count))) {
+		zend_throw_error(zend_ce_arithmetic_error,
+			"Bit shift produces an integer too large to fit in the configured memory limit");
+		if (result != op1) {
+			ZVAL_UNDEF(result);
+		}
+		return FAILURE;
+	}
+
 	/* op1 is the bigint here: if it were a long, this helper was reached only
 	 * because op2 was a bigint, which already returned above. */
 	ZEND_ASSERT(Z_TYPE_P(op1) == IS_BIGINT);
@@ -2961,6 +3007,16 @@ ZEND_API zend_result ZEND_FASTCALL shift_left_function(zval *result, zval *op1, 
 		}
 		ZVAL_LONG(result, 0);
 		return SUCCESS;
+	}
+	zval op1_long;
+	ZVAL_LONG(&op1_long, op1_lval);
+	if (UNEXPECTED(zend_shift_left_result_exceeds_memory(&op1_long, op2_lval))) {
+		zend_throw_error(zend_ce_arithmetic_error,
+			"Bit shift produces an integer too large to fit in the configured memory limit");
+		if (op1 != result) {
+			ZVAL_UNDEF(result);
+		}
+		return FAILURE;
 	}
 	zend_bigint *r = zend_bigint_init();
 	if (!zend_bigint_long_shift_left(r, op1_lval, op2_lval)) {

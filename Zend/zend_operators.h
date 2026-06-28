@@ -93,6 +93,12 @@ ZEND_API bool zend_string_only_has_ascii_alphanumeric(const zend_string *str);
  * ArithmeticError at runtime. */
 ZEND_API bool zend_pow_result_exceeds_memory(const zval *base, zend_long exp);
 
+/* Companion to the above for the left shift "op1 << count". Estimates whether
+ * the result is too large to fit the configured memory limit. Never throws, so
+ * the constant-folder can consult it during compilation to defer the fold;
+ * shift_left itself throws the catchable ArithmeticError at runtime. */
+ZEND_API bool zend_shift_left_result_exceeds_memory(const zval *op1, zend_long count);
+
 /**
  * Checks whether the string "str" with length "length" is numeric. The value
  * of allow_errors determines whether it's required to be entirely numeric, or
