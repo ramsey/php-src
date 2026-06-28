@@ -203,7 +203,7 @@ zend_result php_filter_int(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 	int   min_range_set, max_range_set;
 	bool allow_octal = false, allow_hex = false;
 	size_t	  len;
-	bool error = false;
+	bool error = false, is_negative = false;
 	zend_long  ctx_value;
 	const char *p;
 
@@ -232,6 +232,17 @@ zend_result php_filter_int(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 
 	PHP_FILTER_TRIM_DEFAULT(p, len);
 
+	/* A sign in front of an octal or hexadecimal value is accepted as
+	 * sign-magnitude, matching octdec()/hexdec() and sprintf("%o"/"%x"), e.g.,
+	 * "-017" is -15 and "+0xff" is 255. The leading zero after the sign selects
+	 * octal/hex, so a signed decimal such as "-15" still flows through
+	 * php_filter_parse_int() below, which handles its own sign and is
+	 * PHP_INT_MIN-safe. */
+	if (len > 1 && (*p == '-' || *p == '+') && p[1] == '0') {
+		is_negative = (*p == '-');
+		p++; len--;
+	}
+
 	if (*p == '0') {
 		p++; len--;
 		if (allow_hex && (*p == 'x' || *p == 'X')) {
@@ -255,6 +266,9 @@ zend_result php_filter_int(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 			}
 		} else if (len != 0) {
 			error = true;
+		}
+		if (is_negative && !error) {
+			ctx_value = (zend_long) (0 - (zend_ulong) ctx_value);
 		}
 	} else {
 		if (!php_filter_parse_int(p, len, &ctx_value)) {
