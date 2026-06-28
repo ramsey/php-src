@@ -31,6 +31,14 @@ try {
     echo $e->getMessage() . "\n";
 }
 
+$over = 2147483648;
+try {
+    $r = 2 ** $over;
+    echo "no throw (over INT_MAX)\n";
+} catch (ArithmeticError $e) {
+    echo $e->getMessage() . "\n";
+}
+
 // |base| <= 1 never overflows, so it still computes exactly.
 var_dump(1 ** $exp);
 var_dump(0 ** $exp);
@@ -41,6 +49,7 @@ var_dump(is_int(2 ** 100000));
 
 ?>
 --EXPECT--
+Exponentiation produces an integer too large to fit in the configured memory limit
 Exponentiation produces an integer too large to fit in the configured memory limit
 Exponentiation produces an integer too large to fit in the configured memory limit
 Exponentiation produces an integer too large to fit in the configured memory limit

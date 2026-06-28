@@ -1679,11 +1679,17 @@ static double safe_pow(double base, double exponent)
 	return pow(base, exponent);
 }
 
-ZEND_API bool zend_pow_result_exceeds_memory(const zval *base, zend_long exp)
+ZEND_API bool zend_pow_result_exceeds_memory(const zval *base, zend_long exp, const zend_bigint *exp_big)
 {
 	uint64_t base_bits;
 
-	if (exp <= 0 || !zend_bigint_can_pow_exponent(exp)) {
+	/* With no memory limit the engine never reports a memory error; the backend
+	 * decides whether it can represent the exponent. */
+	if (zend_memory_limit_is_unlimited()) {
+		return false;
+	}
+
+	if (exp_big == NULL && exp <= 0) {
 		return false;
 	}
 
@@ -1702,11 +1708,15 @@ ZEND_API bool zend_pow_result_exceeds_memory(const zval *base, zend_long exp)
 	}
 
 	/* Estimate the result's bit length, saturating instead of wrapping so an
-	 * astronomical product still compares as "too large". */
-	uint64_t exp_u = (uint64_t) exp;
-	uint64_t est_bits = (base_bits > UINT64_MAX / exp_u)
-		? UINT64_MAX
-		: base_bits * exp_u;
+	 * astronomical product still compares as "too large". A bigint exponent is
+	 * far beyond any representable result, so the estimate saturates outright. */
+	uint64_t est_bits;
+	if (exp_big != NULL) {
+		est_bits = UINT64_MAX;
+	} else {
+		uint64_t exp_u = (uint64_t) exp;
+		est_bits = (base_bits > UINT64_MAX / exp_u) ? UINT64_MAX : base_bits * exp_u;
+	}
 
 	/* The estimated peak working set is roughly twice the result's packed size,
 	 * so we multiply by two to create an estimate. */
@@ -1776,7 +1786,7 @@ static zend_always_inline void pow_long_overflow_result(zval *result, zval *op1,
 {
 	zend_long base = Z_LVAL_P(op1), exp = Z_LVAL_P(op2);
 	ZEND_ASSERT(exp >= 0 && "pow_long_overflow_result requires a non-negative exponent");
-	if (UNEXPECTED(zend_pow_result_exceeds_memory(op1, exp))) {
+	if (UNEXPECTED(zend_pow_result_exceeds_memory(op1, exp, NULL))) {
 		zend_throw_error(zend_ce_arithmetic_error,
 			"Exponentiation produces an integer too large to fit in the configured memory limit");
 		if (result != op1) {
@@ -1785,10 +1795,67 @@ static zend_always_inline void pow_long_overflow_result(zval *result, zval *op1,
 		return;
 	}
 	zend_bigint *r = zend_bigint_init();
-	if (UNEXPECTED(!zend_bigint_long_pow_long(r, base, exp))) {
+	if (UNEXPECTED(!zend_bigint_long_pow_long(r, base, exp, NULL))) {
 		pow_backend_refused(result, op1, r);
 		return;
 	}
+	zend_bigint_result(result, r);
+}
+
+/* An integer base (long or bigint) raised to a bigint exponent. A bigint
+ * exponent has magnitude greater than PHP_INT_MAX, so only bases 0, 1, and -1
+ * have an exact integer result (the last by parity); any larger base produces a
+ * value too big to represent. A negative exponent is fractional, so the result
+ * is a float. */
+static zend_always_inline void pow_integer_base_bigint_exp(zval *result, zval *op1, zval *op2)
+{
+	const zend_bigint *exp_big = Z_BIG_P(op2);
+
+	if (zend_bigint_sign(exp_big) < 0) {
+		double base = (Z_TYPE_P(op1) == IS_LONG)
+			? (double) Z_LVAL_P(op1)
+			: zend_bigint_to_double(Z_BIG_P(op1));
+		double d = safe_pow(base, zend_bigint_to_double(exp_big));
+		zend_bigint_release_result_alias(result, op1, op2);
+		ZVAL_DOUBLE(result, d);
+		return;
+	}
+
+	if (Z_TYPE_P(op1) == IS_LONG) {
+		zend_long base = Z_LVAL_P(op1);
+		if (base == 0 || base == 1) {
+			zend_bigint_release_result_alias(result, op1, op2);
+			ZVAL_LONG(result, base);
+			return;
+		}
+		if (base == -1) {
+			zend_bigint_release_result_alias(result, op1, op2);
+			ZVAL_LONG(result, zend_bigint_is_odd(exp_big) ? -1 : 1);
+			return;
+		}
+	}
+
+	/* When |base| >= 2 and memory_limit is finite, the result cannot fit, so
+	 * the engine throws. When memory_limit=-1, the backend throws if it cannot
+	 * represent the exponent. */
+	if (UNEXPECTED(zend_pow_result_exceeds_memory(op1, 0, exp_big))) {
+		zend_throw_error(zend_ce_arithmetic_error,
+			"Exponentiation produces an integer too large to fit in the configured memory limit");
+		if (result != op1) {
+			ZVAL_UNDEF(result);
+		}
+		return;
+	}
+
+	zend_bigint *r = zend_bigint_init();
+	bool computed = (Z_TYPE_P(op1) == IS_LONG)
+		? zend_bigint_long_pow_long(r, Z_LVAL_P(op1), 0, exp_big)
+		: zend_bigint_pow_long(r, Z_BIG_P(op1), 0, exp_big);
+	if (UNEXPECTED(!computed)) {
+		pow_backend_refused(result, op1, r);
+		return;
+	}
+	zend_bigint_release_result_alias(result, op1, op2);
 	zend_bigint_result(result, r);
 }
 
@@ -1850,7 +1917,7 @@ static zend_result ZEND_FASTCALL pow_function_base(zval *result, zval *op1, zval
 			zend_bigint_release_result_alias(result, op1, op2);
 			ZVAL_LONG(result, 1);
 		} else if (exp > 0) {
-			if (UNEXPECTED(zend_pow_result_exceeds_memory(op1, exp))) {
+			if (UNEXPECTED(zend_pow_result_exceeds_memory(op1, exp, NULL))) {
 				zend_throw_error(zend_ce_arithmetic_error,
 					"Exponentiation produces an integer too large to fit in the configured memory limit");
 				if (result != op1) {
@@ -1859,7 +1926,7 @@ static zend_result ZEND_FASTCALL pow_function_base(zval *result, zval *op1, zval
 				return SUCCESS;
 			}
 			zend_bigint *r = zend_bigint_init();
-			if (UNEXPECTED(!zend_bigint_pow_long(r, Z_BIG_P(op1), exp))) {
+			if (UNEXPECTED(!zend_bigint_pow_long(r, Z_BIG_P(op1), exp, NULL))) {
 				pow_backend_refused(result, op1, r);
 				return SUCCESS;
 			}
@@ -1871,6 +1938,10 @@ static zend_result ZEND_FASTCALL pow_function_base(zval *result, zval *op1, zval
 			zend_bigint_release_result_alias(result, op1, op2);
 			ZVAL_DOUBLE(result, d);
 		}
+		return SUCCESS;
+	} else if (type_pair == TYPE_PAIR(IS_LONG, IS_BIGINT)
+			|| type_pair == TYPE_PAIR(IS_BIGINT, IS_BIGINT)) {
+		pow_integer_base_bigint_exp(result, op1, op2);
 		return SUCCESS;
 	} else {
 		return FAILURE;
@@ -1906,10 +1977,11 @@ ZEND_API zend_result ZEND_FASTCALL pow_function(zval *result, zval *op1, zval *o
 		return FAILURE;
 	}
 
-	/* pow_function_base only computes a bigint base raised to a long exponent. A bigint
-	 * exponent has no integer result yet (deferred), and a double operand yields a double, so
-	 * flatten every other bigint combination to a double before re-dispatching. */
-	if (!(Z_TYPE(op1_copy) == IS_BIGINT && Z_TYPE(op2_copy) == IS_LONG)) {
+	/* pow_function_base computes every integer/integer combination exactly,
+	 * including a bigint exponent (e.g., from an out-of-range numeric string).
+	 * Only a bigint paired with a double still needs flattening, since a double
+	 * operand makes the result a double. */
+	if (Z_TYPE(op1_copy) == IS_DOUBLE || Z_TYPE(op2_copy) == IS_DOUBLE) {
 		zendi_flatten_bigint_to_double(&op1_copy);
 		zendi_flatten_bigint_to_double(&op2_copy);
 	}

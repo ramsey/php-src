@@ -287,14 +287,15 @@ ZEND_API bool zend_bigint_can_pow_exponent(zend_long exp)
 	return exp <= INT_MAX;
 }
 
-/* out = base ** exp, for a non-negative exp. On success returns true with the
- * power in out. libtommath's mp_expt_n takes an int exponent, and an exponent
- * above INT_MAX is beyond this backend's reach (and the result would be far too
- * large to hold in memory); in that case it throws an ArithmeticError naming
- * the backend limit, leaves out untouched, and returns false. */
-ZEND_API bool zend_bigint_pow_long(zend_bigint *out, const zend_bigint *base, zend_long exp)
+/* out = base ** exp, for a non-negative exponent (`exp_big` when non-NULL, else
+ * `exp`). On success returns true with the power in out. libtommath's mp_expt_n
+ * takes an int exponent, so an exponent above INT_MAX is beyond this backend's
+ * reach (and the result would be far too large to hold in memory); in that case
+ * it throws an ArithmeticError naming the backend limit, leaves out untouched,
+ * and returns false. */
+ZEND_API bool zend_bigint_pow_long(zend_bigint *out, const zend_bigint *base, zend_long exp, const zend_bigint *exp_big)
 {
-	if (!zend_bigint_can_pow_exponent(exp)) {
+	if (exp_big != NULL || !zend_bigint_can_pow_exponent(exp)) {
 		zend_throw_error(zend_ce_arithmetic_error,
 			"The libtommath bigint backend cannot raise to an exponent greater than %d", INT_MAX);
 		return false;
@@ -303,10 +304,10 @@ ZEND_API bool zend_bigint_pow_long(zend_bigint *out, const zend_bigint *base, ze
 	return true;
 }
 
-ZEND_API bool zend_bigint_long_pow_long(zend_bigint *out, zend_long base, zend_long exp)
+ZEND_API bool zend_bigint_long_pow_long(zend_bigint *out, zend_long base, zend_long exp, const zend_bigint *exp_big)
 {
 	mp_set_i64((mp_int *) out->mp, (int64_t) base);
-	return zend_bigint_pow_long(out, out, exp);
+	return zend_bigint_pow_long(out, out, exp, exp_big);
 }
 
 ZEND_API int zend_bigint_sign(const zend_bigint *big)
@@ -315,6 +316,11 @@ ZEND_API int zend_bigint_sign(const zend_bigint *big)
 		return 0;
 	}
 	return mp_isneg((const mp_int *) big->mp) ? -1 : 1;
+}
+
+ZEND_API bool zend_bigint_is_odd(const zend_bigint *big)
+{
+	return mp_isodd((const mp_int *) big->mp) == MP_YES;
 }
 
 ZEND_API uint64_t zend_bigint_bit_length(const zend_bigint *big)

@@ -18,8 +18,7 @@ var_dump(is_float('99999999999999999999' / 7));
 // pow: a bigint base with an integer exponent stays an int (bigint).
 var_dump('99999999999999999999' ** 2);
 
-// pow: a bigint exponent has no integer result yet, so it degrades to a float.
-var_dump(is_float(2 ** '99999999999999999999'));
+// pow: a bigint base with a float exponent yields a float (the float dominates).
 var_dump(is_float('99999999999999999999' ** 1.5));
 ?>
 --EXPECT--
@@ -30,5 +29,4 @@ bool(true)
 int(33333333333333333333)
 bool(true)
 int(9999999999999999999800000000000000000001)
-bool(true)
 bool(true)

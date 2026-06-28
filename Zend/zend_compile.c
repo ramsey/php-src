@@ -10541,9 +10541,22 @@ ZEND_API bool zend_binary_op_produces_error(uint32_t opcode, const zval *op1, co
 	}
 	if (opcode == ZEND_POW
 			&& Z_TYPE_P(op2) == IS_LONG && Z_LVAL_P(op2) > 0
-			&& zend_pow_result_exceeds_memory(op1, Z_LVAL_P(op2))) {
+			&& zend_pow_result_exceeds_memory(op1, Z_LVAL_P(op2), NULL)) {
 		/* A power whose exact result cannot fit the memory limit throws an
 		 * ArithmeticError; defer the fold so it stays catchable at runtime. */
+		return 1;
+	}
+	if (opcode == ZEND_POW
+			&& Z_TYPE_P(op2) == IS_BIGINT && zend_bigint_sign(Z_BIG_P(op2)) > 0
+			&& !(Z_TYPE_P(op1) == IS_LONG && Z_LVAL_P(op1) >= -1 && Z_LVAL_P(op1) <= 1)) {
+		/* A positive bigint exponent yields a result too large to represent unless
+		 * the base is 0, 1, or -1; defer so the ArithmeticError stays catchable. */
+		return 1;
+	}
+	if (opcode == ZEND_POW && Z_TYPE_P(op2) == IS_STRING
+			&& is_numeric_string(Z_STRVAL_P(op2), Z_STRLEN_P(op2), NULL, NULL, 0) != IS_LONG) {
+		/* A numeric-string exponent that doesn't fit a long becomes a bigint (or
+		 * float) exponent at runtime; defer so any throw stays catchable. */
 		return 1;
 	}
 	if ((opcode == ZEND_SL || opcode == ZEND_SR) && zval_get_long(op2) < 0) {

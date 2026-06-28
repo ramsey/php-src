@@ -64,7 +64,7 @@ ZEND_API void zend_bigint_long_mod(zend_bigint *out, zend_long op1, const zend_b
 ZEND_API void zend_bigint_complement(zend_bigint *out, const zend_bigint *op);
 
 /* Bitwise shift left (out = op << bits) for a non-negative bit count. Returns
- * true on success. If the active backend cannot perform the shift (e.g. a bit
+ * true on success. If the active backend cannot perform the shift (e.g., a bit
  * count beyond the backend's reach), it leaves out untouched and returns false.
  * When returning false, it should throw an ArithmeticError describing the
  * backend's limit. */
@@ -98,13 +98,15 @@ ZEND_API void zend_bigint_or_long(zend_bigint *out, const zend_bigint *op1, zend
 ZEND_API void zend_bigint_xor(zend_bigint *out, const zend_bigint *op1, const zend_bigint *op2);
 ZEND_API void zend_bigint_xor_long(zend_bigint *out, const zend_bigint *op1, zend_long op2);
 
-/* Exponentiation: out = base ** exp, for a non-negative exp. Returns true on
- * success. If the active backend cannot compute the power (e.g. an exponent
- * beyond the backend's reach), it leaves out untouched and returns false. When
- * returning false, it should throw an ArithmeticError describing the backend's
- * limit. */
-ZEND_API bool zend_bigint_pow_long(zend_bigint *out, const zend_bigint *base, zend_long exp);
-ZEND_API bool zend_bigint_long_pow_long(zend_bigint *out, zend_long base, zend_long exp);
+/* Exponentiation. out = base ** exp, for a non-negative exponent. The exponent
+ * is `exp` unless `exp_big` is non-NULL, in which case the exponent is that
+ * bigint and `exp` is ignored. This case is used when the exponent does not fit
+ * a zend_long. Returns true on success. If the active backend cannot compute
+ * the power (e.g., an exponent beyond the backend's reach), it leaves `out`
+ * untouched and returns false. When returning false, it should throw an
+ * ArithmeticError describing the backend's limit. */
+ZEND_API bool zend_bigint_pow_long(zend_bigint *out, const zend_bigint *base, zend_long exp, const zend_bigint *exp_big);
+ZEND_API bool zend_bigint_long_pow_long(zend_bigint *out, zend_long base, zend_long exp, const zend_bigint *exp_big);
 
 /* Whether the active backend can raise to the given non-negative exponent. The
  * compiler consults this to avoid constant-folding a power that would throw, so
@@ -113,6 +115,7 @@ ZEND_API bool zend_bigint_can_pow_exponent(zend_long exp);
 
 /* Information / conversion */
 ZEND_API int       zend_bigint_sign(const zend_bigint *big);
+ZEND_API bool      zend_bigint_is_odd(const zend_bigint *big);
 ZEND_API uint64_t  zend_bigint_bit_length(const zend_bigint *big);
 ZEND_API bool      zend_bigint_can_fit_long(const zend_bigint *big);
 ZEND_API zend_long zend_bigint_to_long(const zend_bigint *big);

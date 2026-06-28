@@ -86,12 +86,14 @@ static zend_always_inline bool instanceof_function(
 
 ZEND_API bool zend_string_only_has_ascii_alphanumeric(const zend_string *str);
 
-/* Whether raising base to the given non-negative long exponent would produce an
- * integer too large to fit in the configured memory limit. This reads the live
+/* Whether raising base to the given non-negative exponent (`exp_big` when
+ * non-NULL, else `exp`) would produce an integer too large to fit in the
+ * configured memory limit. With no memory limit, it returns false, leaving the
+ * backend to report whether it can represent the exponent. Reads the live
  * memory_limit/usage and never throws, so the constant-folder can consult it
- * during compilation to defer the fold. pow itself throws the catchable
+ * during compilation to defer the fold; pow itself throws the catchable
  * ArithmeticError at runtime. */
-ZEND_API bool zend_pow_result_exceeds_memory(const zval *base, zend_long exp);
+ZEND_API bool zend_pow_result_exceeds_memory(const zval *base, zend_long exp, const zend_bigint *exp_big);
 
 /* Companion to the above for the left shift "op1 << count". Estimates whether
  * the result is too large to fit the configured memory limit. Never throws, so

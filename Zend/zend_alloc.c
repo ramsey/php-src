@@ -2928,6 +2928,12 @@ ZEND_API size_t zend_memory_limit(void)
 #endif
 }
 
+ZEND_API bool zend_memory_limit_is_unlimited(void)
+{
+	/* memory_limit=-1 stores the same "unlimited" sentinel the heap uses. */
+	return zend_memory_limit() == ((size_t)Z_L(-1) >> 1);
+}
+
 ZEND_API bool zend_alloc_in_memory_limit_error_reporting(void)
 {
 #if ZEND_MM_LIMIT

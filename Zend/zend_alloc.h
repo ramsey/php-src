@@ -216,6 +216,7 @@ ZEND_API ZEND_ATTRIBUTE_MALLOC char * __zend_strdup(const char *s);
 
 ZEND_API zend_result zend_set_memory_limit(size_t memory_limit);
 ZEND_API size_t zend_memory_limit(void);
+ZEND_API bool zend_memory_limit_is_unlimited(void);
 ZEND_API bool zend_alloc_in_memory_limit_error_reporting(void);
 
 ZEND_API void start_memory_manager(void);
