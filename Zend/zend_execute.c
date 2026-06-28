@@ -1819,6 +1819,23 @@ try_again:
 	return zval_get_long_func(dim, /* is_strict */ false);
 }
 
+/* An out-of-range integer string offset is clamped to ZEND_LONG_MIN/MAX for the
+ * bounds check, but a diagnostic should report the value that was passed. For
+ * diagnostics, this returns the bigint decimal representation, the placeholder
+ * value "<integer too large to display>" for values past zend.int_string_max_digits,
+ * or NULL when the offset was not a bigint and the caller should format the
+ * clamped long. */
+static zend_never_inline ZEND_COLD zend_string *zend_string_offset_bigint_repr(const zval *dim)
+{
+	if (Z_TYPE_P(dim) == IS_REFERENCE) {
+		dim = Z_REFVAL_P(dim);
+	}
+	if (Z_TYPE_P(dim) == IS_BIGINT) {
+		return zend_bigint_to_string_or_placeholder(Z_BIG_P(dim));
+	}
+	return NULL;
+}
+
 ZEND_API zend_never_inline ZEND_COLD void zend_wrong_string_offset_error(void)
 {
 	const char *msg = NULL;
@@ -2143,7 +2160,13 @@ static zend_never_inline void zend_assign_to_string_offset(zval *str, zval *dim,
 
 	if (UNEXPECTED(offset < -(zend_long)ZSTR_LEN(s))) {
 		/* Error on negative offset */
-		zend_error(E_WARNING, "Illegal string offset " ZEND_LONG_FMT, offset);
+		zend_string *offset_repr = zend_string_offset_bigint_repr(dim);
+		if (UNEXPECTED(offset_repr != NULL)) {
+			zend_error(E_WARNING, "Illegal string offset %s", ZSTR_VAL(offset_repr));
+			zend_string_release(offset_repr);
+		} else {
+			zend_error(E_WARNING, "Illegal string offset " ZEND_LONG_FMT, offset);
+		}
 		if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 			ZVAL_NULL(EX_VAR(opline->result.var));
 		}
@@ -3245,7 +3268,13 @@ try_string_offset:
 
 		if (UNEXPECTED(ZSTR_LEN(str) < ((offset < 0) ? -(size_t)offset : ((size_t)offset + 1)))) {
 			if (type != BP_VAR_IS) {
-				zend_error(E_WARNING, "Uninitialized string offset " ZEND_LONG_FMT, offset);
+				zend_string *offset_repr = zend_string_offset_bigint_repr(dim);
+				if (UNEXPECTED(offset_repr != NULL)) {
+					zend_error(E_WARNING, "Uninitialized string offset %s", ZSTR_VAL(offset_repr));
+					zend_string_release(offset_repr);
+				} else {
+					zend_error(E_WARNING, "Uninitialized string offset " ZEND_LONG_FMT, offset);
+				}
 				ZVAL_EMPTY_STRING(result);
 			} else {
 				ZVAL_NULL(result);
