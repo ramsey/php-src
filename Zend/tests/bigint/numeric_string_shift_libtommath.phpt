@@ -1,8 +1,9 @@
 --TEST--
-Bigint: huge shift count errors with libtommath backend
+Bigint: with no memory limit, a huge shift count errors with the libtommath backend
 --SKIPIF--
 <?php if (zend_test_bigint_backend() !== 'libtommath') die('skip libtommath backend only'); ?>
 --INI--
+memory_limit=-1
 opcache.enable_cli=0
 --FILE--
 <?php

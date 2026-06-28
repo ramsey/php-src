@@ -1729,11 +1729,17 @@ ZEND_API bool zend_pow_result_exceeds_memory(const zval *base, zend_long exp, co
 	return est_bytes > (uint64_t) available;
 }
 
-ZEND_API bool zend_shift_left_result_exceeds_memory(const zval *op1, zend_long count)
+ZEND_API bool zend_shift_left_result_exceeds_memory(const zval *op1, zend_long count, const zend_bigint *count_big)
 {
 	uint64_t base_bits;
 
-	if (count <= 0 || !zend_bigint_can_shift_left(count)) {
+	/* With no memory limit, the engine never reports a memory error;
+	 * the bigint backend decides whether it can represent the count. */
+	if (zend_memory_limit_is_unlimited()) {
+		return false;
+	}
+
+	if (count_big == NULL && count <= 0) {
 		return false;
 	}
 
@@ -1751,9 +1757,15 @@ ZEND_API bool zend_shift_left_result_exceeds_memory(const zval *op1, zend_long c
 	}
 
 	/* The result spans bitlen(op1) + count bits; saturate the add so an
-	 * astronomical shift still compares as "too large". */
-	uint64_t count_u = (uint64_t) count;
-	uint64_t est_bits = (base_bits > UINT64_MAX - count_u) ? UINT64_MAX : base_bits + count_u;
+	 * astronomical shift still compares as "too large". A bigint count is far
+	 * beyond any representable result, so the estimate saturates outright. */
+	uint64_t est_bits;
+	if (count_big != NULL) {
+		est_bits = UINT64_MAX;
+	} else {
+		uint64_t count_u = (uint64_t) count;
+		est_bits = (base_bits > UINT64_MAX - count_u) ? UINT64_MAX : base_bits + count_u;
+	}
 
 	/* The estimated peak working set is roughly twice the result's packed size,
 	 * so we multiply by two to create an estimate. */
@@ -2940,46 +2952,42 @@ ZEND_API zend_result ZEND_FASTCALL bitwise_xor_function(zval *result, zval *op1,
 
 static zend_never_inline zend_result ZEND_FASTCALL shift_left_function_bigint(zval *result, zval *op1, zval *op2)
 {
-	/* op1 and op2 are already dereferenced and at least one is an IS_BIGINT. */
-	zend_long count;
+	zend_long count = 0;
+	const zend_bigint *count_big = NULL;
 
 	if (UNEXPECTED(Z_TYPE_P(op2) == IS_BIGINT)) {
-		/* A bigint shift count: negative is the usual error; a positive count is
-		 * astronomically beyond the backend's reach. */
 		if (zend_bigint_sign(Z_BIG_P(op2)) < 0) {
 			zend_throw_error(zend_ce_arithmetic_error, "Bit shift by negative number");
-		} else {
-			zend_throw_error(zend_ce_arithmetic_error,
-				"The libtommath bigint backend cannot shift left by more than %d bits", INT_MAX);
+			if (result != op1) {
+				ZVAL_UNDEF(result);
+			}
+			return FAILURE;
 		}
-		if (result != op1) {
-			ZVAL_UNDEF(result);
-		}
-		return FAILURE;
-	}
-
-	if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
-		count = Z_LVAL_P(op2);
+		count_big = Z_BIG_P(op2);
 	} else {
-		bool failed;
-		count = zendi_try_get_long(op2, &failed);
-		if (UNEXPECTED(failed)) {
-			zend_binop_error("<<", op1, op2);
+		if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
+			count = Z_LVAL_P(op2);
+		} else {
+			bool failed;
+			count = zendi_try_get_long(op2, &failed);
+			if (UNEXPECTED(failed)) {
+				zend_binop_error("<<", op1, op2);
+				if (result != op1) {
+					ZVAL_UNDEF(result);
+				}
+				return FAILURE;
+			}
+		}
+		if (UNEXPECTED(count < 0)) {
+			zend_throw_error(zend_ce_arithmetic_error, "Bit shift by negative number");
 			if (result != op1) {
 				ZVAL_UNDEF(result);
 			}
 			return FAILURE;
 		}
 	}
-	if (UNEXPECTED(count < 0)) {
-		zend_throw_error(zend_ce_arithmetic_error, "Bit shift by negative number");
-		if (result != op1) {
-			ZVAL_UNDEF(result);
-		}
-		return FAILURE;
-	}
 
-	if (UNEXPECTED(zend_shift_left_result_exceeds_memory(op1, count))) {
+	if (UNEXPECTED(zend_shift_left_result_exceeds_memory(op1, count, count_big))) {
 		zend_throw_error(zend_ce_arithmetic_error,
 			"Bit shift produces an integer too large to fit in the configured memory limit");
 		if (result != op1) {
@@ -2988,11 +2996,11 @@ static zend_never_inline zend_result ZEND_FASTCALL shift_left_function_bigint(zv
 		return FAILURE;
 	}
 
-	/* op1 is the bigint here: if it were a long, this helper was reached only
-	 * because op2 was a bigint, which already returned above. */
-	ZEND_ASSERT(Z_TYPE_P(op1) == IS_BIGINT);
 	zend_bigint *r = zend_bigint_init();
-	if (!zend_bigint_shift_left(r, Z_BIG_P(op1), count)) {
+	bool computed = (Z_TYPE_P(op1) == IS_BIGINT)
+		? zend_bigint_shift_left(r, Z_BIG_P(op1), count, count_big)
+		: zend_bigint_long_shift_left(r, Z_LVAL_P(op1), count, count_big);
+	if (!computed) {
 		zend_bigint_release(r);
 		if (result != op1) {
 			ZVAL_UNDEF(result);
@@ -3082,7 +3090,7 @@ ZEND_API zend_result ZEND_FASTCALL shift_left_function(zval *result, zval *op1, 
 	}
 	zval op1_long;
 	ZVAL_LONG(&op1_long, op1_lval);
-	if (UNEXPECTED(zend_shift_left_result_exceeds_memory(&op1_long, op2_lval))) {
+	if (UNEXPECTED(zend_shift_left_result_exceeds_memory(&op1_long, op2_lval, NULL))) {
 		zend_throw_error(zend_ce_arithmetic_error,
 			"Bit shift produces an integer too large to fit in the configured memory limit");
 		if (op1 != result) {
@@ -3091,7 +3099,7 @@ ZEND_API zend_result ZEND_FASTCALL shift_left_function(zval *result, zval *op1, 
 		return FAILURE;
 	}
 	zend_bigint *r = zend_bigint_init();
-	if (!zend_bigint_long_shift_left(r, op1_lval, op2_lval)) {
+	if (!zend_bigint_long_shift_left(r, op1_lval, op2_lval, NULL)) {
 		zend_bigint_release(r);
 		if (op1 != result) {
 			ZVAL_UNDEF(result);
@@ -3108,21 +3116,18 @@ ZEND_API zend_result ZEND_FASTCALL shift_left_function(zval *result, zval *op1, 
 
 static zend_never_inline zend_result ZEND_FASTCALL shift_right_function_bigint(zval *result, zval *op1, zval *op2)
 {
-	/* op1 and op2 are already dereferenced and at least one is an IS_BIGINT. A
-	 * right shift never grows: a count >= the operand's bit length (including any
-	 * bigint count, or a long count beyond the backend's reach) saturates to 0
-	 * (non-negative operand) or -1 (negative operand), so it never hits a
-	 * structural limit. */
 	zend_long count = 0;
-	bool count_saturates = false, count_negative = false;
+	const zend_bigint *count_big = NULL;
 
 	if (UNEXPECTED(Z_TYPE_P(op2) == IS_BIGINT)) {
-		/* A bigint count is never zero, so a positive one is astronomically large. */
 		if (zend_bigint_sign(Z_BIG_P(op2)) < 0) {
-			count_negative = true;
-		} else {
-			count_saturates = true;
+			zend_throw_error(zend_ce_arithmetic_error, "Bit shift by negative number");
+			if (result != op1) {
+				ZVAL_UNDEF(result);
+			}
+			return FAILURE;
 		}
+		count_big = Z_BIG_P(op2);
 	} else {
 		if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
 			count = Z_LVAL_P(op2);
@@ -3138,37 +3143,22 @@ static zend_never_inline zend_result ZEND_FASTCALL shift_right_function_bigint(z
 			}
 		}
 		if (count < 0) {
-			count_negative = true;
-		} else if (!zend_bigint_can_shift_left(count)) {
-			/* Same int reach as the left shift: a larger count saturates. */
-			count_saturates = true;
+			zend_throw_error(zend_ce_arithmetic_error, "Bit shift by negative number");
+			if (result != op1) {
+				ZVAL_UNDEF(result);
+			}
+			return FAILURE;
 		}
-	}
-
-	if (UNEXPECTED(count_negative)) {
-		zend_throw_error(zend_ce_arithmetic_error, "Bit shift by negative number");
-		if (result != op1) {
-			ZVAL_UNDEF(result);
-		}
-		return FAILURE;
 	}
 
 	if (Z_TYPE_P(op1) == IS_BIGINT) {
-		if (count_saturates) {
-			int sign = zend_bigint_sign(Z_BIG_P(op1));
-			zend_bigint_release_result_alias(result, op1, op2);
-			ZVAL_LONG(result, (sign < 0) ? -1 : 0);
-			return SUCCESS;
-		}
 		zend_bigint *r = zend_bigint_init();
-		zend_bigint_shift_right(r, Z_BIG_P(op1), count);
+		zend_bigint_shift_right(r, Z_BIG_P(op1), count, count_big);
 		zend_bigint_release_result_alias(result, op1, op2);
 		zend_bigint_result(result, r);
 		return SUCCESS;
 	}
 
-	/* op1 is not a bigint, so this helper was reached because op2 is a bigint:
-	 * the count is astronomically large and the result saturates to op1's sign. */
 	zend_long lval;
 	if (EXPECTED(Z_TYPE_P(op1) == IS_LONG)) {
 		lval = Z_LVAL_P(op1);

@@ -1,10 +1,11 @@
 --TEST--
-Bigint: a << count beyond the libtommath backend's reach throws a catchable ArithmeticError
+Bigint: with no memory limit, a << count beyond the backend's reach throws a catchable ArithmeticError
 --EXTENSIONS--
 zend_test
 --SKIPIF--
 <?php if (zend_test_bigint_backend() !== 'libtommath') die('skip libtommath backend only'); ?>
 --INI--
+memory_limit=-1
 opcache.enable_cli=0
 --FILE--
 <?php
@@ -15,6 +16,12 @@ $tooBig = 2147483648;   // 2^31, one past the C int max (2147483647) that bounds
 // compile-time fatal.
 try {
     var_dump(1 << 2147483648);
+} catch (ArithmeticError $e) {
+    echo $e->getMessage(), "\n";
+}
+
+try {
+    var_dump(1 << (2 ** 70));
 } catch (ArithmeticError $e) {
     echo $e->getMessage(), "\n";
 }
@@ -58,6 +65,7 @@ try {
 var_dump($x);
 ?>
 --EXPECT--
+The libtommath bigint backend cannot shift left by more than 2147483647 bits
 The libtommath bigint backend cannot shift left by more than 2147483647 bits
 The libtommath bigint backend cannot shift left by more than 2147483647 bits
 The libtommath bigint backend cannot shift left by more than 2147483647 bits

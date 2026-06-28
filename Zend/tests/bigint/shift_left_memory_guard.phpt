@@ -27,11 +27,21 @@ try {
     echo $e->getMessage() . "\n";
 }
 
+// A count past INT_MAX with a large result also exceeds the limit; the engine
+// reports it before the backend's representational limit can apply.
+$over = 2147483648;
+try {
+    $x = 1 << $over;
+} catch (ArithmeticError $e) {
+    echo $e->getMessage() . "\n";
+}
+
 $shift = 100;
 var_dump(1 << $shift);
 
 ?>
 --EXPECT--
+Bit shift produces an integer too large to fit in the configured memory limit
 Bit shift produces an integer too large to fit in the configured memory limit
 Bit shift produces an integer too large to fit in the configured memory limit
 int(1267650600228229401496703205376)

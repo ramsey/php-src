@@ -10571,9 +10571,21 @@ ZEND_API bool zend_binary_op_produces_error(uint32_t opcode, const zval *op1, co
 	}
 	if (opcode == ZEND_SL
 			&& Z_TYPE_P(op2) == IS_LONG && Z_LVAL_P(op2) > 0
-			&& zend_shift_left_result_exceeds_memory(op1, Z_LVAL_P(op2))) {
+			&& zend_shift_left_result_exceeds_memory(op1, Z_LVAL_P(op2), NULL)) {
 		/* A shift whose exact result cannot fit the memory limit throws an
 		 * ArithmeticError; defer the fold so it stays catchable at runtime. */
+		return 1;
+	}
+	if (opcode == ZEND_SL && Z_TYPE_P(op2) == IS_BIGINT && zend_bigint_sign(Z_BIG_P(op2)) > 0) {
+		/* A positive bigint shift count that is beyond the backend's reach or
+		 * exceeds memory throws an ArithmeticError; defer so it stays catchable
+		 * at runtime. */
+		return 1;
+	}
+	if (opcode == ZEND_SL && Z_TYPE_P(op2) == IS_STRING
+			&& is_numeric_string(Z_STRVAL_P(op2), Z_STRLEN_P(op2), NULL, NULL, 0) != IS_LONG) {
+		/* A numeric-string count that doesn't fit a long becomes a bigint count
+		 * at runtime; defer so any throw stays catchable. */
 		return 1;
 	}
 

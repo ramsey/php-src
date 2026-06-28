@@ -28,6 +28,12 @@ var_dump((-255) >> ($big64));
 var_dump(255 >> ($big32));
 var_dump((-255) >> ($big32));
 
+// A bigint operand shifted by a count beyond the backend's reach saturates, too.
+var_dump($big64 >> 2147483648);
+var_dump((-$big64) >> 2147483648);
+var_dump($big64 >> $big64);
+var_dump((-$big64) >> $big64);
+
 // Negative shift count throws.
 try {
     $r = $big64 >> -1;
@@ -45,6 +51,10 @@ int(9223372036854775808)
 int(4611686018427387904)
 int(2147483648)
 int(1073741824)
+int(0)
+int(-1)
+int(0)
+int(-1)
 int(0)
 int(-1)
 int(0)

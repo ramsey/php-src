@@ -213,9 +213,9 @@ ZEND_API bool zend_bigint_can_shift_left(zend_long bits)
 	return bits <= INT_MAX;
 }
 
-ZEND_API bool zend_bigint_shift_left(zend_bigint *out, const zend_bigint *op, zend_long bits)
+ZEND_API bool zend_bigint_shift_left(zend_bigint *out, const zend_bigint *op, zend_long bits, const zend_bigint *bits_big)
 {
-	if (!zend_bigint_can_shift_left(bits)) {
+	if (bits_big != NULL || !zend_bigint_can_shift_left(bits)) {
 		zend_throw_error(zend_ce_arithmetic_error,
 			"The libtommath bigint backend cannot shift left by more than %d bits", INT_MAX);
 		return false;
@@ -224,17 +224,25 @@ ZEND_API bool zend_bigint_shift_left(zend_bigint *out, const zend_bigint *op, ze
 	return true;
 }
 
-ZEND_API bool zend_bigint_long_shift_left(zend_bigint *out, zend_long op, zend_long bits)
+ZEND_API bool zend_bigint_long_shift_left(zend_bigint *out, zend_long op, zend_long bits, const zend_bigint *bits_big)
 {
 	mp_set_i64((mp_int *) out->mp, (int64_t) op);
-	return zend_bigint_shift_left(out, out, bits);
+	return zend_bigint_shift_left(out, out, bits, bits_big);
 }
 
-ZEND_API void zend_bigint_shift_right(zend_bigint *out, const zend_bigint *op, zend_long bits)
+ZEND_API void zend_bigint_shift_right(zend_bigint *out, const zend_bigint *op, zend_long bits, const zend_bigint *bits_big)
 {
-	/* mp_signed_rsh takes an int bit count; the engine saturates larger counts
-	 * to 0/-1 before reaching here, so the value always fits an int. */
-	ZEND_ASSERT(bits >= 0 && bits <= INT_MAX);
+	if (bits_big != NULL || bits > INT_MAX) {
+		/* The count shifts past every bit: an arithmetic right shift saturates
+		 * to 0 for a non-negative operand, -1 for a negative one. */
+		if (mp_isneg((const mp_int *) op->mp)) {
+			mp_set_i64((mp_int *) out->mp, -1);
+		} else {
+			mp_zero((mp_int *) out->mp);
+		}
+		return;
+	}
+	ZEND_ASSERT(bits >= 0);
 	mp_signed_rsh((const mp_int *) op->mp, (int) bits, (mp_int *) out->mp);
 }
 
