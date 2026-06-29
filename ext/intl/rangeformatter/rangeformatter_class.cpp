@@ -60,17 +60,24 @@ zend_object *IntlNumberRangeFormatter_object_create(zend_class_entry *ce)
     return &intern->zo;
 }
 
-static icu::Formattable rangeformatter_create_formattable(const zval *number)
+static bool rangeformatter_create_formattable(const zval *number, icu::Formattable &formattable, UErrorCode &error)
 {
-    icu::Formattable formattable;
-
     if (Z_TYPE_P(number) == IS_DOUBLE) {
         formattable.setDouble(Z_DVAL_P(number));
+    } else if (Z_TYPE_P(number) == IS_BIGINT) {
+        /* Preserve the exact value: hand ICU the decimal string instead of a lossy
+         * double. The conversion honors zend.int_string_max_digits (ValueError). */
+        zend_string *decimal = zend_bigint_to_string_checked(Z_BIG_P(number));
+        if (!decimal) {
+            return false;
+        }
+        formattable.setDecimalNumber(icu::StringPiece(ZSTR_VAL(decimal), (int32_t) ZSTR_LEN(decimal)), error);
+        zend_string_release(decimal);
     } else {
         formattable.setInt64(static_cast<int64_t>(Z_LVAL_P(number)));
     }
 
-    return formattable;
+    return true;
 }
 
 U_CFUNC PHP_METHOD(IntlNumberRangeFormatter, __construct)
@@ -161,14 +168,19 @@ U_CFUNC PHP_METHOD(IntlNumberRangeFormatter, format)
     IntlNumberRangeFormatter_object* obj = Z_INTL_RANGEFORMATTER_P(ZEND_THIS);
 
     ZEND_PARSE_PARAMETERS_START(2, 2)
-        Z_PARAM_NUMBER(start)
-        Z_PARAM_NUMBER(end)
+        Z_PARAM_INT_OR_FLOAT(start)
+        Z_PARAM_INT_OR_FLOAT(end)
     ZEND_PARSE_PARAMETERS_END();
 
     UErrorCode error = U_ZERO_ERROR;
 
-    icu::Formattable start_formattable = rangeformatter_create_formattable(start);
-    icu::Formattable end_formattable = rangeformatter_create_formattable(end);
+    icu::Formattable start_formattable;
+    icu::Formattable end_formattable;
+    if (!rangeformatter_create_formattable(start, start_formattable, error)
+            || !rangeformatter_create_formattable(end, end_formattable, error)) {
+        /* A bigint endpoint exceeded zend.int_string_max_digits; a ValueError is pending. */
+        RETURN_THROWS();
+    }
 
     UnicodeString result = RANGEFORMATTER_OBJECT(obj)->formatFormattableRange(start_formattable, end_formattable, error).toString(error);
 

@@ -768,13 +768,10 @@ ZEND_API bool ZEND_FASTCALL zend_parse_arg_number_slow(zval *arg, zval **dest, u
 		ZVAL_LONG(arg, 0);
 	} else if (Z_TYPE_P(arg) == IS_TRUE) {
 		ZVAL_LONG(arg, 1);
-	} else if (Z_TYPE_P(arg) == IS_BIGINT) {
-		/* Scaffolding until the builtin sweep: unmigrated consumers receive a double.
-		 * Remove after the sweep. */
-		zend_bigint *big = Z_BIG_P(arg);
-		ZVAL_DOUBLE(arg, zend_bigint_to_double(big));
-		zend_bigint_release(big);
 	} else {
+		/* A bigint reaches here, too. Z_PARAM_NUMBER is the legacy int|float
+		 * macro and is not bigint-aware. Use Z_PARAM_INT_OR_FLOAT for a value
+		 * that should accept a bigint at full precision. */
 		return 0;
 	}
 	*dest = arg;

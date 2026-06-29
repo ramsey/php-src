@@ -1922,7 +1922,9 @@ ZEND_API ZEND_COLD void zend_class_redeclaration_error_ex(int type, zend_string 
 #define Z_PARAM_LONG_OR_NULL(dest, is_null) \
 	Z_PARAM_LONG_EX(dest, is_null, 1, 0)
 
-/* old "n" */
+/* old "n" (int|float). Deprecated: not bigint-aware. A bigint argument is
+ * rejected with a TypeError. Use Z_PARAM_INT_OR_FLOAT for a value that should
+ * accept an out-of-int64 integer at full precision. */
 #define Z_PARAM_NUMBER_EX(dest, check_null) \
 	Z_PARAM_PROLOGUE(0, 0); \
 	if (UNEXPECTED(!zend_parse_arg_number(_arg, &dest, check_null, _i))) { \

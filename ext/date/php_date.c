@@ -2739,7 +2739,7 @@ PHP_METHOD(DateTime, createFromTimestamp)
 	php_date_obj *new_dateobj;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_NUMBER(value)
+		Z_PARAM_INT_OR_FLOAT(value)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (object_init_ex(&new_object, execute_data->This.value.ce ? execute_data->This.value.ce : date_ce_date) != SUCCESS) {
@@ -2754,6 +2754,15 @@ PHP_METHOD(DateTime, createFromTimestamp)
 
 		case IS_DOUBLE:
 			if (!php_date_initialize_from_ts_double(new_dateobj, Z_DVAL_P(value))) {
+				zval_ptr_dtor(&new_object);
+				RETURN_THROWS();
+			}
+			break;
+
+		case IS_BIGINT:
+			/* A bigint is always out of int64 seconds range; reuse the double
+			 * range check so it fails with the same DateRangeError. */
+			if (!php_date_initialize_from_ts_double(new_dateobj, zend_bigint_to_double(Z_BIG_P(value)))) {
 				zval_ptr_dtor(&new_object);
 				RETURN_THROWS();
 			}
@@ -2820,7 +2829,7 @@ PHP_METHOD(DateTimeImmutable, createFromTimestamp)
 	php_date_obj *new_dateobj;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_NUMBER(value)
+		Z_PARAM_INT_OR_FLOAT(value)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (object_init_ex(&new_object, execute_data->This.value.ce ? execute_data->This.value.ce : date_ce_immutable) != SUCCESS) {
@@ -2835,6 +2844,15 @@ PHP_METHOD(DateTimeImmutable, createFromTimestamp)
 
 		case IS_DOUBLE:
 			if (!php_date_initialize_from_ts_double(new_dateobj, Z_DVAL_P(value))) {
+				zval_ptr_dtor(&new_object);
+				RETURN_THROWS();
+			}
+			break;
+
+		case IS_BIGINT:
+			/* A bigint is always out of int64 seconds range; reuse the double
+			 * range check so it fails with the same DateRangeError. */
+			if (!php_date_initialize_from_ts_double(new_dateobj, zend_bigint_to_double(Z_BIG_P(value)))) {
 				zval_ptr_dtor(&new_object);
 				RETURN_THROWS();
 			}
