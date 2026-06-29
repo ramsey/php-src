@@ -2887,6 +2887,10 @@ try_again:
 			case IS_DOUBLE:
 				ZVAL_COPY_VALUE(&entry_tmp, entry);
 				break;
+			case IS_BIGINT:
+				/* A bigint is a scalar like a long, but refcounted, so take a reference. */
+				ZVAL_COPY(&entry_tmp, entry);
+				break;
 			case IS_ARRAY:
 				chash = php_mb_convert_encoding_recursive(
 					Z_ARRVAL_P(entry), to_encoding, from_encodings, num_from_encodings);
@@ -5754,6 +5758,7 @@ static bool php_mb_check_encoding_recursive(HashTable *vars, const mbfl_encoding
 			case IS_NULL:
 			case IS_TRUE:
 			case IS_FALSE:
+			case IS_BIGINT:
 				break;
 			default:
 				/* Other types are error. */

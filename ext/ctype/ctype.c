@@ -72,6 +72,15 @@ static zend_never_inline void ctype_fallback(zval *c, zval *return_value, int (*
 		} else {
 			RETURN_BOOL(allow_minus);
 		}
+	} else if (Z_TYPE_P(c) == IS_BIGINT) {
+		/* A bigint is always outside the single-byte range, so it matches a large
+		 * long of the same sign: its decimal string is all digits, optionally with
+		 * a leading minus. */
+		if (zend_bigint_sign(Z_BIG_P(c)) >= 0) {
+			RETURN_BOOL(allow_digits);
+		} else {
+			RETURN_BOOL(allow_minus);
+		}
 	} else {
 		RETURN_FALSE;
 	}
