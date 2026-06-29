@@ -378,6 +378,12 @@ PHP_FUNCTION(msg_send)
 			case IS_LONG:
 				message_len = spprintf(&p, 0, ZEND_LONG_FMT, Z_LVAL_P(message));
 				break;
+			case IS_BIGINT: {
+				zend_string *tmp = zend_bigint_to_str(Z_BIG_P(message));
+				message_len = spprintf(&p, 0, "%s", ZSTR_VAL(tmp));
+				zend_string_release(tmp);
+				break;
+			}
 			case IS_FALSE:
 				p = "0";
 				message_len = 1;
@@ -398,7 +404,7 @@ PHP_FUNCTION(msg_send)
 		messagebuffer = safe_emalloc(message_len, 1, sizeof(struct php_msgbuf));
 		memcpy(messagebuffer->mtext, p, message_len + 1);
 
-		if (Z_TYPE_P(message) == IS_LONG || Z_TYPE_P(message) == IS_DOUBLE) {
+		if (Z_TYPE_P(message) == IS_LONG || Z_TYPE_P(message) == IS_DOUBLE || Z_TYPE_P(message) == IS_BIGINT) {
 			efree(p);
 		}
 	}
