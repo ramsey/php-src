@@ -39,4 +39,4 @@ var_dump(filter_var('0x'.$s, FILTER_VALIDATE_INT, array("flags"=>FILTER_FLAG_ALL
 bool(true)
 bool(true)
 bool(true)
-bool(false)
+int(18446744073709551616)

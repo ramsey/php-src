@@ -92,9 +92,12 @@
 
 static bool _php_filter_validate_ipv6(const char *str, size_t str_len, int ip[8]);
 
-static bool php_filter_parse_int(const char *str, size_t str_len, zend_long *ret) { /* {{{ */
+static bool php_filter_parse_int(const char *str, size_t str_len, zend_long *ret, zend_bigint **big) { /* {{{ */
+	const char *orig_str = str;
+	size_t orig_len = str_len;
 	zend_long ctx_value;
 	bool is_negative = false;
+	bool overflow = false;
 	int digit = 0;
 	const char *end = str + str_len;
 
@@ -110,6 +113,7 @@ static bool php_filter_parse_int(const char *str, size_t str_len, zend_long *ret
 
 	if (*str == '0' && str + 1 == end) {
 		/* Special cases: +0 and -0 */
+		*ret = 0;
 		return true;
 	}
 
@@ -120,25 +124,42 @@ static bool php_filter_parse_int(const char *str, size_t str_len, zend_long *ret
 		return false;
 	}
 
-	if ((end - str > MAX_LENGTH_OF_LONG - 1) /* number too long */
-	 || (SIZEOF_LONG == 4 && (end - str == MAX_LENGTH_OF_LONG - 1) && *str > '2')) {
-		/* overflow */
-		return false;
-	}
-
 	while (str < end) {
-		if (*str >= '0' && *str <= '9') {
-			digit = (*(str++) - '0');
-			if ( (!is_negative) && ctx_value <= (ZEND_LONG_MAX-digit)/10 ) {
-				ctx_value = (ctx_value * 10) + digit;
-			} else if ( is_negative && ctx_value >= (ZEND_LONG_MIN+digit)/10) {
-				ctx_value = (ctx_value * 10) - digit;
-			} else {
-				return false;
-			}
-		} else {
+		if (*str < '0' || *str > '9') {
 			return false;
 		}
+		digit = (*(str++) - '0');
+		if (overflow) {
+			continue;
+		}
+		if ( (!is_negative) && ctx_value <= (ZEND_LONG_MAX-digit)/10 ) {
+			ctx_value = (ctx_value * 10) + digit;
+		} else if ( is_negative && ctx_value >= (ZEND_LONG_MIN+digit)/10) {
+			ctx_value = (ctx_value * 10) - digit;
+		} else {
+			overflow = true;
+		}
+	}
+
+	if (overflow) {
+		/* The validated decimal is out of zend_long range; keep it exactly as a
+		 * bigint. Bound the O(n^2) build by zend.int_string_max_digits (0 = unlimited)
+		 * so untrusted input can't turn validation into a compute-DoS. */
+		const char *digits = orig_str;
+		size_t digits_len = orig_len;
+		if (*digits == '+' || *digits == '-') {
+			digits++;
+			digits_len--;
+		}
+		zend_long limit = EG(int_string_max_digits);
+		if (limit != 0 && digits_len > (size_t) limit) {
+			return false;
+		}
+		*big = zend_bigint_init_from_string_length(digits, digits_len, 10);
+		if (is_negative) {
+			zend_bigint_long_sub(*big, 0, *big);
+		}
+		return true;
 	}
 
 	*ret = ctx_value;
@@ -146,22 +167,37 @@ static bool php_filter_parse_int(const char *str, size_t str_len, zend_long *ret
 }
 /* }}} */
 
-static bool php_filter_parse_octal(const char *str, size_t str_len, zend_long *ret) { /* {{{ */
+static bool php_filter_parse_octal(const char *str, size_t str_len, zend_long *ret, zend_bigint **big) { /* {{{ */
 	zend_ulong ctx_value = 0;
+	const char *orig_str = str;
 	const char *end = str + str_len;
+	bool overflow = false;
 
 	while (str < end) {
-		if (*str >= '0' && *str <= '7') {
-			zend_ulong n = ((*(str++)) - '0');
-
-			if ((ctx_value > ((zend_ulong)(~(zend_long)0)) / 8) ||
-				((ctx_value = ctx_value * 8) > ((zend_ulong)(~(zend_long)0)) - n)) {
-				return false;
-			}
-			ctx_value += n;
-		} else {
+		if (*str < '0' || *str > '7') {
 			return false;
 		}
+		zend_ulong n = ((*(str++)) - '0');
+		if (overflow) {
+			continue;
+		}
+		/* Keep the magnitude within positive zend_long range; above it, build the
+		 * exact value as a bigint (the caller applies any sign). */
+		if ((ctx_value > ((zend_ulong)ZEND_LONG_MAX) / 8) ||
+			((ctx_value = ctx_value * 8) > ((zend_ulong)ZEND_LONG_MAX) - n)) {
+			overflow = true;
+		} else {
+			ctx_value += n;
+		}
+	}
+
+	if (overflow) {
+		zend_long limit = EG(int_string_max_digits);
+		if (limit != 0 && str_len > (size_t) limit) {
+			return false;
+		}
+		*big = zend_bigint_init_from_string_length(orig_str, str_len, 8);
+		return true;
 	}
 
 	*ret = (zend_long)ctx_value;
@@ -169,10 +205,12 @@ static bool php_filter_parse_octal(const char *str, size_t str_len, zend_long *r
 }
 /* }}} */
 
-static bool php_filter_parse_hex(const char *str, size_t str_len, zend_long *ret) { /* {{{ */
+static bool php_filter_parse_hex(const char *str, size_t str_len, zend_long *ret, zend_bigint **big) { /* {{{ */
 	zend_ulong ctx_value = 0;
+	const char *orig_str = str;
 	const char *end = str + str_len;
 	zend_ulong n;
+	bool overflow = false;
 
 	while (str < end) {
 		if (*str >= '0' && *str <= '9') {
@@ -184,11 +222,24 @@ static bool php_filter_parse_hex(const char *str, size_t str_len, zend_long *ret
 		} else {
 			return false;
 		}
-		if ((ctx_value > ((zend_ulong)(~(zend_long)0)) / 16) ||
-			((ctx_value = ctx_value * 16) > ((zend_ulong)(~(zend_long)0)) - n)) {
+		if (overflow) {
+			continue;
+		}
+		if ((ctx_value > ((zend_ulong)ZEND_LONG_MAX) / 16) ||
+			((ctx_value = ctx_value * 16) > ((zend_ulong)ZEND_LONG_MAX) - n)) {
+			overflow = true;
+		} else {
+			ctx_value += n;
+		}
+	}
+
+	if (overflow) {
+		zend_long limit = EG(int_string_max_digits);
+		if (limit != 0 && str_len > (size_t) limit) {
 			return false;
 		}
-		ctx_value += n;
+		*big = zend_bigint_init_from_string_length(orig_str, str_len, 16);
+		return true;
 	}
 
 	*ret = (zend_long)ctx_value;
@@ -198,18 +249,20 @@ static bool php_filter_parse_hex(const char *str, size_t str_len, zend_long *ret
 
 zend_result php_filter_int(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 {
-	zval *option_val;
-	zend_long  min_range, max_range, option_flags;
-	int   min_range_set, max_range_set;
+	zval *min_range = NULL, *max_range = NULL;
+	zend_long  option_flags;
 	bool allow_octal = false, allow_hex = false;
 	size_t	  len;
 	bool error = false, is_negative = false;
-	zend_long  ctx_value;
+	zend_long  ctx_value = 0;
+	zend_bigint *big = NULL;
 	const char *p;
 
-	/* Parse options */
-	FETCH_LONG_OPTION(min_range,    "min_range");
-	FETCH_LONG_OPTION(max_range,    "max_range");
+	/* Range bounds are compared as values (zend_compare), so a bigint bound works too. */
+	if (option_array) {
+		min_range = zend_hash_str_find_deref(Z_ARRVAL_P(option_array), "min_range", sizeof("min_range") - 1);
+		max_range = zend_hash_str_find_deref(Z_ARRVAL_P(option_array), "max_range", sizeof("max_range") - 1);
+	}
 	option_flags = flags;
 
 	len = Z_STRLEN_P(value);
@@ -228,7 +281,6 @@ zend_result php_filter_int(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 
 	/* Start the validating loop */
 	p = Z_STRVAL_P(value);
-	ctx_value = 0;
 
 	PHP_FILTER_TRIM_DEFAULT(p, len);
 
@@ -250,7 +302,7 @@ zend_result php_filter_int(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 			if (len == 0) {
 				RETURN_VALIDATION_FAILED
 			}
-			if (!php_filter_parse_hex(p, len, &ctx_value)) {
+			if (!php_filter_parse_hex(p, len, &ctx_value, &big)) {
 				error = true;
 			}
 		} else if (allow_octal) {
@@ -261,27 +313,45 @@ zend_result php_filter_int(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 					RETURN_VALIDATION_FAILED
 				}
 			}
-			if (!php_filter_parse_octal(p, len, &ctx_value)) {
+			if (!php_filter_parse_octal(p, len, &ctx_value, &big)) {
 				error = true;
 			}
 		} else if (len != 0) {
 			error = true;
 		}
 		if (is_negative && !error) {
-			ctx_value = (zend_long) (0 - (zend_ulong) ctx_value);
+			if (big) {
+				zend_bigint_long_sub(big, 0, big);
+			} else {
+				ctx_value = (zend_long) (0 - (zend_ulong) ctx_value);
+			}
 		}
 	} else {
-		if (!php_filter_parse_int(p, len, &ctx_value)) {
+		if (!php_filter_parse_int(p, len, &ctx_value, &big)) {
 			error = true;
 		}
 	}
 
-	if (error || (min_range_set && (ctx_value < min_range)) || (max_range_set && (ctx_value > max_range))) {
+	if (error) {
 		RETURN_VALIDATION_FAILED
-	} else {
-		zval_ptr_dtor(value);
-		ZVAL_LONG(value, ctx_value);
 	}
+
+	/* A bigint result demotes back to a long if it fits (e.g. -2**63). */
+	zval result;
+	if (big) {
+		zend_bigint_result(&result, big);
+	} else {
+		ZVAL_LONG(&result, ctx_value);
+	}
+
+	if ((min_range && zend_compare(&result, min_range) < 0) ||
+		(max_range && zend_compare(&result, max_range) > 0)) {
+		zval_ptr_dtor(&result);
+		RETURN_VALIDATION_FAILED
+	}
+
+	zval_ptr_dtor(value);
+	ZVAL_COPY_VALUE(value, &result);
 	return SUCCESS;
 }
 /* }}} */
@@ -1119,10 +1189,13 @@ zend_result php_filter_validate_mac(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 			/* The current token did not end with e.g. a "." */
 			RETURN_VALIDATION_FAILED
 		}
-		if (!php_filter_parse_hex(input + offset, length, &ret)) {
+		zend_bigint *token_big = NULL;
+		if (!php_filter_parse_hex(input + offset, length, &ret, &token_big)) {
 			/* The current token is no valid hexadecimal digit */
 			RETURN_VALIDATION_FAILED
 		}
+		/* A MAC token is a single byte, so it never overflows into a bigint. */
+		ZEND_ASSERT(token_big == NULL);
 	}
 	return SUCCESS;
 }
