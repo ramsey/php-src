@@ -12,11 +12,7 @@ try {
 }
 var_dump(gmp_strval(gmp_abs("0")));
 var_dump(gmp_strval(gmp_abs(0)));
-try {
-    var_dump(gmp_strval(gmp_abs(-111111111111111111111))); // This is a float
-} catch (\TypeError $e) {
-    echo $e->getMessage() . \PHP_EOL;
-}
+var_dump(gmp_strval(gmp_abs(-111111111111111111111))); // This is a bigint
 var_dump(gmp_strval(gmp_abs("111111111111111111111")));
 var_dump(gmp_strval(gmp_abs("-111111111111111111111")));
 var_dump(gmp_strval(gmp_abs("0000")));
@@ -47,7 +43,7 @@ echo "Done\n";
 gmp_abs(): Argument #1 ($num) is not an integer string
 string(1) "0"
 string(1) "0"
-gmp_abs(): Argument #1 ($num) must be of type GMP|string|int, float given
+string(21) "111111111111111111111"
 string(21) "111111111111111111111"
 string(21) "111111111111111111111"
 string(1) "0"

@@ -131,6 +131,17 @@ static bool gmp_zend_parse_arg_into_mpz_ex(
 		return true;
 	}
 
+	if (Z_TYPE_P(arg) == IS_BIGINT) {
+		/* GMP natively holds arbitrary integers, so a bigint converts
+		 * losslessly via its decimal string (a value conversion, not display,
+		 * so no int_string_max_digits limit applies). */
+		zend_string *decimal = zend_bigint_to_str(Z_BIG_P(arg));
+		int failed = mpz_set_str(*destination_mpz_ptr, ZSTR_VAL(decimal), 10);
+		zend_string_release(decimal);
+		ZEND_ASSERT(failed == 0);
+		return true;
+	}
+
 	/* This function is also used by the do_operation object hook,
 	 * but operator overloading with objects should behave as if a
 	 * method was called, thus strict types should apply. */
