@@ -34,7 +34,7 @@ U_CFUNC PHP_FUNCTION( numfmt_format )
 	FORMATTER_METHOD_INIT_VARS;
 
 	/* Parse parameters. */
-	if( zend_parse_method_parameters( ZEND_NUM_ARGS(), getThis(), "On|l",
+	if( zend_parse_method_parameters( ZEND_NUM_ARGS(), getThis(), "Oz|l",
 		&object, NumberFormatter_ce_ptr,  &number, &type ) == FAILURE )
 	{
 		RETURN_THROWS();
@@ -42,6 +42,33 @@ U_CFUNC PHP_FUNCTION( numfmt_format )
 
 	/* Fetch the object. */
 	FORMATTER_METHOD_FETCH_OBJECT;
+
+	if (Z_TYPE_P(number) == IS_BIGINT) {
+		/* Format an out-of-int64 value exactly by handing ICU its decimal string
+		 * (honors zend.int_string_max_digits), not a lossy double or truncated int. */
+		zend_string *decimal = zend_bigint_to_string_checked(Z_BIG_P(number));
+		if (UNEXPECTED(!decimal)) {
+			RETURN_THROWS();
+		}
+		icu::UnicodeString bigint_result;
+		icu::FieldPosition bigint_pos;
+		icu::Formattable formattable;
+		formattable.setDecimalNumber(icu::StringPiece(ZSTR_VAL(decimal), (int32_t) ZSTR_LEN(decimal)), INTL_DATA_ERROR_CODE(nfo));
+		zend_string_release(decimal);
+		INTL_METHOD_CHECK_STATUS(nfo, "Number formatting failed");
+		FORMATTER_OBJECT(nfo)->format(formattable, bigint_result, bigint_pos, INTL_DATA_ERROR_CODE(nfo));
+		INTL_METHOD_CHECK_STATUS(nfo, "Number formatting failed");
+		zend_string *bigint_u8str = intl_charFromString(bigint_result, &INTL_DATA_ERROR_CODE(nfo));
+		INTL_METHOD_CHECK_STATUS(nfo, "Error converting result to UTF-8");
+		RETURN_STR(bigint_u8str);
+	}
+
+	/* The "z" spec accepts a bigint (handled above); apply the int|float
+	 * coercion the legacy "n" spec did for every other type. */
+	if (UNEXPECTED(!zend_parse_arg_number(number, &number, /* check_null */ false, getThis() ? 1 : 2))) {
+		zend_argument_type_error(getThis() ? 1 : 2, "must be of type int|float, %s given", zend_zval_value_name(number));
+		RETURN_THROWS();
+	}
 
 	if(type == FORMAT_TYPE_DEFAULT) {
 		switch(Z_TYPE_P(number)) {

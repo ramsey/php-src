@@ -31,5 +31,3 @@ string(13) "Europe/Berlin"
 int(%d)
 string(19) "America/Los_Angeles"
 IntlDateFormatter::parseToCalendar(): Argument #2 ($offset) must be of type int, string given
-
-Warning: The float %r(1\.4757395258967641E\+20|34359738352)%r is not representable as an int, cast occurred in %s on line %d
