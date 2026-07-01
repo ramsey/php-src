@@ -1196,7 +1196,7 @@ static zend_always_inline bcmath_number_obj_t *bcmath_number_new_obj(bc_num ret,
 	return intern;
 }
 
-static zend_result bcmath_number_parse_num(const zval *zv, zend_object **obj, zend_string **str, zend_long *lval)
+static zend_result bcmath_number_parse_num(const zval *zv, zend_object **obj, zend_string **str, const zend_bigint **big, zend_long *lval)
 {
 	if (Z_TYPE_P(zv) == IS_OBJECT && instanceof_function(Z_OBJCE_P(zv), bcmath_number_ce)) {
 		*obj = Z_OBJ_P(zv);
@@ -1205,6 +1205,10 @@ static zend_result bcmath_number_parse_num(const zval *zv, zend_object **obj, ze
 		switch (Z_TYPE_P(zv)) {
 			case IS_LONG:
 				*lval = Z_LVAL_P(zv);
+				return SUCCESS;
+
+			case IS_BIGINT:
+				*big = Z_BIG_P(zv);
 				return SUCCESS;
 
 			case IS_STRING:
@@ -1222,7 +1226,7 @@ static zend_result bcmath_number_parse_num(const zval *zv, zend_object **obj, ze
 }
 
 static zend_result bc_num_from_obj_or_str_or_long(
-	bc_num *num, size_t *full_scale, const zend_object *obj, const zend_string *str, zend_long lval)
+	bc_num *num, size_t *full_scale, const zend_object *obj, const zend_string *str, const zend_bigint *big, zend_long lval)
 {
 	if (obj) {
 		const bcmath_number_obj_t *intern = get_bcmath_number_from_obj(obj);
@@ -1233,6 +1237,14 @@ static zend_result bc_num_from_obj_or_str_or_long(
 		return SUCCESS;
 	} else if (str) {
 		return php_str2num_ex(num, str, full_scale);
+	} else if (big) {
+		zend_string *tmp = zend_bigint_to_string_checked(big);
+		if (UNEXPECTED(tmp == NULL)) {
+			return FAILURE;
+		}
+		zend_result result = php_str2num_ex(num, tmp, full_scale);
+		zend_string_release(tmp);
+		return result;
 	} else {
 		php_long2num(num, lval);
 		if (full_scale) {
@@ -1258,13 +1270,15 @@ static zend_result bcmath_number_do_operation(uint8_t opcode, zval *ret_val, zva
 
 	zend_object *obj1 = NULL;
 	zend_string *str1 = NULL;
+	const zend_bigint *big1 = NULL;
 	zend_long lval1 = 0;
 
 	zend_object *obj2 = NULL;
 	zend_string *str2 = NULL;
+	const zend_bigint *big2 = NULL;
 	zend_long lval2 = 0;
 
-	if (UNEXPECTED(bcmath_number_parse_num(op1, &obj1, &str1, &lval1) == FAILURE || bcmath_number_parse_num(op2, &obj2, &str2, &lval2) == FAILURE)) {
+	if (UNEXPECTED(bcmath_number_parse_num(op1, &obj1, &str1, &big1, &lval1) == FAILURE || bcmath_number_parse_num(op2, &obj2, &str2, &big2, &lval2) == FAILURE)) {
 		return FAILURE;
 	}
 
@@ -1272,12 +1286,16 @@ static zend_result bcmath_number_do_operation(uint8_t opcode, zval *ret_val, zva
 	bc_num n2 = NULL;
 	size_t n1_full_scale;
 	size_t n2_full_scale;
-	if (UNEXPECTED(bc_num_from_obj_or_str_or_long(&n1, &n1_full_scale, obj1, str1, lval1) == FAILURE)) {
-		zend_value_error("Left string operand cannot be converted to BcMath\\Number");
+	if (UNEXPECTED(bc_num_from_obj_or_str_or_long(&n1, &n1_full_scale, obj1, str1, big1, lval1) == FAILURE)) {
+		if (!EG(exception)) {
+			zend_value_error("Left string operand cannot be converted to BcMath\\Number");
+		}
 		goto fail;
 	}
-	if (UNEXPECTED(bc_num_from_obj_or_str_or_long(&n2, &n2_full_scale, obj2, str2, lval2) == FAILURE)) {
-		zend_value_error("Right string operand cannot be converted to BcMath\\Number");
+	if (UNEXPECTED(bc_num_from_obj_or_str_or_long(&n2, &n2_full_scale, obj2, str2, big2, lval2) == FAILURE)) {
+		if (!EG(exception)) {
+			zend_value_error("Right string operand cannot be converted to BcMath\\Number");
+		}
 		goto fail;
 	}
 
@@ -1349,10 +1367,12 @@ static int bcmath_number_compare(zval *op1, zval *op2)
 {
 	zend_object *obj1 = NULL;
 	zend_string *str1 = NULL;
+	const zend_bigint *big1 = NULL;
 	zend_long lval1 = 0;
 
 	zend_object *obj2 = NULL;
 	zend_string *str2 = NULL;
+	const zend_bigint *big2 = NULL;
 	zend_long lval2 = 0;
 
 	bc_num n1 = NULL;
@@ -1360,18 +1380,18 @@ static int bcmath_number_compare(zval *op1, zval *op2)
 
 	int ret = ZEND_UNCOMPARABLE;
 
-	if (UNEXPECTED(bcmath_number_parse_num(op1, &obj1, &str1, &lval1) == FAILURE)) {
+	if (UNEXPECTED(bcmath_number_parse_num(op1, &obj1, &str1, &big1, &lval1) == FAILURE)) {
 		goto failure;
 	}
 
-	if (UNEXPECTED(bcmath_number_parse_num(op2, &obj2, &str2, &lval2) == FAILURE)) {
+	if (UNEXPECTED(bcmath_number_parse_num(op2, &obj2, &str2, &big2, &lval2) == FAILURE)) {
 		goto failure;
 	}
 
 	size_t n1_full_scale;
 	size_t n2_full_scale;
-	if (UNEXPECTED(bc_num_from_obj_or_str_or_long(&n1, &n1_full_scale, obj1, str1, lval1) == FAILURE ||
-		bc_num_from_obj_or_str_or_long(&n2, &n2_full_scale, obj2, str2, lval2) == FAILURE)) {
+	if (UNEXPECTED(bc_num_from_obj_or_str_or_long(&n1, &n1_full_scale, obj1, str1, big1, lval1) == FAILURE ||
+		bc_num_from_obj_or_str_or_long(&n2, &n2_full_scale, obj2, str2, big2, lval2) == FAILURE)) {
 		goto failure;
 	}
 
@@ -1404,11 +1424,13 @@ failure:
  	}
 
 static zend_always_inline zend_result bc_num_from_obj_or_str_or_long_with_err(
-	bc_num *num, size_t *scale, const zend_object *obj, const zend_string *str, zend_long lval, uint32_t arg_num)
+	bc_num *num, size_t *scale, const zend_object *obj, const zend_string *str, const zend_bigint *big, zend_long lval, uint32_t arg_num)
 {
 	size_t full_scale = 0;
-	if (UNEXPECTED(bc_num_from_obj_or_str_or_long(num, &full_scale, obj, str, lval) == FAILURE)) {
-		zend_argument_value_error(arg_num, "is not well-formed");
+	if (UNEXPECTED(bc_num_from_obj_or_str_or_long(num, &full_scale, obj, str, big, lval) == FAILURE)) {
+		if (!EG(exception)) {
+			zend_argument_value_error(arg_num, "is not well-formed");
+		}
 		return FAILURE;
 	}
 	if (UNEXPECTED(CHECK_SCALE_OVERFLOW(full_scale))) {
@@ -1438,7 +1460,7 @@ PHP_METHOD(BcMath_Number, __construct)
 
 	bc_num num = NULL;
 	size_t scale = 0;
-	if (bc_num_from_obj_or_str_or_long_with_err(&num, &scale, NULL, str, lval, 1) == FAILURE) {
+	if (bc_num_from_obj_or_str_or_long_with_err(&num, &scale, NULL, str, NULL, lval, 1) == FAILURE) {
 		bc_free_num(&num);
 		RETURN_THROWS();
 	}
@@ -1463,7 +1485,7 @@ static void bcmath_number_calc_method(INTERNAL_FUNCTION_PARAMETERS, uint8_t opco
 
 	bc_num num = NULL;
 	size_t num_full_scale = 0;
-	if (bc_num_from_obj_or_str_or_long_with_err(&num, &num_full_scale, num_obj, num_str, num_lval, 1) == FAILURE) {
+	if (bc_num_from_obj_or_str_or_long_with_err(&num, &num_full_scale, num_obj, num_str, NULL, num_lval, 1) == FAILURE) {
 		goto fail;
 	}
 	if (bcmath_check_scale(scale_lval, 2) == FAILURE) {
@@ -1564,7 +1586,7 @@ PHP_METHOD(BcMath_Number, divmod)
 
 	bc_num num = NULL;
 	size_t num_full_scale;
-	if (bc_num_from_obj_or_str_or_long_with_err(&num, &num_full_scale, num_obj, num_str, num_lval, 1) == FAILURE) {
+	if (bc_num_from_obj_or_str_or_long_with_err(&num, &num_full_scale, num_obj, num_str, NULL, num_lval, 1) == FAILURE) {
 		goto fail;
 	}
 	if (bcmath_check_scale(scale_lval, 2) == FAILURE) {
@@ -1629,10 +1651,10 @@ PHP_METHOD(BcMath_Number, powmod)
 
 	bc_num exponent_num = NULL;
 	bc_num modulus_num = NULL;
-	if (bc_num_from_obj_or_str_or_long_with_err(&exponent_num, NULL, exponent_obj, exponent_str, exponent_lval, 1) == FAILURE) {
+	if (bc_num_from_obj_or_str_or_long_with_err(&exponent_num, NULL, exponent_obj, exponent_str, NULL, exponent_lval, 1) == FAILURE) {
 		goto cleanup;
 	}
-	if (bc_num_from_obj_or_str_or_long_with_err(&modulus_num, NULL, modulus_obj, modulus_str, modulus_lval, 2) == FAILURE) {
+	if (bc_num_from_obj_or_str_or_long_with_err(&modulus_num, NULL, modulus_obj, modulus_str, NULL, modulus_lval, 2) == FAILURE) {
 		goto cleanup;
 	}
 	if (bcmath_check_scale(scale_lval, 3) == FAILURE) {
@@ -1747,7 +1769,7 @@ PHP_METHOD(BcMath_Number, compare)
 
 	bc_num num = NULL;
 	size_t num_full_scale = 0;
-	if (bc_num_from_obj_or_str_or_long_with_err(&num, &num_full_scale, num_obj, num_str, num_lval, 1) == FAILURE) {
+	if (bc_num_from_obj_or_str_or_long_with_err(&num, &num_full_scale, num_obj, num_str, NULL, num_lval, 1) == FAILURE) {
 		goto fail;
 	}
 	if (bcmath_check_scale(scale_lval, 2) == FAILURE) {
