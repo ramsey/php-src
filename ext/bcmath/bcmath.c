@@ -1413,9 +1413,11 @@ failure:
 	return ret;
 }
 
-#define BCMATH_PARAM_NUMBER_OR_STR_OR_LONG(dest_obj, ce, dest_str, dest_long) \
+#define BCMATH_PARAM_NUMBER_OR_STR_OR_LONG(dest_obj, ce, dest_str, dest_big, dest_long) \
 	Z_PARAM_PROLOGUE(0, 0); \
-	if (UNEXPECTED(!(zend_parse_arg_obj(_arg, &(dest_obj), ce, 0) || \
+	if (Z_TYPE_P(_arg) == IS_BIGINT) { \
+		(dest_big) = Z_BIG_P(_arg); \
+	} else if (UNEXPECTED(!(zend_parse_arg_obj(_arg, &(dest_obj), ce, 0) || \
 		zend_parse_arg_str_or_long(_arg, &(dest_str), &(dest_long), &_dummy, 0, _i)))) { \
 		zend_argument_type_error(_i, "must be of type int, string, or %s, %s given", \
 			ZSTR_VAL(bcmath_number_ce->name), zend_zval_value_name(_arg));             \
@@ -1484,19 +1486,20 @@ static void bcmath_number_calc_method(INTERNAL_FUNCTION_PARAMETERS, uint8_t opco
 {
 	zend_object *num_obj = NULL;
 	zend_string *num_str = NULL;
+	const zend_bigint *num_big = NULL;
 	zend_long num_lval = 0;
 	zend_long scale_lval = 0;
 	bool scale_is_null = true;
 
 	ZEND_PARSE_PARAMETERS_START(1, 2)
-		BCMATH_PARAM_NUMBER_OR_STR_OR_LONG(num_obj, bcmath_number_ce, num_str, num_lval);
+		BCMATH_PARAM_NUMBER_OR_STR_OR_LONG(num_obj, bcmath_number_ce, num_str, num_big, num_lval);
 		Z_PARAM_OPTIONAL
 		Z_PARAM_LONG_OR_NULL(scale_lval, scale_is_null);
 	ZEND_PARSE_PARAMETERS_END();
 
 	bc_num num = NULL;
 	size_t num_full_scale = 0;
-	if (bc_num_from_obj_or_str_or_long_with_err(&num, &num_full_scale, num_obj, num_str, NULL, num_lval, 1) == FAILURE) {
+	if (bc_num_from_obj_or_str_or_long_with_err(&num, &num_full_scale, num_obj, num_str, num_big, num_lval, 1) == FAILURE) {
 		goto fail;
 	}
 	if (bcmath_check_scale(scale_lval, 2) == FAILURE) {
@@ -1585,19 +1588,20 @@ PHP_METHOD(BcMath_Number, divmod)
 {
 	zend_object *num_obj = NULL;
 	zend_string *num_str = NULL;
+	const zend_bigint *num_big = NULL;
 	zend_long num_lval = 0;
 	zend_long scale_lval = 0;
 	bool scale_is_null = true;
 
 	ZEND_PARSE_PARAMETERS_START(1, 2)
-		BCMATH_PARAM_NUMBER_OR_STR_OR_LONG(num_obj, bcmath_number_ce, num_str, num_lval);
+		BCMATH_PARAM_NUMBER_OR_STR_OR_LONG(num_obj, bcmath_number_ce, num_str, num_big, num_lval);
 		Z_PARAM_OPTIONAL
 		Z_PARAM_LONG_OR_NULL(scale_lval, scale_is_null);
 	ZEND_PARSE_PARAMETERS_END();
 
 	bc_num num = NULL;
 	size_t num_full_scale;
-	if (bc_num_from_obj_or_str_or_long_with_err(&num, &num_full_scale, num_obj, num_str, NULL, num_lval, 1) == FAILURE) {
+	if (bc_num_from_obj_or_str_or_long_with_err(&num, &num_full_scale, num_obj, num_str, num_big, num_lval, 1) == FAILURE) {
 		goto fail;
 	}
 	if (bcmath_check_scale(scale_lval, 2) == FAILURE) {
@@ -1644,28 +1648,30 @@ PHP_METHOD(BcMath_Number, powmod)
 {
 	zend_object *exponent_obj = NULL;
 	zend_string *exponent_str = NULL;
+	const zend_bigint *exponent_big = NULL;
 	zend_long exponent_lval = 0;
 
 	zend_object *modulus_obj = NULL;
 	zend_string *modulus_str = NULL;
+	const zend_bigint *modulus_big = NULL;
 	zend_long modulus_lval = 0;
 
 	zend_long scale_lval = 0;
 	bool scale_is_null = true;
 
 	ZEND_PARSE_PARAMETERS_START(2, 3)
-		BCMATH_PARAM_NUMBER_OR_STR_OR_LONG(exponent_obj, bcmath_number_ce, exponent_str, exponent_lval);
-		BCMATH_PARAM_NUMBER_OR_STR_OR_LONG(modulus_obj, bcmath_number_ce, modulus_str, modulus_lval);
+		BCMATH_PARAM_NUMBER_OR_STR_OR_LONG(exponent_obj, bcmath_number_ce, exponent_str, exponent_big, exponent_lval);
+		BCMATH_PARAM_NUMBER_OR_STR_OR_LONG(modulus_obj, bcmath_number_ce, modulus_str, modulus_big, modulus_lval);
 		Z_PARAM_OPTIONAL
 		Z_PARAM_LONG_OR_NULL(scale_lval, scale_is_null);
 	ZEND_PARSE_PARAMETERS_END();
 
 	bc_num exponent_num = NULL;
 	bc_num modulus_num = NULL;
-	if (bc_num_from_obj_or_str_or_long_with_err(&exponent_num, NULL, exponent_obj, exponent_str, NULL, exponent_lval, 1) == FAILURE) {
+	if (bc_num_from_obj_or_str_or_long_with_err(&exponent_num, NULL, exponent_obj, exponent_str, exponent_big, exponent_lval, 1) == FAILURE) {
 		goto cleanup;
 	}
-	if (bc_num_from_obj_or_str_or_long_with_err(&modulus_num, NULL, modulus_obj, modulus_str, NULL, modulus_lval, 2) == FAILURE) {
+	if (bc_num_from_obj_or_str_or_long_with_err(&modulus_num, NULL, modulus_obj, modulus_str, modulus_big, modulus_lval, 2) == FAILURE) {
 		goto cleanup;
 	}
 	if (bcmath_check_scale(scale_lval, 3) == FAILURE) {
@@ -1768,19 +1774,20 @@ PHP_METHOD(BcMath_Number, compare)
 {
 	zend_object *num_obj = NULL;
 	zend_string *num_str = NULL;
+	const zend_bigint *num_big = NULL;
 	zend_long num_lval = 0;
 	zend_long scale_lval = 0;
 	bool scale_is_null = true;
 
 	ZEND_PARSE_PARAMETERS_START(1, 2)
-		BCMATH_PARAM_NUMBER_OR_STR_OR_LONG(num_obj, bcmath_number_ce, num_str, num_lval);
+		BCMATH_PARAM_NUMBER_OR_STR_OR_LONG(num_obj, bcmath_number_ce, num_str, num_big, num_lval);
 		Z_PARAM_OPTIONAL
 		Z_PARAM_LONG_OR_NULL(scale_lval, scale_is_null);
 	ZEND_PARSE_PARAMETERS_END();
 
 	bc_num num = NULL;
 	size_t num_full_scale = 0;
-	if (bc_num_from_obj_or_str_or_long_with_err(&num, &num_full_scale, num_obj, num_str, NULL, num_lval, 1) == FAILURE) {
+	if (bc_num_from_obj_or_str_or_long_with_err(&num, &num_full_scale, num_obj, num_str, num_big, num_lval, 1) == FAILURE) {
 		goto fail;
 	}
 	if (bcmath_check_scale(scale_lval, 2) == FAILURE) {
