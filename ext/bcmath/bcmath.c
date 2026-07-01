@@ -1423,6 +1423,16 @@ failure:
  		break; \
  	}
 
+#define BCMATH_PARAM_STR_OR_LONG_OR_BIGINT(dest_str, dest_big, dest_long) \
+	Z_PARAM_PROLOGUE(0, 0); \
+	if (Z_TYPE_P(_arg) == IS_BIGINT) { \
+		(dest_big) = Z_BIG_P(_arg); \
+	} else if (UNEXPECTED(!zend_parse_arg_str_or_long(_arg, &(dest_str), &(dest_long), &_dummy, 0, _i))) { \
+		zend_argument_type_error(_i, "must be of type string|int, %s given", zend_zval_value_name(_arg)); \
+		_error_code = ZPP_ERROR_FAILURE; \
+		break; \
+	}
+
 static zend_always_inline zend_result bc_num_from_obj_or_str_or_long_with_err(
 	bc_num *num, size_t *scale, const zend_object *obj, const zend_string *str, const zend_bigint *big, zend_long lval, uint32_t arg_num)
 {
@@ -1446,10 +1456,11 @@ static zend_always_inline zend_result bc_num_from_obj_or_str_or_long_with_err(
 PHP_METHOD(BcMath_Number, __construct)
 {
 	zend_string *str = NULL;
+	const zend_bigint *big = NULL;
 	zend_long lval = 0;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_STR_OR_LONG(str, lval);
+		BCMATH_PARAM_STR_OR_LONG_OR_BIGINT(str, big, lval);
 	ZEND_PARSE_PARAMETERS_END();
 
 	bcmath_number_obj_t *intern = get_bcmath_number_from_zval(ZEND_THIS);
@@ -1460,7 +1471,7 @@ PHP_METHOD(BcMath_Number, __construct)
 
 	bc_num num = NULL;
 	size_t scale = 0;
-	if (bc_num_from_obj_or_str_or_long_with_err(&num, &scale, NULL, str, NULL, lval, 1) == FAILURE) {
+	if (bc_num_from_obj_or_str_or_long_with_err(&num, &scale, NULL, str, big, lval, 1) == FAILURE) {
 		bc_free_num(&num);
 		RETURN_THROWS();
 	}
