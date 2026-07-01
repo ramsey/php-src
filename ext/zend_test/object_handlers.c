@@ -41,39 +41,70 @@ static inline void donc_create(zval *target, zend_long l) /* {{{ */
 #define IS_DONC(zval) \
 	(Z_TYPE_P(zval) == IS_OBJECT && instanceof_function(Z_OBJCE_P(zval), donc_ce))
 
+static void donc_get_operands(zval *op1, zval *op2, zend_long *val_1, zend_long *val_2)
+{
+	*val_1 = IS_DONC(op1) ? Z_LVAL_P(OBJ_PROP_NUM(Z_OBJ_P(op1), 0)) : zval_get_long(op1);
+	*val_2 = IS_DONC(op2) ? Z_LVAL_P(OBJ_PROP_NUM(Z_OBJ_P(op2), 0)) : zval_get_long(op2);
+}
 static void donc_add(zval *result, zval *op1, zval *op2)
 {
-	zend_long val_1;
-	zend_long val_2;
-	if (IS_DONC(op1)) {
-		val_1 = Z_LVAL_P(OBJ_PROP_NUM(Z_OBJ_P(op1), 0));
-	} else {
-		val_1 = zval_get_long(op1);
-	}
-	if (IS_DONC(op2)) {
-		val_2 = Z_LVAL_P(OBJ_PROP_NUM(Z_OBJ_P(op2), 0));
-	} else {
-		val_2 = zval_get_long(op2);
-	}
-
+	zend_long val_1, val_2;
+	donc_get_operands(op1, op2, &val_1, &val_2);
 	donc_create(result, val_1 + val_2);
+}
+static void donc_sub(zval *result, zval *op1, zval *op2)
+{
+	zend_long val_1, val_2;
+	donc_get_operands(op1, op2, &val_1, &val_2);
+	donc_create(result, val_1 - val_2);
 }
 static void donc_mul(zval *result, zval *op1, zval *op2)
 {
-	zend_long val_1;
-	zend_long val_2;
-	if (IS_DONC(op1)) {
-		val_1 = Z_LVAL_P(OBJ_PROP_NUM(Z_OBJ_P(op1), 0));
-	} else {
-		val_1 = zval_get_long(op1);
-	}
-	if (IS_DONC(op2)) {
-		val_2 = Z_LVAL_P(OBJ_PROP_NUM(Z_OBJ_P(op2), 0));
-	} else {
-		val_2 = zval_get_long(op2);
-	}
-
+	zend_long val_1, val_2;
+	donc_get_operands(op1, op2, &val_1, &val_2);
 	donc_create(result, val_1 * val_2);
+}
+static void donc_div(zval *result, zval *op1, zval *op2)
+{
+	zend_long val_1, val_2;
+	donc_get_operands(op1, op2, &val_1, &val_2);
+	donc_create(result, val_1 / val_2);
+}
+static void donc_mod(zval *result, zval *op1, zval *op2)
+{
+	zend_long val_1, val_2;
+	donc_get_operands(op1, op2, &val_1, &val_2);
+	donc_create(result, val_2 == 0 ? 0 : val_1 % val_2);
+}
+static void donc_and(zval *result, zval *op1, zval *op2)
+{
+	zend_long val_1, val_2;
+	donc_get_operands(op1, op2, &val_1, &val_2);
+	donc_create(result, val_1 & val_2);
+}
+static void donc_or(zval *result, zval *op1, zval *op2)
+{
+	zend_long val_1, val_2;
+	donc_get_operands(op1, op2, &val_1, &val_2);
+	donc_create(result, val_1 | val_2);
+}
+static void donc_xor(zval *result, zval *op1, zval *op2)
+{
+	zend_long val_1, val_2;
+	donc_get_operands(op1, op2, &val_1, &val_2);
+	donc_create(result, val_1 ^ val_2);
+}
+static void donc_shl(zval *result, zval *op1, zval *op2)
+{
+	zend_long val_1, val_2;
+	donc_get_operands(op1, op2, &val_1, &val_2);
+	donc_create(result, (val_2 >= 0 && val_2 < (zend_long) (sizeof(zend_long) * 8)) ? val_1 << val_2 : 0);
+}
+static void donc_shr(zval *result, zval *op1, zval *op2)
+{
+	zend_long val_1, val_2;
+	donc_get_operands(op1, op2, &val_1, &val_2);
+	donc_create(result, (val_2 >= 0 && val_2 < (zend_long) (sizeof(zend_long) * 8)) ? val_1 >> val_2 : 0);
 }
 
 static zend_result donc_do_operation(zend_uchar opcode, zval *result, zval *op1, zval *op2)
@@ -92,9 +123,43 @@ static zend_result donc_do_operation(zend_uchar opcode, zval *result, zval *op1,
 			if (UNEXPECTED(EG(exception))) { status = FAILURE; }
 			status = SUCCESS;
 			break;
+		case ZEND_SUB:
+			donc_sub(result, op1, op2);
+			if (UNEXPECTED(EG(exception))) { status = FAILURE; }
+			status = SUCCESS;
+			break;
 		case ZEND_MUL:
 			donc_mul(result, op1, op2);
 			if (UNEXPECTED(EG(exception))) { status = FAILURE; }
+			status = SUCCESS;
+			break;
+		case ZEND_DIV:
+			donc_div(result, op1, op2);
+			if (UNEXPECTED(EG(exception))) { status = FAILURE; }
+			status = SUCCESS;
+			break;
+		case ZEND_MOD:
+			donc_mod(result, op1, op2);
+			status = SUCCESS;
+			break;
+		case ZEND_SL:
+			donc_shl(result, op1, op2);
+			status = SUCCESS;
+			break;
+		case ZEND_SR:
+			donc_shr(result, op1, op2);
+			status = SUCCESS;
+			break;
+		case ZEND_BW_AND:
+			donc_and(result, op1, op2);
+			status = SUCCESS;
+			break;
+		case ZEND_BW_OR:
+			donc_or(result, op1, op2);
+			status = SUCCESS;
+			break;
+		case ZEND_BW_XOR:
+			donc_xor(result, op1, op2);
 			status = SUCCESS;
 			break;
 		default:

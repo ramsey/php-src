@@ -2245,7 +2245,8 @@ ZEND_API zend_result ZEND_FASTCALL mod_function(zval *result, zval *op1, zval *o
 	ZVAL_DEREF(op1);
 	ZVAL_DEREF(op2);
 
-	if (UNEXPECTED(Z_TYPE_P(op1) == IS_BIGINT) || UNEXPECTED(Z_TYPE_P(op2) == IS_BIGINT)) {
+	if ((UNEXPECTED(Z_TYPE_P(op1) == IS_BIGINT) || UNEXPECTED(Z_TYPE_P(op2) == IS_BIGINT))
+			&& EXPECTED(Z_TYPE_P(op1) != IS_OBJECT) && EXPECTED(Z_TYPE_P(op2) != IS_OBJECT)) {
 		return mod_function_bigint(result, op1, op2);
 	}
 
@@ -2265,7 +2266,7 @@ ZEND_API zend_result ZEND_FASTCALL mod_function(zval *result, zval *op1, zval *o
 			}
 			return FAILURE;
 		}
-		if (op1_big || op2_big) {
+		if ((op1_big || op2_big) && EXPECTED(Z_TYPE_P(op1) != IS_OBJECT) && EXPECTED(Z_TYPE_P(op2) != IS_OBJECT)) {
 			if (op1 == result) {
 				zval_ptr_dtor(result);
 			}
@@ -2500,7 +2501,8 @@ ZEND_API zend_result ZEND_FASTCALL bitwise_or_function(zval *result, zval *op1, 
 	ZVAL_DEREF(op1);
 	ZVAL_DEREF(op2);
 
-	if (UNEXPECTED(Z_TYPE_P(op1) == IS_BIGINT) || UNEXPECTED(Z_TYPE_P(op2) == IS_BIGINT)) {
+	if ((UNEXPECTED(Z_TYPE_P(op1) == IS_BIGINT) || UNEXPECTED(Z_TYPE_P(op2) == IS_BIGINT))
+			&& EXPECTED(Z_TYPE_P(op1) != IS_OBJECT) && EXPECTED(Z_TYPE_P(op2) != IS_OBJECT)) {
 		return bitwise_or_function_bigint(result, op1, op2);
 	}
 
@@ -2523,7 +2525,7 @@ ZEND_API zend_result ZEND_FASTCALL bitwise_or_function(zval *result, zval *op1, 
 			}
 			return FAILURE;
 		}
-		if (op1_big || op2_big) {
+		if ((op1_big || op2_big) && EXPECTED(Z_TYPE_P(op1) != IS_OBJECT) && EXPECTED(Z_TYPE_P(op2) != IS_OBJECT)) {
 			if (op1 == result) {
 				zval_ptr_dtor(result);
 			}
@@ -2672,7 +2674,8 @@ ZEND_API zend_result ZEND_FASTCALL bitwise_and_function(zval *result, zval *op1,
 	ZVAL_DEREF(op1);
 	ZVAL_DEREF(op2);
 
-	if (UNEXPECTED(Z_TYPE_P(op1) == IS_BIGINT) || UNEXPECTED(Z_TYPE_P(op2) == IS_BIGINT)) {
+	if ((UNEXPECTED(Z_TYPE_P(op1) == IS_BIGINT) || UNEXPECTED(Z_TYPE_P(op2) == IS_BIGINT))
+			&& EXPECTED(Z_TYPE_P(op1) != IS_OBJECT) && EXPECTED(Z_TYPE_P(op2) != IS_OBJECT)) {
 		return bitwise_and_function_bigint(result, op1, op2);
 	}
 
@@ -2695,7 +2698,7 @@ ZEND_API zend_result ZEND_FASTCALL bitwise_and_function(zval *result, zval *op1,
 			}
 			return FAILURE;
 		}
-		if (op1_big || op2_big) {
+		if ((op1_big || op2_big) && EXPECTED(Z_TYPE_P(op1) != IS_OBJECT) && EXPECTED(Z_TYPE_P(op2) != IS_OBJECT)) {
 			if (op1 == result) {
 				zval_ptr_dtor(result);
 			}
@@ -2844,7 +2847,8 @@ ZEND_API zend_result ZEND_FASTCALL bitwise_xor_function(zval *result, zval *op1,
 	ZVAL_DEREF(op1);
 	ZVAL_DEREF(op2);
 
-	if (UNEXPECTED(Z_TYPE_P(op1) == IS_BIGINT) || UNEXPECTED(Z_TYPE_P(op2) == IS_BIGINT)) {
+	if ((UNEXPECTED(Z_TYPE_P(op1) == IS_BIGINT) || UNEXPECTED(Z_TYPE_P(op2) == IS_BIGINT))
+			&& EXPECTED(Z_TYPE_P(op1) != IS_OBJECT) && EXPECTED(Z_TYPE_P(op2) != IS_OBJECT)) {
 		return bitwise_xor_function_bigint(result, op1, op2);
 	}
 
@@ -2867,7 +2871,7 @@ ZEND_API zend_result ZEND_FASTCALL bitwise_xor_function(zval *result, zval *op1,
 			}
 			return FAILURE;
 		}
-		if (op1_big || op2_big) {
+		if ((op1_big || op2_big) && EXPECTED(Z_TYPE_P(op1) != IS_OBJECT) && EXPECTED(Z_TYPE_P(op2) != IS_OBJECT)) {
 			if (op1 == result) {
 				zval_ptr_dtor(result);
 			}
@@ -3025,7 +3029,8 @@ ZEND_API zend_result ZEND_FASTCALL shift_left_function(zval *result, zval *op1, 
 	ZVAL_DEREF(op1);
 	ZVAL_DEREF(op2);
 
-	if (UNEXPECTED(Z_TYPE_P(op1) == IS_BIGINT) || UNEXPECTED(Z_TYPE_P(op2) == IS_BIGINT)) {
+	if ((UNEXPECTED(Z_TYPE_P(op1) == IS_BIGINT) || UNEXPECTED(Z_TYPE_P(op2) == IS_BIGINT))
+			&& EXPECTED(Z_TYPE_P(op1) != IS_OBJECT) && EXPECTED(Z_TYPE_P(op2) != IS_OBJECT)) {
 		return shift_left_function_bigint(result, op1, op2);
 	}
 
@@ -3045,7 +3050,7 @@ ZEND_API zend_result ZEND_FASTCALL shift_left_function(zval *result, zval *op1, 
 			}
 			return FAILURE;
 		}
-		if (op1_big || op2_big) {
+		if ((op1_big || op2_big) && EXPECTED(Z_TYPE_P(op1) != IS_OBJECT) && EXPECTED(Z_TYPE_P(op2) != IS_OBJECT)) {
 			if (op1 == result) {
 				zval_ptr_dtor(result);
 			}
@@ -3193,7 +3198,8 @@ ZEND_API zend_result ZEND_FASTCALL shift_right_function(zval *result, zval *op1,
 	ZVAL_DEREF(op1);
 	ZVAL_DEREF(op2);
 
-	if (UNEXPECTED(Z_TYPE_P(op1) == IS_BIGINT) || UNEXPECTED(Z_TYPE_P(op2) == IS_BIGINT)) {
+	if ((UNEXPECTED(Z_TYPE_P(op1) == IS_BIGINT) || UNEXPECTED(Z_TYPE_P(op2) == IS_BIGINT))
+			&& EXPECTED(Z_TYPE_P(op1) != IS_OBJECT) && EXPECTED(Z_TYPE_P(op2) != IS_OBJECT)) {
 		return shift_right_function_bigint(result, op1, op2);
 	}
 
@@ -3213,7 +3219,7 @@ ZEND_API zend_result ZEND_FASTCALL shift_right_function(zval *result, zval *op1,
 			}
 			return FAILURE;
 		}
-		if (op1_big || op2_big) {
+		if ((op1_big || op2_big) && EXPECTED(Z_TYPE_P(op1) != IS_OBJECT) && EXPECTED(Z_TYPE_P(op2) != IS_OBJECT)) {
 			if (op1 == result) {
 				zval_ptr_dtor(result);
 			}
