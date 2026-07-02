@@ -5557,17 +5557,14 @@ ZEND_VM_C_LABEL(send_array):
 				len = count - skip;
 			} else if (Z_TYPE_P(op2) == IS_BIGINT) {
 				/* A bigint is an int; handle before the strict-types bailout so
-				 * fitting bigints succeed in both weak and strict mode. */
+				 * it succeeds in both weak and strict mode. A bigint length is
+				 * beyond the array, so clamp it like a huge long, matching
+				 * array_slice(). */
 				if (UNEXPECTED(!zend_bigint_can_fit_long(Z_BIG_P(op2)))) {
-					zend_value_error(
-						"array_slice(): Argument #3 ($length) must be between "
-						ZEND_LONG_FMT " and " ZEND_LONG_FMT,
-						ZEND_LONG_MIN, ZEND_LONG_MAX);
-					FREE_OP2();
-					FREE_OP1();
-					HANDLE_EXCEPTION();
+					len = zend_bigint_sign(Z_BIG_P(op2)) < 0 ? ZEND_LONG_MIN : ZEND_LONG_MAX;
+				} else {
+					len = zend_bigint_to_long(Z_BIG_P(op2));
 				}
-				len = zend_bigint_to_long(Z_BIG_P(op2));
 			} else if (EX_USES_STRICT_TYPES()
 					|| !zend_parse_arg_long_weak(op2, &len, /* arg_num */ 3)) {
 				if (EXPECTED(!EG(exception))) {

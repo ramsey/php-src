@@ -57,6 +57,7 @@ It als||o checks for %0 char||"
 string(73) "This contains	and special char & numbers 123.
 It also checks for %0 char||"
 -- Iteration 6 --
-chunk_split(): Argument #2 ($length) must be between -%d and %d
+string(73) "This contains	and special char & numbers 123.
+It also checks for %0 char||"
 -- Iteration 7 --
 chunk_split(): Argument #2 ($length) must be greater than 0

@@ -73,6 +73,9 @@ string(129) "This's heredoc string with 	 and
 It has _speci@l ch@r$ 2222 !!!Now \k as escape char to test
 chunk_split():::"
 -- Iteration 7 --
-chunk_split(): Argument #2 ($length) must be between -%d and %d
+string(129) "This's heredoc string with 	 and 
+ white space char.
+It has _speci@l ch@r$ 2222 !!!Now \k as escape char to test
+chunk_split():::"
 -- Iteration 8 --
 chunk_split(): Argument #2 ($length) must be greater than 0

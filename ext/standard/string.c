@@ -2219,15 +2219,20 @@ PHP_FUNCTION(chunk_split)
 	zend_string *str;
 	char *end    = "\r\n";
 	size_t endlen   = 2;
+	zval *chunklen_arg = NULL;
 	zend_long chunklen = 76;
 	zend_string *result;
 
 	ZEND_PARSE_PARAMETERS_START(1, 3)
 		Z_PARAM_STR(str)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_LONG(chunklen)
+		Z_PARAM_INT(chunklen_arg)
 		Z_PARAM_STRING(end, endlen)
 	ZEND_PARSE_PARAMETERS_END();
+
+	if (chunklen_arg != NULL && UNEXPECTED(!zend_logical_int_to_long(chunklen_arg, &chunklen))) {
+		chunklen = zend_bigint_sign(Z_BIG_P(chunklen_arg)) < 0 ? ZEND_LONG_MIN : ZEND_LONG_MAX;
+	}
 
 	if (chunklen <= 0) {
 		zend_argument_value_error(2, "must be greater than 0");

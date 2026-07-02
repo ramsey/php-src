@@ -1375,13 +1375,18 @@ PHP_FUNCTION(fdatasync)
 /* {{{ Truncate file to 'size' length */
 PHP_FUNCTION(ftruncate)
 {
+	zval *size_arg;
 	zend_long size;
 	php_stream *stream;
 
 	ZEND_PARSE_PARAMETERS_START(2, 2)
 		PHP_Z_PARAM_STREAM(stream)
-		Z_PARAM_LONG(size)
+		Z_PARAM_INT(size_arg)
 	ZEND_PARSE_PARAMETERS_END();
+
+	if (UNEXPECTED(!zend_logical_int_to_long(size_arg, &size))) {
+		size = zend_bigint_sign(Z_BIG_P(size_arg)) < 0 ? ZEND_LONG_MIN : ZEND_LONG_MAX;
+	}
 
 	if (size < 0) {
 		zend_argument_value_error(2, "must be greater than or equal to 0");

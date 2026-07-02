@@ -3928,9 +3928,11 @@ PHP_FUNCTION(array_slice)
 {
 	zval *input;                  /* Input array */
 	zval *entry;                  /* An array entry */
+	zval *offset_arg;             /* Offset argument */
+	zval *length_arg = NULL;      /* Length argument */
 	zend_long offset;             /* Offset to get elements from */
 	zend_long length = 0;         /* How many elements to get */
-	bool length_is_null = 1; /* Whether an explicit length has been omitted */
+	bool length_is_null;     /* Whether an explicit length has been omitted */
 	bool preserve_keys = 0;  /* Whether to preserve keys while copying to the new array */
 	uint32_t num_in;              /* Number of elements in the input array */
 	zend_string *string_key;
@@ -3938,11 +3940,19 @@ PHP_FUNCTION(array_slice)
 
 	ZEND_PARSE_PARAMETERS_START(2, 4)
 		Z_PARAM_ARRAY(input)
-		Z_PARAM_LONG(offset)
+		Z_PARAM_INT(offset_arg)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_LONG_OR_NULL(length, length_is_null)
+		Z_PARAM_INT_OR_NULL(length_arg)
 		Z_PARAM_BOOL(preserve_keys)
 	ZEND_PARSE_PARAMETERS_END();
+
+	if (UNEXPECTED(!zend_logical_int_to_long(offset_arg, &offset))) {
+		offset = zend_bigint_sign(Z_BIG_P(offset_arg)) < 0 ? ZEND_LONG_MIN : ZEND_LONG_MAX;
+	}
+	length_is_null = (length_arg == NULL);
+	if (!length_is_null && UNEXPECTED(!zend_logical_int_to_long(length_arg, &length))) {
+		length = zend_bigint_sign(Z_BIG_P(length_arg)) < 0 ? ZEND_LONG_MIN : ZEND_LONG_MAX;
+	}
 
 	/* Get number of entries in the input hash */
 	num_in = zend_hash_num_elements(Z_ARRVAL_P(input));

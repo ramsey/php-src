@@ -1122,6 +1122,7 @@ PHP_FUNCTION(flush)
 /* {{{ Delay for a given number of seconds */
 PHP_FUNCTION(sleep)
 {
+	zval *num_arg;
 	zend_long num;
 #ifdef PHP_WIN32
 	const unsigned int max = UINT_MAX / 1000;
@@ -1130,11 +1131,15 @@ PHP_FUNCTION(sleep)
 #endif
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_LONG(num)
+		Z_PARAM_INT(num_arg)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (num < 0 || (zend_ulong) num > max) {
-		zend_argument_value_error(1, "must be between 0 and %u", max);
+	if (UNEXPECTED(!zend_logical_int_to_long(num_arg, &num))) {
+		num = zend_bigint_sign(Z_BIG_P(num_arg)) < 0 ? ZEND_LONG_MIN : ZEND_LONG_MAX;
+	}
+
+	if (num < 0) {
+		zend_argument_value_error(1, "must be greater than or equal to 0");
 		RETURN_THROWS();
 	}
 
@@ -1145,14 +1150,19 @@ PHP_FUNCTION(sleep)
 /* {{{ Delay for a given number of micro seconds */
 PHP_FUNCTION(usleep)
 {
+	zval *num_arg;
 	zend_long num;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_LONG(num)
+		Z_PARAM_INT(num_arg)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (num < 0 || (zend_ulong) num > UINT_MAX) {
-		zend_argument_value_error(1, "must be between 0 and %u", UINT_MAX);
+	if (UNEXPECTED(!zend_logical_int_to_long(num_arg, &num))) {
+		num = zend_bigint_sign(Z_BIG_P(num_arg)) < 0 ? ZEND_LONG_MIN : ZEND_LONG_MAX;
+	}
+
+	if (num < 0) {
+		zend_argument_value_error(1, "must be greater than or equal to 0");
 		RETURN_THROWS();
 	}
 
@@ -1166,13 +1176,21 @@ PHP_FUNCTION(usleep)
 /* {{{ Delay for a number of seconds and nano seconds */
 PHP_FUNCTION(time_nanosleep)
 {
+	zval *tv_sec_arg, *tv_nsec_arg;
 	zend_long tv_sec, tv_nsec;
 	struct timespec php_req, php_rem;
 
 	ZEND_PARSE_PARAMETERS_START(2, 2)
-		Z_PARAM_LONG(tv_sec)
-		Z_PARAM_LONG(tv_nsec)
+		Z_PARAM_INT(tv_sec_arg)
+		Z_PARAM_INT(tv_nsec_arg)
 	ZEND_PARSE_PARAMETERS_END();
+
+	if (UNEXPECTED(!zend_logical_int_to_long(tv_sec_arg, &tv_sec))) {
+		tv_sec = zend_bigint_sign(Z_BIG_P(tv_sec_arg)) < 0 ? ZEND_LONG_MIN : ZEND_LONG_MAX;
+	}
+	if (UNEXPECTED(!zend_logical_int_to_long(tv_nsec_arg, &tv_nsec))) {
+		tv_nsec = zend_bigint_sign(Z_BIG_P(tv_nsec_arg)) < 0 ? ZEND_LONG_MIN : ZEND_LONG_MAX;
+	}
 
 	if (tv_sec < 0) {
 		zend_argument_value_error(1, "must be greater than or equal to 0");
