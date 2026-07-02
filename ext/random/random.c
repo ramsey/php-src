@@ -578,15 +578,24 @@ PHP_FUNCTION(rand)
 /* {{{ Return an arbitrary length of pseudo-random bytes as binary string */
 PHP_FUNCTION(random_bytes)
 {
+	zval *size_arg;
 	zend_long size;
 	zend_string *bytes;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_LONG(size)
+		Z_PARAM_INT(size_arg)
 	ZEND_PARSE_PARAMETERS_END();
+
+	if (UNEXPECTED(!zend_logical_int_to_long(size_arg, &size))) {
+		size = zend_bigint_sign(Z_BIG_P(size_arg)) < 0 ? ZEND_LONG_MIN : ZEND_LONG_MAX;
+	}
 
 	if (size < 1) {
 		zend_argument_value_error(1, "must be greater than 0");
+		RETURN_THROWS();
+	}
+
+	if (UNEXPECTED(zend_string_alloc_size_exceeds_memory(size, 1, 0))) {
 		RETURN_THROWS();
 	}
 

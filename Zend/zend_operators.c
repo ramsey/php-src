@@ -1778,6 +1778,28 @@ ZEND_API bool zend_shift_left_result_exceeds_memory(const zval *op1, zend_long c
 	return est_bytes > (uint64_t) available;
 }
 
+ZEND_API bool zend_string_alloc_size_exceeds_memory(size_t nmemb, size_t size, size_t offset)
+{
+	bool overflow;
+	size_t needed = zend_safe_address(nmemb, size, offset, &overflow);
+
+	if (!overflow) {
+		if (zend_memory_limit_is_unlimited()) {
+			return false;
+		}
+		size_t limit = zend_memory_limit();
+		size_t usage = zend_memory_usage(true);
+		size_t available = (limit > usage) ? (limit - usage) : 0;
+		if (needed <= available) {
+			return false;
+		}
+	}
+
+	zend_throw_error(zend_ce_memory_error,
+		"The resulting string is too large to fit in the configured memory limit");
+	return true;
+}
+
 /* Tidy up after the bigint backend has refused to compute a power (it has
  * already thrown). A result that aliases op1 keeps its old value. The refused
  * bigint temp is released. */

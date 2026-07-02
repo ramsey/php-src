@@ -5555,14 +5555,19 @@ PHP_FUNCTION(str_getcsv)
 PHP_FUNCTION(str_repeat)
 {
 	zend_string		*input_str;		/* Input string */
+	zval			*mult_arg;		/* Multiplier argument */
 	zend_long 		mult;			/* Multiplier */
 	zend_string	*result;		/* Resulting string */
 	size_t		result_len;		/* Length of the resulting string */
 
 	ZEND_PARSE_PARAMETERS_START(2, 2)
 		Z_PARAM_STR(input_str)
-		Z_PARAM_LONG(mult)
+		Z_PARAM_INT(mult_arg)
 	ZEND_PARSE_PARAMETERS_END();
+
+	if (UNEXPECTED(!zend_logical_int_to_long(mult_arg, &mult))) {
+		mult = zend_bigint_sign(Z_BIG_P(mult_arg)) < 0 ? ZEND_LONG_MIN : ZEND_LONG_MAX;
+	}
 
 	if (mult < 0) {
 		zend_argument_value_error(2, "must be greater than or equal to 0");
@@ -5573,6 +5578,10 @@ PHP_FUNCTION(str_repeat)
 	/* ... or if the multiplier is zero */
 	if (ZSTR_LEN(input_str) == 0 || mult == 0)
 		RETURN_EMPTY_STRING();
+
+	if (UNEXPECTED(zend_string_alloc_size_exceeds_memory(ZSTR_LEN(input_str), mult, 0))) {
+		RETURN_THROWS();
+	}
 
 	/* Initialize the result string */
 	result = zend_string_safe_alloc(ZSTR_LEN(input_str), mult, 0, 0);
@@ -5859,6 +5868,7 @@ PHP_FUNCTION(str_pad)
 {
 	/* Input arguments */
 	zend_string *input;				/* Input string */
+	zval *pad_length_arg;			/* Length-to-pad-to argument */
 	zend_long pad_length;			/* Length to pad to */
 
 	/* Helper variables */
@@ -5871,11 +5881,15 @@ PHP_FUNCTION(str_pad)
 
 	ZEND_PARSE_PARAMETERS_START(2, 4)
 		Z_PARAM_STR(input)
-		Z_PARAM_LONG(pad_length)
+		Z_PARAM_INT(pad_length_arg)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_STRING(pad_str, pad_str_len)
 		Z_PARAM_LONG(pad_type_val)
 	ZEND_PARSE_PARAMETERS_END();
+
+	if (UNEXPECTED(!zend_logical_int_to_long(pad_length_arg, &pad_length))) {
+		pad_length = zend_bigint_sign(Z_BIG_P(pad_length_arg)) < 0 ? ZEND_LONG_MIN : ZEND_LONG_MAX;
+	}
 
 	/* If resulting string turns out to be shorter than input string,
 	   we simply copy the input and return. */
@@ -5894,6 +5908,9 @@ PHP_FUNCTION(str_pad)
 	}
 
 	num_pad_chars = pad_length - ZSTR_LEN(input);
+	if (UNEXPECTED(zend_string_alloc_size_exceeds_memory(1, ZSTR_LEN(input), num_pad_chars))) {
+		RETURN_THROWS();
+	}
 	result = zend_string_safe_alloc(1, ZSTR_LEN(input), num_pad_chars, 0);
 	ZSTR_LEN(result) = 0;
 

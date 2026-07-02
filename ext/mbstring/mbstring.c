@@ -22,6 +22,7 @@
 #include "php.h"
 #include "php_ini.h"
 #include "php_variables.h"
+#include "zend_exceptions.h"
 #include "mbstring.h"
 #include "ext/standard/php_string.h"
 #include "ext/standard/php_mail.h"
@@ -5960,17 +5961,22 @@ PHP_FUNCTION(mb_chr)
 PHP_FUNCTION(mb_str_pad)
 {
 	zend_string *input, *encoding_str = NULL, *pad = ZSTR_CHAR(' ');
+	zval *pad_to_length_arg;
 	zend_long pad_to_length;
 	zend_long pad_type_val = PHP_STR_PAD_RIGHT;
 
 	ZEND_PARSE_PARAMETERS_START(2, 5)
 		Z_PARAM_STR(input)
-		Z_PARAM_LONG(pad_to_length)
+		Z_PARAM_INT(pad_to_length_arg)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_STR(pad)
 		Z_PARAM_LONG(pad_type_val)
 		Z_PARAM_STR_OR_NULL(encoding_str)
 	ZEND_PARSE_PARAMETERS_END();
+
+	if (UNEXPECTED(!zend_logical_int_to_long(pad_to_length_arg, &pad_to_length))) {
+		pad_to_length = zend_bigint_sign(Z_BIG_P(pad_to_length_arg)) < 0 ? ZEND_LONG_MIN : ZEND_LONG_MAX;
+	}
 
 	const mbfl_encoding *encoding = php_mb_get_encoding(encoding_str, 5);
 	if (!encoding) {
@@ -6003,6 +6009,10 @@ PHP_FUNCTION(mb_str_pad)
 	}
 
 	size_t num_mb_pad_chars = pad_to_length - input_length;
+
+	if (UNEXPECTED(zend_string_alloc_size_exceeds_memory(num_mb_pad_chars, 1, ZSTR_LEN(input)))) {
+		RETURN_THROWS();
+	}
 
 	/* We need to figure out the left/right padding lengths. */
 	size_t left_pad = 0, right_pad = 0; /* Initialize here to silence compiler warnings. */
@@ -6084,7 +6094,7 @@ overflow:
 	zend_string_release_ex(remaining_left_pad_str, false);
 	zend_string_release_ex(remaining_right_pad_str, false);
 overflow_no_release:
-	zend_throw_error(NULL, "String size overflow");
+	zend_throw_error(zend_ce_memory_error, "The resulting string is too large to fit in the configured memory limit");
 	RETURN_THROWS();
 }
 
