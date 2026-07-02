@@ -8,13 +8,13 @@ opcache.enable_cli=0
 
 try {
     var_dump(2 ** (2 ** 70));
-} catch (ArithmeticError $e) {
+} catch (MemoryError $e) {
     echo $e->getMessage() . "\n";
 }
 
 try {
     var_dump(2 ** '1180591620717411303424');
-} catch (ArithmeticError $e) {
+} catch (MemoryError $e) {
     echo $e->getMessage() . "\n";
 }
 

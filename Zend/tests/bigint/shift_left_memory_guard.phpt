@@ -1,5 +1,5 @@
 --TEST--
-Bigint: a left shift whose result exceeds memory_limit throws a catchable ArithmeticError
+Bigint: a left shift whose result exceeds memory_limit throws a catchable MemoryError
 --INI--
 memory_limit=64M
 opcache.enable_cli=0
@@ -15,7 +15,7 @@ $count = 2147483647;
 $max = PHP_INT_MAX;
 try {
     $x = $max << $count;
-} catch (ArithmeticError $e) {
+} catch (MemoryError $e) {
     echo $e->getMessage() . "\n";
 }
 
@@ -23,7 +23,7 @@ try {
 $big = 2 ** 100;
 try {
     $x = $big << $count;
-} catch (ArithmeticError $e) {
+} catch (MemoryError $e) {
     echo $e->getMessage() . "\n";
 }
 
@@ -32,7 +32,7 @@ try {
 $over = 2147483648;
 try {
     $x = 1 << $over;
-} catch (ArithmeticError $e) {
+} catch (MemoryError $e) {
     echo $e->getMessage() . "\n";
 }
 

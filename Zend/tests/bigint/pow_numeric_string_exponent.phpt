@@ -15,14 +15,14 @@ var_dump((-1) ** $strExp);
 $base = 2;
 try {
     var_dump($base ** $strExp);
-} catch (ArithmeticError $e) {
+} catch (MemoryError $e) {
     echo $e->getMessage() . "\n";
 }
 
 $strBase = '5';
 try {
     var_dump($strBase ** $strExp);
-} catch (ArithmeticError $e) {
+} catch (MemoryError $e) {
     echo $e->getMessage() . "\n";
 }
 

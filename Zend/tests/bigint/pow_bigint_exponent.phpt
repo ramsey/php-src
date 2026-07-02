@@ -27,14 +27,14 @@ var_dump($x);
 $base = 2;
 try {
     var_dump($base ** $bigEven);
-} catch (ArithmeticError $e) {
+} catch (MemoryError $e) {
     echo $e->getMessage() . "\n";
 }
 
 $y = 5;
 try {
     $y **= $bigEven;
-} catch (ArithmeticError $e) {
+} catch (MemoryError $e) {
     echo $e->getMessage() . "\n";
 }
 var_dump($y);

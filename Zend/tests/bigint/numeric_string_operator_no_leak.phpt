@@ -24,7 +24,7 @@ for ($i = 0; $i < 1000; $i++) {
     $r = $s >> $s;
     try {
         $r = $s << $s;
-    } catch (ArithmeticError) {
+    } catch (MemoryError) {
         // ignore
     }
 

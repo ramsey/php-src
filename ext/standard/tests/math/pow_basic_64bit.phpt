@@ -56,7 +56,7 @@ foreach($bases as $base) {
         try {
             $res = pow($base, $exponent);
             echo safe_to_string($res);
-        } catch (ArithmeticError $e) {
+        } catch (MemoryError $e) {
             echo $e->getMessage();
         }
     }

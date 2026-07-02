@@ -1799,7 +1799,7 @@ static zend_always_inline void pow_long_overflow_result(zval *result, zval *op1,
 	zend_long base = Z_LVAL_P(op1), exp = Z_LVAL_P(op2);
 	ZEND_ASSERT(exp >= 0 && "pow_long_overflow_result requires a non-negative exponent");
 	if (UNEXPECTED(zend_pow_result_exceeds_memory(op1, exp, NULL))) {
-		zend_throw_error(zend_ce_arithmetic_error,
+		zend_throw_error(zend_ce_memory_error,
 			"Exponentiation produces an integer too large to fit in the configured memory limit");
 		if (result != op1) {
 			ZVAL_UNDEF(result);
@@ -1851,7 +1851,7 @@ static zend_always_inline void pow_integer_base_bigint_exp(zval *result, zval *o
 	 * the engine throws. When memory_limit=-1, the backend throws if it cannot
 	 * represent the exponent. */
 	if (UNEXPECTED(zend_pow_result_exceeds_memory(op1, 0, exp_big))) {
-		zend_throw_error(zend_ce_arithmetic_error,
+		zend_throw_error(zend_ce_memory_error,
 			"Exponentiation produces an integer too large to fit in the configured memory limit");
 		if (result != op1) {
 			ZVAL_UNDEF(result);
@@ -1930,7 +1930,7 @@ static zend_result ZEND_FASTCALL pow_function_base(zval *result, zval *op1, zval
 			ZVAL_LONG(result, 1);
 		} else if (exp > 0) {
 			if (UNEXPECTED(zend_pow_result_exceeds_memory(op1, exp, NULL))) {
-				zend_throw_error(zend_ce_arithmetic_error,
+				zend_throw_error(zend_ce_memory_error,
 					"Exponentiation produces an integer too large to fit in the configured memory limit");
 				if (result != op1) {
 					ZVAL_UNDEF(result);
@@ -2998,7 +2998,7 @@ static zend_never_inline zend_result ZEND_FASTCALL shift_left_function_bigint(zv
 	}
 
 	if (UNEXPECTED(zend_shift_left_result_exceeds_memory(op1, count, count_big))) {
-		zend_throw_error(zend_ce_arithmetic_error,
+		zend_throw_error(zend_ce_memory_error,
 			"Bit shift produces an integer too large to fit in the configured memory limit");
 		if (result != op1) {
 			ZVAL_UNDEF(result);
@@ -3102,7 +3102,7 @@ ZEND_API zend_result ZEND_FASTCALL shift_left_function(zval *result, zval *op1, 
 	zval op1_long;
 	ZVAL_LONG(&op1_long, op1_lval);
 	if (UNEXPECTED(zend_shift_left_result_exceeds_memory(&op1_long, op2_lval, NULL))) {
-		zend_throw_error(zend_ce_arithmetic_error,
+		zend_throw_error(zend_ce_memory_error,
 			"Bit shift produces an integer too large to fit in the configured memory limit");
 		if (op1 != result) {
 			ZVAL_UNDEF(result);

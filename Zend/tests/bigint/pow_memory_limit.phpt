@@ -12,14 +12,14 @@ $exp = 2147483647;
 try {
     $r = $base ** $exp;
     echo "no throw (operator)\n";
-} catch (ArithmeticError $e) {
+} catch (MemoryError $e) {
     echo $e->getMessage() . "\n";
 }
 
 try {
     $r = pow($base, $exp);
     echo "no throw (pow)\n";
-} catch (ArithmeticError $e) {
+} catch (MemoryError $e) {
     echo $e->getMessage() . "\n";
 }
 
@@ -27,7 +27,7 @@ $bigbase = 2 ** 70;
 try {
     $r = $bigbase ** $exp;
     echo "no throw (bigint base)\n";
-} catch (ArithmeticError $e) {
+} catch (MemoryError $e) {
     echo $e->getMessage() . "\n";
 }
 
@@ -35,7 +35,7 @@ $over = 2147483648;
 try {
     $r = 2 ** $over;
     echo "no throw (over INT_MAX)\n";
-} catch (ArithmeticError $e) {
+} catch (MemoryError $e) {
     echo $e->getMessage() . "\n";
 }
 
