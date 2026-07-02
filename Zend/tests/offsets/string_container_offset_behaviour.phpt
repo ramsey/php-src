@@ -93,6 +93,52 @@ OUTPUT;
 
 $EXPECTED_OUTPUT_VALID_OFFSETS_OUT_OF_RANGE_REGEX = '/^' . expectf_to_regex(EXPECTED_OUTPUT_VALID_OFFSETS_OUT_OF_RANGE) . '$/s';
 
+const EXPECTED_OUTPUT_OOM_ON_WRITE = <<<OUTPUT
+Read before write:
+
+Warning: Uninitialized string offset %i in %s on line %d
+string(0) ""
+Write:
+String offset assignment produces a string too large to fit in the configured memory limit
+Read:
+
+Warning: Uninitialized string offset %i in %s on line %d
+string(0) ""
+Read-Write:
+Cannot use assign-op operators with string offsets
+isset():
+bool(false)
+empty():
+bool(true)
+null coalesce:
+string(7) "default"
+Reference to dimension:
+Cannot create references %s string offsets
+unset():
+Cannot unset string offsets
+Nested read:
+
+Warning: Uninitialized string offset %i in %s on line %d
+
+Warning: Uninitialized string offset %i in %s on line %d
+string(0) ""
+Nested write:
+Cannot use string offset as an array
+Nested Read-Write:
+Cannot use string offset as an array
+Nested isset():
+bool(false)
+Nested empty():
+bool(true)
+Nested null coalesce:
+string(7) "default"
+Nested unset():
+Cannot use string offset as an array
+
+OUTPUT;
+
+$EXPECTED_OUTPUT_OOM_ON_WRITE_REGEX = '/^' . expectf_to_regex(EXPECTED_OUTPUT_OOM_ON_WRITE) . '$/s';
+
 const EXPECTED_OUTPUT_STRING_CAST_OFFSETS = <<<OUTPUT
 Read before write:
 
@@ -722,6 +768,7 @@ foreach ($offsets as $dimension) {
     if (
         !preg_match($EXPECTED_OUTPUT_VALID_OFFSETS_REGEX, $varOutput)
         && !preg_match($EXPECTED_OUTPUT_VALID_OFFSETS_OUT_OF_RANGE_REGEX, $varOutput)
+        && !preg_match($EXPECTED_OUTPUT_OOM_ON_WRITE_REGEX, $varOutput)
         && !preg_match($EXPECTED_OUTPUT_STRING_CAST_OFFSETS_REGEX, $varOutput)
         && !preg_match($EXPECTED_OUTPUT_STRING_CAST_OFFSETS_TO_0_REGEX, $varOutput)
         && !preg_match($EXPECTED_OUTPUT_STRING_CAST_OFFSETS_OUT_OF_RANGE_REGEX, $varOutput)
@@ -757,6 +804,7 @@ foreach ($offsets as $offset) {
     if (
         !preg_match($EXPECTED_OUTPUT_VALID_OFFSETS_REGEX, $varOutput)
         && !preg_match($EXPECTED_OUTPUT_VALID_OFFSETS_OUT_OF_RANGE_REGEX, $varOutput)
+        && !preg_match($EXPECTED_OUTPUT_OOM_ON_WRITE_REGEX, $varOutput)
         && !preg_match($EXPECTED_OUTPUT_STRING_CAST_OFFSETS_REGEX, $varOutput)
         && !preg_match($EXPECTED_OUTPUT_STRING_CAST_OFFSETS_TO_0_REGEX, $varOutput)
         && !preg_match($EXPECTED_OUTPUT_STRING_CAST_OFFSETS_OUT_OF_RANGE_REGEX, $varOutput)
