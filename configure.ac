@@ -1321,7 +1321,7 @@ AS_CASE([$PHP_BIGINT],
   [AC_MSG_ERROR([--with-bigint: only 'libtommath' is supported at this time])])
 
 PHP_ADD_SOURCES([Zend/bigint/libtommath], [tommath_amalgam.c tommath_platform_stubs.c],
-  [-DMP_NO_FILE -DMP_64BIT -DMP_MALLOC=zend_mp_malloc -DMP_REALLOC=zend_mp_realloc -DMP_CALLOC=zend_mp_calloc -DMP_FREE=zend_mp_free])
+  [-DMP_NO_FILE -DMP_MALLOC=zend_mp_malloc -DMP_REALLOC=zend_mp_realloc -DMP_CALLOC=zend_mp_calloc -DMP_FREE=zend_mp_free])
 PHP_ADD_SOURCES([Zend/bigint], [zend_bigint.c zend_bigint_libtommath.c zend_bigint_libtommath_alloc.c],
   [-I$(abs_srcdir)/Zend/bigint])
 
