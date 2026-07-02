@@ -40,6 +40,17 @@ try {
 }
 
 try {
+    number_format(1.5, 2 ** 70);
+} catch (ValueError $e) {
+    echo 'number_format bigint: ' . $e->getMessage() . "\n";
+}
+try {
+    number_format(1.5, 2000000000);
+} catch (MemoryError $e) {
+    echo 'number_format huge: ' . get_class($e) . "\n";
+}
+
+try {
     str_repeat('ab', -(2 ** 70));
 } catch (ValueError $e) {
     echo 'str_repeat neg: ' . $e->getMessage() . "\n";
@@ -55,4 +66,6 @@ str_pad (long): MemoryError
 mb_str_pad: MemoryError
 random_bytes (bigint): MemoryError
 random_bytes (long): MemoryError
+number_format bigint: number_format(): Argument #2 ($decimals) must be between -2147483648 and 2147483647
+number_format huge: MemoryError
 str_repeat neg: str_repeat(): Argument #2 ($times) must be greater than or equal to 0

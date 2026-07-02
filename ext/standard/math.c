@@ -1634,6 +1634,7 @@ static zend_string *php_math_number_format_bigint(const zend_bigint *num, zend_l
 PHP_FUNCTION(number_format)
 {
 	zval* num;
+	zval *dec_arg = NULL;
 	zend_long dec = 0;
 	int dec_int;
 	char *thousand_sep = NULL, *dec_point = NULL;
@@ -1642,10 +1643,14 @@ PHP_FUNCTION(number_format)
 	ZEND_PARSE_PARAMETERS_START(1, 4)
 		Z_PARAM_INT_OR_FLOAT(num)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_LONG(dec)
+		Z_PARAM_INT(dec_arg)
 		Z_PARAM_STRING_OR_NULL(dec_point, dec_point_len)
 		Z_PARAM_STRING_OR_NULL(thousand_sep, thousand_sep_len)
 	ZEND_PARSE_PARAMETERS_END();
+
+	if (dec_arg != NULL && UNEXPECTED(!zend_logical_int_to_long(dec_arg, &dec))) {
+		dec = zend_bigint_sign(Z_BIG_P(dec_arg)) < 0 ? ZEND_LONG_MIN : ZEND_LONG_MAX;
+	}
 
 	if (dec_point == NULL) {
 		dec_point = ".";
@@ -1658,6 +1663,10 @@ PHP_FUNCTION(number_format)
 
 	if (UNEXPECTED(dec > INT_MAX || dec < INT_MIN)) {
 		zend_argument_value_error(2, "must be between %d and %d", INT_MIN, INT_MAX);
+		RETURN_THROWS();
+	}
+
+	if (dec > 0 && UNEXPECTED(zend_string_alloc_size_exceeds_memory((size_t)dec, 1, 0))) {
 		RETURN_THROWS();
 	}
 
