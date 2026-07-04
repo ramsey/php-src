@@ -104,11 +104,6 @@ ZEND_API bool zend_pow_result_exceeds_memory(const zval *base, zend_long exp, co
  * runtime. */
 ZEND_API bool zend_shift_left_result_exceeds_memory(const zval *op1, zend_long count, const zend_bigint *count_big);
 
-/* Throws a catchable MemoryError and returns true when allocating a string of
- * "nmemb * size + offset" bytes would overflow or exceed the configured memory
- * limit; returns false (without throwing) otherwise. */
-ZEND_API bool zend_string_alloc_size_exceeds_memory(size_t nmemb, size_t size, size_t offset);
-
 /**
  * Checks whether the string "str" with length "length" is numeric. The value
  * of allow_errors determines whether it's required to be entirely numeric, or
