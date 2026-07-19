@@ -33,6 +33,7 @@
 #include "Zend/Optimizer/zend_optimizer.h"
 #include "Zend/zend_alloc.h"
 #include "Zend/zend_int_backend.h"
+#include "Zend/zend_int.h"
 #include "test_arginfo.h"
 #include "tmp_methods_arginfo.h"
 #include "zend_call_stack.h"
@@ -2528,4 +2529,49 @@ static ZEND_FUNCTION(zend_test_bigint_cmp_strings)
 	RETVAL_LONG(zend_bigint_cmp(a, b));
 	zend_bigint_free(a);
 	zend_bigint_free(b);
+}
+
+static ZEND_FUNCTION(zend_test_bigint_make)
+{
+	zend_string *digits;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_STR(digits)
+	ZEND_PARSE_PARAMETERS_END();
+
+	zend_bigint *b = zend_bigint_from_string(ZSTR_VAL(digits), ZSTR_LEN(digits), 10);
+	if (!b) {
+		RETURN_FALSE;
+	}
+
+	zend_int_from_bigint(return_value, b);
+}
+
+static ZEND_FUNCTION(zend_test_int_is_boxed)
+{
+	zval *value;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_ZVAL(value)
+	ZEND_PARSE_PARAMETERS_END();
+
+	RETURN_BOOL(Z_TYPE_P(value) == IS_BIGINT);
+}
+
+static ZEND_FUNCTION(zend_test_bigint_to_string)
+{
+	zval *value;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_ZVAL(value)
+	ZEND_PARSE_PARAMETERS_END();
+
+	/* The parameter is mixed because zpp does not yet know IS_BIGINT in this
+	 * phase, so guard the tag before reaching into the box. */
+	if (Z_TYPE_P(value) != IS_BIGINT) {
+		zend_argument_type_error(1, "must be a bigint box");
+		RETURN_THROWS();
+	}
+
+	RETURN_STR(zend_bigint_to_str(Z_BIG_P(value)));
 }

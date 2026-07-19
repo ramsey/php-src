@@ -461,6 +461,19 @@ function zend_test_override_libxml_global_state(): void {}
     function zend_test_bigint_roundtrip(string $digits): string|false {}
 
     function zend_test_bigint_cmp_strings(string $a, string $b): int|false {}
+
+    /**
+     * Returns an IS_BIGINT box. The return type is PHPDoc-only on purpose:
+     * internal return verification checks the exact tag, which zpp does not yet
+     * know in this phase, so a declared return type would reject the box.
+     *
+     * @return mixed
+     */
+    function zend_test_bigint_make(string $digits) {}
+
+    function zend_test_int_is_boxed(mixed $value): bool {}
+
+    function zend_test_bigint_to_string(mixed $value): string {}
 }
 
 namespace ZendTestNS {

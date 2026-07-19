@@ -12,20 +12,20 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef ZEND_INT_BACKEND_LIBTOMMATH_H
-#define ZEND_INT_BACKEND_LIBTOMMATH_H
+#include "zend.h"
+#include "zend_int.h"
 
-#include "zend_int_backend.h"
-#include "Zend/bigint/libtommath/tommath.h"
+/* A zend_bigint is opaque here on purpose; this file never sees the backend
+ * struct layout. The cross-backend contract guarantees a zend_bigint begins
+ * with its zend_refcounted_h, so GC headers are reached through
+ * zend_refcounted casts. */
 
-struct _zend_bigint {
-	zend_refcounted_h gc;
-	mp_int            mp;
-};
+ZEND_API void zend_int_from_bigint(zval *result, zend_bigint *b)
+{
+	zend_refcounted *ref = (zend_refcounted *) b;
 
-/* The engine reaches the GC header through a zend_refcounted cast, which relies
- * on the box beginning with its refcounted header. */
-ZEND_STATIC_ASSERT(offsetof(struct _zend_bigint, gc) == 0,
-	"zend_bigint must begin with its GC header");
+	GC_SET_REFCOUNT(ref, 1);
+	GC_TYPE_INFO(ref) = GC_BIGINT;
 
-#endif
+	ZVAL_BIGINT(result, b);
+}

@@ -85,6 +85,7 @@ typedef struct _zend_resource   zend_resource;
 typedef struct _zend_reference  zend_reference;
 typedef struct _zend_ast_ref    zend_ast_ref;
 typedef struct _zend_ast        zend_ast;
+typedef struct _zend_bigint     zend_bigint;
 
 typedef int  (*compare_func_t)(const void *, const void *);
 typedef void (*swap_func_t)(void *, void *);
@@ -322,6 +323,7 @@ typedef union _zend_value {
 	zend_long         lval;				/* long value */
 	double            dval;				/* double value */
 	zend_refcounted  *counted;
+	zend_bigint      *big;
 	zend_string      *str;
 	zend_array       *arr;
 	zend_object      *obj;
@@ -895,6 +897,7 @@ static zend_always_inline uint32_t zend_gc_delref_ex(zend_refcounted_h *p, uint3
 	} while (0)
 
 #define GC_NULL						(IS_NULL         | (GC_NOT_COLLECTABLE << GC_FLAGS_SHIFT))
+#define GC_BIGINT					(IS_BIGINT       | (GC_NOT_COLLECTABLE << GC_FLAGS_SHIFT))
 #define GC_STRING					(IS_STRING       | (GC_NOT_COLLECTABLE << GC_FLAGS_SHIFT))
 #define GC_ARRAY					IS_ARRAY
 #define GC_OBJECT					IS_OBJECT
@@ -917,6 +920,7 @@ static zend_always_inline uint32_t zend_gc_delref_ex(zend_refcounted_h *p, uint3
 /* extended types */
 #define IS_INTERNED_STRING_EX		IS_STRING
 
+#define IS_BIGINT_EX				(IS_BIGINT         | (IS_TYPE_REFCOUNTED << Z_TYPE_FLAGS_SHIFT))
 #define IS_STRING_EX				(IS_STRING         | (IS_TYPE_REFCOUNTED << Z_TYPE_FLAGS_SHIFT))
 #define IS_ARRAY_EX					(IS_ARRAY          | (IS_TYPE_REFCOUNTED << Z_TYPE_FLAGS_SHIFT) | (IS_TYPE_COLLECTABLE << Z_TYPE_FLAGS_SHIFT))
 #define IS_OBJECT_EX				(IS_OBJECT         | (IS_TYPE_REFCOUNTED << Z_TYPE_FLAGS_SHIFT) | (IS_TYPE_COLLECTABLE << Z_TYPE_FLAGS_SHIFT))
@@ -1067,6 +1071,9 @@ static zend_always_inline uint32_t zend_gc_delref_ex(zend_refcounted_h *p, uint3
 #define Z_DVAL(zval)				(zval).value.dval
 #define Z_DVAL_P(zval_p)			Z_DVAL(*(zval_p))
 
+#define Z_BIG(zval)					(zval).value.big
+#define Z_BIG_P(zval_p)				Z_BIG(*(zval_p))
+
 #define Z_STR(zval)					(zval).value.str
 #define Z_STR_P(zval_p)				Z_STR(*(zval_p))
 
@@ -1172,6 +1179,13 @@ static zend_always_inline uint32_t zend_gc_delref_ex(zend_refcounted_h *p, uint3
 		zval *__z = (z);				\
 		Z_DVAL_P(__z) = d;				\
 		Z_TYPE_INFO_P(__z) = IS_DOUBLE;	\
+	} while (0)
+
+#define ZVAL_BIGINT(z, b) do {					\
+		zval *__z = (z);						\
+		zend_bigint *__b = (b);					\
+		Z_BIG_P(__z) = __b;						\
+		Z_TYPE_INFO_P(__z) = IS_BIGINT_EX;		\
 	} while (0)
 
 #define ZVAL_STR(z, s) do {						\

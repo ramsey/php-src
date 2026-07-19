@@ -24,6 +24,7 @@
 #include "zend_globals.h"
 #include "zend_constants.h"
 #include "zend_list.h"
+#include "zend_int_backend.h"
 
 #if ZEND_DEBUG
 static void ZEND_FASTCALL zend_string_destroy(zend_string *str);
@@ -32,6 +33,7 @@ static void ZEND_FASTCALL zend_string_destroy(zend_string *str);
 #endif
 static void ZEND_FASTCALL zend_reference_destroy(zend_reference *ref);
 static void ZEND_FASTCALL zend_empty_destroy(zend_reference *ref);
+static void ZEND_FASTCALL zend_bigint_destroy(zend_bigint *big);
 
 typedef void (ZEND_FASTCALL *zend_rc_dtor_func_t)(zend_refcounted *p);
 
@@ -41,6 +43,7 @@ static const zend_rc_dtor_func_t zend_rc_dtor_func[] = {
 	[IS_FALSE] =        (zend_rc_dtor_func_t)zend_empty_destroy,
 	[IS_TRUE] =         (zend_rc_dtor_func_t)zend_empty_destroy,
 	[IS_LONG] =         (zend_rc_dtor_func_t)zend_empty_destroy,
+	[IS_BIGINT] =       (zend_rc_dtor_func_t)zend_bigint_destroy,
 	[IS_DOUBLE] =       (zend_rc_dtor_func_t)zend_empty_destroy,
 	[IS_STRING] =       (zend_rc_dtor_func_t)zend_string_destroy,
 	[IS_ARRAY] =        (zend_rc_dtor_func_t)zend_array_destroy,
@@ -76,6 +79,11 @@ static void ZEND_FASTCALL zend_reference_destroy(zend_reference *ref)
 
 static void ZEND_FASTCALL zend_empty_destroy(zend_reference *ref)
 {
+}
+
+static void ZEND_FASTCALL zend_bigint_destroy(zend_bigint *big)
+{
+	zend_bigint_free(big);
 }
 
 ZEND_API void zval_ptr_dtor(zval *zval_ptr) /* {{{ */

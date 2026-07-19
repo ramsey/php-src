@@ -1,5 +1,5 @@
 /* This is a generated file, edit test.stub.php instead.
- * Stub hash: 8b8720d04b73065af95da843f8539146725cb925
+ * Stub hash: 002f6b9250ce46cea25e4698b5efca406148cc57
  * Has decl header: yes */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_zend_trigger_bailout, 0, 0, IS_NEVER, 0)
@@ -337,6 +337,18 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_zend_test_bigint_cmp_strings, 0,
 	ZEND_ARG_TYPE_INFO(0, b, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_INFO_EX(arginfo_zend_test_bigint_make, 0, 0, 1)
+	ZEND_ARG_TYPE_INFO(0, digits, IS_STRING, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_zend_test_int_is_boxed, 0, 1, _IS_BOOL, 0)
+	ZEND_ARG_TYPE_INFO(0, value, IS_MIXED, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_zend_test_bigint_to_string, 0, 1, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, value, IS_MIXED, 0)
+ZEND_END_ARG_INFO()
+
 #define arginfo_ZendTestNS2_namespaced_func arginfo_zend_test_is_pcre_bundled
 
 #define arginfo_ZendTestNS2_namespaced_deprecated_func arginfo_zend_test_void_return
@@ -530,6 +542,9 @@ static ZEND_FUNCTION(zend_test_uri_parser);
 static ZEND_FUNCTION(zend_test_gh19792);
 static ZEND_FUNCTION(zend_test_bigint_roundtrip);
 static ZEND_FUNCTION(zend_test_bigint_cmp_strings);
+static ZEND_FUNCTION(zend_test_bigint_make);
+static ZEND_FUNCTION(zend_test_int_is_boxed);
+static ZEND_FUNCTION(zend_test_bigint_to_string);
 static ZEND_FUNCTION(ZendTestNS2_namespaced_func);
 static ZEND_FUNCTION(ZendTestNS2_namespaced_deprecated_func);
 static ZEND_FUNCTION(ZendTestNS2_ZendSubNS_namespaced_func);
@@ -716,6 +731,9 @@ static const zend_function_entry ext_functions[] = {
 #endif
 	ZEND_FE(zend_test_bigint_roundtrip, arginfo_zend_test_bigint_roundtrip)
 	ZEND_FE(zend_test_bigint_cmp_strings, arginfo_zend_test_bigint_cmp_strings)
+	ZEND_FE(zend_test_bigint_make, arginfo_zend_test_bigint_make)
+	ZEND_FE(zend_test_int_is_boxed, arginfo_zend_test_int_is_boxed)
+	ZEND_FE(zend_test_bigint_to_string, arginfo_zend_test_bigint_to_string)
 #if (PHP_VERSION_ID >= 80400)
 	ZEND_RAW_FENTRY(ZEND_NS_NAME("ZendTestNS2", "namespaced_func"), zif_ZendTestNS2_namespaced_func, arginfo_ZendTestNS2_namespaced_func, 0, NULL, NULL)
 #else
