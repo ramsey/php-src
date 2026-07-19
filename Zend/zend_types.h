@@ -127,24 +127,24 @@ typedef struct {
 	zend_type types[1];
 } zend_type_list;
 
-#define _ZEND_TYPE_EXTRA_FLAGS_SHIFT 25
-#define _ZEND_TYPE_MASK ((1u << 25) - 1)
+#define _ZEND_TYPE_EXTRA_FLAGS_SHIFT 26
+#define _ZEND_TYPE_MASK ((1u << 26) - 1)
 /* Only one of these bits may be set. */
-#define _ZEND_TYPE_NAME_BIT (1u << 24)
+#define _ZEND_TYPE_NAME_BIT (1u << 25)
 // Used to signify that type.ptr is not a `zend_string*` but a `const char*`,
-#define _ZEND_TYPE_LITERAL_NAME_BIT (1u << 23)
-#define _ZEND_TYPE_LIST_BIT (1u << 22)
+#define _ZEND_TYPE_LITERAL_NAME_BIT (1u << 24)
+#define _ZEND_TYPE_LIST_BIT (1u << 23)
 #define _ZEND_TYPE_KIND_MASK (_ZEND_TYPE_LIST_BIT|_ZEND_TYPE_NAME_BIT|_ZEND_TYPE_LITERAL_NAME_BIT)
 /* For BC behaviour with iterable type */
-#define _ZEND_TYPE_ITERABLE_BIT (1u << 21)
+#define _ZEND_TYPE_ITERABLE_BIT (1u << 22)
 /* Whether the type list is arena allocated */
-#define _ZEND_TYPE_ARENA_BIT (1u << 20)
+#define _ZEND_TYPE_ARENA_BIT (1u << 21)
 /* Whether the type list is an intersection type */
-#define _ZEND_TYPE_INTERSECTION_BIT (1u << 19)
+#define _ZEND_TYPE_INTERSECTION_BIT (1u << 20)
 /* Whether the type is a union type */
-#define _ZEND_TYPE_UNION_BIT (1u << 18)
+#define _ZEND_TYPE_UNION_BIT (1u << 19)
 /* Type mask excluding the flags above. */
-#define _ZEND_TYPE_MAY_BE_MASK ((1u << 18) - 1)
+#define _ZEND_TYPE_MAY_BE_MASK ((1u << 19) - 1)
 /* Must have same value as MAY_BE_NULL */
 #define _ZEND_TYPE_NULLABLE_BIT 0x2u
 
@@ -634,35 +634,36 @@ struct _zend_ast_ref {
 #define IS_FALSE					2
 #define IS_TRUE						3
 #define IS_LONG						4
-#define IS_DOUBLE					5
-#define IS_STRING					6
-#define IS_ARRAY					7
-#define IS_OBJECT					8
-#define IS_RESOURCE					9
-#define IS_REFERENCE				10
-#define IS_CONSTANT_AST				11 /* Constant expressions */
+#define IS_BIGINT					5
+#define IS_DOUBLE					6
+#define IS_STRING					7
+#define IS_ARRAY					8
+#define IS_OBJECT					9
+#define IS_RESOURCE					10
+#define IS_REFERENCE				11
+#define IS_CONSTANT_AST				12 /* Constant expressions */
 
 /* Fake types used only for type hinting.
  * These are allowed to overlap with the types below. */
-#define IS_CALLABLE					12
-#define IS_ITERABLE					13
-#define IS_VOID						14
-#define IS_STATIC					15
-#define IS_MIXED					16
-#define IS_NEVER					17
+#define IS_CALLABLE					13
+#define IS_ITERABLE					14
+#define IS_VOID						15
+#define IS_STATIC					16
+#define IS_MIXED					17
+#define IS_NEVER					18
 
 /* internal types */
-#define IS_INDIRECT             	12
-#define IS_PTR						13
-#define IS_ALIAS_PTR				14
-#define _IS_ERROR					15
+#define IS_INDIRECT             	13
+#define IS_PTR						14
+#define IS_ALIAS_PTR				15
+#define _IS_ERROR					16
 
 /* used for casts */
-#define _IS_BOOL					18
-#define _IS_NUMBER					19
+#define _IS_BOOL					19
+#define _IS_NUMBER					20
 
 /* used for PFAs/FCCs */
-#define _IS_PLACEHOLDER             20
+#define _IS_PLACEHOLDER             21
 
 /* guard flags */
 #define ZEND_GUARD_PROPERTY_GET		(1<<0)
@@ -693,6 +694,9 @@ static zend_always_inline uint8_t zval_get_type(const zval* pz) {
 /* we should never set just Z_TYPE, we should set Z_TYPE_INFO */
 #define Z_TYPE(zval)				zval_get_type(&(zval))
 #define Z_TYPE_P(zval_p)			Z_TYPE(*(zval_p))
+
+#define Z_IS_INT(zv)				((uint8_t)(Z_TYPE(zv) - IS_LONG) <= (IS_BIGINT - IS_LONG))
+#define Z_IS_INT_P(zv)				Z_IS_INT(*(zv))
 
 #define Z_TYPE_FLAGS(zval)			(zval).u1.v.type_flags
 #define Z_TYPE_FLAGS_P(zval_p)		Z_TYPE_FLAGS(*(zval_p))

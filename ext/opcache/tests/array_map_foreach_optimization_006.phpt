@@ -32,7 +32,7 @@ $_main:
 0003 T3 = DO_ICALL
 0004 ASSIGN CV0($array) T3
 0005 ASSIGN CV1($plus1) string("plus1")
-0006 TYPE_ASSERT 131079 string("array_map") CV0($array)
+0006 TYPE_ASSERT 131080 string("array_map") CV0($array)
 0007 T3 = INIT_ARRAY 0 (packed) NEXT
 0008 V4 = FE_RESET_R CV0($array) 0015
 0009 T6 = FE_FETCH_R V4 T5 0015

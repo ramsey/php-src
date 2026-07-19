@@ -105,25 +105,25 @@ define dump_bt
 				if $type == 4
 					printf "%ld", $zvalue->value.lval
 				end
-				if $type == 5
+				if $type == 6
 					printf "%f", $zvalue->value.dval
 				end
-				if $type == 6
+				if $type == 7
 					____print_str (char*)$zvalue->value.str->val $zvalue->value.str->len
 				end
-				if $type == 7
+				if $type == 8
 					printf "array(%d)[%p]", $zvalue->value.arr->nNumOfElements, $zvalue
 				end
-				if $type == 8
+				if $type == 9
 					printf "object[%p]", $zvalue
 				end
-				if $type == 9
+				if $type == 10
 					printf "resource(#%d)", $zvalue->value.lval
 				end
-				if $type == 10
+				if $type == 11
 					printf "reference"
 				end
-				if $type > 10
+				if ($type == 5) || ($type > 11)
 					printf "unknown type %d", $type
 				end
 				set $arg = $arg + 1
@@ -162,8 +162,8 @@ define ____printzv_contents
 	set $zvalue = $arg0
 	set $type = $zvalue->u1.v.type
 
-	# 15 == IS_INDIRECT
-	if $type > 5 && $type < 12
+	# 13 == IS_INDIRECT
+	if ($type > 6 && $type < 13)
 		printf "(refcount=%d) ", $zvalue->value.counted->gc.refcount
 	end
 
@@ -182,13 +182,13 @@ define ____printzv_contents
 	if $type == 4
 		printf "long: %ld", $zvalue->value.lval
 	end
-	if $type == 5
+	if $type == 6
 		printf "double: %f", $zvalue->value.dval
 	end
-	if $type == 6
+	if $type == 7
 		printf "string: %s", (char*)$zvalue->value.str->val
 	end
-	if $type == 7
+	if $type == 8
 		printf "array: "
 		if ! $arg1
 			set $ind = $ind + 1
@@ -202,7 +202,7 @@ define ____printzv_contents
 		end
 		set $type = 0
 	end
-	if $type == 8
+	if $type == 9
 		printf "object"
 		____executor_globals
 		set $handle = $zvalue->value.obj.handle
@@ -242,33 +242,36 @@ define ____printzv_contents
 		end
 		set $type = 0
 	end
-	if $type == 9
+	if $type == 10
 		printf "resource: #%d", $zvalue->value.res->handle
 	end
-	if $type == 10
+	if $type == 11
 		printf "reference: "
 		____printzv &$zvalue->value.ref->val $arg1
 	end
-	if $type == 11
+	if $type == 12
 		printf "CONSTANT_AST"
 	end
-	if $type == 12
+	if $type == 13
 		printf "indirect: "
 		____printzv $zvalue->value.zv $arg1
 	end
-	if $type == 13
+	if $type == 14
 		printf "pointer: %p", $zvalue->value.ptr
 	end
 	if $type == 15
-		printf "_ERROR"
+		printf "alias pointer: %p", $zvalue->value.ptr
 	end
 	if $type == 16
+		printf "_ERROR"
+	end
+	if $type == 19
 		printf "_BOOL"
 	end
-	if $type == 17
+	if $type == 20
 		printf "_NUMBER"
 	end
-	if $type > 17
+	if ($type == 5) || ($type == 17) || ($type == 18) || ($type > 20)
 		printf "unknown type %d", $type
 	end
 	printf "\n"

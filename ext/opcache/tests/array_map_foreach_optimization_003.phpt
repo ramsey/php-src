@@ -23,7 +23,7 @@ $_main:
      ; (lines=%d, args=0, vars=%d, tmps=%d)
      ; (after optimizer)
      ; %s
-0000 TYPE_ASSERT 131079 string("array_map") array(...)
+0000 TYPE_ASSERT 131080 string("array_map") array(...)
 0001 T1 = INIT_ARRAY 0 (packed) NEXT
 0002 V2 = FE_RESET_R array(...) 0009
 0003 T4 = FE_FETCH_R V2 T3 0009

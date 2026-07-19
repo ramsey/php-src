@@ -4257,7 +4257,7 @@ static void zend_check_symbol(zval *pz)
 	if (Z_TYPE_P(pz) == IS_INDIRECT) {
 		pz = Z_INDIRECT_P(pz);
 	}
-	if (Z_TYPE_P(pz) > 10) {
+	if (Z_TYPE_P(pz) > IS_REFERENCE) {
 		fprintf(stderr, "Warning!  %x has invalid type!\n", *pz);
 /* See http://support.microsoft.com/kb/190351 */
 #ifdef ZEND_WIN32
