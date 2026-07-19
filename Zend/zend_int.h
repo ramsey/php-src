@@ -19,8 +19,9 @@
 
 BEGIN_EXTERN_C()
 
-/* Wraps a backend integer in an IS_BIGINT box and stores it in result. Takes
- * ownership of b. */
+/* Stores b in result as a canonical integer, demoting to an IS_LONG when the
+ * value fits zend_long and wrapping it in an IS_BIGINT box otherwise. Takes
+ * ownership of b either way. */
 ZEND_API void zend_int_from_bigint(zval *result, zend_bigint *b);
 
 END_EXTERN_C()

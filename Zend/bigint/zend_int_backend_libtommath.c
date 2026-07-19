@@ -116,13 +116,15 @@ ZEND_API void zend_bigint_free(zend_bigint *b)
 ZEND_API bool zend_bigint_fits_long(const zend_bigint *b)
 {
 	int bits = mp_count_bits(&b->mp);
+	int max_bits = SIZEOF_ZEND_LONG * 8 - 1;
 
-	if (bits <= 63) {
+	if (bits <= max_bits) {
 		return true;
 	}
 
-	/* ZEND_LONG_MIN's magnitude is 2**63: 64 bits with only the top bit set. */
-	return bits == 64 && mp_isneg(&b->mp) && mp_cnt_lsb(&b->mp) == 63;
+	/* One bit past the positive range fits only ZEND_LONG_MIN, whose magnitude
+	 * is 2**max_bits with that top bit set alone. */
+	return bits == max_bits + 1 && mp_isneg(&b->mp) && mp_cnt_lsb(&b->mp) == max_bits;
 }
 
 ZEND_API zend_long zend_bigint_to_long(const zend_bigint *b)

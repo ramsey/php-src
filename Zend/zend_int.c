@@ -22,8 +22,15 @@
 
 ZEND_API void zend_int_from_bigint(zval *result, zend_bigint *b)
 {
-	zend_refcounted *ref = (zend_refcounted *) b;
+	zend_refcounted *ref;
 
+	if (zend_bigint_fits_long(b)) {
+		ZVAL_LONG(result, zend_bigint_to_long(b));
+		zend_bigint_free(b);
+		return;
+	}
+
+	ref = (zend_refcounted *) b;
 	GC_SET_REFCOUNT(ref, 1);
 	GC_TYPE_INFO(ref) = GC_BIGINT;
 
