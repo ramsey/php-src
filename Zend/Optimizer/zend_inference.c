@@ -1947,6 +1947,11 @@ static uint32_t get_ssa_alias_types(zend_ssa_alias_kind alias) {
 	}
 }
 
+static zend_always_inline bool ssa_var_is_class_entry(const zend_ssa *ssa, int var)
+{
+	return ssa->var_info && var >= 0 && ssa->var_info[var].is_class_entry;
+}
+
 #define UPDATE_SSA_TYPE(_type, _var)									\
 	do {																\
 		uint32_t __type = (_type) & ~MAY_BE_GUARD;						\
@@ -2013,6 +2018,17 @@ static uint32_t get_ssa_alias_types(zend_ssa_alias_kind alias) {
 				}														\
 			}															\
 			/*zend_bitset_excl(worklist, var);*/						\
+		}																\
+	} while (0)
+
+#define UPDATE_SSA_CLASS_ENTRY(_var)									\
+	do {																\
+		int __var = (_var);												\
+		if (__var >= 0 && !ssa_var_info[__var].is_class_entry) {		\
+			ssa_var_info[__var].is_class_entry = 1;						\
+			if (update_worklist) {										\
+				add_usages(op_array, ssa, worklist, __var);				\
+			}															\
 		}																\
 	} while (0)
 
@@ -2550,15 +2566,15 @@ static zend_always_inline zend_result _zend_update_type_info(
 	/* If one of the operands cannot have any type, this means the operand derives from
 	 * unreachable code. Propagate the empty result early, so that that the following
 	 * code may assume that operands have at least one type. */
-	if (!(t1 & (MAY_BE_ANY|MAY_BE_UNDEF|MAY_BE_CLASS))
-	 || !(t2 & (MAY_BE_ANY|MAY_BE_UNDEF|MAY_BE_CLASS))
-	 || (ssa_op->result_use >= 0 && !(RES_USE_INFO() & (MAY_BE_ANY|MAY_BE_UNDEF|MAY_BE_CLASS)))
+	if ((!(t1 & (MAY_BE_ANY|MAY_BE_UNDEF)) && !ssa_var_is_class_entry(ssa, ssa_op->op1_use))
+	 || (!(t2 & (MAY_BE_ANY|MAY_BE_UNDEF)) && !ssa_var_is_class_entry(ssa, ssa_op->op2_use))
+	 || (ssa_op->result_use >= 0 && !(RES_USE_INFO() & (MAY_BE_ANY|MAY_BE_UNDEF)) && !ssa_var_is_class_entry(ssa, ssa_op->result_use))
 	 || ((opline->opcode == ZEND_ASSIGN_DIM_OP
 	   || opline->opcode == ZEND_ASSIGN_OBJ_OP
 	   || opline->opcode == ZEND_ASSIGN_STATIC_PROP_OP
 	   || opline->opcode == ZEND_ASSIGN_DIM
 	   || opline->opcode == ZEND_ASSIGN_OBJ)
-	    && !(OP1_DATA_INFO() & (MAY_BE_ANY|MAY_BE_UNDEF|MAY_BE_CLASS)) /*&& 0*/)) {
+	    && !(OP1_DATA_INFO() & (MAY_BE_ANY|MAY_BE_UNDEF)) && !ssa_var_is_class_entry(ssa, (ssa_op+1)->op1_use) /*&& 0*/)) {
 		tmp = 0;
 		if (ssa_op->result_def >= 0 && !(ssa_var_info[ssa_op->result_def].type & MAY_BE_REF)) {
 			UPDATE_SSA_TYPE(tmp, ssa_op->result_def);
@@ -3331,13 +3347,13 @@ static zend_always_inline zend_result _zend_update_type_info(
 			break;
 		}
 		case ZEND_DECLARE_ANON_CLASS:
-			UPDATE_SSA_TYPE(MAY_BE_CLASS, ssa_op->result_def);
+			UPDATE_SSA_CLASS_ENTRY(ssa_op->result_def);
 			if (script && (ce = zend_hash_find_ptr(&script->class_table, Z_STR_P(CRT_CONSTANT(opline->op1)))) != NULL) {
 				UPDATE_SSA_OBJ_TYPE(ce, 0, ssa_op->result_def);
 			}
 			break;
 		case ZEND_FETCH_CLASS:
-			UPDATE_SSA_TYPE(MAY_BE_CLASS, ssa_op->result_def);
+			UPDATE_SSA_CLASS_ENTRY(ssa_op->result_def);
 			if (opline->op2_type == IS_UNUSED) {
 				switch (opline->op1.num & ZEND_FETCH_CLASS_MASK) {
 					case ZEND_FETCH_CLASS_SELF:
@@ -3382,7 +3398,7 @@ static zend_always_inline zend_result _zend_update_type_info(
 			ce = zend_optimizer_get_class_entry_from_op1(script, op_array, opline);
 			if (ce) {
 				UPDATE_SSA_OBJ_TYPE(ce, 0, ssa_op->result_def);
-			} else if ((t1 & MAY_BE_CLASS) && ssa_op->op1_use >= 0 && ssa_var_info[ssa_op->op1_use].ce) {
+			} else if (ssa_var_is_class_entry(ssa, ssa_op->op1_use) && ssa_var_info[ssa_op->op1_use].ce) {
 				UPDATE_SSA_OBJ_TYPE(ssa_var_info[ssa_op->op1_use].ce, ssa_var_info[ssa_op->op1_use].is_instanceof, ssa_op->result_def);
 				if (!ssa_var_info[ssa_op->result_def].is_instanceof) {
 					ce = ssa_var_info[ssa_op->op1_use].ce;

@@ -120,6 +120,7 @@ typedef struct _zend_ssa_var_info {
 	uint32_t               type; /* inferred type (see zend_inference.h) */
 	bool                   has_range : 1;
 	bool                   is_instanceof : 1; /* 0 - class == "ce", 1 - may be child of "ce" */
+	bool                   is_class_entry : 1;
 	bool                   recursive : 1;
 	bool                   use_as_double : 1;
 	bool                   delayed_fetch_this : 1;

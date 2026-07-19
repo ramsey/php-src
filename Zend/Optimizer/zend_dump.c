@@ -188,7 +188,7 @@ static void zend_dump_range(const zend_ssa_range *r)
 	}
 }
 
-static void zend_dump_type_info(uint32_t info, const zend_class_entry *ce, bool is_instanceof, uint32_t dump_flags)
+static void zend_dump_type_info(uint32_t info, bool is_class, const zend_class_entry *ce, bool is_instanceof, uint32_t dump_flags)
 {
 	bool first = true;
 
@@ -218,7 +218,7 @@ static void zend_dump_type_info(uint32_t info, const zend_class_entry *ce, bool 
 			fprintf(stderr, "rcn");
 		}
 	}
-	if (info & MAY_BE_CLASS) {
+	if (is_class) {
 		if (first) first = false; else fprintf(stderr, ", ");
 		fprintf(stderr, "class");
 		if (ce) {
@@ -376,6 +376,7 @@ static void zend_dump_ssa_var_info(const zend_ssa *ssa, int ssa_var_num, uint32_
 {
 	zend_dump_type_info(
 		ssa->var_info[ssa_var_num].type,
+		ssa->var_info[ssa_var_num].is_class_entry,
 		ssa->var_info[ssa_var_num].ce,
 		ssa->var_info[ssa_var_num].ce ?
 			ssa->var_info[ssa_var_num].is_instanceof : 0,
@@ -410,7 +411,7 @@ ZEND_API void zend_dump_ssa_var(const zend_op_array *op_array, const zend_ssa *s
 static void zend_dump_type_constraint(const zend_op_array *op_array, const zend_ssa *ssa, const zend_ssa_type_constraint *constraint, uint32_t dump_flags)
 {
 	fprintf(stderr, " TYPE");
-	zend_dump_type_info(constraint->type_mask, constraint->ce, 1, dump_flags);
+	zend_dump_type_info(constraint->type_mask, 0, constraint->ce, 1, dump_flags);
 }
 
 static void zend_dump_range_constraint(const zend_op_array *op_array, const zend_ssa *ssa, const zend_ssa_range_constraint *r, uint32_t dump_flags)
@@ -567,7 +568,7 @@ ZEND_API void zend_dump_op(const zend_op_array *op_array, const zend_basic_block
 				break;
 			default:
 				fprintf(stderr, " TYPE");
-				zend_dump_type_info(opline->extended_value, NULL, 0, dump_flags);
+				zend_dump_type_info(opline->extended_value, 0, NULL, 0, dump_flags);
 				break;
 		}
 	} else if (ZEND_VM_EXT_EVAL == (flags & ZEND_VM_EXT_MASK)) {
@@ -1021,7 +1022,7 @@ ZEND_API void zend_dump_op_array(const zend_op_array *op_array, uint32_t dump_fl
 
 	if (func_info) {
 		fprintf(stderr, "     ; return ");
-		zend_dump_type_info(func_info->return_info.type, func_info->return_info.ce, func_info->return_info.is_instanceof, dump_flags);
+		zend_dump_type_info(func_info->return_info.type, 0, func_info->return_info.ce, func_info->return_info.is_instanceof, dump_flags);
 		zend_dump_range(&func_info->return_info.range);
 		fprintf(stderr, "\n");
 	}

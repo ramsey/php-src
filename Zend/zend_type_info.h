@@ -70,7 +70,6 @@
 #define MAY_BE_HASH_ONLY(t)         (MAY_BE_HASH(t) && !((t) & (MAY_BE_ARRAY_PACKED|MAY_BE_ARRAY_EMPTY)))
 #define MAY_BE_EMPTY_ONLY(t)        (((t) & MAY_BE_ARRAY_KEY_ANY) == MAY_BE_ARRAY_EMPTY)
 
-#define MAY_BE_CLASS                (1<<24)
 #define MAY_BE_INDIRECT             (1<<25)
 
 #define MAY_BE_RC1                  (1<<30) /* may be non-reference with refcount == 1 */
