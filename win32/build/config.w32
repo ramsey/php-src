@@ -245,7 +245,7 @@ ADD_SOURCES("Zend", "zend_language_parser.c zend_language_scanner.c \
 ADD_SOURCES("Zend\\Optimizer", "zend_optimizer.c pass1.c pass3.c optimize_func_calls.c block_pass.c optimize_temp_vars_5.c nop_removal.c compact_literals.c zend_cfg.c zend_dfg.c dfa_pass.c zend_ssa.c zend_inference.c zend_func_info.c zend_call_graph.c zend_dump.c escape_analysis.c compact_vars.c dce.c sccp.c scdf.c");
 
 ADD_SOURCES("Zend\\bigint\\libtommath", "tommath_amalgam.c tommath_platform_stubs.c", "/DMP_NO_FILE /DMP_PREC=8 /DMP_MALLOC=zend_mp_malloc /DMP_REALLOC=zend_mp_realloc /DMP_CALLOC=zend_mp_calloc /DMP_FREE=zend_mp_free");
-ADD_SOURCES("Zend\\bigint", "zend_int_backend_libtommath_alloc.c", "/IZend/bigint");
+ADD_SOURCES("Zend\\bigint", "zend_int_backend_libtommath_alloc.c zend_int_backend_libtommath.c", "/IZend/bigint");
 
 var PHP_ASSEMBLER = PATH_PROG({
 	'x64': 'ML64',

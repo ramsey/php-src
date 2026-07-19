@@ -1,0 +1,40 @@
+/*
+   +----------------------------------------------------------------------+
+   | Copyright © The PHP Group and Contributors.                          |
+   +----------------------------------------------------------------------+
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
+   +----------------------------------------------------------------------+
+   | Author: Ben Ramsey <ramsey@php.net>                                  |
+   +----------------------------------------------------------------------+
+*/
+
+#ifndef ZEND_INT_BACKEND_H
+#define ZEND_INT_BACKEND_H
+
+#include "zend_types.h"
+
+typedef struct _zend_bigint zend_bigint;
+
+BEGIN_EXTERN_C()
+
+ZEND_API zend_bigint *zend_bigint_from_long(zend_long v);
+ZEND_API zend_bigint *zend_bigint_from_string(const char *s, size_t len, int base);
+ZEND_API zend_bigint *zend_bigint_dup(const zend_bigint *b);
+ZEND_API void         zend_bigint_free(zend_bigint *b);
+ZEND_API bool         zend_bigint_fits_long(const zend_bigint *b);
+ZEND_API zend_long    zend_bigint_to_long(const zend_bigint *b);
+ZEND_API int          zend_bigint_sign(const zend_bigint *b);
+ZEND_API int          zend_bigint_cmp(const zend_bigint *a, const zend_bigint *b);
+ZEND_API uint64_t     zend_bigint_bit_length(const zend_bigint *b);
+ZEND_API zend_string *zend_bigint_to_str(const zend_bigint *b);
+ZEND_API bool         zend_bigint_radix_is_linear(int base);
+ZEND_API bool         zend_bigint_exceeds_digits(const zend_bigint *b, zend_long max_digits);
+ZEND_API const char  *zend_bigint_backend_name(void);
+
+END_EXTERN_C()
+
+#endif

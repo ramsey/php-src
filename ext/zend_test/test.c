@@ -32,6 +32,7 @@
 #include "zend_weakrefs.h"
 #include "Zend/Optimizer/zend_optimizer.h"
 #include "Zend/zend_alloc.h"
+#include "Zend/zend_int_backend.h"
 #include "test_arginfo.h"
 #include "tmp_methods_arginfo.h"
 #include "zend_call_stack.h"
@@ -2484,4 +2485,47 @@ static PHP_FUNCTION(zend_test_gh19792)
 	RETVAL_STRING("this is a non-interned string");
 	zend_error(E_WARNING, "a warning");
 	zend_throw_error(NULL, "an exception");
+}
+
+static ZEND_FUNCTION(zend_test_bigint_roundtrip)
+{
+	zend_string *digits;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_STR(digits)
+	ZEND_PARSE_PARAMETERS_END();
+
+	zend_bigint *b = zend_bigint_from_string(ZSTR_VAL(digits), ZSTR_LEN(digits), 10);
+	if (!b) {
+		RETURN_FALSE;
+	}
+
+	zend_string *out = zend_bigint_to_str(b);
+	zend_bigint_free(b);
+	RETURN_STR(out);
+}
+
+static ZEND_FUNCTION(zend_test_bigint_cmp_strings)
+{
+	zend_string *a_digits, *b_digits;
+
+	ZEND_PARSE_PARAMETERS_START(2, 2)
+		Z_PARAM_STR(a_digits)
+		Z_PARAM_STR(b_digits)
+	ZEND_PARSE_PARAMETERS_END();
+
+	zend_bigint *a = zend_bigint_from_string(ZSTR_VAL(a_digits), ZSTR_LEN(a_digits), 10);
+	if (!a) {
+		RETURN_FALSE;
+	}
+
+	zend_bigint *b = zend_bigint_from_string(ZSTR_VAL(b_digits), ZSTR_LEN(b_digits), 10);
+	if (!b) {
+		zend_bigint_free(a);
+		RETURN_FALSE;
+	}
+
+	RETVAL_LONG(zend_bigint_cmp(a, b));
+	zend_bigint_free(a);
+	zend_bigint_free(b);
 }

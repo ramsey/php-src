@@ -457,6 +457,10 @@ function zend_test_override_libxml_global_state(): void {}
 
     /** @compile-time-eval */
     function zend_test_gh19792(): void {}
+
+    function zend_test_bigint_roundtrip(string $digits): string|false {}
+
+    function zend_test_bigint_cmp_strings(string $a, string $b): int|false {}
 }
 
 namespace ZendTestNS {
