@@ -105,6 +105,10 @@ define dump_bt
 				if $type == 4
 					printf "%ld", $zvalue->value.lval
 				end
+				if $type == 5
+					set $bigstr = (zend_string *)zend_int_debug_str($zvalue, 40)
+					printf "bigint(%s)", (char*)$bigstr->val
+				end
 				if $type == 6
 					printf "%f", $zvalue->value.dval
 				end
@@ -123,7 +127,7 @@ define dump_bt
 				if $type == 11
 					printf "reference"
 				end
-				if ($type == 5) || ($type > 11)
+				if $type > 11
 					printf "unknown type %d", $type
 				end
 				set $arg = $arg + 1
@@ -163,7 +167,7 @@ define ____printzv_contents
 	set $type = $zvalue->u1.v.type
 
 	# 13 == IS_INDIRECT
-	if ($type > 6 && $type < 13)
+	if ($type == 5) || ($type > 6 && $type < 13)
 		printf "(refcount=%d) ", $zvalue->value.counted->gc.refcount
 	end
 
@@ -181,6 +185,10 @@ define ____printzv_contents
 	end
 	if $type == 4
 		printf "long: %ld", $zvalue->value.lval
+	end
+	if $type == 5
+		set $bigstr = (zend_string *)zend_int_debug_str($zvalue, 40)
+		printf "bigint(%s)", (char*)$bigstr->val
 	end
 	if $type == 6
 		printf "double: %f", $zvalue->value.dval
@@ -271,7 +279,7 @@ define ____printzv_contents
 	if $type == 20
 		printf "_NUMBER"
 	end
-	if ($type == 5) || ($type == 17) || ($type == 18) || ($type > 20)
+	if ($type == 17) || ($type == 18) || ($type > 20)
 		printf "unknown type %d", $type
 	end
 	printf "\n"

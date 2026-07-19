@@ -14,6 +14,7 @@
 
 #include "zend.h"
 #include "zend_int.h"
+#include "zend_smart_str.h"
 
 /* A zend_bigint is opaque here on purpose; this file never sees the backend
  * struct layout. The cross-backend contract guarantees a zend_bigint begins
@@ -35,4 +36,59 @@ ZEND_API void zend_int_from_bigint(zval *result, zend_bigint *b)
 	GC_TYPE_INFO(ref) = GC_BIGINT;
 
 	ZVAL_BIGINT(result, b);
+}
+
+ZEND_API bool zend_int_fits_long(const zval *zv)
+{
+	ZEND_ASSERT(Z_IS_INT_P(zv));
+
+	if (Z_TYPE_P(zv) == IS_LONG) {
+		return true;
+	}
+
+	return zend_bigint_fits_long(Z_BIG_P(zv));
+}
+
+ZEND_API bool zend_int_get_long(const zval *zv, zend_long *out)
+{
+	ZEND_ASSERT(Z_IS_INT_P(zv));
+
+	if (Z_TYPE_P(zv) == IS_LONG) {
+		*out = Z_LVAL_P(zv);
+		return true;
+	}
+
+	if (!zend_bigint_fits_long(Z_BIG_P(zv))) {
+		return false;
+	}
+
+	*out = zend_bigint_to_long(Z_BIG_P(zv));
+	return true;
+}
+
+ZEND_API zend_string *zend_int_debug_str(const zval *zv, size_t max_digits)
+{
+	ZEND_ASSERT(Z_IS_INT_P(zv));
+
+	if (Z_TYPE_P(zv) == IS_LONG) {
+		return zend_long_to_str(Z_LVAL_P(zv));
+	}
+
+	zend_bigint *b = Z_BIG_P(zv);
+	zend_string *full = zend_bigint_to_str(b);
+
+	if (!zend_bigint_exceeds_digits(b, (zend_long) max_digits)) {
+		return full;
+	}
+
+	size_t lead = MIN(max_digits, ZSTR_LEN(full));
+	smart_str buf = {0};
+	smart_str_appendl(&buf, ZSTR_VAL(full), lead);
+	smart_str_appends(&buf, "...(");
+	smart_str_append_long(&buf, (zend_long) ZSTR_LEN(full));
+	smart_str_appends(&buf, " digits)");
+
+	zend_string_release(full);
+
+	return smart_str_extract(&buf);
 }

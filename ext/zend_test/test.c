@@ -2575,3 +2575,21 @@ static ZEND_FUNCTION(zend_test_bigint_to_string)
 
 	RETURN_STR(zend_bigint_to_str(Z_BIG_P(value)));
 }
+
+static ZEND_FUNCTION(zend_test_int_debug_str)
+{
+	zval *value;
+	zend_long max_digits;
+
+	ZEND_PARSE_PARAMETERS_START(2, 2)
+		Z_PARAM_ZVAL(value)
+		Z_PARAM_LONG(max_digits)
+	ZEND_PARSE_PARAMETERS_END();
+
+	if (!Z_IS_INT_P(value)) {
+		zend_argument_type_error(1, "must be an integer");
+		RETURN_THROWS();
+	}
+
+	RETURN_STR(zend_int_debug_str(value, (size_t) max_digits));
+}

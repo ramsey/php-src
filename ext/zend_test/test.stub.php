@@ -474,6 +474,8 @@ function zend_test_override_libxml_global_state(): void {}
     function zend_test_int_is_boxed(mixed $value): bool {}
 
     function zend_test_bigint_to_string(mixed $value): string {}
+
+    function zend_test_int_debug_str(mixed $v, int $maxDigits): string {}
 }
 
 namespace ZendTestNS {
