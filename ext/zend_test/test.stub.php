@@ -476,6 +476,26 @@ function zend_test_override_libxml_global_state(): void {}
     function zend_test_bigint_to_string(mixed $value): string {}
 
     function zend_test_int_debug_str(mixed $v, int $maxDigits): string {}
+
+    /**
+     * Returns an IS_BIGINT box when the sum is out of long range. The return
+     * type is PHPDoc-only for the same reason as zend_test_bigint_make.
+     *
+     * @param mixed $a
+     * @param mixed $b
+     * @return mixed
+     */
+    function zend_test_int_add(mixed $a, mixed $b) {}
+
+    /**
+     * Returns an IS_BIGINT box when the difference is out of long range. The
+     * return type is PHPDoc-only for the same reason as zend_test_bigint_make.
+     *
+     * @param mixed $a
+     * @param mixed $b
+     * @return mixed
+     */
+    function zend_test_int_sub(mixed $a, mixed $b) {}
 }
 
 namespace ZendTestNS {

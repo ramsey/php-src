@@ -2593,3 +2593,45 @@ static ZEND_FUNCTION(zend_test_int_debug_str)
 
 	RETURN_STR(zend_int_debug_str(value, (size_t) max_digits));
 }
+
+static ZEND_FUNCTION(zend_test_int_add)
+{
+	zval *op1, *op2;
+
+	ZEND_PARSE_PARAMETERS_START(2, 2)
+		Z_PARAM_ZVAL(op1)
+		Z_PARAM_ZVAL(op2)
+	ZEND_PARSE_PARAMETERS_END();
+
+	if (!Z_IS_INT_P(op1)) {
+		zend_argument_type_error(1, "must be an integer");
+		RETURN_THROWS();
+	}
+	if (!Z_IS_INT_P(op2)) {
+		zend_argument_type_error(2, "must be an integer");
+		RETURN_THROWS();
+	}
+
+	zend_int_add(return_value, op1, op2);
+}
+
+static ZEND_FUNCTION(zend_test_int_sub)
+{
+	zval *op1, *op2;
+
+	ZEND_PARSE_PARAMETERS_START(2, 2)
+		Z_PARAM_ZVAL(op1)
+		Z_PARAM_ZVAL(op2)
+	ZEND_PARSE_PARAMETERS_END();
+
+	if (!Z_IS_INT_P(op1)) {
+		zend_argument_type_error(1, "must be an integer");
+		RETURN_THROWS();
+	}
+	if (!Z_IS_INT_P(op2)) {
+		zend_argument_type_error(2, "must be an integer");
+		RETURN_THROWS();
+	}
+
+	zend_int_sub(return_value, op1, op2);
+}

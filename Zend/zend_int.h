@@ -37,6 +37,83 @@ ZEND_API bool zend_int_get_long(const zval *zv, zend_long *out);
  * characters followed by "...(N digits)", where N is the full length. */
 ZEND_API zend_string *zend_int_debug_str(const zval *zv, size_t max_digits);
 
+/* Returns true if a + b overflows zend_long. Writes the wrapped result to
+ * *r regardless; it is meaningful only when this returns false. */
+static zend_always_inline bool zend_long_add_overflows(zend_long a, zend_long b, zend_long *r)
+{
+#if defined(PHP_HAVE_BUILTIN_SADDL_OVERFLOW) && SIZEOF_LONG == SIZEOF_ZEND_LONG
+	long lr;
+	bool ov = __builtin_saddl_overflow((long) a, (long) b, &lr);
+	*r = (zend_long) lr;
+	return ov;
+#elif defined(PHP_HAVE_BUILTIN_SADDLL_OVERFLOW) && SIZEOF_LONG_LONG == SIZEOF_ZEND_LONG
+	long long llr;
+	bool ov = __builtin_saddll_overflow((long long) a, (long long) b, &llr);
+	*r = (zend_long) llr;
+	return ov;
+#else
+	zend_long s = (zend_long) ((zend_ulong) a + (zend_ulong) b);
+	*r = s;
+	return ((a ^ s) & (b ^ s)) < 0;
+#endif
+}
+
+/* Returns true if a - b overflows zend_long. Writes the wrapped result to
+ * *r regardless; it is meaningful only when this returns false. */
+static zend_always_inline bool zend_long_sub_overflows(zend_long a, zend_long b, zend_long *r)
+{
+#if defined(PHP_HAVE_BUILTIN_SSUBL_OVERFLOW) && SIZEOF_LONG == SIZEOF_ZEND_LONG
+	long lr;
+	bool ov = __builtin_ssubl_overflow((long) a, (long) b, &lr);
+	*r = (zend_long) lr;
+	return ov;
+#elif defined(PHP_HAVE_BUILTIN_SSUBLL_OVERFLOW) && SIZEOF_LONG_LONG == SIZEOF_ZEND_LONG
+	long long llr;
+	bool ov = __builtin_ssubll_overflow((long long) a, (long long) b, &llr);
+	*r = (zend_long) llr;
+	return ov;
+#else
+	zend_long s = (zend_long) ((zend_ulong) a - (zend_ulong) b);
+	*r = s;
+	return ((a ^ b) & (a ^ s)) < 0;
+#endif
+}
+
+/* Cold out-of-line halves of zend_int_add/zend_int_sub below; the overflow
+ * and boxed cases are handled here, not called directly. */
+ZEND_API void zend_int_add_slow(zval *result, const zval *op1, const zval *op2);
+ZEND_API void zend_int_sub_slow(zval *result, const zval *op1, const zval *op2);
+
+/* Value-op arithmetic on logical integers. Each stores a canonical integer
+ * in result, an IS_LONG when the value fits zend_long and an IS_BIGINT box
+ * otherwise; result may alias an operand. Both operands must be logical
+ * integers (debug-asserted). */
+static zend_always_inline void zend_int_add(zval *result, const zval *op1, const zval *op2)
+{
+	ZEND_ASSERT(Z_IS_INT_P(op1) && Z_IS_INT_P(op2));
+	if (EXPECTED(Z_TYPE_INFO_P(op1) == IS_LONG) && EXPECTED(Z_TYPE_INFO_P(op2) == IS_LONG)) {
+		zend_long r;
+		if (EXPECTED(!zend_long_add_overflows(Z_LVAL_P(op1), Z_LVAL_P(op2), &r))) {
+			ZVAL_LONG(result, r);
+			return;
+		}
+	}
+	zend_int_add_slow(result, op1, op2);
+}
+
+static zend_always_inline void zend_int_sub(zval *result, const zval *op1, const zval *op2)
+{
+	ZEND_ASSERT(Z_IS_INT_P(op1) && Z_IS_INT_P(op2));
+	if (EXPECTED(Z_TYPE_INFO_P(op1) == IS_LONG) && EXPECTED(Z_TYPE_INFO_P(op2) == IS_LONG)) {
+		zend_long r;
+		if (EXPECTED(!zend_long_sub_overflows(Z_LVAL_P(op1), Z_LVAL_P(op2), &r))) {
+			ZVAL_LONG(result, r);
+			return;
+		}
+	}
+	zend_int_sub_slow(result, op1, op2);
+}
+
 END_EXTERN_C()
 
 #endif

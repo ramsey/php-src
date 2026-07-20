@@ -92,3 +92,37 @@ ZEND_API zend_string *zend_int_debug_str(const zval *zv, size_t max_digits)
 
 	return smart_str_extract(&buf);
 }
+
+ZEND_API void zend_int_add_slow(zval *result, const zval *op1, const zval *op2)
+{
+	zend_bigint *b;
+	if (Z_TYPE_P(op1) == IS_LONG) {
+		if (Z_TYPE_P(op2) == IS_LONG) {
+			b = zend_bigint_long_add_long(Z_LVAL_P(op1), Z_LVAL_P(op2));
+		} else {
+			b = zend_bigint_add_long(Z_BIG_P(op2), Z_LVAL_P(op1));
+		}
+	} else if (Z_TYPE_P(op2) == IS_LONG) {
+		b = zend_bigint_add_long(Z_BIG_P(op1), Z_LVAL_P(op2));
+	} else {
+		b = zend_bigint_add(Z_BIG_P(op1), Z_BIG_P(op2));
+	}
+	zend_int_from_bigint(result, b);
+}
+
+ZEND_API void zend_int_sub_slow(zval *result, const zval *op1, const zval *op2)
+{
+	zend_bigint *b;
+	if (Z_TYPE_P(op1) == IS_LONG) {
+		if (Z_TYPE_P(op2) == IS_LONG) {
+			b = zend_bigint_long_sub_long(Z_LVAL_P(op1), Z_LVAL_P(op2));
+		} else {
+			b = zend_bigint_long_sub(Z_LVAL_P(op1), Z_BIG_P(op2));
+		}
+	} else if (Z_TYPE_P(op2) == IS_LONG) {
+		b = zend_bigint_sub_long(Z_BIG_P(op1), Z_LVAL_P(op2));
+	} else {
+		b = zend_bigint_sub(Z_BIG_P(op1), Z_BIG_P(op2));
+	}
+	zend_int_from_bigint(result, b);
+}
