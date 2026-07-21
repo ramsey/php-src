@@ -293,6 +293,26 @@ ZEND_API void zend_int_shift_right_slow(zval *result, const zval *op1, const zva
 	zend_int_from_bigint(result, b);
 }
 
+/* A boxed operand cannot equal a long operand. A value that fits zend_long is
+ * never boxed. So long-vs.-box and box-vs.-long reduce to zend_bigint_cmp_long
+ * (negated for long-vs.-box), and box-vs.-box reduces to zend_bigint_cmp. */
+ZEND_API int zend_int_cmp_slow(const zval *op1, const zval *op2)
+{
+	if (Z_TYPE_P(op1) == IS_LONG) {
+		return -zend_bigint_cmp_long(Z_BIG_P(op2), Z_LVAL_P(op1));
+	}
+	if (Z_TYPE_P(op2) == IS_LONG) {
+		return zend_bigint_cmp_long(Z_BIG_P(op1), Z_LVAL_P(op2));
+	}
+	return zend_bigint_cmp(Z_BIG_P(op1), Z_BIG_P(op2));
+}
+
+ZEND_API void zend_int_from_double(zval *result, double d)
+{
+	ZEND_ASSERT(zend_finite(d));
+	zend_int_from_bigint(result, zend_bigint_from_double(d));
+}
+
 ZEND_API zend_result zend_int_pow_slow(zval *result, const zval *op1, const zval *op2)
 {
 	zend_bigint *base = Z_TYPE_P(op1) == IS_LONG

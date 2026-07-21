@@ -95,6 +95,7 @@ ZEND_API void zend_int_xor_slow(zval *result, const zval *op1, const zval *op2);
 ZEND_API zend_result zend_int_shift_left_slow(zval *result, const zval *op1, const zval *op2);
 ZEND_API void zend_int_shift_right_slow(zval *result, const zval *op1, const zval *op2);
 ZEND_API zend_result zend_int_pow_slow(zval *result, const zval *op1, const zval *op2);
+ZEND_API int zend_int_cmp_slow(const zval *op1, const zval *op2);
 
 /* Value-op arithmetic on logical integers. Each stores a canonical integer
  * in result, an IS_LONG when the value fits zend_long and an IS_BIGINT box
@@ -279,6 +280,75 @@ static zend_always_inline zend_result zend_int_pow(zval *result, const zval *op1
 	}
 	return zend_int_pow_slow(result, op1, op2);
 }
+
+/* Queries about a logical integer operand, returning a value rather than
+ * writing to a result zval. Operands must be logical integers (debug-asserted). */
+
+static zend_always_inline int zend_int_cmp(const zval *op1, const zval *op2)
+{
+	ZEND_ASSERT(Z_IS_INT_P(op1) && Z_IS_INT_P(op2));
+	if (EXPECTED(Z_TYPE_INFO_P(op1) == IS_LONG) && EXPECTED(Z_TYPE_INFO_P(op2) == IS_LONG)) {
+		return Z_LVAL_P(op1) < Z_LVAL_P(op2) ? -1 : (Z_LVAL_P(op1) > Z_LVAL_P(op2) ? 1 : 0);
+	}
+	return zend_int_cmp_slow(op1, op2);
+}
+
+static zend_always_inline int zend_int_cmp_long(const zval *op, zend_long n)
+{
+	ZEND_ASSERT(Z_IS_INT_P(op));
+	if (EXPECTED(Z_TYPE_INFO_P(op) == IS_LONG)) {
+		return Z_LVAL_P(op) < n ? -1 : (Z_LVAL_P(op) > n ? 1 : 0);
+	}
+	return zend_bigint_cmp_long(Z_BIG_P(op), n);
+}
+
+static zend_always_inline int zend_int_sign(const zval *op)
+{
+	ZEND_ASSERT(Z_IS_INT_P(op));
+	if (EXPECTED(Z_TYPE_INFO_P(op) == IS_LONG)) {
+		return (Z_LVAL_P(op) > 0) - (Z_LVAL_P(op) < 0);
+	}
+	return zend_bigint_sign(Z_BIG_P(op));
+}
+
+static zend_always_inline bool zend_int_is_odd(const zval *op)
+{
+	ZEND_ASSERT(Z_IS_INT_P(op));
+	if (EXPECTED(Z_TYPE_INFO_P(op) == IS_LONG)) {
+		return Z_LVAL_P(op) & 1;
+	}
+	return zend_bigint_is_odd(Z_BIG_P(op));
+}
+
+static zend_always_inline uint64_t zend_int_bit_length(const zval *op)
+{
+	ZEND_ASSERT(Z_IS_INT_P(op));
+	if (EXPECTED(Z_TYPE_INFO_P(op) == IS_LONG)) {
+		zend_ulong magnitude = Z_LVAL_P(op) < 0
+			? (zend_ulong) -(zend_ulong) Z_LVAL_P(op)
+			: (zend_ulong) Z_LVAL_P(op);
+		uint64_t bits = 0;
+		while (magnitude != 0) {
+			bits++;
+			magnitude >>= 1;
+		}
+		return bits;
+	}
+	return zend_bigint_bit_length(Z_BIG_P(op));
+}
+
+static zend_always_inline double zend_int_to_double(const zval *op)
+{
+	ZEND_ASSERT(Z_IS_INT_P(op));
+	if (EXPECTED(Z_TYPE_INFO_P(op) == IS_LONG)) {
+		return (double) Z_LVAL_P(op);
+	}
+	return zend_bigint_to_double(Z_BIG_P(op));
+}
+
+/* Converts a finite double to a canonical integer, truncating toward zero,
+ * and stores it in result. The caller must ensure d is finite. */
+ZEND_API void zend_int_from_double(zval *result, double d);
 
 END_EXTERN_C()
 

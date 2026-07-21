@@ -630,6 +630,27 @@ function zend_test_override_libxml_global_state(): void {}
      * @return mixed
      */
     function zend_test_int_pow(mixed $a, mixed $b) {}
+
+    function zend_test_int_cmp(mixed $a, mixed $b): int {}
+
+    function zend_test_int_cmp_long(mixed $a, int $b): int {}
+
+    function zend_test_int_sign(mixed $value): int {}
+
+    function zend_test_int_is_odd(mixed $value): bool {}
+
+    function zend_test_int_bit_length(mixed $value): int {}
+
+    function zend_test_int_to_double(mixed $value): float {}
+
+    /**
+     * Returns an IS_BIGINT box when the reconstructed value is out of long
+     * range. The return type is PHPDoc-only for the same reason as
+     * zend_test_bigint_make.
+     *
+     * @return mixed
+     */
+    function zend_test_int_from_double(float $value) {}
 }
 
 namespace ZendTestNS {

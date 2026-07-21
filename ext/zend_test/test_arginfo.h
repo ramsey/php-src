@@ -1,5 +1,5 @@
 /* This is a generated file, edit test.stub.php instead.
- * Stub hash: e014ac1d37ff0aa2000a9a1854a8b867d8c3c7e3
+ * Stub hash: aed748a9770b565433d92a0148b59c6343f78d4b
  * Has decl header: yes */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_zend_trigger_bailout, 0, 0, IS_NEVER, 0)
@@ -389,6 +389,30 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_zend_test_int_pow arginfo_zend_test_int_add
 
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_zend_test_int_cmp, 0, 2, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO(0, a, IS_MIXED, 0)
+	ZEND_ARG_TYPE_INFO(0, b, IS_MIXED, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_zend_test_int_cmp_long, 0, 2, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO(0, a, IS_MIXED, 0)
+	ZEND_ARG_TYPE_INFO(0, b, IS_LONG, 0)
+ZEND_END_ARG_INFO()
+
+#define arginfo_zend_test_int_sign arginfo_zend_test_refcount
+
+#define arginfo_zend_test_int_is_odd arginfo_zend_test_int_is_boxed
+
+#define arginfo_zend_test_int_bit_length arginfo_zend_test_refcount
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_zend_test_int_to_double, 0, 1, IS_DOUBLE, 0)
+	ZEND_ARG_TYPE_INFO(0, value, IS_MIXED, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_zend_test_int_from_double, 0, 0, 1)
+	ZEND_ARG_TYPE_INFO(0, value, IS_DOUBLE, 0)
+ZEND_END_ARG_INFO()
+
 #define arginfo_ZendTestNS2_namespaced_func arginfo_zend_test_is_pcre_bundled
 
 #define arginfo_ZendTestNS2_namespaced_deprecated_func arginfo_zend_test_void_return
@@ -601,6 +625,13 @@ static ZEND_FUNCTION(zend_test_int_not);
 static ZEND_FUNCTION(zend_test_int_shift_left);
 static ZEND_FUNCTION(zend_test_int_shift_right);
 static ZEND_FUNCTION(zend_test_int_pow);
+static ZEND_FUNCTION(zend_test_int_cmp);
+static ZEND_FUNCTION(zend_test_int_cmp_long);
+static ZEND_FUNCTION(zend_test_int_sign);
+static ZEND_FUNCTION(zend_test_int_is_odd);
+static ZEND_FUNCTION(zend_test_int_bit_length);
+static ZEND_FUNCTION(zend_test_int_to_double);
+static ZEND_FUNCTION(zend_test_int_from_double);
 static ZEND_FUNCTION(ZendTestNS2_namespaced_func);
 static ZEND_FUNCTION(ZendTestNS2_namespaced_deprecated_func);
 static ZEND_FUNCTION(ZendTestNS2_ZendSubNS_namespaced_func);
@@ -806,6 +837,13 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(zend_test_int_shift_left, arginfo_zend_test_int_shift_left)
 	ZEND_FE(zend_test_int_shift_right, arginfo_zend_test_int_shift_right)
 	ZEND_FE(zend_test_int_pow, arginfo_zend_test_int_pow)
+	ZEND_FE(zend_test_int_cmp, arginfo_zend_test_int_cmp)
+	ZEND_FE(zend_test_int_cmp_long, arginfo_zend_test_int_cmp_long)
+	ZEND_FE(zend_test_int_sign, arginfo_zend_test_int_sign)
+	ZEND_FE(zend_test_int_is_odd, arginfo_zend_test_int_is_odd)
+	ZEND_FE(zend_test_int_bit_length, arginfo_zend_test_int_bit_length)
+	ZEND_FE(zend_test_int_to_double, arginfo_zend_test_int_to_double)
+	ZEND_FE(zend_test_int_from_double, arginfo_zend_test_int_from_double)
 #if (PHP_VERSION_ID >= 80400)
 	ZEND_RAW_FENTRY(ZEND_NS_NAME("ZendTestNS2", "namespaced_func"), zif_ZendTestNS2_namespaced_func, arginfo_ZendTestNS2_namespaced_func, 0, NULL, NULL)
 #else

@@ -147,9 +147,31 @@ ZEND_API int zend_bigint_cmp(const zend_bigint *a, const zend_bigint *b)
 	return (int) mp_cmp(&a->mp, &b->mp);
 }
 
+ZEND_API int zend_bigint_cmp_long(const zend_bigint *a, zend_long b)
+{
+	mp_int t;
+	mp_err err = mp_init(&t);
+	ZEND_ASSERT(err == MP_OKAY);
+	mp_set_i64(&t, (int64_t) b);
+	int r = (int) mp_cmp(&a->mp, &t);
+	mp_clear(&t);
+	(void) err;
+	return r;
+}
+
+ZEND_API bool zend_bigint_is_odd(const zend_bigint *b)
+{
+	return mp_isodd(&b->mp) == MP_YES;
+}
+
 ZEND_API uint64_t zend_bigint_bit_length(const zend_bigint *b)
 {
 	return (uint64_t) mp_count_bits(&b->mp);
+}
+
+ZEND_API double zend_bigint_to_double(const zend_bigint *b)
+{
+	return mp_get_double(&b->mp);
 }
 
 ZEND_API zend_string *zend_bigint_to_str(const zend_bigint *b)
@@ -198,6 +220,17 @@ static zend_always_inline zend_bigint *zend_bigint_alloc(void)
 	ZEND_ASSERT(err == MP_OKAY);
 	(void) err;
 	return b;
+}
+
+/* The input is finite by precondition; mp_set_double truncates toward zero
+ * and requires IEEE-754. */
+ZEND_API zend_bigint *zend_bigint_from_double(double d)
+{
+	zend_bigint *out = zend_bigint_alloc();
+	mp_err err = mp_set_double(&out->mp, d);
+	ZEND_ASSERT(err == MP_OKAY);
+	(void) err;
+	return out;
 }
 
 ZEND_API zend_bigint *zend_bigint_add(const zend_bigint *a, const zend_bigint *b)

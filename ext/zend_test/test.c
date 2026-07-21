@@ -2900,3 +2900,117 @@ static ZEND_FUNCTION(zend_test_int_pow)
 		RETURN_THROWS();
 	}
 }
+
+static ZEND_FUNCTION(zend_test_int_cmp)
+{
+	zval *op1, *op2;
+
+	ZEND_PARSE_PARAMETERS_START(2, 2)
+		Z_PARAM_ZVAL(op1)
+		Z_PARAM_ZVAL(op2)
+	ZEND_PARSE_PARAMETERS_END();
+
+	if (!Z_IS_INT_P(op1)) {
+		zend_argument_type_error(1, "must be an integer");
+		RETURN_THROWS();
+	}
+	if (!Z_IS_INT_P(op2)) {
+		zend_argument_type_error(2, "must be an integer");
+		RETURN_THROWS();
+	}
+
+	RETURN_LONG(zend_int_cmp(op1, op2));
+}
+
+static ZEND_FUNCTION(zend_test_int_cmp_long)
+{
+	zval *op1;
+	zend_long n;
+
+	ZEND_PARSE_PARAMETERS_START(2, 2)
+		Z_PARAM_ZVAL(op1)
+		Z_PARAM_LONG(n)
+	ZEND_PARSE_PARAMETERS_END();
+
+	if (!Z_IS_INT_P(op1)) {
+		zend_argument_type_error(1, "must be an integer");
+		RETURN_THROWS();
+	}
+
+	RETURN_LONG(zend_int_cmp_long(op1, n));
+}
+
+static ZEND_FUNCTION(zend_test_int_sign)
+{
+	zval *op;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_ZVAL(op)
+	ZEND_PARSE_PARAMETERS_END();
+
+	if (!Z_IS_INT_P(op)) {
+		zend_argument_type_error(1, "must be an integer");
+		RETURN_THROWS();
+	}
+
+	RETURN_LONG(zend_int_sign(op));
+}
+
+static ZEND_FUNCTION(zend_test_int_is_odd)
+{
+	zval *op;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_ZVAL(op)
+	ZEND_PARSE_PARAMETERS_END();
+
+	if (!Z_IS_INT_P(op)) {
+		zend_argument_type_error(1, "must be an integer");
+		RETURN_THROWS();
+	}
+
+	RETURN_BOOL(zend_int_is_odd(op));
+}
+
+static ZEND_FUNCTION(zend_test_int_bit_length)
+{
+	zval *op;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_ZVAL(op)
+	ZEND_PARSE_PARAMETERS_END();
+
+	if (!Z_IS_INT_P(op)) {
+		zend_argument_type_error(1, "must be an integer");
+		RETURN_THROWS();
+	}
+
+	RETURN_LONG((zend_long) zend_int_bit_length(op));
+}
+
+static ZEND_FUNCTION(zend_test_int_to_double)
+{
+	zval *op;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_ZVAL(op)
+	ZEND_PARSE_PARAMETERS_END();
+
+	if (!Z_IS_INT_P(op)) {
+		zend_argument_type_error(1, "must be an integer");
+		RETURN_THROWS();
+	}
+
+	RETURN_DOUBLE(zend_int_to_double(op));
+}
+
+static ZEND_FUNCTION(zend_test_int_from_double)
+{
+	double d;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_DOUBLE(d)
+	ZEND_PARSE_PARAMETERS_END();
+
+	zend_int_from_double(return_value, d);
+}
