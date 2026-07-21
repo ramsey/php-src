@@ -525,6 +525,39 @@ function zend_test_override_libxml_global_state(): void {}
      * @return mixed
      */
     function zend_test_int_abs(mixed $value) {}
+
+    /**
+     * Returns an IS_BIGINT box when the quotient is out of long range,
+     * truncating toward zero. The return type is PHPDoc-only for the same
+     * reason as zend_test_bigint_make.
+     *
+     * @param mixed $a
+     * @param mixed $b
+     * @return mixed
+     */
+    function zend_test_int_div_trunc(mixed $a, mixed $b) {}
+
+    /**
+     * Returns the remainder of truncated division, taking the sign of the
+     * dividend. The return type is PHPDoc-only for the same reason as
+     * zend_test_bigint_make.
+     *
+     * @param mixed $a
+     * @param mixed $b
+     * @return mixed
+     */
+    function zend_test_int_mod(mixed $a, mixed $b) {}
+
+    /**
+     * Calls the out-of-line modulo half directly, bypassing the inline fast
+     * path, so the long/long arm of zend_int_mod_slow can be exercised. The
+     * return type is PHPDoc-only for the same reason as zend_test_bigint_make.
+     *
+     * @param mixed $a
+     * @param mixed $b
+     * @return mixed
+     */
+    function zend_test_int_mod_slow(mixed $a, mixed $b) {}
 }
 
 namespace ZendTestNS {

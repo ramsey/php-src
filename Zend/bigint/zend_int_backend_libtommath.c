@@ -348,3 +348,80 @@ ZEND_API zend_bigint *zend_bigint_abs(const zend_bigint *a)
 	(void) err;
 	return out;
 }
+
+/* PHP's "%" is C truncated division: the remainder takes the sign of the
+ * dividend. This is the same as mp_div's remainder; mp_mod would instead
+ * floor the result toward the divisor's sign. */
+ZEND_API void zend_bigint_divmod(const zend_bigint *a, const zend_bigint *b, zend_bigint **quot, zend_bigint **rem)
+{
+	*quot = zend_bigint_alloc();
+	*rem = zend_bigint_alloc();
+	mp_err err = mp_div(&a->mp, &b->mp, &(*quot)->mp, &(*rem)->mp);
+	ZEND_ASSERT(err == MP_OKAY);
+	(void) err;
+}
+
+ZEND_API void zend_bigint_divmod_long(const zend_bigint *a, zend_long b, zend_bigint **quot, zend_bigint **rem)
+{
+	*quot = zend_bigint_alloc();
+	*rem = zend_bigint_alloc();
+	mp_int t;
+	mp_err err = mp_init(&t);
+	ZEND_ASSERT(err == MP_OKAY);
+	mp_set_i64(&t, (int64_t) b);
+	err = mp_div(&a->mp, &t, &(*quot)->mp, &(*rem)->mp);
+	ZEND_ASSERT(err == MP_OKAY);
+	mp_clear(&t);
+	(void) err;
+}
+
+ZEND_API void zend_bigint_long_divmod(zend_long a, const zend_bigint *b, zend_bigint **quot, zend_bigint **rem)
+{
+	*quot = zend_bigint_alloc();
+	*rem = zend_bigint_alloc();
+	mp_int t;
+	mp_err err = mp_init(&t);
+	ZEND_ASSERT(err == MP_OKAY);
+	mp_set_i64(&t, (int64_t) a);
+	err = mp_div(&t, &b->mp, &(*quot)->mp, &(*rem)->mp);
+	ZEND_ASSERT(err == MP_OKAY);
+	mp_clear(&t);
+	(void) err;
+}
+
+ZEND_API zend_bigint *zend_bigint_mod(const zend_bigint *a, const zend_bigint *b)
+{
+	zend_bigint *out = zend_bigint_alloc();
+	mp_err err = mp_div(&a->mp, &b->mp, NULL, &out->mp);
+	ZEND_ASSERT(err == MP_OKAY);
+	(void) err;
+	return out;
+}
+
+ZEND_API zend_bigint *zend_bigint_mod_long(const zend_bigint *a, zend_long b)
+{
+	zend_bigint *out = zend_bigint_alloc();
+	mp_int t;
+	mp_err err = mp_init(&t);
+	ZEND_ASSERT(err == MP_OKAY);
+	mp_set_i64(&t, (int64_t) b);
+	err = mp_div(&a->mp, &t, NULL, &out->mp);
+	ZEND_ASSERT(err == MP_OKAY);
+	mp_clear(&t);
+	(void) err;
+	return out;
+}
+
+ZEND_API zend_bigint *zend_bigint_long_mod(zend_long a, const zend_bigint *b)
+{
+	zend_bigint *out = zend_bigint_alloc();
+	mp_int t;
+	mp_err err = mp_init(&t);
+	ZEND_ASSERT(err == MP_OKAY);
+	mp_set_i64(&t, (int64_t) a);
+	err = mp_div(&t, &b->mp, NULL, &out->mp);
+	ZEND_ASSERT(err == MP_OKAY);
+	mp_clear(&t);
+	(void) err;
+	return out;
+}

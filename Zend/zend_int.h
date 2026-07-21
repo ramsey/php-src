@@ -87,6 +87,8 @@ ZEND_API void zend_int_sub_slow(zval *result, const zval *op1, const zval *op2);
 ZEND_API void zend_int_mul_slow(zval *result, const zval *op1, const zval *op2);
 ZEND_API void zend_int_neg_slow(zval *result, const zval *op1);
 ZEND_API void zend_int_abs_slow(zval *result, const zval *op1);
+ZEND_API void zend_int_div_trunc_slow(zval *result, const zval *op1, const zval *op2);
+ZEND_API void zend_int_mod_slow(zval *result, const zval *op1, const zval *op2);
 
 /* Value-op arithmetic on logical integers. Each stores a canonical integer
  * in result, an IS_LONG when the value fits zend_long and an IS_BIGINT box
@@ -156,6 +158,34 @@ static zend_always_inline void zend_int_abs(zval *result, const zval *op1)
 		}
 	}
 	zend_int_abs_slow(result, op1);
+}
+
+static zend_always_inline void zend_int_div_trunc(zval *result, const zval *op1, const zval *op2)
+{
+	ZEND_ASSERT(Z_IS_INT_P(op1) && Z_IS_INT_P(op2));
+	if (EXPECTED(Z_TYPE_INFO_P(op1) == IS_LONG) && EXPECTED(Z_TYPE_INFO_P(op2) == IS_LONG)) {
+		ZEND_ASSERT(Z_LVAL_P(op2) != 0);
+		if (EXPECTED(!(Z_LVAL_P(op1) == ZEND_LONG_MIN && Z_LVAL_P(op2) == -1))) {
+			ZVAL_LONG(result, Z_LVAL_P(op1) / Z_LVAL_P(op2));
+			return;
+		}
+	}
+	zend_int_div_trunc_slow(result, op1, op2);
+}
+
+static zend_always_inline void zend_int_mod(zval *result, const zval *op1, const zval *op2)
+{
+	ZEND_ASSERT(Z_IS_INT_P(op1) && Z_IS_INT_P(op2));
+	if (EXPECTED(Z_TYPE_INFO_P(op1) == IS_LONG) && EXPECTED(Z_TYPE_INFO_P(op2) == IS_LONG)) {
+		ZEND_ASSERT(Z_LVAL_P(op2) != 0);
+		if (EXPECTED(Z_LVAL_P(op2) != -1)) {
+			ZVAL_LONG(result, Z_LVAL_P(op1) % Z_LVAL_P(op2));
+		} else {
+			ZVAL_LONG(result, 0);
+		}
+		return;
+	}
+	zend_int_mod_slow(result, op1, op2);
 }
 
 END_EXTERN_C()
