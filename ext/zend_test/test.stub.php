@@ -496,6 +496,16 @@ function zend_test_override_libxml_global_state(): void {}
      * @return mixed
      */
     function zend_test_int_sub(mixed $a, mixed $b) {}
+
+    /**
+     * Returns an IS_BIGINT box when the product is out of long range. The
+     * return type is PHPDoc-only for the same reason as zend_test_bigint_make.
+     *
+     * @param mixed $a
+     * @param mixed $b
+     * @return mixed
+     */
+    function zend_test_int_mul(mixed $a, mixed $b) {}
 }
 
 namespace ZendTestNS {

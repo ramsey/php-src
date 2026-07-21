@@ -291,3 +291,42 @@ ZEND_API zend_bigint *zend_bigint_long_sub_long(zend_long a, zend_long b)
 	(void) err;
 	return out;
 }
+
+ZEND_API zend_bigint *zend_bigint_mul(const zend_bigint *a, const zend_bigint *b)
+{
+	zend_bigint *out = zend_bigint_alloc();
+	mp_err err = mp_mul(&a->mp, &b->mp, &out->mp);
+	ZEND_ASSERT(err == MP_OKAY);
+	(void) err;
+	return out;
+}
+
+ZEND_API zend_bigint *zend_bigint_mul_long(const zend_bigint *a, zend_long b)
+{
+	zend_bigint *out = zend_bigint_alloc();
+	mp_int t;
+	mp_err err = mp_init(&t);
+	ZEND_ASSERT(err == MP_OKAY);
+	mp_set_i64(&t, (int64_t) b);
+	err = mp_mul(&a->mp, &t, &out->mp);
+	ZEND_ASSERT(err == MP_OKAY);
+	mp_clear(&t);
+	(void) err;
+	return out;
+}
+
+ZEND_API zend_bigint *zend_bigint_long_mul_long(zend_long a, zend_long b)
+{
+	zend_bigint *out = zend_bigint_alloc();
+	mp_set_i64(&out->mp, (int64_t) a);
+
+	mp_int t;
+	mp_err err = mp_init(&t);
+	ZEND_ASSERT(err == MP_OKAY);
+	mp_set_i64(&t, (int64_t) b);
+	err = mp_mul(&out->mp, &t, &out->mp);
+	ZEND_ASSERT(err == MP_OKAY);
+	mp_clear(&t);
+	(void) err;
+	return out;
+}

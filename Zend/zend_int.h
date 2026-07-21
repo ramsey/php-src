@@ -16,6 +16,7 @@
 #define ZEND_INT_H
 
 #include "zend_int_backend.h"
+#include "zend_multiply.h"
 
 BEGIN_EXTERN_C()
 
@@ -83,6 +84,7 @@ static zend_always_inline bool zend_long_sub_overflows(zend_long a, zend_long b,
  * and boxed cases are handled here, not called directly. */
 ZEND_API void zend_int_add_slow(zval *result, const zval *op1, const zval *op2);
 ZEND_API void zend_int_sub_slow(zval *result, const zval *op1, const zval *op2);
+ZEND_API void zend_int_mul_slow(zval *result, const zval *op1, const zval *op2);
 
 /* Value-op arithmetic on logical integers. Each stores a canonical integer
  * in result, an IS_LONG when the value fits zend_long and an IS_BIGINT box
@@ -112,6 +114,22 @@ static zend_always_inline void zend_int_sub(zval *result, const zval *op1, const
 		}
 	}
 	zend_int_sub_slow(result, op1, op2);
+}
+
+static zend_always_inline void zend_int_mul(zval *result, const zval *op1, const zval *op2)
+{
+	ZEND_ASSERT(Z_IS_INT_P(op1) && Z_IS_INT_P(op2));
+	if (EXPECTED(Z_TYPE_INFO_P(op1) == IS_LONG) && EXPECTED(Z_TYPE_INFO_P(op2) == IS_LONG)) {
+		zend_long r, overflow;
+		double d;
+		ZEND_SIGNED_MULTIPLY_LONG(Z_LVAL_P(op1), Z_LVAL_P(op2), r, d, overflow);
+		if (EXPECTED(!overflow)) {
+			ZVAL_LONG(result, r);
+			return;
+		}
+		(void) d;
+	}
+	zend_int_mul_slow(result, op1, op2);
 }
 
 END_EXTERN_C()

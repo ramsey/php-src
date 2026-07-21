@@ -126,3 +126,20 @@ ZEND_API void zend_int_sub_slow(zval *result, const zval *op1, const zval *op2)
 	}
 	zend_int_from_bigint(result, b);
 }
+
+ZEND_API void zend_int_mul_slow(zval *result, const zval *op1, const zval *op2)
+{
+	zend_bigint *b;
+	if (Z_TYPE_P(op1) == IS_LONG) {
+		if (Z_TYPE_P(op2) == IS_LONG) {
+			b = zend_bigint_long_mul_long(Z_LVAL_P(op1), Z_LVAL_P(op2));
+		} else {
+			b = zend_bigint_mul_long(Z_BIG_P(op2), Z_LVAL_P(op1));
+		}
+	} else if (Z_TYPE_P(op2) == IS_LONG) {
+		b = zend_bigint_mul_long(Z_BIG_P(op1), Z_LVAL_P(op2));
+	} else {
+		b = zend_bigint_mul(Z_BIG_P(op1), Z_BIG_P(op2));
+	}
+	zend_int_from_bigint(result, b);
+}
