@@ -597,6 +597,28 @@ function zend_test_override_libxml_global_state(): void {}
      * @return mixed
      */
     function zend_test_int_not(mixed $value) {}
+
+    /**
+     * Returns an IS_BIGINT box when the result is out of long range. Throws
+     * ArithmeticError when the count exceeds the backend's reach. The return
+     * type is PHPDoc-only for the same reason as zend_test_bigint_make.
+     *
+     * @param mixed $a
+     * @param mixed $b
+     * @return mixed
+     */
+    function zend_test_int_shift_left(mixed $a, mixed $b) {}
+
+    /**
+     * Returns an IS_BIGINT box when the result is out of long range,
+     * saturating to 0 or -1 once the count exceeds the backend's reach. The
+     * return type is PHPDoc-only for the same reason as zend_test_bigint_make.
+     *
+     * @param mixed $a
+     * @param mixed $b
+     * @return mixed
+     */
+    function zend_test_int_shift_right(mixed $a, mixed $b) {}
 }
 
 namespace ZendTestNS {

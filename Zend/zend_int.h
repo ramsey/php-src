@@ -92,6 +92,8 @@ ZEND_API void zend_int_mod_slow(zval *result, const zval *op1, const zval *op2);
 ZEND_API void zend_int_and_slow(zval *result, const zval *op1, const zval *op2);
 ZEND_API void zend_int_or_slow(zval *result, const zval *op1, const zval *op2);
 ZEND_API void zend_int_xor_slow(zval *result, const zval *op1, const zval *op2);
+ZEND_API zend_result zend_int_shift_left_slow(zval *result, const zval *op1, const zval *op2);
+ZEND_API void zend_int_shift_right_slow(zval *result, const zval *op1, const zval *op2);
 
 /* Value-op arithmetic on logical integers. Each stores a canonical integer
  * in result, an IS_LONG when the value fits zend_long and an IS_BIGINT box
@@ -229,6 +231,38 @@ static zend_always_inline void zend_int_not(zval *result, const zval *op1)
 		return;
 	}
 	zend_int_from_bigint(result, zend_bigint_not(Z_BIG_P(op1)));
+}
+
+/* shift_left returns a zend_result and fails when the backend's over-reach
+ * ArithmeticError has been thrown; shift_right instead saturates to 0 or -1
+ * once the count exceeds the backend's reach. Both require a non-negative
+ * count (debug-asserted). */
+
+static zend_always_inline zend_result zend_int_shift_left(zval *result, const zval *op1, const zval *op2)
+{
+	ZEND_ASSERT(Z_IS_INT_P(op1) && Z_IS_INT_P(op2));
+	ZEND_ASSERT(Z_TYPE_INFO_P(op2) == IS_LONG ? Z_LVAL_P(op2) >= 0 : zend_bigint_sign(Z_BIG_P(op2)) >= 0);
+	if (EXPECTED(Z_TYPE_INFO_P(op1) == IS_LONG) && EXPECTED(Z_TYPE_INFO_P(op2) == IS_LONG)) {
+		zend_long n = Z_LVAL_P(op2);
+		if (EXPECTED((zend_ulong) n < (zend_ulong) (SIZEOF_ZEND_LONG * 8 - 1))
+			&& EXPECTED((Z_LVAL_P(op1) >> (SIZEOF_ZEND_LONG * 8 - 1 - n)) == (Z_LVAL_P(op1) >> (SIZEOF_ZEND_LONG * 8 - 1)))) {
+			ZVAL_LONG(result, Z_LVAL_P(op1) << n);
+			return SUCCESS;
+		}
+	}
+	return zend_int_shift_left_slow(result, op1, op2);
+}
+
+static zend_always_inline void zend_int_shift_right(zval *result, const zval *op1, const zval *op2)
+{
+	ZEND_ASSERT(Z_IS_INT_P(op1) && Z_IS_INT_P(op2));
+	ZEND_ASSERT(Z_TYPE_INFO_P(op2) == IS_LONG ? Z_LVAL_P(op2) >= 0 : zend_bigint_sign(Z_BIG_P(op2)) >= 0);
+	if (EXPECTED(Z_TYPE_INFO_P(op1) == IS_LONG) && EXPECTED(Z_TYPE_INFO_P(op2) == IS_LONG)) {
+		zend_long n = Z_LVAL_P(op2);
+		ZVAL_LONG(result, Z_LVAL_P(op1) >> MIN(n, SIZEOF_ZEND_LONG * 8 - 1));
+		return;
+	}
+	zend_int_shift_right_slow(result, op1, op2);
 }
 
 END_EXTERN_C()

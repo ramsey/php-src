@@ -1,5 +1,5 @@
 /* This is a generated file, edit test.stub.php instead.
- * Stub hash: 8dff689c60bfdaa4af7613bc2f8670e2e48dd454
+ * Stub hash: 9e339a7c1921848b777fe71596f625c615e30947
  * Has decl header: yes */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_zend_trigger_bailout, 0, 0, IS_NEVER, 0)
@@ -383,6 +383,10 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_zend_test_int_not arginfo_zend_test_int_neg
 
+#define arginfo_zend_test_int_shift_left arginfo_zend_test_int_add
+
+#define arginfo_zend_test_int_shift_right arginfo_zend_test_int_add
+
 #define arginfo_ZendTestNS2_namespaced_func arginfo_zend_test_is_pcre_bundled
 
 #define arginfo_ZendTestNS2_namespaced_deprecated_func arginfo_zend_test_void_return
@@ -592,6 +596,8 @@ static ZEND_FUNCTION(zend_test_int_and);
 static ZEND_FUNCTION(zend_test_int_or);
 static ZEND_FUNCTION(zend_test_int_xor);
 static ZEND_FUNCTION(zend_test_int_not);
+static ZEND_FUNCTION(zend_test_int_shift_left);
+static ZEND_FUNCTION(zend_test_int_shift_right);
 static ZEND_FUNCTION(ZendTestNS2_namespaced_func);
 static ZEND_FUNCTION(ZendTestNS2_namespaced_deprecated_func);
 static ZEND_FUNCTION(ZendTestNS2_ZendSubNS_namespaced_func);
@@ -794,6 +800,8 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(zend_test_int_or, arginfo_zend_test_int_or)
 	ZEND_FE(zend_test_int_xor, arginfo_zend_test_int_xor)
 	ZEND_FE(zend_test_int_not, arginfo_zend_test_int_not)
+	ZEND_FE(zend_test_int_shift_left, arginfo_zend_test_int_shift_left)
+	ZEND_FE(zend_test_int_shift_right, arginfo_zend_test_int_shift_right)
 #if (PHP_VERSION_ID >= 80400)
 	ZEND_RAW_FENTRY(ZEND_NS_NAME("ZendTestNS2", "namespaced_func"), zif_ZendTestNS2_namespaced_func, arginfo_ZendTestNS2_namespaced_func, 0, NULL, NULL)
 #else

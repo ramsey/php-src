@@ -13,8 +13,10 @@
 */
 
 #include "zend.h"
+#include "zend_exceptions.h"
 #include "zend_int_backend_libtommath.h"
 
+#include <limits.h>
 #include <string.h>
 
 /* The libtommath calls below that can only fail on allocation are asserted
@@ -502,6 +504,71 @@ ZEND_API zend_bigint *zend_bigint_xor_long(const zend_bigint *a, zend_long b)
 	err = mp_xor(&a->mp, &t, &out->mp);
 	ZEND_ASSERT(err == MP_OKAY);
 	mp_clear(&t);
+	(void) err;
+	return out;
+}
+
+ZEND_API bool zend_bigint_can_shift_left(zend_long bits)
+{
+	ZEND_ASSERT(bits >= 0);
+	/* mp_mul_2d takes an int bit count. */
+	return bits <= INT_MAX;
+}
+
+/* Throws and returns false when bit size is out of the backend's reach. */
+static bool zend_bigint_shift_left_reach_check(zend_long bits, const zend_bigint *bits_big)
+{
+	if (bits_big != NULL || !zend_bigint_can_shift_left(bits)) {
+		zend_throw_error(zend_ce_arithmetic_error,
+			"The libtommath bigint backend cannot shift left by more than %d bits", INT_MAX);
+		return false;
+	}
+	return true;
+}
+
+ZEND_API bool zend_bigint_shift_left(const zend_bigint *a, zend_long bits, const zend_bigint *bits_big, zend_bigint **out)
+{
+	if (!zend_bigint_shift_left_reach_check(bits, bits_big)) {
+		return false;
+	}
+	*out = zend_bigint_alloc();
+	mp_err err = mp_mul_2d(&a->mp, (int) bits, &(*out)->mp);
+	ZEND_ASSERT(err == MP_OKAY);
+	(void) err;
+	return true;
+}
+
+ZEND_API bool zend_bigint_long_shift_left(zend_long a, zend_long bits, const zend_bigint *bits_big, zend_bigint **out)
+{
+	if (!zend_bigint_shift_left_reach_check(bits, bits_big)) {
+		return false;
+	}
+	*out = zend_bigint_alloc();
+	mp_set_i64(&(*out)->mp, (int64_t) a);
+	mp_err err = mp_mul_2d(&(*out)->mp, (int) bits, &(*out)->mp);
+	ZEND_ASSERT(err == MP_OKAY);
+	(void) err;
+	return true;
+}
+
+ZEND_API zend_bigint *zend_bigint_shift_right(const zend_bigint *a, zend_long bits, const zend_bigint *bits_big)
+{
+	zend_bigint *out = zend_bigint_alloc();
+
+	if (bits_big != NULL || bits > INT_MAX) {
+		/* The count shifts past every bit. An arithmetic right shift saturates
+		 * to 0 for a non-negative operand, -1 for a negative one. */
+		if (mp_isneg(&a->mp)) {
+			mp_set_i64(&out->mp, -1);
+		} else {
+			mp_zero(&out->mp);
+		}
+		return out;
+	}
+
+	ZEND_ASSERT(bits >= 0);
+	mp_err err = mp_signed_rsh(&a->mp, (int) bits, &out->mp);
+	ZEND_ASSERT(err == MP_OKAY);
 	(void) err;
 	return out;
 }

@@ -63,6 +63,11 @@ ZEND_API zend_bigint *zend_bigint_or_long(const zend_bigint *a, zend_long b);
 ZEND_API zend_bigint *zend_bigint_xor(const zend_bigint *a, const zend_bigint *b);
 ZEND_API zend_bigint *zend_bigint_xor_long(const zend_bigint *a, zend_long b);
 
+ZEND_API bool zend_bigint_can_shift_left(zend_long bits);
+ZEND_API bool zend_bigint_shift_left(const zend_bigint *a, zend_long bits, const zend_bigint *bits_big, zend_bigint **out);
+ZEND_API bool zend_bigint_long_shift_left(zend_long a, zend_long bits, const zend_bigint *bits_big, zend_bigint **out);
+ZEND_API zend_bigint *zend_bigint_shift_right(const zend_bigint *a, zend_long bits, const zend_bigint *bits_big);
+
 END_EXTERN_C()
 
 #endif

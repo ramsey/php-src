@@ -2833,3 +2833,47 @@ static ZEND_FUNCTION(zend_test_int_not)
 
 	zend_int_not(return_value, op1);
 }
+
+static ZEND_FUNCTION(zend_test_int_shift_left)
+{
+	zval *op1, *op2;
+
+	ZEND_PARSE_PARAMETERS_START(2, 2)
+		Z_PARAM_ZVAL(op1)
+		Z_PARAM_ZVAL(op2)
+	ZEND_PARSE_PARAMETERS_END();
+
+	if (!Z_IS_INT_P(op1)) {
+		zend_argument_type_error(1, "must be an integer");
+		RETURN_THROWS();
+	}
+	if (!Z_IS_INT_P(op2)) {
+		zend_argument_type_error(2, "must be an integer");
+		RETURN_THROWS();
+	}
+
+	if (zend_int_shift_left(return_value, op1, op2) == FAILURE) {
+		RETURN_THROWS();
+	}
+}
+
+static ZEND_FUNCTION(zend_test_int_shift_right)
+{
+	zval *op1, *op2;
+
+	ZEND_PARSE_PARAMETERS_START(2, 2)
+		Z_PARAM_ZVAL(op1)
+		Z_PARAM_ZVAL(op2)
+	ZEND_PARSE_PARAMETERS_END();
+
+	if (!Z_IS_INT_P(op1)) {
+		zend_argument_type_error(1, "must be an integer");
+		RETURN_THROWS();
+	}
+	if (!Z_IS_INT_P(op2)) {
+		zend_argument_type_error(2, "must be an integer");
+		RETURN_THROWS();
+	}
+
+	zend_int_shift_right(return_value, op1, op2);
+}
