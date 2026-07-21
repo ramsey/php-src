@@ -45,6 +45,8 @@ ZEND_API zend_bigint *zend_bigint_long_sub_long(zend_long a, zend_long b);
 ZEND_API zend_bigint *zend_bigint_mul(const zend_bigint *a, const zend_bigint *b);
 ZEND_API zend_bigint *zend_bigint_mul_long(const zend_bigint *a, zend_long b);
 ZEND_API zend_bigint *zend_bigint_long_mul_long(zend_long a, zend_long b);
+ZEND_API zend_bigint *zend_bigint_neg(const zend_bigint *a);
+ZEND_API zend_bigint *zend_bigint_abs(const zend_bigint *a);
 
 END_EXTERN_C()
 

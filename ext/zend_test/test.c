@@ -2656,3 +2656,35 @@ static ZEND_FUNCTION(zend_test_int_mul)
 
 	zend_int_mul(return_value, op1, op2);
 }
+
+static ZEND_FUNCTION(zend_test_int_neg)
+{
+	zval *op1;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_ZVAL(op1)
+	ZEND_PARSE_PARAMETERS_END();
+
+	if (!Z_IS_INT_P(op1)) {
+		zend_argument_type_error(1, "must be an integer");
+		RETURN_THROWS();
+	}
+
+	zend_int_neg(return_value, op1);
+}
+
+static ZEND_FUNCTION(zend_test_int_abs)
+{
+	zval *op1;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_ZVAL(op1)
+	ZEND_PARSE_PARAMETERS_END();
+
+	if (!Z_IS_INT_P(op1)) {
+		zend_argument_type_error(1, "must be an integer");
+		RETURN_THROWS();
+	}
+
+	zend_int_abs(return_value, op1);
+}

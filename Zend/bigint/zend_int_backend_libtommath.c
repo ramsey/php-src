@@ -330,3 +330,21 @@ ZEND_API zend_bigint *zend_bigint_long_mul_long(zend_long a, zend_long b)
 	(void) err;
 	return out;
 }
+
+ZEND_API zend_bigint *zend_bigint_neg(const zend_bigint *a)
+{
+	zend_bigint *out = zend_bigint_alloc();
+	mp_err err = mp_neg(&a->mp, &out->mp);
+	ZEND_ASSERT(err == MP_OKAY);
+	(void) err;
+	return out;
+}
+
+ZEND_API zend_bigint *zend_bigint_abs(const zend_bigint *a)
+{
+	zend_bigint *out = zend_bigint_alloc();
+	mp_err err = mp_abs(&a->mp, &out->mp);
+	ZEND_ASSERT(err == MP_OKAY);
+	(void) err;
+	return out;
+}

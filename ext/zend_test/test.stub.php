@@ -506,6 +506,25 @@ function zend_test_override_libxml_global_state(): void {}
      * @return mixed
      */
     function zend_test_int_mul(mixed $a, mixed $b) {}
+
+    /**
+     * Returns an IS_BIGINT box when the negation is out of long range. The
+     * return type is PHPDoc-only for the same reason as zend_test_bigint_make.
+     *
+     * @param mixed $value
+     * @return mixed
+     */
+    function zend_test_int_neg(mixed $value) {}
+
+    /**
+     * Returns an IS_BIGINT box when the absolute value is out of long range.
+     * The return type is PHPDoc-only for the same reason as
+     * zend_test_bigint_make.
+     *
+     * @param mixed $value
+     * @return mixed
+     */
+    function zend_test_int_abs(mixed $value) {}
 }
 
 namespace ZendTestNS {

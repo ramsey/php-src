@@ -85,11 +85,13 @@ static zend_always_inline bool zend_long_sub_overflows(zend_long a, zend_long b,
 ZEND_API void zend_int_add_slow(zval *result, const zval *op1, const zval *op2);
 ZEND_API void zend_int_sub_slow(zval *result, const zval *op1, const zval *op2);
 ZEND_API void zend_int_mul_slow(zval *result, const zval *op1, const zval *op2);
+ZEND_API void zend_int_neg_slow(zval *result, const zval *op1);
+ZEND_API void zend_int_abs_slow(zval *result, const zval *op1);
 
 /* Value-op arithmetic on logical integers. Each stores a canonical integer
  * in result, an IS_LONG when the value fits zend_long and an IS_BIGINT box
- * otherwise; result may alias an operand. Both operands must be logical
- * integers (debug-asserted). */
+ * otherwise; result may alias an operand. Operands must be logical integers
+ * (debug-asserted). */
 static zend_always_inline void zend_int_add(zval *result, const zval *op1, const zval *op2)
 {
 	ZEND_ASSERT(Z_IS_INT_P(op1) && Z_IS_INT_P(op2));
@@ -130,6 +132,30 @@ static zend_always_inline void zend_int_mul(zval *result, const zval *op1, const
 		(void) d;
 	}
 	zend_int_mul_slow(result, op1, op2);
+}
+
+static zend_always_inline void zend_int_neg(zval *result, const zval *op1)
+{
+	ZEND_ASSERT(Z_IS_INT_P(op1));
+	if (EXPECTED(Z_TYPE_INFO_P(op1) == IS_LONG)) {
+		if (EXPECTED(Z_LVAL_P(op1) != ZEND_LONG_MIN)) {
+			ZVAL_LONG(result, -Z_LVAL_P(op1));
+			return;
+		}
+	}
+	zend_int_neg_slow(result, op1);
+}
+
+static zend_always_inline void zend_int_abs(zval *result, const zval *op1)
+{
+	ZEND_ASSERT(Z_IS_INT_P(op1));
+	if (EXPECTED(Z_TYPE_INFO_P(op1) == IS_LONG)) {
+		if (EXPECTED(Z_LVAL_P(op1) != ZEND_LONG_MIN)) {
+			ZVAL_LONG(result, Z_LVAL_P(op1) < 0 ? -Z_LVAL_P(op1) : Z_LVAL_P(op1));
+			return;
+		}
+	}
+	zend_int_abs_slow(result, op1);
 }
 
 END_EXTERN_C()
