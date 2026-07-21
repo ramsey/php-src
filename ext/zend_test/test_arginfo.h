@@ -1,5 +1,5 @@
 /* This is a generated file, edit test.stub.php instead.
- * Stub hash: 42c53fef78d6b9b1677d5cbfec01b05271114bae
+ * Stub hash: 8dff689c60bfdaa4af7613bc2f8670e2e48dd454
  * Has decl header: yes */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_zend_trigger_bailout, 0, 0, IS_NEVER, 0)
@@ -375,6 +375,14 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_zend_test_int_mod_slow arginfo_zend_test_int_add
 
+#define arginfo_zend_test_int_and arginfo_zend_test_int_add
+
+#define arginfo_zend_test_int_or arginfo_zend_test_int_add
+
+#define arginfo_zend_test_int_xor arginfo_zend_test_int_add
+
+#define arginfo_zend_test_int_not arginfo_zend_test_int_neg
+
 #define arginfo_ZendTestNS2_namespaced_func arginfo_zend_test_is_pcre_bundled
 
 #define arginfo_ZendTestNS2_namespaced_deprecated_func arginfo_zend_test_void_return
@@ -580,6 +588,10 @@ static ZEND_FUNCTION(zend_test_int_abs);
 static ZEND_FUNCTION(zend_test_int_div_trunc);
 static ZEND_FUNCTION(zend_test_int_mod);
 static ZEND_FUNCTION(zend_test_int_mod_slow);
+static ZEND_FUNCTION(zend_test_int_and);
+static ZEND_FUNCTION(zend_test_int_or);
+static ZEND_FUNCTION(zend_test_int_xor);
+static ZEND_FUNCTION(zend_test_int_not);
 static ZEND_FUNCTION(ZendTestNS2_namespaced_func);
 static ZEND_FUNCTION(ZendTestNS2_namespaced_deprecated_func);
 static ZEND_FUNCTION(ZendTestNS2_ZendSubNS_namespaced_func);
@@ -778,6 +790,10 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(zend_test_int_div_trunc, arginfo_zend_test_int_div_trunc)
 	ZEND_FE(zend_test_int_mod, arginfo_zend_test_int_mod)
 	ZEND_FE(zend_test_int_mod_slow, arginfo_zend_test_int_mod_slow)
+	ZEND_FE(zend_test_int_and, arginfo_zend_test_int_and)
+	ZEND_FE(zend_test_int_or, arginfo_zend_test_int_or)
+	ZEND_FE(zend_test_int_xor, arginfo_zend_test_int_xor)
+	ZEND_FE(zend_test_int_not, arginfo_zend_test_int_not)
 #if (PHP_VERSION_ID >= 80400)
 	ZEND_RAW_FENTRY(ZEND_NS_NAME("ZendTestNS2", "namespaced_func"), zif_ZendTestNS2_namespaced_func, arginfo_ZendTestNS2_namespaced_func, 0, NULL, NULL)
 #else

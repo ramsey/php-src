@@ -55,6 +55,14 @@ ZEND_API zend_bigint *zend_bigint_mod(const zend_bigint *a, const zend_bigint *b
 ZEND_API zend_bigint *zend_bigint_mod_long(const zend_bigint *a, zend_long b);
 ZEND_API zend_bigint *zend_bigint_long_mod(zend_long a, const zend_bigint *b);
 
+ZEND_API zend_bigint *zend_bigint_not(const zend_bigint *a);
+ZEND_API zend_bigint *zend_bigint_and(const zend_bigint *a, const zend_bigint *b);
+ZEND_API zend_bigint *zend_bigint_and_long(const zend_bigint *a, zend_long b);
+ZEND_API zend_bigint *zend_bigint_or(const zend_bigint *a, const zend_bigint *b);
+ZEND_API zend_bigint *zend_bigint_or_long(const zend_bigint *a, zend_long b);
+ZEND_API zend_bigint *zend_bigint_xor(const zend_bigint *a, const zend_bigint *b);
+ZEND_API zend_bigint *zend_bigint_xor_long(const zend_bigint *a, zend_long b);
+
 END_EXTERN_C()
 
 #endif

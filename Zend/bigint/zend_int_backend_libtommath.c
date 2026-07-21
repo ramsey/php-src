@@ -425,3 +425,83 @@ ZEND_API zend_bigint *zend_bigint_long_mod(zend_long a, const zend_bigint *b)
 	(void) err;
 	return out;
 }
+
+/* Infinite two's-complement: ~x == -(x + 1), matching mp_complement's own
+ * definition rather than a fixed-width bitwise flip. */
+ZEND_API zend_bigint *zend_bigint_not(const zend_bigint *a)
+{
+	zend_bigint *out = zend_bigint_alloc();
+	mp_err err = mp_complement(&a->mp, &out->mp);
+	ZEND_ASSERT(err == MP_OKAY);
+	(void) err;
+	return out;
+}
+
+ZEND_API zend_bigint *zend_bigint_and(const zend_bigint *a, const zend_bigint *b)
+{
+	zend_bigint *out = zend_bigint_alloc();
+	mp_err err = mp_and(&a->mp, &b->mp, &out->mp);
+	ZEND_ASSERT(err == MP_OKAY);
+	(void) err;
+	return out;
+}
+
+ZEND_API zend_bigint *zend_bigint_and_long(const zend_bigint *a, zend_long b)
+{
+	zend_bigint *out = zend_bigint_alloc();
+	mp_int t;
+	mp_err err = mp_init(&t);
+	ZEND_ASSERT(err == MP_OKAY);
+	mp_set_i64(&t, (int64_t) b);
+	err = mp_and(&a->mp, &t, &out->mp);
+	ZEND_ASSERT(err == MP_OKAY);
+	mp_clear(&t);
+	(void) err;
+	return out;
+}
+
+ZEND_API zend_bigint *zend_bigint_or(const zend_bigint *a, const zend_bigint *b)
+{
+	zend_bigint *out = zend_bigint_alloc();
+	mp_err err = mp_or(&a->mp, &b->mp, &out->mp);
+	ZEND_ASSERT(err == MP_OKAY);
+	(void) err;
+	return out;
+}
+
+ZEND_API zend_bigint *zend_bigint_or_long(const zend_bigint *a, zend_long b)
+{
+	zend_bigint *out = zend_bigint_alloc();
+	mp_int t;
+	mp_err err = mp_init(&t);
+	ZEND_ASSERT(err == MP_OKAY);
+	mp_set_i64(&t, (int64_t) b);
+	err = mp_or(&a->mp, &t, &out->mp);
+	ZEND_ASSERT(err == MP_OKAY);
+	mp_clear(&t);
+	(void) err;
+	return out;
+}
+
+ZEND_API zend_bigint *zend_bigint_xor(const zend_bigint *a, const zend_bigint *b)
+{
+	zend_bigint *out = zend_bigint_alloc();
+	mp_err err = mp_xor(&a->mp, &b->mp, &out->mp);
+	ZEND_ASSERT(err == MP_OKAY);
+	(void) err;
+	return out;
+}
+
+ZEND_API zend_bigint *zend_bigint_xor_long(const zend_bigint *a, zend_long b)
+{
+	zend_bigint *out = zend_bigint_alloc();
+	mp_int t;
+	mp_err err = mp_init(&t);
+	ZEND_ASSERT(err == MP_OKAY);
+	mp_set_i64(&t, (int64_t) b);
+	err = mp_xor(&a->mp, &t, &out->mp);
+	ZEND_ASSERT(err == MP_OKAY);
+	mp_clear(&t);
+	(void) err;
+	return out;
+}

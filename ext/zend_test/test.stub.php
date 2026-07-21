@@ -558,6 +558,45 @@ function zend_test_override_libxml_global_state(): void {}
      * @return mixed
      */
     function zend_test_int_mod_slow(mixed $a, mixed $b) {}
+
+    /**
+     * Returns an IS_BIGINT box when the result is out of long range. The
+     * return type is PHPDoc-only for the same reason as zend_test_bigint_make.
+     *
+     * @param mixed $a
+     * @param mixed $b
+     * @return mixed
+     */
+    function zend_test_int_and(mixed $a, mixed $b) {}
+
+    /**
+     * Returns an IS_BIGINT box when the result is out of long range. The
+     * return type is PHPDoc-only for the same reason as zend_test_bigint_make.
+     *
+     * @param mixed $a
+     * @param mixed $b
+     * @return mixed
+     */
+    function zend_test_int_or(mixed $a, mixed $b) {}
+
+    /**
+     * Returns an IS_BIGINT box when the result is out of long range. The
+     * return type is PHPDoc-only for the same reason as zend_test_bigint_make.
+     *
+     * @param mixed $a
+     * @param mixed $b
+     * @return mixed
+     */
+    function zend_test_int_xor(mixed $a, mixed $b) {}
+
+    /**
+     * Returns an IS_BIGINT box when the complement is out of long range. The
+     * return type is PHPDoc-only for the same reason as zend_test_bigint_make.
+     *
+     * @param mixed $value
+     * @return mixed
+     */
+    function zend_test_int_not(mixed $value) {}
 }
 
 namespace ZendTestNS {

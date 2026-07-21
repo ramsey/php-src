@@ -208,3 +208,42 @@ ZEND_API void zend_int_mod_slow(zval *result, const zval *op1, const zval *op2)
 	}
 	zend_int_from_bigint(result, b);
 }
+
+ZEND_API void zend_int_and_slow(zval *result, const zval *op1, const zval *op2)
+{
+	zend_bigint *b;
+	if (Z_TYPE_P(op1) == IS_LONG) {
+		b = zend_bigint_and_long(Z_BIG_P(op2), Z_LVAL_P(op1));
+	} else if (Z_TYPE_P(op2) == IS_LONG) {
+		b = zend_bigint_and_long(Z_BIG_P(op1), Z_LVAL_P(op2));
+	} else {
+		b = zend_bigint_and(Z_BIG_P(op1), Z_BIG_P(op2));
+	}
+	zend_int_from_bigint(result, b);
+}
+
+ZEND_API void zend_int_or_slow(zval *result, const zval *op1, const zval *op2)
+{
+	zend_bigint *b;
+	if (Z_TYPE_P(op1) == IS_LONG) {
+		b = zend_bigint_or_long(Z_BIG_P(op2), Z_LVAL_P(op1));
+	} else if (Z_TYPE_P(op2) == IS_LONG) {
+		b = zend_bigint_or_long(Z_BIG_P(op1), Z_LVAL_P(op2));
+	} else {
+		b = zend_bigint_or(Z_BIG_P(op1), Z_BIG_P(op2));
+	}
+	zend_int_from_bigint(result, b);
+}
+
+ZEND_API void zend_int_xor_slow(zval *result, const zval *op1, const zval *op2)
+{
+	zend_bigint *b;
+	if (Z_TYPE_P(op1) == IS_LONG) {
+		b = zend_bigint_xor_long(Z_BIG_P(op2), Z_LVAL_P(op1));
+	} else if (Z_TYPE_P(op2) == IS_LONG) {
+		b = zend_bigint_xor_long(Z_BIG_P(op1), Z_LVAL_P(op2));
+	} else {
+		b = zend_bigint_xor(Z_BIG_P(op1), Z_BIG_P(op2));
+	}
+	zend_int_from_bigint(result, b);
+}

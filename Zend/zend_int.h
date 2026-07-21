@@ -89,6 +89,9 @@ ZEND_API void zend_int_neg_slow(zval *result, const zval *op1);
 ZEND_API void zend_int_abs_slow(zval *result, const zval *op1);
 ZEND_API void zend_int_div_trunc_slow(zval *result, const zval *op1, const zval *op2);
 ZEND_API void zend_int_mod_slow(zval *result, const zval *op1, const zval *op2);
+ZEND_API void zend_int_and_slow(zval *result, const zval *op1, const zval *op2);
+ZEND_API void zend_int_or_slow(zval *result, const zval *op1, const zval *op2);
+ZEND_API void zend_int_xor_slow(zval *result, const zval *op1, const zval *op2);
 
 /* Value-op arithmetic on logical integers. Each stores a canonical integer
  * in result, an IS_LONG when the value fits zend_long and an IS_BIGINT box
@@ -186,6 +189,46 @@ static zend_always_inline void zend_int_mod(zval *result, const zval *op1, const
 		return;
 	}
 	zend_int_mod_slow(result, op1, op2);
+}
+
+static zend_always_inline void zend_int_and(zval *result, const zval *op1, const zval *op2)
+{
+	ZEND_ASSERT(Z_IS_INT_P(op1) && Z_IS_INT_P(op2));
+	if (EXPECTED(Z_TYPE_INFO_P(op1) == IS_LONG) && EXPECTED(Z_TYPE_INFO_P(op2) == IS_LONG)) {
+		ZVAL_LONG(result, Z_LVAL_P(op1) & Z_LVAL_P(op2));
+		return;
+	}
+	zend_int_and_slow(result, op1, op2);
+}
+
+static zend_always_inline void zend_int_or(zval *result, const zval *op1, const zval *op2)
+{
+	ZEND_ASSERT(Z_IS_INT_P(op1) && Z_IS_INT_P(op2));
+	if (EXPECTED(Z_TYPE_INFO_P(op1) == IS_LONG) && EXPECTED(Z_TYPE_INFO_P(op2) == IS_LONG)) {
+		ZVAL_LONG(result, Z_LVAL_P(op1) | Z_LVAL_P(op2));
+		return;
+	}
+	zend_int_or_slow(result, op1, op2);
+}
+
+static zend_always_inline void zend_int_xor(zval *result, const zval *op1, const zval *op2)
+{
+	ZEND_ASSERT(Z_IS_INT_P(op1) && Z_IS_INT_P(op2));
+	if (EXPECTED(Z_TYPE_INFO_P(op1) == IS_LONG) && EXPECTED(Z_TYPE_INFO_P(op2) == IS_LONG)) {
+		ZVAL_LONG(result, Z_LVAL_P(op1) ^ Z_LVAL_P(op2));
+		return;
+	}
+	zend_int_xor_slow(result, op1, op2);
+}
+
+static zend_always_inline void zend_int_not(zval *result, const zval *op1)
+{
+	ZEND_ASSERT(Z_IS_INT_P(op1));
+	if (EXPECTED(Z_TYPE_INFO_P(op1) == IS_LONG)) {
+		ZVAL_LONG(result, ~Z_LVAL_P(op1));
+		return;
+	}
+	zend_int_from_bigint(result, zend_bigint_not(Z_BIG_P(op1)));
 }
 
 END_EXTERN_C()
