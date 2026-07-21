@@ -1,5 +1,5 @@
 /* This is a generated file, edit test.stub.php instead.
- * Stub hash: 9e339a7c1921848b777fe71596f625c615e30947
+ * Stub hash: e014ac1d37ff0aa2000a9a1854a8b867d8c3c7e3
  * Has decl header: yes */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_zend_trigger_bailout, 0, 0, IS_NEVER, 0)
@@ -387,6 +387,8 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_zend_test_int_shift_right arginfo_zend_test_int_add
 
+#define arginfo_zend_test_int_pow arginfo_zend_test_int_add
+
 #define arginfo_ZendTestNS2_namespaced_func arginfo_zend_test_is_pcre_bundled
 
 #define arginfo_ZendTestNS2_namespaced_deprecated_func arginfo_zend_test_void_return
@@ -598,6 +600,7 @@ static ZEND_FUNCTION(zend_test_int_xor);
 static ZEND_FUNCTION(zend_test_int_not);
 static ZEND_FUNCTION(zend_test_int_shift_left);
 static ZEND_FUNCTION(zend_test_int_shift_right);
+static ZEND_FUNCTION(zend_test_int_pow);
 static ZEND_FUNCTION(ZendTestNS2_namespaced_func);
 static ZEND_FUNCTION(ZendTestNS2_namespaced_deprecated_func);
 static ZEND_FUNCTION(ZendTestNS2_ZendSubNS_namespaced_func);
@@ -802,6 +805,7 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(zend_test_int_not, arginfo_zend_test_int_not)
 	ZEND_FE(zend_test_int_shift_left, arginfo_zend_test_int_shift_left)
 	ZEND_FE(zend_test_int_shift_right, arginfo_zend_test_int_shift_right)
+	ZEND_FE(zend_test_int_pow, arginfo_zend_test_int_pow)
 #if (PHP_VERSION_ID >= 80400)
 	ZEND_RAW_FENTRY(ZEND_NS_NAME("ZendTestNS2", "namespaced_func"), zif_ZendTestNS2_namespaced_func, arginfo_ZendTestNS2_namespaced_func, 0, NULL, NULL)
 #else

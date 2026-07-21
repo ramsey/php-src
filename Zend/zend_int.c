@@ -292,3 +292,27 @@ ZEND_API void zend_int_shift_right_slow(zval *result, const zval *op1, const zva
 	}
 	zend_int_from_bigint(result, b);
 }
+
+ZEND_API zend_result zend_int_pow_slow(zval *result, const zval *op1, const zval *op2)
+{
+	zend_bigint *base = Z_TYPE_P(op1) == IS_LONG
+		? zend_bigint_from_long(Z_LVAL_P(op1))
+		: zend_bigint_dup(Z_BIG_P(op1));
+
+	zend_long exp = 0;
+	const zend_bigint *exp_big = NULL;
+	if (Z_TYPE_P(op2) == IS_LONG) {
+		exp = Z_LVAL_P(op2);
+	} else {
+		exp_big = Z_BIG_P(op2);
+	}
+
+	zend_bigint *out;
+	if (!zend_bigint_pow(base, exp, exp_big, &out)) {
+		zend_bigint_free(base);
+		return FAILURE;
+	}
+	zend_bigint_free(base);
+	zend_int_from_bigint(result, out);
+	return SUCCESS;
+}

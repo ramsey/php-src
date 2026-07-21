@@ -94,6 +94,7 @@ ZEND_API void zend_int_or_slow(zval *result, const zval *op1, const zval *op2);
 ZEND_API void zend_int_xor_slow(zval *result, const zval *op1, const zval *op2);
 ZEND_API zend_result zend_int_shift_left_slow(zval *result, const zval *op1, const zval *op2);
 ZEND_API void zend_int_shift_right_slow(zval *result, const zval *op1, const zval *op2);
+ZEND_API zend_result zend_int_pow_slow(zval *result, const zval *op1, const zval *op2);
 
 /* Value-op arithmetic on logical integers. Each stores a canonical integer
  * in result, an IS_LONG when the value fits zend_long and an IS_BIGINT box
@@ -263,6 +264,20 @@ static zend_always_inline void zend_int_shift_right(zval *result, const zval *op
 		return;
 	}
 	zend_int_shift_right_slow(result, op1, op2);
+}
+
+/* pow returns a zend_result and fails when the backend's over-reach
+ * ArithmeticError has been thrown. The exponent must be non-negative
+ * (debug-asserted). */
+static zend_always_inline zend_result zend_int_pow(zval *result, const zval *op1, const zval *op2)
+{
+	ZEND_ASSERT(Z_IS_INT_P(op1) && Z_IS_INT_P(op2));
+	ZEND_ASSERT(Z_TYPE_INFO_P(op2) == IS_LONG ? Z_LVAL_P(op2) >= 0 : zend_bigint_sign(Z_BIG_P(op2)) >= 0);
+	if (Z_TYPE_INFO_P(op2) == IS_LONG && Z_LVAL_P(op2) == 0) {
+		ZVAL_LONG(result, 1);
+		return SUCCESS;
+	}
+	return zend_int_pow_slow(result, op1, op2);
 }
 
 END_EXTERN_C()

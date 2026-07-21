@@ -572,3 +572,27 @@ ZEND_API zend_bigint *zend_bigint_shift_right(const zend_bigint *a, zend_long bi
 	(void) err;
 	return out;
 }
+
+ZEND_API bool zend_bigint_can_pow(zend_long exp)
+{
+	ZEND_ASSERT(exp >= 0);
+	/* mp_expt_n takes an int exponent. */
+	return exp <= INT_MAX;
+}
+
+/* out = base ** exp, for a non-negative exponent (exp_big when non-NULL, else
+ * exp). Throws and returns false when the exponent is out of the backend's
+ * reach. */
+ZEND_API bool zend_bigint_pow(const zend_bigint *base, zend_long exp, const zend_bigint *exp_big, zend_bigint **out)
+{
+	if (exp_big != NULL || !zend_bigint_can_pow(exp)) {
+		zend_throw_error(zend_ce_arithmetic_error,
+			"The libtommath bigint backend cannot raise to an exponent greater than %d", INT_MAX);
+		return false;
+	}
+	*out = zend_bigint_alloc();
+	mp_err err = mp_expt_n(&base->mp, (int) exp, &(*out)->mp);
+	ZEND_ASSERT(err == MP_OKAY);
+	(void) err;
+	return true;
+}
