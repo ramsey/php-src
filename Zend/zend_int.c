@@ -14,7 +14,6 @@
 
 #include "zend.h"
 #include "zend_int.h"
-#include "zend_smart_str.h"
 
 /* A zend_bigint is opaque here on purpose; this file never sees the backend
  * struct layout. The cross-backend contract guarantees a zend_bigint begins
@@ -75,22 +74,10 @@ ZEND_API zend_string *zend_int_debug_str(const zval *zv, size_t max_digits)
 	}
 
 	zend_bigint *b = Z_BIG_P(zv);
-	zend_string *full = zend_bigint_to_str(b);
-
-	if (!zend_bigint_exceeds_digits(b, (zend_long) max_digits)) {
-		return full;
+	if (zend_bigint_exceeds_digits(b, (zend_long) max_digits)) {
+		return ZSTR_INIT_LITERAL("<integer too large to display>", 0);
 	}
-
-	size_t lead = MIN(max_digits, ZSTR_LEN(full));
-	smart_str buf = {0};
-	smart_str_appendl(&buf, ZSTR_VAL(full), lead);
-	smart_str_appends(&buf, "...(");
-	smart_str_append_long(&buf, (zend_long) ZSTR_LEN(full));
-	smart_str_appends(&buf, " digits)");
-
-	zend_string_release(full);
-
-	return smart_str_extract(&buf);
+	return zend_bigint_to_str(b);
 }
 
 ZEND_API void zend_int_add_slow(zval *result, const zval *op1, const zval *op2)

@@ -34,8 +34,8 @@ ZEND_API bool zend_int_fits_long(const zval *zv);
 ZEND_API bool zend_int_get_long(const zval *zv, zend_long *out);
 
 /* Renders the integer zval as a decimal string. A value within max_digits
- * renders in full; a larger boxed value renders its leading max_digits
- * characters followed by "...(N digits)", where N is the full length. */
+ * renders in full; a larger boxed value renders the fixed placeholder
+ * "<integer too large to display>" instead. */
 ZEND_API zend_string *zend_int_debug_str(const zval *zv, size_t max_digits);
 
 /* Returns true if a + b overflows zend_long. Writes the wrapped result to

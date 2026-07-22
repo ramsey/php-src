@@ -1,5 +1,5 @@
 --TEST--
-bigint debug renderer: full and truncated forms
+bigint debug renderer: full below the limit, fixed placeholder above it
 --EXTENSIONS--
 zend_test
 --FILE--
@@ -11,5 +11,5 @@ echo zend_test_int_debug_str(42, 10) . "\n";
 ?>
 --EXPECT--
 99999999999999999999999999999999999999999999999999
-9999999999...(50 digits)
+<integer too large to display>
 42
