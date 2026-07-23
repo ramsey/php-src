@@ -2309,6 +2309,28 @@ static int compare_long_to_string(zend_long lval, const zend_string *str) /* {{{
 }
 /* }}} */
 
+static int compare_bigint_to_string(const zend_bigint *big, const zend_string *str) /* {{{ */
+{
+	zend_long str_lval;
+	double str_dval;
+	uint8_t type = is_numeric_string(ZSTR_VAL(str), ZSTR_LEN(str), &str_lval, &str_dval, 0);
+
+	if (type == IS_LONG) {
+		return zend_bigint_cmp_long(big, str_lval);
+	}
+
+	if (type == IS_DOUBLE) {
+		return ZEND_THREEWAY_COMPARE(zend_bigint_to_double(big), str_dval);
+	}
+
+	zend_string *big_as_str = zend_bigint_to_str(big);
+	int cmp_result = zend_binary_strcmp(
+		ZSTR_VAL(big_as_str), ZSTR_LEN(big_as_str), ZSTR_VAL(str), ZSTR_LEN(str));
+	zend_string_release(big_as_str);
+	return ZEND_NORMALIZE_BOOL(cmp_result);
+}
+/* }}} */
+
 static int compare_double_to_string(double dval, const zend_string *str) /* {{{ */
 {
 	zend_long str_lval;
@@ -2351,6 +2373,27 @@ ZEND_API int ZEND_FASTCALL zend_compare(zval *op1, zval *op2) /* {{{ */
 
 			case TYPE_PAIR(IS_DOUBLE, IS_DOUBLE):
 				return ZEND_THREEWAY_COMPARE(Z_DVAL_P(op1), Z_DVAL_P(op2));
+
+			case TYPE_PAIR(IS_BIGINT, IS_BIGINT):
+				return zend_bigint_cmp(Z_BIG_P(op1), Z_BIG_P(op2));
+
+			case TYPE_PAIR(IS_BIGINT, IS_LONG):
+				return zend_bigint_cmp_long(Z_BIG_P(op1), Z_LVAL_P(op2));
+
+			case TYPE_PAIR(IS_LONG, IS_BIGINT):
+				return -zend_bigint_cmp_long(Z_BIG_P(op2), Z_LVAL_P(op1));
+
+			case TYPE_PAIR(IS_BIGINT, IS_DOUBLE):
+				return ZEND_THREEWAY_COMPARE(zend_bigint_to_double(Z_BIG_P(op1)), Z_DVAL_P(op2));
+
+			case TYPE_PAIR(IS_DOUBLE, IS_BIGINT):
+				return ZEND_THREEWAY_COMPARE(Z_DVAL_P(op1), zend_bigint_to_double(Z_BIG_P(op2)));
+
+			case TYPE_PAIR(IS_BIGINT, IS_STRING):
+				return compare_bigint_to_string(Z_BIG_P(op1), Z_STR_P(op2));
+
+			case TYPE_PAIR(IS_STRING, IS_BIGINT):
+				return -compare_bigint_to_string(Z_BIG_P(op2), Z_STR_P(op1));
 
 			case TYPE_PAIR(IS_ARRAY, IS_ARRAY):
 				return zend_compare_arrays(op1, op2);
@@ -2518,6 +2561,8 @@ ZEND_API bool ZEND_FASTCALL zend_is_identical(const zval *op1, const zval *op2) 
 			return 1;
 		case IS_LONG:
 			return (Z_LVAL_P(op1) == Z_LVAL_P(op2));
+		case IS_BIGINT:
+			return zend_bigint_cmp(Z_BIG_P(op1), Z_BIG_P(op2)) == 0;
 		case IS_RESOURCE:
 			return (Z_RES_P(op1) == Z_RES_P(op2));
 		case IS_DOUBLE:
