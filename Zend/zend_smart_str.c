@@ -13,6 +13,7 @@
  */
 
 #include <zend.h>
+#include "zend_int.h"
 #include "zend_smart_str.h"
 #include "zend_smart_string.h"
 #include "zend_enum.h"
@@ -220,6 +221,13 @@ ZEND_API void ZEND_FASTCALL smart_str_append_scalar(smart_str *dest, const zval 
 		case IS_LONG:
 			smart_str_append_long(dest, Z_LVAL_P(value));
 		break;
+
+		case IS_BIGINT: {
+			zend_string *str = zend_bigint_to_str(Z_BIG_P(value));
+			smart_str_append(dest, str);
+			zend_string_release(str);
+			break;
+		}
 
 		case IS_STRING:
 			smart_str_appendc(dest, '\'');

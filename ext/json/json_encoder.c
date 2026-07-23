@@ -19,6 +19,7 @@
 
 #include "php.h"
 #include "ext/standard/html.h"
+#include "zend_int.h"
 #include "zend_smart_str.h"
 #include "php_json.h"
 #include "php_json_encoder.h"
@@ -644,6 +645,13 @@ again:
 		case IS_LONG:
 			smart_str_append_long(buf, Z_LVAL_P(val));
 			break;
+
+		case IS_BIGINT: {
+			zend_string *str = zend_bigint_to_str(Z_BIG_P(val));
+			smart_str_append(buf, str);
+			zend_string_release(str);
+			break;
+		}
 
 		case IS_DOUBLE:
 			if (php_json_is_valid_double(Z_DVAL_P(val))) {

@@ -21,6 +21,7 @@
 #include "php.h"
 #include "php_string.h"
 #include "php_var.h"
+#include "zend_int.h"
 #include "zend_lazy_objects.h"
 #include "zend_smart_str.h"
 #include "basic_functions.h"
@@ -138,6 +139,12 @@ again:
 		case IS_LONG:
 			php_printf("%sint(" ZEND_LONG_FMT ")\n", COMMON, Z_LVAL_P(struc));
 			break;
+		case IS_BIGINT: {
+			zend_string *str = zend_bigint_to_str(Z_BIG_P(struc));
+			php_printf("%sint(%s)\n", COMMON, ZSTR_VAL(str));
+			zend_string_release(str);
+			break;
+		}
 		case IS_DOUBLE:
 			php_printf_unchecked("%sfloat(%.*H)\n", COMMON, (int) PG(serialize_precision), Z_DVAL_P(struc));
 			break;
@@ -345,6 +352,12 @@ PHPAPI void php_debug_zval_dump(zval *struc, int level) /* {{{ */
 	case IS_LONG:
 		php_printf("int(" ZEND_LONG_FMT ")\n", Z_LVAL_P(struc));
 		break;
+	case IS_BIGINT: {
+		zend_string *str = zend_bigint_to_str(Z_BIG_P(struc));
+		php_printf("int(%s) bigint refcount(%u)\n", ZSTR_VAL(str), Z_REFCOUNT_P(struc));
+		zend_string_release(str);
+		break;
+	}
 	case IS_DOUBLE:
 		php_printf_unchecked("float(%.*H)\n", (int) PG(serialize_precision), Z_DVAL_P(struc));
 		break;
@@ -562,6 +575,12 @@ again:
 			}
 			smart_str_append_long(buf, Z_LVAL_P(struc));
 			break;
+		case IS_BIGINT: {
+			zend_string *str = zend_bigint_to_str(Z_BIG_P(struc));
+			smart_str_append(buf, str);
+			zend_string_release(str);
+			break;
+		}
 		case IS_DOUBLE:
 			smart_str_append_double(
 				buf, Z_DVAL_P(struc), (int) PG(serialize_precision), /* zero_fraction */ true);
@@ -1114,6 +1133,15 @@ again:
 		case IS_LONG:
 			php_var_serialize_long(buf, Z_LVAL_P(struc));
 			return;
+
+		case IS_BIGINT: {
+			zend_string *str = zend_bigint_to_str(Z_BIG_P(struc));
+			smart_str_appendl(buf, "i:", 2);
+			smart_str_append(buf, str);
+			smart_str_appendc(buf, ';');
+			zend_string_release(str);
+			return;
+		}
 
 		case IS_DOUBLE: {
 			char tmp_str[ZEND_DOUBLE_MAX_LENGTH];

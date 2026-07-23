@@ -1190,6 +1190,12 @@ static zend_always_inline bool zend_check_type_slow(
 	if ((type_mask & MAY_BE_STATIC) && zend_value_instanceof_static(arg)) {
 		return 1;
 	}
+	if ((type_mask & MAY_BE_LONG) && Z_TYPE_P(arg) == IS_BIGINT) {
+		/* A boxed integer already is an int and needs no coercion to satisfy
+		 * any type that accepts one. Without this the scalar hints below
+		 * would stringify it instead, since IS_BIGINT sorts below IS_STRING. */
+		return 1;
+	}
 	if (ref && ZEND_REF_HAS_TYPE_SOURCES(ref)) {
 		/* We cannot have conversions for typed refs. */
 		return 0;

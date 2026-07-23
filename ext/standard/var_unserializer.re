@@ -15,6 +15,7 @@
 #include "php.h"
 #include "ext/standard/php_var.h"
 #include "php_incomplete_class.h"
+#include "zend_int.h"
 #include "zend_portability.h"
 #include "zend_exceptions.h"
 #include "zend_objects.h"
@@ -980,28 +981,34 @@ static int php_var_unserialize_internal(UNSERIALIZE_PARAMETER)
 }
 
 "i:" iv ";"	{
-#if SIZEOF_ZEND_LONG == 4
-	int digits = YYCURSOR - start - 3;
+	const char *lit = (const char *) start + 2;
+	size_t lit_len = YYCURSOR - start - 3;
+	size_t magnitude = lit_len;
 
-	if (start[2] == '-' || start[2] == '+') {
-		digits--;
+	if (*lit == '-' || *lit == '+') {
+		magnitude--;
 	}
 
-	/* Use double for large zend_long values that were serialized on a 64-bit system */
-	if (digits >= MAX_LENGTH_OF_LONG - 1) {
-		if (digits == MAX_LENGTH_OF_LONG - 1) {
-			int cmp = strncmp((char*)YYCURSOR - MAX_LENGTH_OF_LONG, long_min_digits, MAX_LENGTH_OF_LONG - 1);
-
-			if (!(cmp < 0 || (cmp == 0 && start[2] == '-'))) {
-				goto use_double;
-			}
-		} else {
-			goto use_double;
-		}
+	if (EXPECTED(magnitude < MAX_LENGTH_OF_LONG - 1)) {
+		*p = YYCURSOR;
+		ZVAL_LONG(rval, parse_iv(start + 2));
+		return 1;
 	}
-#endif
+
+	const char *num = lit;
+	size_t num_len = lit_len;
+	if (*num == '+') {
+		num++;
+		num_len--;
+	}
+
+	zend_bigint *big = zend_bigint_from_string(num, num_len, 10);
+	if (UNEXPECTED(!big)) {
+		return 0;
+	}
+
 	*p = YYCURSOR;
-	ZVAL_LONG(rval, parse_iv(start + 2));
+	zend_int_from_bigint(rval, big);
 	return 1;
 }
 
@@ -1022,9 +1029,6 @@ static int php_var_unserialize_internal(UNSERIALIZE_PARAMETER)
 }
 
 "d:" (iv | nv | nvexp) ";"	{
-#if SIZEOF_ZEND_LONG == 4
-use_double:
-#endif
 	*p = YYCURSOR;
 	ZVAL_DOUBLE(rval, zend_strtod((const char *)start + 2, NULL));
 	return 1;
