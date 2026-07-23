@@ -1,5 +1,5 @@
 --TEST--
-var_dump, debug_zval_dump, and print_r render boxed integers as exact decimal
+bigint: var_dump, debug_zval_dump, and print_r render boxed integers as exact decimal
 --EXTENSIONS--
 zend_test
 --FILE--

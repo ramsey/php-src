@@ -1,5 +1,5 @@
 --TEST--
-(int) cast and settype('integer') are identities on an already-boxed integer
+bigint: (int) cast and settype('integer') are identities on an already-boxed integer
 --EXTENSIONS--
 zend_test
 --FILE--

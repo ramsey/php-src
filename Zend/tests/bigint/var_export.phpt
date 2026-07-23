@@ -1,5 +1,5 @@
 --TEST--
-var_export renders boxed integers as exact decimal
+bigint: var_export renders boxed integers as exact decimal
 --EXTENSIONS--
 zend_test
 --FILE--

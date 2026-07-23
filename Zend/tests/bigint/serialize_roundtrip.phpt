@@ -1,5 +1,5 @@
 --TEST--
-serialize and unserialize round-trip boxed integers exactly
+bigint: serialize and unserialize round-trip boxed integers exactly
 --EXTENSIONS--
 zend_test
 --FILE--

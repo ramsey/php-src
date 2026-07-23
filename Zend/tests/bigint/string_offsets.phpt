@@ -1,5 +1,5 @@
 --TEST--
-String offsets with a boxed integer: isset/empty saturate out of range, direct read still rejects the type
+bigint: string offsets with a boxed integer: isset/empty saturate out of range, direct read still rejects the type
 --EXTENSIONS--
 zend_test
 --FILE--

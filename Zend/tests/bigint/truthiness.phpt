@@ -1,5 +1,5 @@
 --TEST--
-Boxed integers are always truthy: if, (bool), negation, ternary
+bigint: boxed integers are always truthy: if, (bool), negation, ternary
 --EXTENSIONS--
 zend_test
 --FILE--

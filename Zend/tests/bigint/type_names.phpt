@@ -1,5 +1,5 @@
 --TEST--
-gettype, get_debug_type, and value-name error text all report a boxed integer as int
+bigint: gettype, get_debug_type, and value-name error text all report a boxed integer as int
 --EXTENSIONS--
 zend_test
 --FILE--

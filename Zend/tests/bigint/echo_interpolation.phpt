@@ -1,5 +1,5 @@
 --TEST--
-echo and double-quoted string interpolation render boxed integers as exact decimal
+bigint: echo and double-quoted string interpolation render boxed integers as exact decimal
 --EXTENSIONS--
 zend_test
 --FILE--

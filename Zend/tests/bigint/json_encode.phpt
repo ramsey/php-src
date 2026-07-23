@@ -1,5 +1,5 @@
 --TEST--
-json_encode renders boxed integers as exact decimal
+bigint: json_encode renders boxed integers as exact decimal
 --EXTENSIONS--
 zend_test
 --FILE--

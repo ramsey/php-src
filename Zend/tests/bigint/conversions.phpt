@@ -1,5 +1,5 @@
 --TEST--
-Conversions of boxed integers: float and string exact, bool true, long saturates via intval
+bigint: conversions of boxed integers: float and string exact, bool true, long saturates via intval
 --EXTENSIONS--
 zend_test
 --FILE--
