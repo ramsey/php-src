@@ -630,6 +630,9 @@ struct _zend_ast_ref {
 	/*zend_ast        ast; zend_ast follows the zend_ast_ref structure */
 };
 
+/* Feature-detection macro for the logical integer type. */
+#define ZEND_MP_INT 1
+
 /* Regular data types: Must be in sync with zend_variables.c. */
 #define IS_UNDEF					0
 #define IS_NULL						1
@@ -1026,7 +1029,7 @@ static zend_always_inline uint32_t zend_gc_delref_ex(zend_refcounted_h *p, uint3
 		} \
 	} while(0)
 
-/* All data types < IS_STRING have their constructor/destructors skipped */
+/* Values without the refcounted type flag need no constructor or destructor. */
 
 #if 1
 /* This optimized version assumes that we have a single "type_flag" */

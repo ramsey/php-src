@@ -287,6 +287,7 @@ ZEND_ATTRIBUTE_CONST static bool zp_is_simple_type(uint32_t type_mask)
 
 	return zp_is_power_of_two(type_mask)
 		|| type_mask == MAY_BE_BOOL
+		|| type_mask == MAY_BE_INT
 		|| type_mask == MAY_BE_ANY;
 }
 
@@ -305,6 +306,7 @@ static zend_ast *zp_simple_type_to_ast(uint32_t type)
 			name = ZSTR_KNOWN(ZEND_STR_FALSE);
 			break;
 		case MAY_BE_LONG:
+		case MAY_BE_INT:
 			name = ZSTR_KNOWN(ZEND_STR_INT);
 			break;
 		case MAY_BE_DOUBLE:
@@ -390,6 +392,11 @@ static zend_ast *zp_type_to_ast(const zend_type type)
 		if ((type_mask & MAY_BE_BOOL) == MAY_BE_BOOL) {
 			type_ast = zend_ast_list_add(type_ast, zp_simple_type_to_ast(MAY_BE_BOOL));
 			type_mask &= ~MAY_BE_BOOL;
+		}
+		/* IS_LONG|IS_BIGINT is represented as a single int node */
+		if ((type_mask & MAY_BE_INT) == MAY_BE_INT) {
+			type_ast = zend_ast_list_add(type_ast, zp_simple_type_to_ast(MAY_BE_INT));
+			type_mask &= ~MAY_BE_INT;
 		}
 		for (uint32_t may_be_type = 1; may_be_type < _ZEND_TYPE_MAY_BE_MASK; may_be_type <<= 1) {
 			if (type_mask & may_be_type) {

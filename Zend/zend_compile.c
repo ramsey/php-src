@@ -1509,7 +1509,7 @@ zend_string *zend_type_to_string_resolved(const zend_type type, const zend_class
 	if (type_mask & MAY_BE_STRING) {
 		str = add_type_string(str, ZSTR_KNOWN(ZEND_STR_STRING), /* is_intersection */ false);
 	}
-	if (type_mask & MAY_BE_LONG) {
+	if (type_mask & MAY_BE_INT) {
 		str = add_type_string(str, ZSTR_KNOWN(ZEND_STR_INT), /* is_intersection */ false);
 	}
 	if (type_mask & MAY_BE_DOUBLE) {
@@ -4372,10 +4372,12 @@ static zend_result zend_compile_func_typecheck(znode *result, const zend_ast_lis
 
 	zend_compile_expr(&arg_node, args->child[0]);
 	opline = zend_emit_op_tmp(result, ZEND_TYPE_CHECK, &arg_node, NULL);
-	if (type != _IS_BOOL) {
-		opline->extended_value = (1 << type);
-	} else {
+	if (type == _IS_BOOL) {
 		opline->extended_value = (1 << IS_FALSE) | (1 << IS_TRUE);
+	} else if (type == IS_LONG) {
+		opline->extended_value = MAY_BE_INT;
+	} else {
+		opline->extended_value = (1 << type);
 	}
 	return SUCCESS;
 }
@@ -4392,7 +4394,7 @@ static zend_result zend_compile_func_is_scalar(znode *result, const zend_ast_lis
 
 	zend_compile_expr(&arg_node, args->child[0]);
 	opline = zend_emit_op_tmp(result, ZEND_TYPE_CHECK, &arg_node, NULL);
-	opline->extended_value = (1 << IS_FALSE | 1 << IS_TRUE | 1 << IS_DOUBLE | 1 << IS_LONG | 1 << IS_STRING);
+	opline->extended_value = (1 << IS_FALSE | 1 << IS_TRUE | 1 << IS_DOUBLE | 1 << IS_LONG | 1 << IS_BIGINT | 1 << IS_STRING);
 	return SUCCESS;
 }
 
@@ -7645,6 +7647,11 @@ static zend_type zend_compile_single_typename(zend_ast *ast)
 				return iterable;
 			}
 
+			/* The int type accepts native longs and boxed integers alike */
+			if (type_code == IS_LONG) {
+				return (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_INT);
+			}
+
 			return (zend_type) ZEND_TYPE_INIT_CODE(type_code, 0, 0);
 		} else {
 			const char *correct_name;
@@ -9804,13 +9811,13 @@ static void zend_compile_enum_backing_type(zend_class_entry *ce, zend_ast *enum_
 	ZEND_ASSERT(ce->ce_flags & ZEND_ACC_ENUM);
 	zend_type type = zend_compile_typename(enum_backing_type_ast);
 	uint32_t type_mask = ZEND_TYPE_PURE_MASK(type);
-	if (ZEND_TYPE_IS_COMPLEX(type) || (type_mask != MAY_BE_LONG && type_mask != MAY_BE_STRING)) {
+	if (ZEND_TYPE_IS_COMPLEX(type) || (type_mask != MAY_BE_INT && type_mask != MAY_BE_STRING)) {
 		zend_string *type_string = zend_type_to_string(type);
 		zend_error_noreturn(E_COMPILE_ERROR,
 			"Enum backing type must be int or string, %s given",
 			ZSTR_VAL(type_string));
 	}
-	if (type_mask == MAY_BE_LONG) {
+	if (type_mask == MAY_BE_INT) {
 		ce->enum_backing_type = IS_LONG;
 	} else {
 		ZEND_ASSERT(type_mask == MAY_BE_STRING);

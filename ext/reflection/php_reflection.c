@@ -1468,7 +1468,7 @@ static reflection_type_kind get_type_kind(zend_type type) {
 		}
 		return NAMED_TYPE;
 	}
-	if (type_mask_without_null == MAY_BE_BOOL || ZEND_TYPE_PURE_MASK(type) == MAY_BE_ANY) {
+	if (type_mask_without_null == MAY_BE_BOOL || type_mask_without_null == MAY_BE_INT || ZEND_TYPE_PURE_MASK(type) == MAY_BE_ANY) {
 		return NAMED_TYPE;
 	}
 	/* Check that only one bit is set. */

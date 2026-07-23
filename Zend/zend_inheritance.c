@@ -690,6 +690,12 @@ static inheritance_status zend_perform_covariant_type_check(
 			added_types &= ~MAY_BE_STATIC;
 		}
 
+		if ((added_types & MAY_BE_BIGINT) && (proto_type_mask & MAY_BE_LONG)) {
+			/* A boxed integer is a logical int, so gaining bigint over a parent
+			 * that already accepts int is not a widening. */
+			added_types &= ~MAY_BE_BIGINT;
+		}
+
 		if (added_types == MAY_BE_NEVER) {
 			/* never is the bottom type */
 			return INHERITANCE_SUCCESS;

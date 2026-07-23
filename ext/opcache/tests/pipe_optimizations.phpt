@@ -73,7 +73,7 @@ Other::foo:
      ; (after optimizer)
      ; %s:8-10
 0000 CV0($a) = RECV 1
-0001 T1 = ADD CV0($a) CV0($a)
+0001 T1 = MUL CV0($a) int(2)
 0002 VERIFY_RETURN_TYPE T1
 0003 RETURN T1
 

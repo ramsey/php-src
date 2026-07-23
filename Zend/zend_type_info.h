@@ -26,12 +26,14 @@
 #define MAY_BE_TRUE		            (1 << IS_TRUE)
 #define MAY_BE_BOOL                 (MAY_BE_FALSE|MAY_BE_TRUE)
 #define MAY_BE_LONG		            (1 << IS_LONG)
+#define MAY_BE_BIGINT	            (1 << IS_BIGINT)
+#define MAY_BE_INT		            (MAY_BE_LONG|MAY_BE_BIGINT)
 #define MAY_BE_DOUBLE	            (1 << IS_DOUBLE)
 #define MAY_BE_STRING	            (1 << IS_STRING)
 #define MAY_BE_ARRAY	            (1 << IS_ARRAY)
 #define MAY_BE_OBJECT	            (1 << IS_OBJECT)
 #define MAY_BE_RESOURCE	            (1 << IS_RESOURCE)
-#define MAY_BE_ANY                  (MAY_BE_NULL|MAY_BE_FALSE|MAY_BE_TRUE|MAY_BE_LONG|MAY_BE_DOUBLE|MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE)
+#define MAY_BE_ANY                  (MAY_BE_NULL|MAY_BE_FALSE|MAY_BE_TRUE|MAY_BE_LONG|MAY_BE_BIGINT|MAY_BE_DOUBLE|MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE)
 #define MAY_BE_REF                  (1 << IS_REFERENCE) /* may be reference */
 
 /* These are used in zend_type, but not for type inference.
