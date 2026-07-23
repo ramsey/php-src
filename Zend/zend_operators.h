@@ -406,6 +406,9 @@ again:
 				result = 1;
 			}
 			break;
+		case IS_BIGINT:
+			result = 1;
+			break;
 		case IS_DOUBLE:
 			if (UNEXPECTED(zend_isnan(Z_DVAL_P(op)))) {
 				zend_nan_coerced_to_type_warning(_IS_BOOL);

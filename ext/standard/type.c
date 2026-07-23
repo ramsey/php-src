@@ -51,6 +51,7 @@ PHP_FUNCTION(get_debug_type)
 		case IS_TRUE:
 			RETURN_INTERNED_STR(ZSTR_KNOWN(ZEND_STR_BOOL));
 		case IS_LONG:
+		case IS_BIGINT:
 			RETURN_INTERNED_STR(ZSTR_KNOWN(ZEND_STR_INT));
 		case IS_DOUBLE:
 			RETURN_INTERNED_STR(ZSTR_KNOWN(ZEND_STR_FLOAT));
@@ -98,10 +99,11 @@ PHP_FUNCTION(settype)
 	} else {
 		ptr = Z_REFVAL_P(var);
 	}
-	if (zend_string_equals_ci(type, ZSTR_KNOWN(ZEND_STR_INTEGER))) {
-		convert_to_long(ptr);
-	} else if (zend_string_equals_ci(type, ZSTR_KNOWN(ZEND_STR_INT))) {
-		convert_to_long(ptr);
+	if (zend_string_equals_ci(type, ZSTR_KNOWN(ZEND_STR_INTEGER))
+			|| zend_string_equals_ci(type, ZSTR_KNOWN(ZEND_STR_INT))) {
+		if (!Z_IS_INT_P(ptr)) {
+			convert_to_long(ptr);
+		}
 	} else if (zend_string_equals_ci(type, ZSTR_KNOWN(ZEND_STR_FLOAT))) {
 		convert_to_double(ptr);
 	} else if (zend_string_equals_ci(type, ZSTR_KNOWN(ZEND_STR_DOUBLE))) {

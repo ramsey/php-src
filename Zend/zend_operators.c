@@ -28,6 +28,7 @@
 #include "zend_strtod.h"
 #include "zend_exceptions.h"
 #include "zend_closures.h"
+#include "zend_int.h"
 
 #include <locale.h>
 #ifdef HAVE_LANGINFO_H
@@ -384,6 +385,8 @@ try_again:
 			return 0;
 		case IS_TRUE:
 			return 1;
+		case IS_BIGINT:
+			return zend_bigint_sign(Z_BIG_P(op)) < 0 ? ZEND_LONG_MIN : ZEND_LONG_MAX;
 		case IS_DOUBLE: {
 			double dval = Z_DVAL_P(op);
 			zend_long lval = zend_dval_to_lval_safe(dval);
@@ -569,6 +572,13 @@ try_again:
 			break;
 		case IS_LONG:
 			break;
+		case IS_BIGINT: {
+			zend_bigint *big = Z_BIG_P(op);
+			zend_long l = zend_bigint_sign(big) < 0 ? ZEND_LONG_MIN : ZEND_LONG_MAX;
+			zend_bigint_release(big);
+			ZVAL_LONG(op, l);
+			break;
+		}
 		case IS_DOUBLE: {
 			/* NAN might emit a warning */
 			zend_long new_value = zend_dval_to_lval(Z_DVAL_P(op));
@@ -632,6 +642,13 @@ try_again:
 		case IS_LONG:
 			ZVAL_DOUBLE(op, (double) Z_LVAL_P(op));
 			break;
+		case IS_BIGINT: {
+			zend_bigint *big = Z_BIG_P(op);
+			double d = zend_bigint_to_double(big);
+			zend_bigint_release(big);
+			ZVAL_DOUBLE(op, d);
+			break;
+		}
 		case IS_DOUBLE:
 			break;
 		case IS_STRING:
@@ -701,6 +718,11 @@ try_again:
 		case IS_LONG:
 			ZVAL_BOOL(op, Z_LVAL_P(op) ? 1 : 0);
 			break;
+		case IS_BIGINT: {
+			zend_bigint_release(Z_BIG_P(op));
+			ZVAL_TRUE(op);
+			break;
+		}
 		case IS_DOUBLE: {
 			/* We compute the new value before emitting the warning as the zval may change */
 			bool new_value = Z_DVAL_P(op) ? true : false;
@@ -775,6 +797,13 @@ try_again:
 		case IS_LONG:
 			ZVAL_STR(op, zend_long_to_str(Z_LVAL_P(op)));
 			break;
+		case IS_BIGINT: {
+			zend_bigint *big = Z_BIG_P(op);
+			zend_string *str = zend_bigint_to_str(big);
+			zend_bigint_release(big);
+			ZVAL_NEW_STR(op, str);
+			break;
+		}
 		case IS_DOUBLE: {
 			/* Casting NAN will cause a warning */
 			zend_string *new_value = zend_double_to_str(Z_DVAL_P(op));
@@ -963,6 +992,8 @@ try_again:
 			return Z_RES_HANDLE_P(op);
 		case IS_LONG:
 			return Z_LVAL_P(op);
+		case IS_BIGINT:
+			return zend_bigint_sign(Z_BIG_P(op)) < 0 ? ZEND_LONG_MIN : ZEND_LONG_MAX;
 		case IS_DOUBLE: {
 			double dval = Z_DVAL_P(op);
 			zend_long lval = zend_dval_to_lval(dval);
@@ -1032,6 +1063,8 @@ try_again:
 			return (double) Z_RES_HANDLE_P(op);
 		case IS_LONG:
 			return (double) Z_LVAL_P(op);
+		case IS_BIGINT:
+			return zend_bigint_to_double(Z_BIG_P(op));
 		case IS_DOUBLE:
 			return Z_DVAL_P(op);
 		case IS_STRING:
@@ -1072,6 +1105,8 @@ try_again:
 			return zend_strpprintf(0, "Resource id #" ZEND_LONG_FMT, (zend_long)Z_RES_HANDLE_P(op));
 		case IS_LONG:
 			return zend_long_to_str(Z_LVAL_P(op));
+		case IS_BIGINT:
+			return zend_bigint_to_str(Z_BIG_P(op));
 		case IS_DOUBLE:
 			return zend_double_to_str(Z_DVAL_P(op));
 		case IS_ARRAY:

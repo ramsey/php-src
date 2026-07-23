@@ -102,6 +102,7 @@ ZEND_API const char *zend_get_type_by_const(int type) /* {{{ */
 		case _IS_BOOL:
 			return "bool";
 		case IS_LONG:
+		case IS_BIGINT:
 			return "int";
 		case IS_DOUBLE:
 			return "float";
@@ -175,6 +176,7 @@ ZEND_API zend_string *zend_zval_get_legacy_type(const zval *arg) /* {{{ */
 		case IS_TRUE:
 			return ZSTR_KNOWN(ZEND_STR_BOOLEAN);
 		case IS_LONG:
+		case IS_BIGINT:
 			return ZSTR_KNOWN(ZEND_STR_INTEGER);
 		case IS_DOUBLE:
 			return ZSTR_KNOWN(ZEND_STR_DOUBLE);

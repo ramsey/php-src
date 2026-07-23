@@ -5341,6 +5341,25 @@ static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_
 
 	switch (opline->extended_value) {
 		case IS_LONG:
+			if (IS_CONST & (IS_VAR|IS_CV)) {
+				ZVAL_DEREF(expr);
+			}
+			/* Z_IS_INT matches IS_LONG and IS_BIGINT, and casting either
+			 * to int is an identity. A bigint must not fall through to
+			 * zval_get_long, which saturates values outside the machine
+			 * range. The copy takes the same ownership treatment as the
+			 * same-type arm in the default case below. */
+			if (Z_IS_INT_P(expr)) {
+				ZVAL_COPY_VALUE(result, expr);
+				if (IS_CONST == IS_CONST) {
+					if (UNEXPECTED(Z_OPT_REFCOUNTED_P(result))) Z_ADDREF_P(result);
+				} else if (IS_CONST != IS_TMP_VAR) {
+					if (Z_OPT_REFCOUNTED_P(result)) Z_ADDREF_P(result);
+				}
+
+
+				ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
+			}
 			ZVAL_LONG(result, zval_get_long(expr));
 			break;
 		case IS_DOUBLE:
@@ -17533,6 +17552,25 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_CAST_SPEC_TMP
 
 	switch (opline->extended_value) {
 		case IS_LONG:
+			if (IS_TMP_VAR & (IS_VAR|IS_CV)) {
+				ZVAL_DEREF(expr);
+			}
+			/* Z_IS_INT matches IS_LONG and IS_BIGINT, and casting either
+			 * to int is an identity. A bigint must not fall through to
+			 * zval_get_long, which saturates values outside the machine
+			 * range. The copy takes the same ownership treatment as the
+			 * same-type arm in the default case below. */
+			if (Z_IS_INT_P(expr)) {
+				ZVAL_COPY_VALUE(result, expr);
+				if (IS_TMP_VAR == IS_CONST) {
+					if (UNEXPECTED(Z_OPT_REFCOUNTED_P(result))) Z_ADDREF_P(result);
+				} else if (IS_TMP_VAR != IS_TMP_VAR) {
+					if (Z_OPT_REFCOUNTED_P(result)) Z_ADDREF_P(result);
+				}
+
+
+				ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
+			}
 			ZVAL_LONG(result, zval_get_long(expr));
 			break;
 		case IS_DOUBLE:
@@ -40303,6 +40341,25 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_CAST_SPEC_CV_
 
 	switch (opline->extended_value) {
 		case IS_LONG:
+			if (IS_CV & (IS_VAR|IS_CV)) {
+				ZVAL_DEREF(expr);
+			}
+			/* Z_IS_INT matches IS_LONG and IS_BIGINT, and casting either
+			 * to int is an identity. A bigint must not fall through to
+			 * zval_get_long, which saturates values outside the machine
+			 * range. The copy takes the same ownership treatment as the
+			 * same-type arm in the default case below. */
+			if (Z_IS_INT_P(expr)) {
+				ZVAL_COPY_VALUE(result, expr);
+				if (IS_CV == IS_CONST) {
+					if (UNEXPECTED(Z_OPT_REFCOUNTED_P(result))) Z_ADDREF_P(result);
+				} else if (IS_CV != IS_TMP_VAR) {
+					if (Z_OPT_REFCOUNTED_P(result)) Z_ADDREF_P(result);
+				}
+
+
+				ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
+			}
 			ZVAL_LONG(result, zval_get_long(expr));
 			break;
 		case IS_DOUBLE:
@@ -58186,6 +58243,25 @@ static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_CAST_
 
 	switch (opline->extended_value) {
 		case IS_LONG:
+			if (IS_CONST & (IS_VAR|IS_CV)) {
+				ZVAL_DEREF(expr);
+			}
+			/* Z_IS_INT matches IS_LONG and IS_BIGINT, and casting either
+			 * to int is an identity. A bigint must not fall through to
+			 * zval_get_long, which saturates values outside the machine
+			 * range. The copy takes the same ownership treatment as the
+			 * same-type arm in the default case below. */
+			if (Z_IS_INT_P(expr)) {
+				ZVAL_COPY_VALUE(result, expr);
+				if (IS_CONST == IS_CONST) {
+					if (UNEXPECTED(Z_OPT_REFCOUNTED_P(result))) Z_ADDREF_P(result);
+				} else if (IS_CONST != IS_TMP_VAR) {
+					if (Z_OPT_REFCOUNTED_P(result)) Z_ADDREF_P(result);
+				}
+
+
+				ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
+			}
 			ZVAL_LONG(result, zval_get_long(expr));
 			break;
 		case IS_DOUBLE:
@@ -70276,6 +70352,25 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_CAST_SPEC_TMP_TAIL
 
 	switch (opline->extended_value) {
 		case IS_LONG:
+			if (IS_TMP_VAR & (IS_VAR|IS_CV)) {
+				ZVAL_DEREF(expr);
+			}
+			/* Z_IS_INT matches IS_LONG and IS_BIGINT, and casting either
+			 * to int is an identity. A bigint must not fall through to
+			 * zval_get_long, which saturates values outside the machine
+			 * range. The copy takes the same ownership treatment as the
+			 * same-type arm in the default case below. */
+			if (Z_IS_INT_P(expr)) {
+				ZVAL_COPY_VALUE(result, expr);
+				if (IS_TMP_VAR == IS_CONST) {
+					if (UNEXPECTED(Z_OPT_REFCOUNTED_P(result))) Z_ADDREF_P(result);
+				} else if (IS_TMP_VAR != IS_TMP_VAR) {
+					if (Z_OPT_REFCOUNTED_P(result)) Z_ADDREF_P(result);
+				}
+
+
+				ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
+			}
 			ZVAL_LONG(result, zval_get_long(expr));
 			break;
 		case IS_DOUBLE:
@@ -92946,6 +93041,25 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_CAST_SPEC_CV_TAILC
 
 	switch (opline->extended_value) {
 		case IS_LONG:
+			if (IS_CV & (IS_VAR|IS_CV)) {
+				ZVAL_DEREF(expr);
+			}
+			/* Z_IS_INT matches IS_LONG and IS_BIGINT, and casting either
+			 * to int is an identity. A bigint must not fall through to
+			 * zval_get_long, which saturates values outside the machine
+			 * range. The copy takes the same ownership treatment as the
+			 * same-type arm in the default case below. */
+			if (Z_IS_INT_P(expr)) {
+				ZVAL_COPY_VALUE(result, expr);
+				if (IS_CV == IS_CONST) {
+					if (UNEXPECTED(Z_OPT_REFCOUNTED_P(result))) Z_ADDREF_P(result);
+				} else if (IS_CV != IS_TMP_VAR) {
+					if (Z_OPT_REFCOUNTED_P(result)) Z_ADDREF_P(result);
+				}
+
+
+				ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
+			}
 			ZVAL_LONG(result, zval_get_long(expr));
 			break;
 		case IS_DOUBLE:
