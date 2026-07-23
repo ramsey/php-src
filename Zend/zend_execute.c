@@ -815,8 +815,8 @@ static bool zend_verify_weak_scalar_type_hint_no_sideeffect(uint32_t type_mask, 
 ZEND_API bool zend_verify_scalar_type_hint(uint32_t type_mask, zval *arg, bool strict, bool is_internal_arg)
 {
 	if (UNEXPECTED(strict)) {
-		/* SSTH Exception: IS_LONG may be accepted as IS_DOUBLE (converted) */
-		if (!(type_mask & MAY_BE_DOUBLE) || Z_TYPE_P(arg) != IS_LONG) {
+		/* SSTH Exception: IS_LONG and IS_BIGINT may be accepted as IS_DOUBLE (converted) */
+		if (!(type_mask & MAY_BE_DOUBLE) || (Z_TYPE_P(arg) != IS_LONG && Z_TYPE_P(arg) != IS_BIGINT)) {
 			return 0;
 		}
 	} else if (UNEXPECTED(Z_TYPE_P(arg) == IS_NULL)) {

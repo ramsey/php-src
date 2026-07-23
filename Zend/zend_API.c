@@ -34,6 +34,7 @@
 #include "zend_enum.h"
 #include "zend_object_handlers.h"
 #include "zend_observer.h"
+#include "zend_int_backend.h"
 
 #include <stdarg.h>
 
@@ -596,7 +597,15 @@ ZEND_API zpp_parse_bool_status ZEND_FASTCALL zend_flf_parse_arg_bool_slow(const 
 
 ZEND_API bool ZEND_FASTCALL zend_parse_arg_long_weak(const zval *arg, zend_long *dest, uint32_t arg_num) /* {{{ */
 {
-	if (EXPECTED(Z_TYPE_P(arg) == IS_DOUBLE)) {
+	if (UNEXPECTED(Z_TYPE_P(arg) == IS_BIGINT)) {
+		/* Check arg_num is not (uint32_t)-1, as otherwise its called by
+		 * zend_verify_weak_scalar_type_hint_no_sideeffect() */
+		if (arg_num != (uint32_t)-1) {
+			zend_argument_value_error(arg_num, "must be between " ZEND_LONG_FMT " and " ZEND_LONG_FMT,
+				ZEND_LONG_MIN, ZEND_LONG_MAX);
+		}
+		return 0;
+	} else if (EXPECTED(Z_TYPE_P(arg) == IS_DOUBLE)) {
 		if (UNEXPECTED(zend_isnan(Z_DVAL_P(arg)))) {
 			return 0;
 		}
@@ -663,6 +672,11 @@ ZEND_API bool ZEND_FASTCALL zend_parse_arg_long_weak(const zval *arg, zend_long 
 
 ZEND_API bool ZEND_FASTCALL zend_parse_arg_long_slow(const zval *arg, zend_long *dest, uint32_t arg_num) /* {{{ */
 {
+	if (UNEXPECTED(Z_TYPE_P(arg) == IS_BIGINT)) {
+		zend_argument_value_error(arg_num, "must be between " ZEND_LONG_FMT " and " ZEND_LONG_FMT,
+			ZEND_LONG_MIN, ZEND_LONG_MAX);
+		return 0;
+	}
 	if (UNEXPECTED(ZEND_ARG_USES_STRICT_TYPES())) {
 		return 0;
 	}
@@ -672,6 +686,11 @@ ZEND_API bool ZEND_FASTCALL zend_parse_arg_long_slow(const zval *arg, zend_long 
 
 ZEND_API bool ZEND_FASTCALL zend_flf_parse_arg_long_slow(const zval *arg, zend_long *dest, uint32_t arg_num)
 {
+	if (UNEXPECTED(Z_TYPE_P(arg) == IS_BIGINT)) {
+		zend_argument_value_error(arg_num, "must be between " ZEND_LONG_FMT " and " ZEND_LONG_FMT,
+			ZEND_LONG_MIN, ZEND_LONG_MAX);
+		return 0;
+	}
 	if (UNEXPECTED(ZEND_FLF_ARG_USES_STRICT_TYPES())) {
 		return 0;
 	}
@@ -703,6 +722,8 @@ ZEND_API double ZEND_FASTCALL zend_parse_arg_double_weak(const zval *arg, uint32
 		return 0.0;
 	} else if (EXPECTED(Z_TYPE_P(arg) == IS_TRUE)) {
 		return 1.0;
+	} else if (Z_TYPE_P(arg) == IS_BIGINT) {
+		return zend_bigint_to_double(Z_BIG_P(arg));
 	} else {
 		return NAN;
 	}
@@ -714,6 +735,9 @@ ZEND_API double ZEND_FASTCALL zend_parse_arg_double_slow(const zval *arg, uint32
 	if (EXPECTED(Z_TYPE_P(arg) == IS_LONG)) {
 		/* SSTH Exception: IS_LONG may be accepted instead as IS_DOUBLE */
 		return (double)Z_LVAL_P(arg);
+	} else if (UNEXPECTED(Z_TYPE_P(arg) == IS_BIGINT)) {
+		/* SSTH Exception: IS_BIGINT may be accepted instead as IS_DOUBLE */
+		return zend_bigint_to_double(Z_BIG_P(arg));
 	} else if (UNEXPECTED(ZEND_ARG_USES_STRICT_TYPES())) {
 		return NAN;
 	}
@@ -723,6 +747,11 @@ ZEND_API double ZEND_FASTCALL zend_parse_arg_double_slow(const zval *arg, uint32
 
 ZEND_API bool ZEND_FASTCALL zend_parse_arg_number_slow(zval *arg, zval **dest, uint32_t arg_num) /* {{{ */
 {
+	if (UNEXPECTED(Z_TYPE_P(arg) == IS_BIGINT)) {
+		zend_argument_value_error(arg_num, "must be between " ZEND_LONG_FMT " and " ZEND_LONG_FMT,
+			ZEND_LONG_MIN, ZEND_LONG_MAX);
+		return 0;
+	}
 	if (UNEXPECTED(ZEND_ARG_USES_STRICT_TYPES())) {
 		return 0;
 	}
@@ -831,6 +860,16 @@ ZEND_API bool ZEND_FASTCALL zend_parse_arg_str_or_long_slow(zval *arg, zend_stri
 {
 	zend_string *str;
 	if (UNEXPECTED(ZEND_ARG_USES_STRICT_TYPES())) {
+		return 0;
+	}
+	if (UNEXPECTED(Z_TYPE_P(arg) == IS_BIGINT)) {
+		/* A box never fits a zend_long. Route it through the string arm
+		 * instead of the long arm, which would throw a range error. */
+		if ((str = zend_parse_arg_str_weak(arg, arg_num)) != NULL) {
+			*dest_long = 0;
+			*dest_str = str;
+			return 1;
+		}
 		return 0;
 	}
 	if (zend_parse_arg_long_weak(arg, dest_long, arg_num)) {
