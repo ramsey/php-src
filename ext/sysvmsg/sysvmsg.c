@@ -22,6 +22,7 @@
 #include "sysvmsg_arginfo.h"
 #include "ext/standard/php_var.h"
 #include "zend_smart_str.h"
+#include "zend_int.h"
 
 #include <sys/types.h>
 #include <sys/ipc.h>
@@ -411,6 +412,13 @@ PHP_FUNCTION(msg_send)
 			case IS_DOUBLE:
 				message_len = spprintf(&p, 0, "%F", Z_DVAL_P(message));
 				break;
+			case IS_BIGINT: {
+				zend_string *s = zend_bigint_to_str(Z_BIG_P(message));
+				message_len = ZSTR_LEN(s);
+				p = estrndup(ZSTR_VAL(s), message_len);
+				zend_string_release(s);
+				break;
+			}
 
 			default:
 				zend_argument_type_error(3, "must be of type string|int|float|bool, %s given", zend_zval_value_name(message));
@@ -420,7 +428,7 @@ PHP_FUNCTION(msg_send)
 		messagebuffer = safe_emalloc(message_len, 1, sizeof(struct php_msgbuf));
 		memcpy(messagebuffer->mtext, p, message_len + 1);
 
-		if (Z_TYPE_P(message) == IS_LONG || Z_TYPE_P(message) == IS_DOUBLE) {
+		if (Z_TYPE_P(message) == IS_LONG || Z_TYPE_P(message) == IS_DOUBLE || Z_TYPE_P(message) == IS_BIGINT) {
 			efree(p);
 		}
 	}
