@@ -16,7 +16,7 @@ function test() {
     }
     return $a;
 }
-var_dump(test() == PHP_INT_MIN);
+var_dump(test() == -9223372036854775816);
 ?>
 --EXPECT--
 bool(true)

@@ -262,24 +262,24 @@ ArithmeticError: Bit shift by negative number
 int(0)
 --- testing: 9223372036854775806 >> 9223372036854775807 ---
 int(0)
---- testing: 9.2233720368548E+18 >> 0 ---
-int(-9223372036854775808)
---- testing: 9.2233720368548E+18 >> 1 ---
-int(-4611686018427387904)
---- testing: 9.2233720368548E+18 >> -1 ---
+--- testing: 9223372036854775808 >> 0 ---
+int(9223372036854775808)
+--- testing: 9223372036854775808 >> 1 ---
+int(4611686018427387904)
+--- testing: 9223372036854775808 >> -1 ---
 ArithmeticError: Bit shift by negative number
---- testing: 9.2233720368548E+18 >> 7 ---
-int(-72057594037927936)
---- testing: 9.2233720368548E+18 >> 9 ---
-int(-18014398509481984)
---- testing: 9.2233720368548E+18 >> 65 ---
-int(-1)
---- testing: 9.2233720368548E+18 >> -44 ---
+--- testing: 9223372036854775808 >> 7 ---
+int(72057594037927936)
+--- testing: 9223372036854775808 >> 9 ---
+int(18014398509481984)
+--- testing: 9223372036854775808 >> 65 ---
+int(0)
+--- testing: 9223372036854775808 >> -44 ---
 ArithmeticError: Bit shift by negative number
---- testing: 9.2233720368548E+18 >> 2147483647 ---
-int(-1)
---- testing: 9.2233720368548E+18 >> 9223372036854775807 ---
-int(-1)
+--- testing: 9223372036854775808 >> 2147483647 ---
+int(0)
+--- testing: 9223372036854775808 >> 9223372036854775807 ---
+int(0)
 --- testing: -9223372036854775807 >> 0 ---
 int(-9223372036854775807)
 --- testing: -9223372036854775807 >> 1 ---
@@ -298,23 +298,23 @@ ArithmeticError: Bit shift by negative number
 int(-1)
 --- testing: -9223372036854775807 >> 9223372036854775807 ---
 int(-1)
---- testing: -9.2233720368548E+18 >> 0 ---
-int(-9223372036854775808)
---- testing: -9.2233720368548E+18 >> 1 ---
-int(-4611686018427387904)
---- testing: -9.2233720368548E+18 >> -1 ---
+--- testing: -9223372036854775809 >> 0 ---
+int(-9223372036854775809)
+--- testing: -9223372036854775809 >> 1 ---
+int(-4611686018427387905)
+--- testing: -9223372036854775809 >> -1 ---
 ArithmeticError: Bit shift by negative number
---- testing: -9.2233720368548E+18 >> 7 ---
-int(-72057594037927936)
---- testing: -9.2233720368548E+18 >> 9 ---
-int(-18014398509481984)
---- testing: -9.2233720368548E+18 >> 65 ---
+--- testing: -9223372036854775809 >> 7 ---
+int(-72057594037927937)
+--- testing: -9223372036854775809 >> 9 ---
+int(-18014398509481985)
+--- testing: -9223372036854775809 >> 65 ---
 int(-1)
---- testing: -9.2233720368548E+18 >> -44 ---
+--- testing: -9223372036854775809 >> -44 ---
 ArithmeticError: Bit shift by negative number
---- testing: -9.2233720368548E+18 >> 2147483647 ---
+--- testing: -9223372036854775809 >> 2147483647 ---
 int(-1)
---- testing: -9.2233720368548E+18 >> 9223372036854775807 ---
+--- testing: -9223372036854775809 >> 9223372036854775807 ---
 int(-1)
 --- testing: 0 >> 9223372036854775807 ---
 int(0)
@@ -340,11 +340,11 @@ int(0)
 int(0)
 --- testing: 0 >> 9223372036854775806 ---
 int(0)
---- testing: 0 >> 9.2233720368548E+18 ---
-ArithmeticError: Bit shift by negative number
+--- testing: 0 >> 9223372036854775808 ---
+int(0)
 --- testing: 0 >> -9223372036854775807 ---
 ArithmeticError: Bit shift by negative number
---- testing: 0 >> -9.2233720368548E+18 ---
+--- testing: 0 >> -9223372036854775809 ---
 ArithmeticError: Bit shift by negative number
 --- testing: 1 >> 9223372036854775807 ---
 int(0)
@@ -370,11 +370,11 @@ int(0)
 int(0)
 --- testing: 1 >> 9223372036854775806 ---
 int(0)
---- testing: 1 >> 9.2233720368548E+18 ---
-ArithmeticError: Bit shift by negative number
+--- testing: 1 >> 9223372036854775808 ---
+int(0)
 --- testing: 1 >> -9223372036854775807 ---
 ArithmeticError: Bit shift by negative number
---- testing: 1 >> -9.2233720368548E+18 ---
+--- testing: 1 >> -9223372036854775809 ---
 ArithmeticError: Bit shift by negative number
 --- testing: -1 >> 9223372036854775807 ---
 int(-1)
@@ -400,11 +400,11 @@ int(-1)
 int(-1)
 --- testing: -1 >> 9223372036854775806 ---
 int(-1)
---- testing: -1 >> 9.2233720368548E+18 ---
-ArithmeticError: Bit shift by negative number
+--- testing: -1 >> 9223372036854775808 ---
+int(-1)
 --- testing: -1 >> -9223372036854775807 ---
 ArithmeticError: Bit shift by negative number
---- testing: -1 >> -9.2233720368548E+18 ---
+--- testing: -1 >> -9223372036854775809 ---
 ArithmeticError: Bit shift by negative number
 --- testing: 7 >> 9223372036854775807 ---
 int(0)
@@ -430,11 +430,11 @@ int(0)
 int(0)
 --- testing: 7 >> 9223372036854775806 ---
 int(0)
---- testing: 7 >> 9.2233720368548E+18 ---
-ArithmeticError: Bit shift by negative number
+--- testing: 7 >> 9223372036854775808 ---
+int(0)
 --- testing: 7 >> -9223372036854775807 ---
 ArithmeticError: Bit shift by negative number
---- testing: 7 >> -9.2233720368548E+18 ---
+--- testing: 7 >> -9223372036854775809 ---
 ArithmeticError: Bit shift by negative number
 --- testing: 9 >> 9223372036854775807 ---
 int(0)
@@ -460,11 +460,11 @@ int(0)
 int(0)
 --- testing: 9 >> 9223372036854775806 ---
 int(0)
---- testing: 9 >> 9.2233720368548E+18 ---
-ArithmeticError: Bit shift by negative number
+--- testing: 9 >> 9223372036854775808 ---
+int(0)
 --- testing: 9 >> -9223372036854775807 ---
 ArithmeticError: Bit shift by negative number
---- testing: 9 >> -9.2233720368548E+18 ---
+--- testing: 9 >> -9223372036854775809 ---
 ArithmeticError: Bit shift by negative number
 --- testing: 65 >> 9223372036854775807 ---
 int(0)
@@ -490,11 +490,11 @@ int(0)
 int(0)
 --- testing: 65 >> 9223372036854775806 ---
 int(0)
---- testing: 65 >> 9.2233720368548E+18 ---
-ArithmeticError: Bit shift by negative number
+--- testing: 65 >> 9223372036854775808 ---
+int(0)
 --- testing: 65 >> -9223372036854775807 ---
 ArithmeticError: Bit shift by negative number
---- testing: 65 >> -9.2233720368548E+18 ---
+--- testing: 65 >> -9223372036854775809 ---
 ArithmeticError: Bit shift by negative number
 --- testing: -44 >> 9223372036854775807 ---
 int(-1)
@@ -520,11 +520,11 @@ int(-1)
 int(-1)
 --- testing: -44 >> 9223372036854775806 ---
 int(-1)
---- testing: -44 >> 9.2233720368548E+18 ---
-ArithmeticError: Bit shift by negative number
+--- testing: -44 >> 9223372036854775808 ---
+int(-1)
 --- testing: -44 >> -9223372036854775807 ---
 ArithmeticError: Bit shift by negative number
---- testing: -44 >> -9.2233720368548E+18 ---
+--- testing: -44 >> -9223372036854775809 ---
 ArithmeticError: Bit shift by negative number
 --- testing: 2147483647 >> 9223372036854775807 ---
 int(0)
@@ -550,11 +550,11 @@ int(0)
 int(0)
 --- testing: 2147483647 >> 9223372036854775806 ---
 int(0)
---- testing: 2147483647 >> 9.2233720368548E+18 ---
-ArithmeticError: Bit shift by negative number
+--- testing: 2147483647 >> 9223372036854775808 ---
+int(0)
 --- testing: 2147483647 >> -9223372036854775807 ---
 ArithmeticError: Bit shift by negative number
---- testing: 2147483647 >> -9.2233720368548E+18 ---
+--- testing: 2147483647 >> -9223372036854775809 ---
 ArithmeticError: Bit shift by negative number
 --- testing: 9223372036854775807 >> 9223372036854775807 ---
 int(0)
@@ -580,9 +580,9 @@ int(0)
 int(0)
 --- testing: 9223372036854775807 >> 9223372036854775806 ---
 int(0)
---- testing: 9223372036854775807 >> 9.2233720368548E+18 ---
-ArithmeticError: Bit shift by negative number
+--- testing: 9223372036854775807 >> 9223372036854775808 ---
+int(0)
 --- testing: 9223372036854775807 >> -9223372036854775807 ---
 ArithmeticError: Bit shift by negative number
---- testing: 9223372036854775807 >> -9.2233720368548E+18 ---
+--- testing: 9223372036854775807 >> -9223372036854775809 ---
 ArithmeticError: Bit shift by negative number

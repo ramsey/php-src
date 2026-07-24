@@ -28,26 +28,18 @@ var_dump($a->foo);
 
 $a->foo = PHP_INT_MIN;
 
-try {
-        $_[0]--;
-} catch (Throwable $e) { echo $e::class, ': ', $e->getMessage(), "\n"; }
+$_[0]--;
 echo gettype($a->foo),"\n";
 
-try {
-    --$_[0];
-} catch (Throwable $e) { echo $e::class, ': ', $e->getMessage(), "\n"; }
+--$_[0];
 echo gettype($a->foo),"\n";
 
 $a->foo = PHP_INT_MAX;
 
-try {
-    $_[0]++;
-} catch (Throwable $e) { echo $e::class, ': ', $e->getMessage(), "\n"; }
+$_[0]++;
 echo gettype($a->foo),"\n";
 
-try {
-    ++$_[0];
-} catch (Throwable $e) { echo $e::class, ': ', $e->getMessage(), "\n"; }
+++$_[0];
 echo gettype($a->foo),"\n";
 
 $_[0] = 0;
@@ -67,13 +59,9 @@ TypeError: Cannot assign string to reference held by property class@anonymous::$
 int(21)
 int(20)
 int(19)
-TypeError: Cannot decrement a reference held by property class@anonymous::$foo of type int past its minimal value
 integer
-TypeError: Cannot decrement a reference held by property class@anonymous::$foo of type int past its minimal value
 integer
-TypeError: Cannot increment a reference held by property class@anonymous::$foo of type int past its maximal value
 integer
-TypeError: Cannot increment a reference held by property class@anonymous::$foo of type int past its maximal value
 integer
 TypeError: Cannot assign array to reference held by property class@anonymous::$foo of type int
 int(0)

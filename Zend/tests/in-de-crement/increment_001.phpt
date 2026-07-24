@@ -19,6 +19,6 @@ foreach ($values as $var) {
 echo "Done\n";
 ?>
 --EXPECT--
-float(2147483648)
-float(2147483648)
+int(2147483648)
+int(2147483648)
 Done

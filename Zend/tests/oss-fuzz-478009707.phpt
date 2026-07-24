@@ -24,4 +24,4 @@ var_dump($c->prop);
 ?>
 --EXPECTF--
 int(4)
-float(%s)
+int(%i)

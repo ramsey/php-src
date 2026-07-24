@@ -17,8 +17,13 @@ $foo = new class {
 };
 
 try {
+    $iteration = 0;
     foreach ($foo->fetch() as &$prop) {
-        $prop += 1;
+        if (++$iteration === 4) {
+            $prop += 1.1;
+        } else {
+            $prop += 1;
+        }
     }
 } catch (Throwable $e) { echo $e::class, ': ', $e->getMessage(), "\n"; }
 

@@ -1,5 +1,5 @@
 --TEST--
-testing integer overflow (64bit)
+testing integer does not overflow to float (64bit)
 --SKIPIF--
 <?php if (PHP_INT_SIZE != 8) die("skip this test is for 64bit platform only"); ?>
 --FILE--
@@ -24,16 +24,10 @@ echo "Done\n";
 ?>
 --EXPECTF--
 int(9223372036854775807)
-
-Warning: The float %f is not representable as an int, cast occurred in %s on line %d
+int(9223372036854775808)
+int(9223372036854776807)
+int(18446744073709551618)
 int(-9223372036854775808)
-
-Warning: The float %f is not representable as an int, cast occurred in %s on line %d
-int(-9223372036854775808)
-
-Warning: The float %f is not representable as an int, cast occurred in %s on line %d
-int(0)
-int(-9223372036854775808)
-int(-9223372036854775808)
-int(-9223372036854775808)
+int(-9223372036854775809)
+int(-9223372036854776807)
 Done

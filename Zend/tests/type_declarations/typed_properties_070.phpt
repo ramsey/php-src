@@ -27,9 +27,7 @@ var_dump(Foo::$s);
 Foo::$i += stringRef();
 var_dump(Foo::$i);
 
-try {
-    Foo::$i += PHP_INT_MAX;
-} catch (Throwable $e) { echo $e::class, ': ', $e->getMessage(), "\n"; }
+Foo::$i += PHP_INT_MAX;
 var_dump(Foo::$i);
 
 try {
@@ -38,12 +36,11 @@ try {
 var_dump(Foo::$i);
 
 ?>
---EXPECT--
+--EXPECTF--
 string(2) "11"
 string(2) "13"
 string(2) "12"
 int(1)
-TypeError: Cannot assign float to property Foo::$i of type int
-int(1)
+int(%d)
 TypeError: Cannot assign string to property Foo::$i of type int
-int(1)
+int(%d)

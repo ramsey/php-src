@@ -1,5 +1,5 @@
 --TEST--
-Test typed properties overflowing
+Test typed int property does not overflow to float
 --SKIPIF--
 <?php if (PHP_INT_SIZE == 4) die("SKIP: 64 bit test"); ?>
 --FILE--
@@ -9,45 +9,21 @@ class Foo {
     public static int $bar = PHP_INT_MAX;
 };
 
-try {
-    Foo::$bar++;
-} catch(Throwable $t) {
-    echo $t::class, ': ', $t->getMessage(), "\n";
-}
-
+Foo::$bar++;
 var_dump(Foo::$bar);
 
-try {
-    Foo::$bar += 1;
-} catch(Throwable $t) {
-    echo $t::class, ': ', $t->getMessage(), "\n";
-}
-
+Foo::$bar += 1;
 var_dump(Foo::$bar);
 
-try {
-    ++Foo::$bar;
-} catch(Throwable $t) {
-    echo $t::class, ': ', $t->getMessage(), "\n";
-}
-
+++Foo::$bar;
 var_dump(Foo::$bar);
 
-try {
-    Foo::$bar = Foo::$bar + 1;
-} catch(Throwable $t) {
-    echo $t::class, ': ', $t->getMessage(), "\n";
-}
-
+Foo::$bar = Foo::$bar + 1;
 var_dump(Foo::$bar);
 
 ?>
 --EXPECT--
-TypeError: Cannot increment property Foo::$bar of type int past its maximal value
-int(9223372036854775807)
-TypeError: Cannot assign float to property Foo::$bar of type int
-int(9223372036854775807)
-TypeError: Cannot increment property Foo::$bar of type int past its maximal value
-int(9223372036854775807)
-TypeError: Cannot assign float to property Foo::$bar of type int
-int(9223372036854775807)
+int(9223372036854775808)
+int(9223372036854775809)
+int(9223372036854775810)
+int(9223372036854775811)

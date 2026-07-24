@@ -144,7 +144,7 @@ TypeError: Unsupported operand types: string / string
 Warning: A non-numeric value encountered in %s on line %d
 
 Warning: A non-numeric value encountered in %s on line %d
-float(3.0910586430935376E+39)
+int(3091058643093537522799545838540043339063)
 TypeError: Unsupported operand types: string ** string
 ---
 

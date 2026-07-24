@@ -1,5 +1,5 @@
 --TEST--
-Test typed properties int must not be allowed to overflow
+Test typed properties int does not overflow to float
 --FILE--
 <?php
 class Foo {
@@ -11,12 +11,8 @@ class Foo {
 }
 
 $foo = new Foo();
-
-try {
-    $foo->inc();
-} catch (Throwable $e) {
-    echo $e::class, ': ', $e->getMessage(), "\n";
-}
+$foo->inc();
+var_dump(is_int($foo->bar));
 ?>
 --EXPECT--
-TypeError: Cannot increment property Foo::$bar of type int past its maximal value
+bool(true)

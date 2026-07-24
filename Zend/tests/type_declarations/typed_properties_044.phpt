@@ -19,32 +19,13 @@ var_dump($bar++);
 
 $bar = PHP_INT_MAX;
 
-try {
-    var_dump($bar++);
-} catch (Throwable $e) {
-    echo $e::class, ': ', $e->getMessage(), "\n";
-}
-
-try {
-    var_dump(++$bar);
-} catch (Throwable $e) {
-    echo $e::class, ': ', $e->getMessage(), "\n";
-}
+var_dump($bar++);
+var_dump(++$bar);
 
 $bar = PHP_INT_MIN;
 
-
-try {
-    var_dump($bar--);
-} catch (Throwable $e) {
-    echo $e::class, ': ', $e->getMessage(), "\n";
-}
-
-try {
-    var_dump(--$bar);
-} catch (Throwable $e) {
-    echo $e::class, ': ', $e->getMessage(), "\n";
-}
+var_dump($bar--);
+var_dump(--$bar);
 
 ?>
 --EXPECT--
@@ -52,7 +33,7 @@ int(0)
 int(-2)
 int(-1)
 int(-1)
-TypeError: Cannot increment a reference held by property class@anonymous::$bar of type ?int past its maximal value
-TypeError: Cannot increment a reference held by property class@anonymous::$bar of type ?int past its maximal value
-TypeError: Cannot decrement a reference held by property class@anonymous::$bar of type ?int past its minimal value
-TypeError: Cannot decrement a reference held by property class@anonymous::$bar of type ?int past its minimal value
+int(9223372036854775807)
+int(9223372036854775809)
+int(-9223372036854775808)
+int(-9223372036854775810)
