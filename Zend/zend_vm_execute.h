@@ -23375,7 +23375,7 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_P
 	if (EXPECTED(Z_TYPE_P(var_ptr) == IS_LONG)) {
 		fast_long_increment_function(var_ptr);
 		if (UNEXPECTED(0)) {
-			ZVAL_COPY_VALUE(EX_VAR(opline->result.var), var_ptr);
+			ZVAL_COPY(EX_VAR(opline->result.var), var_ptr);
 		}
 		ZEND_VM_NEXT_OPCODE();
 	}
@@ -23393,7 +23393,7 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_P
 	if (EXPECTED(Z_TYPE_P(var_ptr) == IS_LONG)) {
 		fast_long_increment_function(var_ptr);
 		if (UNEXPECTED(1)) {
-			ZVAL_COPY_VALUE(EX_VAR(opline->result.var), var_ptr);
+			ZVAL_COPY(EX_VAR(opline->result.var), var_ptr);
 		}
 		ZEND_VM_NEXT_OPCODE();
 	}
@@ -23445,7 +23445,7 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_P
 	if (EXPECTED(Z_TYPE_P(var_ptr) == IS_LONG)) {
 		fast_long_decrement_function(var_ptr);
 		if (UNEXPECTED(0)) {
-			ZVAL_COPY_VALUE(EX_VAR(opline->result.var), var_ptr);
+			ZVAL_COPY(EX_VAR(opline->result.var), var_ptr);
 		}
 		ZEND_VM_NEXT_OPCODE();
 	}
@@ -23463,7 +23463,7 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_P
 	if (EXPECTED(Z_TYPE_P(var_ptr) == IS_LONG)) {
 		fast_long_decrement_function(var_ptr);
 		if (UNEXPECTED(1)) {
-			ZVAL_COPY_VALUE(EX_VAR(opline->result.var), var_ptr);
+			ZVAL_COPY(EX_VAR(opline->result.var), var_ptr);
 		}
 		ZEND_VM_NEXT_OPCODE();
 	}
@@ -39641,7 +39641,7 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_P
 	if (EXPECTED(Z_TYPE_P(var_ptr) == IS_LONG)) {
 		fast_long_increment_function(var_ptr);
 		if (UNEXPECTED(0)) {
-			ZVAL_COPY_VALUE(EX_VAR(opline->result.var), var_ptr);
+			ZVAL_COPY(EX_VAR(opline->result.var), var_ptr);
 		}
 		ZEND_VM_NEXT_OPCODE();
 	}
@@ -39659,7 +39659,7 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_P
 	if (EXPECTED(Z_TYPE_P(var_ptr) == IS_LONG)) {
 		fast_long_increment_function(var_ptr);
 		if (UNEXPECTED(1)) {
-			ZVAL_COPY_VALUE(EX_VAR(opline->result.var), var_ptr);
+			ZVAL_COPY(EX_VAR(opline->result.var), var_ptr);
 		}
 		ZEND_VM_NEXT_OPCODE();
 	}
@@ -39711,7 +39711,7 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_P
 	if (EXPECTED(Z_TYPE_P(var_ptr) == IS_LONG)) {
 		fast_long_decrement_function(var_ptr);
 		if (UNEXPECTED(0)) {
-			ZVAL_COPY_VALUE(EX_VAR(opline->result.var), var_ptr);
+			ZVAL_COPY(EX_VAR(opline->result.var), var_ptr);
 		}
 		ZEND_VM_NEXT_OPCODE();
 	}
@@ -39729,7 +39729,7 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_P
 	if (EXPECTED(Z_TYPE_P(var_ptr) == IS_LONG)) {
 		fast_long_decrement_function(var_ptr);
 		if (UNEXPECTED(1)) {
-			ZVAL_COPY_VALUE(EX_VAR(opline->result.var), var_ptr);
+			ZVAL_COPY(EX_VAR(opline->result.var), var_ptr);
 		}
 		ZEND_VM_NEXT_OPCODE();
 	}
@@ -41253,7 +41253,7 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_P
 	var_ptr = EX_VAR(opline->op1.var);
 	fast_long_increment_function(var_ptr);
 	if (UNEXPECTED(0)) {
-		ZVAL_COPY_VALUE(EX_VAR(opline->result.var), var_ptr);
+		ZVAL_COPY(EX_VAR(opline->result.var), var_ptr);
 	}
 	ZEND_VM_NEXT_OPCODE();
 }
@@ -41266,7 +41266,7 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_P
 	var_ptr = EX_VAR(opline->op1.var);
 	fast_long_increment_function(var_ptr);
 	if (UNEXPECTED(1)) {
-		ZVAL_COPY_VALUE(EX_VAR(opline->result.var), var_ptr);
+		ZVAL_COPY(EX_VAR(opline->result.var), var_ptr);
 	}
 	ZEND_VM_NEXT_OPCODE();
 }
@@ -41305,7 +41305,7 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_P
 	var_ptr = EX_VAR(opline->op1.var);
 	fast_long_decrement_function(var_ptr);
 	if (UNEXPECTED(0)) {
-		ZVAL_COPY_VALUE(EX_VAR(opline->result.var), var_ptr);
+		ZVAL_COPY(EX_VAR(opline->result.var), var_ptr);
 	}
 	ZEND_VM_NEXT_OPCODE();
 }
@@ -41318,7 +41318,7 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_P
 	var_ptr = EX_VAR(opline->op1.var);
 	fast_long_decrement_function(var_ptr);
 	if (UNEXPECTED(1)) {
-		ZVAL_COPY_VALUE(EX_VAR(opline->result.var), var_ptr);
+		ZVAL_COPY(EX_VAR(opline->result.var), var_ptr);
 	}
 	ZEND_VM_NEXT_OPCODE();
 }
@@ -76100,7 +76100,7 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_PRE_IN
 	if (EXPECTED(Z_TYPE_P(var_ptr) == IS_LONG)) {
 		fast_long_increment_function(var_ptr);
 		if (UNEXPECTED(0)) {
-			ZVAL_COPY_VALUE(EX_VAR(opline->result.var), var_ptr);
+			ZVAL_COPY(EX_VAR(opline->result.var), var_ptr);
 		}
 		ZEND_VM_NEXT_OPCODE();
 	}
@@ -76118,7 +76118,7 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_PRE_IN
 	if (EXPECTED(Z_TYPE_P(var_ptr) == IS_LONG)) {
 		fast_long_increment_function(var_ptr);
 		if (UNEXPECTED(1)) {
-			ZVAL_COPY_VALUE(EX_VAR(opline->result.var), var_ptr);
+			ZVAL_COPY(EX_VAR(opline->result.var), var_ptr);
 		}
 		ZEND_VM_NEXT_OPCODE();
 	}
@@ -76170,7 +76170,7 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_PRE_DE
 	if (EXPECTED(Z_TYPE_P(var_ptr) == IS_LONG)) {
 		fast_long_decrement_function(var_ptr);
 		if (UNEXPECTED(0)) {
-			ZVAL_COPY_VALUE(EX_VAR(opline->result.var), var_ptr);
+			ZVAL_COPY(EX_VAR(opline->result.var), var_ptr);
 		}
 		ZEND_VM_NEXT_OPCODE();
 	}
@@ -76188,7 +76188,7 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_PRE_DE
 	if (EXPECTED(Z_TYPE_P(var_ptr) == IS_LONG)) {
 		fast_long_decrement_function(var_ptr);
 		if (UNEXPECTED(1)) {
-			ZVAL_COPY_VALUE(EX_VAR(opline->result.var), var_ptr);
+			ZVAL_COPY(EX_VAR(opline->result.var), var_ptr);
 		}
 		ZEND_VM_NEXT_OPCODE();
 	}
@@ -92366,7 +92366,7 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_PRE_IN
 	if (EXPECTED(Z_TYPE_P(var_ptr) == IS_LONG)) {
 		fast_long_increment_function(var_ptr);
 		if (UNEXPECTED(0)) {
-			ZVAL_COPY_VALUE(EX_VAR(opline->result.var), var_ptr);
+			ZVAL_COPY(EX_VAR(opline->result.var), var_ptr);
 		}
 		ZEND_VM_NEXT_OPCODE();
 	}
@@ -92384,7 +92384,7 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_PRE_IN
 	if (EXPECTED(Z_TYPE_P(var_ptr) == IS_LONG)) {
 		fast_long_increment_function(var_ptr);
 		if (UNEXPECTED(1)) {
-			ZVAL_COPY_VALUE(EX_VAR(opline->result.var), var_ptr);
+			ZVAL_COPY(EX_VAR(opline->result.var), var_ptr);
 		}
 		ZEND_VM_NEXT_OPCODE();
 	}
@@ -92436,7 +92436,7 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_PRE_DE
 	if (EXPECTED(Z_TYPE_P(var_ptr) == IS_LONG)) {
 		fast_long_decrement_function(var_ptr);
 		if (UNEXPECTED(0)) {
-			ZVAL_COPY_VALUE(EX_VAR(opline->result.var), var_ptr);
+			ZVAL_COPY(EX_VAR(opline->result.var), var_ptr);
 		}
 		ZEND_VM_NEXT_OPCODE();
 	}
@@ -92454,7 +92454,7 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_PRE_DE
 	if (EXPECTED(Z_TYPE_P(var_ptr) == IS_LONG)) {
 		fast_long_decrement_function(var_ptr);
 		if (UNEXPECTED(1)) {
-			ZVAL_COPY_VALUE(EX_VAR(opline->result.var), var_ptr);
+			ZVAL_COPY(EX_VAR(opline->result.var), var_ptr);
 		}
 		ZEND_VM_NEXT_OPCODE();
 	}
@@ -93978,7 +93978,7 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_PRE_IN
 	var_ptr = EX_VAR(opline->op1.var);
 	fast_long_increment_function(var_ptr);
 	if (UNEXPECTED(0)) {
-		ZVAL_COPY_VALUE(EX_VAR(opline->result.var), var_ptr);
+		ZVAL_COPY(EX_VAR(opline->result.var), var_ptr);
 	}
 	ZEND_VM_NEXT_OPCODE();
 }
@@ -93991,7 +93991,7 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_PRE_IN
 	var_ptr = EX_VAR(opline->op1.var);
 	fast_long_increment_function(var_ptr);
 	if (UNEXPECTED(1)) {
-		ZVAL_COPY_VALUE(EX_VAR(opline->result.var), var_ptr);
+		ZVAL_COPY(EX_VAR(opline->result.var), var_ptr);
 	}
 	ZEND_VM_NEXT_OPCODE();
 }
@@ -94030,7 +94030,7 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_PRE_DE
 	var_ptr = EX_VAR(opline->op1.var);
 	fast_long_decrement_function(var_ptr);
 	if (UNEXPECTED(0)) {
-		ZVAL_COPY_VALUE(EX_VAR(opline->result.var), var_ptr);
+		ZVAL_COPY(EX_VAR(opline->result.var), var_ptr);
 	}
 	ZEND_VM_NEXT_OPCODE();
 }
@@ -94043,7 +94043,7 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_PRE_DE
 	var_ptr = EX_VAR(opline->op1.var);
 	fast_long_decrement_function(var_ptr);
 	if (UNEXPECTED(1)) {
-		ZVAL_COPY_VALUE(EX_VAR(opline->result.var), var_ptr);
+		ZVAL_COPY(EX_VAR(opline->result.var), var_ptr);
 	}
 	ZEND_VM_NEXT_OPCODE();
 }
