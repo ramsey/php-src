@@ -396,7 +396,7 @@ static bool try_remove_var_def(const context *ctx, int free_var, int use_chain, 
 }
 
 static zend_always_inline bool may_be_refcounted(uint32_t type) {
-	return (type & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE|MAY_BE_REF)) != 0;
+	return (type & (MAY_BE_BIGINT|MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE|MAY_BE_REF)) != 0;
 }
 
 static inline bool is_free_of_live_var(const context *ctx, const zend_op *opline, const zend_ssa_op *ssa_op) {

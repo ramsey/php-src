@@ -28,5 +28,5 @@ foo:
      ; (after optimizer)
      ; %sdce_003.php:2-5
 0000 CV0($a) = RECV 1
-0001 CV0($a) = ADD CV0($a) int(3)
+0001 ASSIGN_OP (ADD) CV0($a) int(3)
 0002 RETURN CV0($a)

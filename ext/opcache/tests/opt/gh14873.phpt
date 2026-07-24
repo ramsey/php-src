@@ -118,7 +118,7 @@ testMin2First:
      ; %s
 0000 CV0($value) = RECV 1
 0001 T1 = FRAMELESS_ICALL_2(min) CV0($value) int(100)
-0002 CV0($value) = QM_ASSIGN T1
+0002 ASSIGN CV0($value) T1
 0003 VERIFY_RETURN_TYPE CV0($value)
 0004 RETURN CV0($value)
 
@@ -128,19 +128,20 @@ testMin2Second:
      ; %s
 0000 CV0($value) = RECV 1
 0001 T1 = FRAMELESS_ICALL_2(min) int(100) CV0($value)
-0002 CV0($value) = QM_ASSIGN T1
+0002 ASSIGN CV0($value) T1
 0003 VERIFY_RETURN_TYPE CV0($value)
 0004 RETURN CV0($value)
 
 testMin2_TMP:
-     ; (lines=5, args=1, vars=1, tmps=%d)
+     ; (lines=6, args=1, vars=1, tmps=%d)
      ; (after optimizer)
      ; %s
 0000 CV0($value) = RECV 1
-0001 T1 = ADD CV0($value) int(1)
-0002 CV0($value) = FRAMELESS_ICALL_2(min) T1 int(100)
-0003 VERIFY_RETURN_TYPE CV0($value)
-0004 RETURN CV0($value)
+0001 T2 = ADD CV0($value) int(1)
+0002 T1 = FRAMELESS_ICALL_2(min) T2 int(100)
+0003 ASSIGN CV0($value) T1
+0004 VERIFY_RETURN_TYPE CV0($value)
+0005 RETURN CV0($value)
 
 testStrstr3First:
      ; (lines=6, args=1, vars=1, tmps=%d)

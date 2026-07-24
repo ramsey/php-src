@@ -776,7 +776,7 @@ optimize_jmpz:
 							if (opline->op1_type == IS_CV && (OP1_INFO() & MAY_BE_UNDEF)) {
 								opline->opcode = ZEND_CHECK_VAR;
 								opline->op2.num = 0;
-							} else if (opline->op1_type == IS_CV || !(OP1_INFO() & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE|MAY_BE_REF))) {
+							} else if (opline->op1_type == IS_CV || !(OP1_INFO() & (MAY_BE_BIGINT|MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE|MAY_BE_REF))) {
 								zend_ssa_remove_instr(ssa, opline, ssa_op);
 								removed_ops++;
 								goto optimize_nop;
@@ -807,7 +807,7 @@ optimize_jmpnz:
 							if (opline->op1_type == IS_CV && (OP1_INFO() & MAY_BE_UNDEF)) {
 								opline->opcode = ZEND_CHECK_VAR;
 								opline->op2.num = 0;
-							} else if (opline->op1_type == IS_CV || !(OP1_INFO() & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE|MAY_BE_REF))) {
+							} else if (opline->op1_type == IS_CV || !(OP1_INFO() & (MAY_BE_BIGINT|MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE|MAY_BE_REF))) {
 								zend_ssa_remove_instr(ssa, opline, ssa_op);
 								removed_ops++;
 								goto optimize_nop;
@@ -1322,7 +1322,7 @@ void zend_dfa_optimize_op_array(zend_op_array *op_array, zend_optimizer_ctx *ctx
 			if (opline->opcode == ZEND_QM_ASSIGN
 			 && ssa->ops[op_1].result_def == v
 			 && opline->op1_type & (IS_TMP_VAR|IS_VAR)
-			 && !(ssa->var_info[v].type & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE|MAY_BE_REF))
+			 && !(ssa->var_info[v].type & (MAY_BE_BIGINT|MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE|MAY_BE_REF))
 			) {
 
 				int src_var = ssa->ops[op_1].op1_use;
@@ -1482,7 +1482,7 @@ void zend_dfa_optimize_op_array(zend_op_array *op_array, zend_optimizer_ctx *ctx
 				int orig_var = ssa->ops[op_1].op1_use;
 
 				if (orig_var >= 0
-				 && !(ssa->var_info[orig_var].type & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE|MAY_BE_REF))
+				 && !(ssa->var_info[orig_var].type & (MAY_BE_BIGINT|MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE|MAY_BE_REF))
 				) {
 					int src_var = ssa->ops[op_1].op2_use;
 
@@ -1649,7 +1649,7 @@ void zend_dfa_optimize_op_array(zend_op_array *op_array, zend_optimizer_ctx *ctx
 			} else if (ssa->ops[op_1].op1_def == v
 			 && !RETURN_VALUE_USED(opline)
 			 && ssa->ops[op_1].op1_use >= 0
-			 && !(ssa->var_info[ssa->ops[op_1].op1_use].type & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE|MAY_BE_REF))
+			 && !(ssa->var_info[ssa->ops[op_1].op1_use].type & (MAY_BE_BIGINT|MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE|MAY_BE_REF))
 			 && opline->opcode == ZEND_ASSIGN_OP
 			 && opline->extended_value != ZEND_CONCAT) {
 

@@ -1528,7 +1528,7 @@ static bool needs_live_range(const zend_op_array *op_array, const zend_op *def_o
 	}
 
 	uint32_t type = func_info->ssa.var_info[ssa_var].type;
-	return (type & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE|MAY_BE_REF)) != 0;
+	return (type & (MAY_BE_BIGINT|MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE|MAY_BE_REF)) != 0;
 }
 
 static void zend_foreach_op_array_helper(
