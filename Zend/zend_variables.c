@@ -83,6 +83,9 @@ static void ZEND_FASTCALL zend_empty_destroy(zend_reference *ref)
 
 static void ZEND_FASTCALL zend_bigint_destroy(zend_bigint *big)
 {
+	if (GC_FLAGS((zend_refcounted *) big) & GC_IMMUTABLE) {
+		return;
+	}
 	zend_bigint_free(big);
 }
 

@@ -2531,6 +2531,36 @@ static ZEND_FUNCTION(zend_test_bigint_cmp_strings)
 	zend_bigint_free(b);
 }
 
+static ZEND_FUNCTION(zend_test_bigint_persist_roundtrip)
+{
+	zend_string *digits;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_STR(digits)
+	ZEND_PARSE_PARAMETERS_END();
+
+	zend_bigint *b = zend_bigint_from_string(ZSTR_VAL(digits), ZSTR_LEN(digits), 10);
+	if (!b) {
+		RETURN_FALSE;
+	}
+
+	void *blob = emalloc(zend_bigint_persist_size(b));
+	zend_bigint *copy = zend_bigint_persist_copy(blob, b);
+	zend_bigint_free(b);
+
+	zend_bigint_persist_detach(copy);
+	zend_bigint_persist_relink(copy);
+
+	zend_string *out = zend_bigint_to_str(copy);
+	bool same = zend_string_equals(out, digits);
+	zend_string_release(out);
+	/* The blob is raw memory whose inline digits point inside itself, so free
+	 * it directly rather than through the box release path. */
+	efree(blob);
+
+	RETURN_BOOL(same);
+}
+
 static ZEND_FUNCTION(zend_test_bigint_make)
 {
 	zend_string *digits;

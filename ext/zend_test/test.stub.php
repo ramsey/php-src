@@ -462,6 +462,8 @@ function zend_test_override_libxml_global_state(): void {}
 
     function zend_test_bigint_cmp_strings(string $a, string $b): int|false {}
 
+    function zend_test_bigint_persist_roundtrip(string $digits): bool {}
+
     /**
      * Returns an IS_BIGINT box. The return type is PHPDoc-only on purpose:
      * internal return verification checks the exact tag, which zpp does not yet

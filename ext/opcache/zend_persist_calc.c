@@ -23,6 +23,7 @@
 #include "zend_extensions.h"
 #include "zend_shared_alloc.h"
 #include "zend_operators.h"
+#include "zend_int_backend.h"
 #include "zend_attributes.h"
 #include "zend_constants.h"
 
@@ -123,6 +124,9 @@ static void zend_persist_zval_calc(zval *z)
 			if (ZSTR_IS_INTERNED(Z_STR_P(z))) {
 				Z_TYPE_FLAGS_P(z) = 0;
 			}
+			break;
+		case IS_BIGINT:
+			ADD_SIZE(zend_bigint_persist_size(Z_BIG_P(z)));
 			break;
 		case IS_ARRAY:
 			if (!ZCG(current_persistent_script)->corrupted

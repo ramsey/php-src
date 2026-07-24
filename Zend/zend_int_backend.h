@@ -75,6 +75,20 @@ ZEND_API zend_bigint *zend_bigint_shift_right(const zend_bigint *a, zend_long bi
 ZEND_API bool zend_bigint_can_pow(zend_long exp);
 ZEND_API bool zend_bigint_pow(const zend_bigint *base, zend_long exp, const zend_bigint *exp_big, zend_bigint **out);
 
+/* These functions let opcache keep a box in shared memory and in its file
+ * cache. A regular box allocates its digit buffer separately on the request
+ * heap. persist_size reports the size of a copy that holds everything in
+ * one contiguous block, and persist_copy writes such a copy, marked
+ * immutable, into caller memory of that size. The copy contains one pointer
+ * to its own digits. persist_detach clears that pointer before the block is
+ * saved to disk; persist_relink restores it after the block is loaded at a
+ * new address. */
+
+ZEND_API size_t       zend_bigint_persist_size(const zend_bigint *b);
+ZEND_API zend_bigint *zend_bigint_persist_copy(void *dst, const zend_bigint *b);
+ZEND_API void         zend_bigint_persist_detach(zend_bigint *b);
+ZEND_API void         zend_bigint_persist_relink(zend_bigint *b);
+
 END_EXTERN_C()
 
 #endif

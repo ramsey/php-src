@@ -20,7 +20,7 @@
 #include <string.h>
 
 /* The libtommath calls below that can only fail on allocation are asserted
- * MP_OKAY rather than checked: the zend_mp_* allocator (see
+ * MP_OKAY rather than checked. The zend_mp_* allocator (see
  * zend_int_backend_libtommath_alloc.c) routes through emalloc/erealloc/ecalloc,
  * which bail out on OOM instead of returning NULL. */
 
@@ -628,4 +628,41 @@ ZEND_API bool zend_bigint_pow(const zend_bigint *base, zend_long exp, const zend
 	ZEND_ASSERT(err == MP_OKAY);
 	(void) err;
 	return true;
+}
+
+/* The persist form is a flat, self-contained blob: the box struct followed by
+ * its used digits inline. The digit pointer lands at a fixed offset just past
+ * the struct, so zend_bigint_persist_relink can recompute it from the box
+ * address alone after the blob is remapped. */
+
+ZEND_API size_t zend_bigint_persist_size(const zend_bigint *b)
+{
+	return sizeof(zend_bigint) + (size_t) b->mp.used * sizeof(mp_digit);
+}
+
+ZEND_API zend_bigint *zend_bigint_persist_copy(void *dst, const zend_bigint *b)
+{
+	zend_bigint *copy = (zend_bigint *) dst;
+	mp_digit *digits = (mp_digit *) (copy + 1);
+	int used = b->mp.used;
+
+	copy->mp = b->mp;
+	copy->mp.dp = digits;
+	copy->mp.alloc = used;
+	memcpy(digits, b->mp.dp, (size_t) used * sizeof(mp_digit));
+
+	GC_SET_REFCOUNT(copy, 2);
+	GC_TYPE_INFO(copy) = GC_BIGINT | (GC_IMMUTABLE << GC_FLAGS_SHIFT);
+
+	return copy;
+}
+
+ZEND_API void zend_bigint_persist_detach(zend_bigint *b)
+{
+	b->mp.dp = NULL;
+}
+
+ZEND_API void zend_bigint_persist_relink(zend_bigint *b)
+{
+	b->mp.dp = (mp_digit *) (b + 1);
 }

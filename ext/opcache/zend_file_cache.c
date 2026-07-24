@@ -18,6 +18,7 @@
 #include "zend_virtual_cwd.h"
 #include "zend_compile.h"
 #include "zend_vm.h"
+#include "zend_int_backend.h"
 #include "zend_interfaces.h"
 #include "zend_attributes.h"
 #include "zend_system_id.h"
@@ -418,6 +419,16 @@ static void zend_file_cache_serialize_zval(zval                     *zv,
 		case IS_STRING:
 			if (!IS_SERIALIZED(Z_STR_P(zv))) {
 				SERIALIZE_STR(Z_STR_P(zv));
+			}
+			break;
+		case IS_BIGINT:
+			if (!IS_SERIALIZED(Z_BIG_P(zv))) {
+				zend_bigint *big;
+
+				SERIALIZE_PTR(Z_BIG_P(zv));
+				big = Z_BIG_P(zv);
+				UNSERIALIZE_PTR(big);
+				zend_bigint_persist_detach(big);
 			}
 			break;
 		case IS_ARRAY:
@@ -1354,6 +1365,12 @@ static void zend_file_cache_unserialize_zval(zval                    *zv,
 			 * interned strings in non-shm mode. */
 			if (IS_SERIALIZED(Z_STR_P(zv)) || IS_SERIALIZED_INTERNED(Z_STR_P(zv))) {
 				UNSERIALIZE_STR(Z_STR_P(zv));
+			}
+			break;
+		case IS_BIGINT:
+			if (!IS_UNSERIALIZED(Z_BIG_P(zv))) {
+				UNSERIALIZE_PTR(Z_BIG_P(zv));
+				zend_bigint_persist_relink(Z_BIG_P(zv));
 			}
 			break;
 		case IS_ARRAY:

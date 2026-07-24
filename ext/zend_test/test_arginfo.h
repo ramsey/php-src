@@ -1,5 +1,5 @@
 /* This is a generated file, edit test.stub.php instead.
- * Stub hash: aed748a9770b565433d92a0148b59c6343f78d4b
+ * Stub hash: 592b3268166cb3f341f6f02c41e4ac4d7f130ca6
  * Has decl header: yes */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_zend_trigger_bailout, 0, 0, IS_NEVER, 0)
@@ -337,6 +337,10 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_zend_test_bigint_cmp_strings, 0,
 	ZEND_ARG_TYPE_INFO(0, b, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_zend_test_bigint_persist_roundtrip, 0, 1, _IS_BOOL, 0)
+	ZEND_ARG_TYPE_INFO(0, digits, IS_STRING, 0)
+ZEND_END_ARG_INFO()
+
 ZEND_BEGIN_ARG_INFO_EX(arginfo_zend_test_bigint_make, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, digits, IS_STRING, 0)
 ZEND_END_ARG_INFO()
@@ -606,6 +610,7 @@ static ZEND_FUNCTION(zend_test_uri_parser);
 static ZEND_FUNCTION(zend_test_gh19792);
 static ZEND_FUNCTION(zend_test_bigint_roundtrip);
 static ZEND_FUNCTION(zend_test_bigint_cmp_strings);
+static ZEND_FUNCTION(zend_test_bigint_persist_roundtrip);
 static ZEND_FUNCTION(zend_test_bigint_make);
 static ZEND_FUNCTION(zend_test_int_is_boxed);
 static ZEND_FUNCTION(zend_test_bigint_to_string);
@@ -818,6 +823,7 @@ static const zend_function_entry ext_functions[] = {
 #endif
 	ZEND_FE(zend_test_bigint_roundtrip, arginfo_zend_test_bigint_roundtrip)
 	ZEND_FE(zend_test_bigint_cmp_strings, arginfo_zend_test_bigint_cmp_strings)
+	ZEND_FE(zend_test_bigint_persist_roundtrip, arginfo_zend_test_bigint_persist_roundtrip)
 	ZEND_FE(zend_test_bigint_make, arginfo_zend_test_bigint_make)
 	ZEND_FE(zend_test_int_is_boxed, arginfo_zend_test_int_is_boxed)
 	ZEND_FE(zend_test_bigint_to_string, arginfo_zend_test_bigint_to_string)

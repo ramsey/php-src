@@ -25,6 +25,7 @@
 #include "zend_vm.h"
 #include "zend_constants.h"
 #include "zend_operators.h"
+#include "zend_int_backend.h"
 #include "zend_interfaces.h"
 #include "zend_attributes.h"
 #include "zend_partial.h"
@@ -233,6 +234,16 @@ static void zend_persist_zval(zval *z)
 			zend_accel_store_interned_string(Z_STR_P(z));
 			Z_TYPE_FLAGS_P(z) = 0;
 			break;
+		case IS_BIGINT: {
+			zend_bigint *big = Z_BIG_P(z);
+			void *mem = ZCG(mem);
+
+			ZEND_ASSERT(((uintptr_t)ZCG(mem) & 0x7) == 0); /* should be 8 byte aligned */
+			ZCG(mem) = (void*)((char*)mem + ZEND_ALIGNED_SIZE(zend_bigint_persist_size(big)));
+			Z_BIG_P(z) = zend_bigint_persist_copy(mem, big);
+			Z_TYPE_FLAGS_P(z) = 0;
+			break;
+		}
 		case IS_ARRAY:
 			new_ptr = zend_shared_alloc_get_xlat_entry(Z_ARR_P(z));
 			if (new_ptr) {
