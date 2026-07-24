@@ -2306,7 +2306,7 @@ static void zend_pre_incdec_property_zval(zval *prop, const zend_property_info *
 		} else {
 			fast_long_decrement_function(prop);
 		}
-		if (UNEXPECTED(Z_TYPE_P(prop) != IS_LONG) && prop_info
+		if (UNEXPECTED(Z_TYPE_P(prop) == IS_DOUBLE) && prop_info
 				&& !(ZEND_TYPE_FULL_MASK(prop_info->type) & MAY_BE_DOUBLE)) {
 			zend_long val = zend_throw_incdec_prop_error(prop_info OPLINE_CC);
 			ZVAL_LONG(prop, val);
@@ -2345,7 +2345,7 @@ static void zend_post_incdec_property_zval(zval *prop, const zend_property_info 
 		} else {
 			fast_long_decrement_function(prop);
 		}
-		if (UNEXPECTED(Z_TYPE_P(prop) != IS_LONG) && prop_info
+		if (UNEXPECTED(Z_TYPE_P(prop) == IS_DOUBLE) && prop_info
 				&& !(ZEND_TYPE_FULL_MASK(prop_info->type) & MAY_BE_DOUBLE)) {
 			zend_long val = zend_throw_incdec_prop_error(prop_info OPLINE_CC);
 			ZVAL_LONG(prop, val);

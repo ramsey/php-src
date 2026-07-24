@@ -6364,12 +6364,15 @@ static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_
 		/* pass */
 	} else if (EXPECTED(Z_TYPE_INFO_P(op1) == IS_LONG)) {
 		if (EXPECTED(Z_TYPE_INFO_P(op2) == IS_LONG)) {
-			zend_long overflow;
-
-			result = EX_VAR(opline->result.var);
-			ZEND_SIGNED_MULTIPLY_LONG(Z_LVAL_P(op1), Z_LVAL_P(op2), Z_LVAL_P(result), Z_DVAL_P(result), overflow);
-			Z_TYPE_INFO_P(result) = overflow ? IS_DOUBLE : IS_LONG;
-			ZEND_VM_NEXT_OPCODE();
+			zend_long lval, overflow;
+			double dval;
+			ZEND_SIGNED_MULTIPLY_LONG(Z_LVAL_P(op1), Z_LVAL_P(op2), lval, dval, overflow);
+			if (EXPECTED(!overflow)) {
+				result = EX_VAR(opline->result.var);
+				ZVAL_LONG(result, lval);
+				ZEND_VM_NEXT_OPCODE();
+			}
+			(void) dval;
 		} else if (EXPECTED(Z_TYPE_INFO_P(op2) == IS_DOUBLE)) {
 			d1 = (double)Z_LVAL_P(op1);
 			d2 = Z_DVAL_P(op2);
@@ -6447,8 +6450,9 @@ static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_
 		/* pass */
 	} else if (EXPECTED(Z_TYPE_INFO_P(op1) == IS_LONG)
 			&& EXPECTED(Z_TYPE_INFO_P(op2) == IS_LONG)
-			&& EXPECTED((zend_ulong)Z_LVAL_P(op2) < SIZEOF_ZEND_LONG * 8)) {
-		/* Perform shift on unsigned numbers to get well-defined wrap behavior. */
+			&& EXPECTED((zend_ulong)Z_LVAL_P(op2) < SIZEOF_ZEND_LONG * 8 - 1)
+			&& EXPECTED((Z_LVAL_P(op1) >> (SIZEOF_ZEND_LONG * 8 - 1 - Z_LVAL_P(op2))) == (Z_LVAL_P(op1) >> (SIZEOF_ZEND_LONG * 8 - 1)))) {
+		/* The result fits zend_long; a shift that overflows boxes in the helper. */
 		ZVAL_LONG(EX_VAR(opline->result.var),
 			(zend_long) ((zend_ulong) Z_LVAL_P(op1) << Z_LVAL_P(op2)));
 		ZEND_VM_NEXT_OPCODE();
@@ -8816,8 +8820,9 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_SL_SPEC_CONST
 		/* pass */
 	} else if (EXPECTED(Z_TYPE_INFO_P(op1) == IS_LONG)
 			&& EXPECTED(Z_TYPE_INFO_P(op2) == IS_LONG)
-			&& EXPECTED((zend_ulong)Z_LVAL_P(op2) < SIZEOF_ZEND_LONG * 8)) {
-		/* Perform shift on unsigned numbers to get well-defined wrap behavior. */
+			&& EXPECTED((zend_ulong)Z_LVAL_P(op2) < SIZEOF_ZEND_LONG * 8 - 1)
+			&& EXPECTED((Z_LVAL_P(op1) >> (SIZEOF_ZEND_LONG * 8 - 1 - Z_LVAL_P(op2))) == (Z_LVAL_P(op1) >> (SIZEOF_ZEND_LONG * 8 - 1)))) {
+		/* The result fits zend_long; a shift that overflows boxes in the helper. */
 		ZVAL_LONG(EX_VAR(opline->result.var),
 			(zend_long) ((zend_ulong) Z_LVAL_P(op1) << Z_LVAL_P(op2)));
 		ZEND_VM_NEXT_OPCODE();
@@ -13736,12 +13741,15 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_MUL_SPEC_TMPV
 		/* pass */
 	} else if (EXPECTED(Z_TYPE_INFO_P(op1) == IS_LONG)) {
 		if (EXPECTED(Z_TYPE_INFO_P(op2) == IS_LONG)) {
-			zend_long overflow;
-
-			result = EX_VAR(opline->result.var);
-			ZEND_SIGNED_MULTIPLY_LONG(Z_LVAL_P(op1), Z_LVAL_P(op2), Z_LVAL_P(result), Z_DVAL_P(result), overflow);
-			Z_TYPE_INFO_P(result) = overflow ? IS_DOUBLE : IS_LONG;
-			ZEND_VM_NEXT_OPCODE();
+			zend_long lval, overflow;
+			double dval;
+			ZEND_SIGNED_MULTIPLY_LONG(Z_LVAL_P(op1), Z_LVAL_P(op2), lval, dval, overflow);
+			if (EXPECTED(!overflow)) {
+				result = EX_VAR(opline->result.var);
+				ZVAL_LONG(result, lval);
+				ZEND_VM_NEXT_OPCODE();
+			}
+			(void) dval;
 		} else if (EXPECTED(Z_TYPE_INFO_P(op2) == IS_DOUBLE)) {
 			d1 = (double)Z_LVAL_P(op1);
 			d2 = Z_DVAL_P(op2);
@@ -13803,8 +13811,9 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_SL_SPEC_TMPVA
 		/* pass */
 	} else if (EXPECTED(Z_TYPE_INFO_P(op1) == IS_LONG)
 			&& EXPECTED(Z_TYPE_INFO_P(op2) == IS_LONG)
-			&& EXPECTED((zend_ulong)Z_LVAL_P(op2) < SIZEOF_ZEND_LONG * 8)) {
-		/* Perform shift on unsigned numbers to get well-defined wrap behavior. */
+			&& EXPECTED((zend_ulong)Z_LVAL_P(op2) < SIZEOF_ZEND_LONG * 8 - 1)
+			&& EXPECTED((Z_LVAL_P(op1) >> (SIZEOF_ZEND_LONG * 8 - 1 - Z_LVAL_P(op2))) == (Z_LVAL_P(op1) >> (SIZEOF_ZEND_LONG * 8 - 1)))) {
+		/* The result fits zend_long; a shift that overflows boxes in the helper. */
 		ZVAL_LONG(EX_VAR(opline->result.var),
 			(zend_long) ((zend_ulong) Z_LVAL_P(op1) << Z_LVAL_P(op2)));
 		ZEND_VM_NEXT_OPCODE();
@@ -14359,13 +14368,19 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_M
 {
 	USE_OPLINE
 	zval *op1, *op2, *result;
-	zend_long overflow;
+	zend_long lval, overflow;
+	double dval;
 
 	op1 = EX_VAR(opline->op1.var);
 	op2 = RT_CONSTANT(opline, opline->op2);
 	result = EX_VAR(opline->result.var);
-	ZEND_SIGNED_MULTIPLY_LONG(Z_LVAL_P(op1), Z_LVAL_P(op2), Z_LVAL_P(result), Z_DVAL_P(result), overflow);
-	Z_TYPE_INFO_P(result) = overflow ? IS_DOUBLE : IS_LONG;
+	ZEND_SIGNED_MULTIPLY_LONG(Z_LVAL_P(op1), Z_LVAL_P(op2), lval, dval, overflow);
+	if (EXPECTED(!overflow)) {
+		ZVAL_LONG(result, lval);
+	} else {
+		(void) dval;
+		mul_function(result, op1, op2);
+	}
 	ZEND_VM_NEXT_OPCODE();
 }
 
@@ -14841,12 +14856,15 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_MUL_SPEC_TMPV
 		/* pass */
 	} else if (EXPECTED(Z_TYPE_INFO_P(op1) == IS_LONG)) {
 		if (EXPECTED(Z_TYPE_INFO_P(op2) == IS_LONG)) {
-			zend_long overflow;
-
-			result = EX_VAR(opline->result.var);
-			ZEND_SIGNED_MULTIPLY_LONG(Z_LVAL_P(op1), Z_LVAL_P(op2), Z_LVAL_P(result), Z_DVAL_P(result), overflow);
-			Z_TYPE_INFO_P(result) = overflow ? IS_DOUBLE : IS_LONG;
-			ZEND_VM_NEXT_OPCODE();
+			zend_long lval, overflow;
+			double dval;
+			ZEND_SIGNED_MULTIPLY_LONG(Z_LVAL_P(op1), Z_LVAL_P(op2), lval, dval, overflow);
+			if (EXPECTED(!overflow)) {
+				result = EX_VAR(opline->result.var);
+				ZVAL_LONG(result, lval);
+				ZEND_VM_NEXT_OPCODE();
+			}
+			(void) dval;
 		} else if (EXPECTED(Z_TYPE_INFO_P(op2) == IS_DOUBLE)) {
 			d1 = (double)Z_LVAL_P(op1);
 			d2 = Z_DVAL_P(op2);
@@ -14908,8 +14926,9 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_SL_SPEC_TMPVA
 		/* pass */
 	} else if (EXPECTED(Z_TYPE_INFO_P(op1) == IS_LONG)
 			&& EXPECTED(Z_TYPE_INFO_P(op2) == IS_LONG)
-			&& EXPECTED((zend_ulong)Z_LVAL_P(op2) < SIZEOF_ZEND_LONG * 8)) {
-		/* Perform shift on unsigned numbers to get well-defined wrap behavior. */
+			&& EXPECTED((zend_ulong)Z_LVAL_P(op2) < SIZEOF_ZEND_LONG * 8 - 1)
+			&& EXPECTED((Z_LVAL_P(op1) >> (SIZEOF_ZEND_LONG * 8 - 1 - Z_LVAL_P(op2))) == (Z_LVAL_P(op1) >> (SIZEOF_ZEND_LONG * 8 - 1)))) {
+		/* The result fits zend_long; a shift that overflows boxes in the helper. */
 		ZVAL_LONG(EX_VAR(opline->result.var),
 			(zend_long) ((zend_ulong) Z_LVAL_P(op1) << Z_LVAL_P(op2)));
 		ZEND_VM_NEXT_OPCODE();
@@ -15349,13 +15368,19 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_M
 {
 	USE_OPLINE
 	zval *op1, *op2, *result;
-	zend_long overflow;
+	zend_long lval, overflow;
+	double dval;
 
 	op1 = EX_VAR(opline->op1.var);
 	op2 = EX_VAR(opline->op2.var);
 	result = EX_VAR(opline->result.var);
-	ZEND_SIGNED_MULTIPLY_LONG(Z_LVAL_P(op1), Z_LVAL_P(op2), Z_LVAL_P(result), Z_DVAL_P(result), overflow);
-	Z_TYPE_INFO_P(result) = overflow ? IS_DOUBLE : IS_LONG;
+	ZEND_SIGNED_MULTIPLY_LONG(Z_LVAL_P(op1), Z_LVAL_P(op2), lval, dval, overflow);
+	if (EXPECTED(!overflow)) {
+		ZVAL_LONG(result, lval);
+	} else {
+		(void) dval;
+		mul_function(result, op1, op2);
+	}
 	ZEND_VM_NEXT_OPCODE();
 }
 
@@ -59266,12 +59291,15 @@ static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_MUL_S
 		/* pass */
 	} else if (EXPECTED(Z_TYPE_INFO_P(op1) == IS_LONG)) {
 		if (EXPECTED(Z_TYPE_INFO_P(op2) == IS_LONG)) {
-			zend_long overflow;
-
-			result = EX_VAR(opline->result.var);
-			ZEND_SIGNED_MULTIPLY_LONG(Z_LVAL_P(op1), Z_LVAL_P(op2), Z_LVAL_P(result), Z_DVAL_P(result), overflow);
-			Z_TYPE_INFO_P(result) = overflow ? IS_DOUBLE : IS_LONG;
-			ZEND_VM_NEXT_OPCODE();
+			zend_long lval, overflow;
+			double dval;
+			ZEND_SIGNED_MULTIPLY_LONG(Z_LVAL_P(op1), Z_LVAL_P(op2), lval, dval, overflow);
+			if (EXPECTED(!overflow)) {
+				result = EX_VAR(opline->result.var);
+				ZVAL_LONG(result, lval);
+				ZEND_VM_NEXT_OPCODE();
+			}
+			(void) dval;
 		} else if (EXPECTED(Z_TYPE_INFO_P(op2) == IS_DOUBLE)) {
 			d1 = (double)Z_LVAL_P(op1);
 			d2 = Z_DVAL_P(op2);
@@ -59349,8 +59377,9 @@ static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_SL_SP
 		/* pass */
 	} else if (EXPECTED(Z_TYPE_INFO_P(op1) == IS_LONG)
 			&& EXPECTED(Z_TYPE_INFO_P(op2) == IS_LONG)
-			&& EXPECTED((zend_ulong)Z_LVAL_P(op2) < SIZEOF_ZEND_LONG * 8)) {
-		/* Perform shift on unsigned numbers to get well-defined wrap behavior. */
+			&& EXPECTED((zend_ulong)Z_LVAL_P(op2) < SIZEOF_ZEND_LONG * 8 - 1)
+			&& EXPECTED((Z_LVAL_P(op1) >> (SIZEOF_ZEND_LONG * 8 - 1 - Z_LVAL_P(op2))) == (Z_LVAL_P(op1) >> (SIZEOF_ZEND_LONG * 8 - 1)))) {
+		/* The result fits zend_long; a shift that overflows boxes in the helper. */
 		ZVAL_LONG(EX_VAR(opline->result.var),
 			(zend_long) ((zend_ulong) Z_LVAL_P(op1) << Z_LVAL_P(op2)));
 		ZEND_VM_NEXT_OPCODE();
@@ -61718,8 +61747,9 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_SL_SPEC_CONST_TMPV
 		/* pass */
 	} else if (EXPECTED(Z_TYPE_INFO_P(op1) == IS_LONG)
 			&& EXPECTED(Z_TYPE_INFO_P(op2) == IS_LONG)
-			&& EXPECTED((zend_ulong)Z_LVAL_P(op2) < SIZEOF_ZEND_LONG * 8)) {
-		/* Perform shift on unsigned numbers to get well-defined wrap behavior. */
+			&& EXPECTED((zend_ulong)Z_LVAL_P(op2) < SIZEOF_ZEND_LONG * 8 - 1)
+			&& EXPECTED((Z_LVAL_P(op1) >> (SIZEOF_ZEND_LONG * 8 - 1 - Z_LVAL_P(op2))) == (Z_LVAL_P(op1) >> (SIZEOF_ZEND_LONG * 8 - 1)))) {
+		/* The result fits zend_long; a shift that overflows boxes in the helper. */
 		ZVAL_LONG(EX_VAR(opline->result.var),
 			(zend_long) ((zend_ulong) Z_LVAL_P(op1) << Z_LVAL_P(op2)));
 		ZEND_VM_NEXT_OPCODE();
@@ -66536,12 +66566,15 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_MUL_SPEC_TMPVARCV_
 		/* pass */
 	} else if (EXPECTED(Z_TYPE_INFO_P(op1) == IS_LONG)) {
 		if (EXPECTED(Z_TYPE_INFO_P(op2) == IS_LONG)) {
-			zend_long overflow;
-
-			result = EX_VAR(opline->result.var);
-			ZEND_SIGNED_MULTIPLY_LONG(Z_LVAL_P(op1), Z_LVAL_P(op2), Z_LVAL_P(result), Z_DVAL_P(result), overflow);
-			Z_TYPE_INFO_P(result) = overflow ? IS_DOUBLE : IS_LONG;
-			ZEND_VM_NEXT_OPCODE();
+			zend_long lval, overflow;
+			double dval;
+			ZEND_SIGNED_MULTIPLY_LONG(Z_LVAL_P(op1), Z_LVAL_P(op2), lval, dval, overflow);
+			if (EXPECTED(!overflow)) {
+				result = EX_VAR(opline->result.var);
+				ZVAL_LONG(result, lval);
+				ZEND_VM_NEXT_OPCODE();
+			}
+			(void) dval;
 		} else if (EXPECTED(Z_TYPE_INFO_P(op2) == IS_DOUBLE)) {
 			d1 = (double)Z_LVAL_P(op1);
 			d2 = Z_DVAL_P(op2);
@@ -66603,8 +66636,9 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_SL_SPEC_TMPVARCV_C
 		/* pass */
 	} else if (EXPECTED(Z_TYPE_INFO_P(op1) == IS_LONG)
 			&& EXPECTED(Z_TYPE_INFO_P(op2) == IS_LONG)
-			&& EXPECTED((zend_ulong)Z_LVAL_P(op2) < SIZEOF_ZEND_LONG * 8)) {
-		/* Perform shift on unsigned numbers to get well-defined wrap behavior. */
+			&& EXPECTED((zend_ulong)Z_LVAL_P(op2) < SIZEOF_ZEND_LONG * 8 - 1)
+			&& EXPECTED((Z_LVAL_P(op1) >> (SIZEOF_ZEND_LONG * 8 - 1 - Z_LVAL_P(op2))) == (Z_LVAL_P(op1) >> (SIZEOF_ZEND_LONG * 8 - 1)))) {
+		/* The result fits zend_long; a shift that overflows boxes in the helper. */
 		ZVAL_LONG(EX_VAR(opline->result.var),
 			(zend_long) ((zend_ulong) Z_LVAL_P(op1) << Z_LVAL_P(op2)));
 		ZEND_VM_NEXT_OPCODE();
@@ -67159,13 +67193,19 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_MUL_LO
 {
 	USE_OPLINE
 	zval *op1, *op2, *result;
-	zend_long overflow;
+	zend_long lval, overflow;
+	double dval;
 
 	op1 = EX_VAR(opline->op1.var);
 	op2 = RT_CONSTANT(opline, opline->op2);
 	result = EX_VAR(opline->result.var);
-	ZEND_SIGNED_MULTIPLY_LONG(Z_LVAL_P(op1), Z_LVAL_P(op2), Z_LVAL_P(result), Z_DVAL_P(result), overflow);
-	Z_TYPE_INFO_P(result) = overflow ? IS_DOUBLE : IS_LONG;
+	ZEND_SIGNED_MULTIPLY_LONG(Z_LVAL_P(op1), Z_LVAL_P(op2), lval, dval, overflow);
+	if (EXPECTED(!overflow)) {
+		ZVAL_LONG(result, lval);
+	} else {
+		(void) dval;
+		mul_function(result, op1, op2);
+	}
 	ZEND_VM_NEXT_OPCODE();
 }
 
@@ -67641,12 +67681,15 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_MUL_SPEC_TMPVARCV_
 		/* pass */
 	} else if (EXPECTED(Z_TYPE_INFO_P(op1) == IS_LONG)) {
 		if (EXPECTED(Z_TYPE_INFO_P(op2) == IS_LONG)) {
-			zend_long overflow;
-
-			result = EX_VAR(opline->result.var);
-			ZEND_SIGNED_MULTIPLY_LONG(Z_LVAL_P(op1), Z_LVAL_P(op2), Z_LVAL_P(result), Z_DVAL_P(result), overflow);
-			Z_TYPE_INFO_P(result) = overflow ? IS_DOUBLE : IS_LONG;
-			ZEND_VM_NEXT_OPCODE();
+			zend_long lval, overflow;
+			double dval;
+			ZEND_SIGNED_MULTIPLY_LONG(Z_LVAL_P(op1), Z_LVAL_P(op2), lval, dval, overflow);
+			if (EXPECTED(!overflow)) {
+				result = EX_VAR(opline->result.var);
+				ZVAL_LONG(result, lval);
+				ZEND_VM_NEXT_OPCODE();
+			}
+			(void) dval;
 		} else if (EXPECTED(Z_TYPE_INFO_P(op2) == IS_DOUBLE)) {
 			d1 = (double)Z_LVAL_P(op1);
 			d2 = Z_DVAL_P(op2);
@@ -67708,8 +67751,9 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_SL_SPEC_TMPVARCV_T
 		/* pass */
 	} else if (EXPECTED(Z_TYPE_INFO_P(op1) == IS_LONG)
 			&& EXPECTED(Z_TYPE_INFO_P(op2) == IS_LONG)
-			&& EXPECTED((zend_ulong)Z_LVAL_P(op2) < SIZEOF_ZEND_LONG * 8)) {
-		/* Perform shift on unsigned numbers to get well-defined wrap behavior. */
+			&& EXPECTED((zend_ulong)Z_LVAL_P(op2) < SIZEOF_ZEND_LONG * 8 - 1)
+			&& EXPECTED((Z_LVAL_P(op1) >> (SIZEOF_ZEND_LONG * 8 - 1 - Z_LVAL_P(op2))) == (Z_LVAL_P(op1) >> (SIZEOF_ZEND_LONG * 8 - 1)))) {
+		/* The result fits zend_long; a shift that overflows boxes in the helper. */
 		ZVAL_LONG(EX_VAR(opline->result.var),
 			(zend_long) ((zend_ulong) Z_LVAL_P(op1) << Z_LVAL_P(op2)));
 		ZEND_VM_NEXT_OPCODE();
@@ -68149,13 +68193,19 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_MUL_LO
 {
 	USE_OPLINE
 	zval *op1, *op2, *result;
-	zend_long overflow;
+	zend_long lval, overflow;
+	double dval;
 
 	op1 = EX_VAR(opline->op1.var);
 	op2 = EX_VAR(opline->op2.var);
 	result = EX_VAR(opline->result.var);
-	ZEND_SIGNED_MULTIPLY_LONG(Z_LVAL_P(op1), Z_LVAL_P(op2), Z_LVAL_P(result), Z_DVAL_P(result), overflow);
-	Z_TYPE_INFO_P(result) = overflow ? IS_DOUBLE : IS_LONG;
+	ZEND_SIGNED_MULTIPLY_LONG(Z_LVAL_P(op1), Z_LVAL_P(op2), lval, dval, overflow);
+	if (EXPECTED(!overflow)) {
+		ZVAL_LONG(result, lval);
+	} else {
+		(void) dval;
+		mul_function(result, op1, op2);
+	}
 	ZEND_VM_NEXT_OPCODE();
 }
 

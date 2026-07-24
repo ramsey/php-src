@@ -28,6 +28,7 @@
 #include "zend_exceptions.h"
 #include "zend_interfaces.h"
 #include "zend_types.h"
+#include "zend_int_backend.h"
 #include "zend_portability.h"
 #include "zend_string.h"
 #include "zend_virtual_cwd.h"
@@ -10621,6 +10622,28 @@ ZEND_API bool zend_binary_op_produces_error(uint32_t opcode, const zval *op1, co
 	if ((opcode == ZEND_SL || opcode == ZEND_SR) && zval_get_long(op2) < 0) {
 		/* Shift by negative number throws an error. */
 		return 1;
+	}
+
+	/* A power or left shift whose exponent or count is boxed or beyond the
+	 * backend's reach raises an ArithmeticError; refuse the fold so the throw
+	 * happens at runtime rather than at compile time. */
+	if (opcode == ZEND_POW) {
+		if (Z_TYPE_P(op2) == IS_BIGINT) {
+			return 1;
+		}
+		if (Z_TYPE_P(op2) == IS_LONG && Z_LVAL_P(op2) >= 0
+				&& !zend_bigint_can_pow(Z_LVAL_P(op2))) {
+			return 1;
+		}
+	}
+	if (opcode == ZEND_SL) {
+		if (Z_TYPE_P(op2) == IS_BIGINT) {
+			return 1;
+		}
+		if (Z_TYPE_P(op2) == IS_LONG && Z_LVAL_P(op2) >= 0
+				&& !zend_bigint_can_shift_left(Z_LVAL_P(op2))) {
+			return 1;
+		}
 	}
 
 	return 0;

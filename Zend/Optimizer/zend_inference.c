@@ -2292,8 +2292,8 @@ static uint32_t binary_op_result_type(
 					!ssa->var_info[result_var].has_range ||
 				    ssa->var_info[result_var].range.underflow ||
 				    ssa->var_info[result_var].range.overflow) {
-					/* may overflow */
-					tmp |= MAY_BE_LONG | MAY_BE_DOUBLE;
+					/* Overflow boxes an exact integer, never a double. */
+					tmp |= MAY_BE_LONG | MAY_BE_BIGINT;
 				} else {
 					tmp |= MAY_BE_LONG;
 				}
@@ -2304,7 +2304,9 @@ static uint32_t binary_op_result_type(
 				tmp |= t1 & (MAY_BE_ARRAY_KEY_ANY|MAY_BE_ARRAY_OF_ANY|MAY_BE_ARRAY_OF_REF);
 				tmp |= t2 & (MAY_BE_ARRAY_KEY_ANY|MAY_BE_ARRAY_OF_ANY|MAY_BE_ARRAY_OF_REF);
 			} else {
-				tmp |= MAY_BE_LONG | MAY_BE_DOUBLE;
+				/* A coerced operand may yield a double; an integer sum may
+				 * overflow into a box. */
+				tmp |= MAY_BE_LONG | MAY_BE_DOUBLE | MAY_BE_BIGINT;
 				if ((t1_type & MAY_BE_ARRAY) && (t2_type & MAY_BE_ARRAY)) {
 					tmp |= MAY_BE_ARRAY | MAY_BE_RC1;
 					tmp |= t1 & (MAY_BE_ARRAY_KEY_ANY|MAY_BE_ARRAY_OF_ANY|MAY_BE_ARRAY_OF_REF);
@@ -2319,19 +2321,20 @@ static uint32_t binary_op_result_type(
 					!ssa->var_info[result_var].has_range ||
 				    ssa->var_info[result_var].range.underflow ||
 				    ssa->var_info[result_var].range.overflow) {
-					/* may overflow */
-					tmp |= MAY_BE_LONG | MAY_BE_DOUBLE;
+					/* Overflow boxes an exact integer, never a double. */
+					tmp |= MAY_BE_LONG | MAY_BE_BIGINT;
 				} else {
 					tmp |= MAY_BE_LONG;
 				}
 			} else if (t1_type == MAY_BE_DOUBLE || t2_type == MAY_BE_DOUBLE) {
 				tmp |= MAY_BE_DOUBLE;
 			} else {
-				tmp |= MAY_BE_LONG | MAY_BE_DOUBLE;
+				/* A coerced operand may yield a double; an integer result may
+				 * overflow into a box. */
+				tmp |= MAY_BE_LONG | MAY_BE_DOUBLE | MAY_BE_BIGINT;
 			}
 			break;
 		case ZEND_DIV:
-		case ZEND_POW:
 			if (t1_type == MAY_BE_DOUBLE || t2_type == MAY_BE_DOUBLE) {
 				tmp |= MAY_BE_DOUBLE;
 			} else {
@@ -2339,6 +2342,15 @@ static uint32_t binary_op_result_type(
 			}
 			/* Division by zero results in Inf/-Inf/Nan (double), so it doesn't need any special
 			 * handling */
+			break;
+		case ZEND_POW:
+			if (t1_type == MAY_BE_DOUBLE || t2_type == MAY_BE_DOUBLE) {
+				tmp |= MAY_BE_DOUBLE;
+			} else {
+				/* A negative exponent yields a double; a non-negative one may
+				 * overflow into a box. */
+				tmp |= MAY_BE_LONG | MAY_BE_DOUBLE | MAY_BE_BIGINT;
+			}
 			break;
 		case ZEND_MOD:
 			tmp |= MAY_BE_LONG;
@@ -2355,6 +2367,9 @@ static uint32_t binary_op_result_type(
 			}
 			break;
 		case ZEND_SL:
+			/* A left shift that overflows zend_long boxes. */
+			tmp |= MAY_BE_LONG | MAY_BE_BIGINT;
+			break;
 		case ZEND_SR:
 			tmp |= MAY_BE_LONG;
 			break;
@@ -2904,8 +2919,8 @@ static zend_always_inline zend_result _zend_update_type_info(
 				     (opline->opcode == ZEND_PRE_INC &&
 				      (ssa_var_info[ssa_op->op1_use].range.overflow ||
 				       ssa_var_info[ssa_op->op1_use].range.max == ZEND_LONG_MAX))) {
-					/* may overflow */
-					tmp |= MAY_BE_LONG | MAY_BE_DOUBLE;
+					/* Overflow boxes an exact integer, never a double. */
+					tmp |= MAY_BE_LONG | MAY_BE_BIGINT;
 				} else {
 					tmp |= MAY_BE_LONG;
 				}
@@ -2918,13 +2933,15 @@ static zend_always_inline zend_result _zend_update_type_info(
 					}
 				}
 				if (t1 & MAY_BE_LONG) {
-					tmp |= MAY_BE_LONG | MAY_BE_DOUBLE;
+					/* Overflow of the long component boxes. */
+					tmp |= MAY_BE_LONG | MAY_BE_BIGINT;
 				}
 				if (t1 & MAY_BE_DOUBLE) {
 					tmp |= MAY_BE_DOUBLE;
 				}
 				if (t1 & MAY_BE_STRING) {
-					tmp |= MAY_BE_STRING | MAY_BE_LONG | MAY_BE_DOUBLE;
+					/* A numeric string may overflow into a box on ++/--. */
+					tmp |= MAY_BE_STRING | MAY_BE_LONG | MAY_BE_DOUBLE | MAY_BE_BIGINT;
 				}
 				tmp |= t1 & (MAY_BE_FALSE | MAY_BE_TRUE | MAY_BE_OBJECT);
 			}
@@ -2966,8 +2983,8 @@ static zend_always_inline zend_result _zend_update_type_info(
 				      (opline->opcode == ZEND_POST_INC &&
 				       (ssa_var_info[ssa_op->op1_use].range.overflow ||
 				        ssa_var_info[ssa_op->op1_use].range.max == ZEND_LONG_MAX))) {
-					/* may overflow */
-					tmp |= MAY_BE_LONG | MAY_BE_DOUBLE;
+					/* Overflow boxes an exact integer, never a double. */
+					tmp |= MAY_BE_LONG | MAY_BE_BIGINT;
 				} else {
 					tmp |= MAY_BE_LONG;
 				}
@@ -2980,13 +2997,15 @@ static zend_always_inline zend_result _zend_update_type_info(
 					}
 				}
 				if (t1 & MAY_BE_LONG) {
-					tmp |= MAY_BE_LONG | MAY_BE_DOUBLE;
+					/* Overflow of the long component boxes. */
+					tmp |= MAY_BE_LONG | MAY_BE_BIGINT;
 				}
 				if (t1 & MAY_BE_DOUBLE) {
 					tmp |= MAY_BE_DOUBLE;
 				}
 				if (t1 & MAY_BE_STRING) {
-					tmp |= MAY_BE_STRING | MAY_BE_LONG | MAY_BE_DOUBLE;
+					/* A numeric string may overflow into a box on ++/--. */
+					tmp |= MAY_BE_STRING | MAY_BE_LONG | MAY_BE_DOUBLE | MAY_BE_BIGINT;
 				}
 				tmp |= t1 & (MAY_BE_FALSE | MAY_BE_TRUE | MAY_BE_RESOURCE | MAY_BE_ARRAY | MAY_BE_OBJECT | MAY_BE_ARRAY_OF_ANY | MAY_BE_ARRAY_OF_REF | MAY_BE_ARRAY_KEY_ANY);
 			}
@@ -5084,9 +5103,15 @@ ZEND_API bool zend_may_throw_ex(const zend_op *opline, const zend_ssa_op *ssa_op
 			ZEND_FALLTHROUGH;
 		case ZEND_SUB:
 		case ZEND_MUL:
-		case ZEND_POW:
 			return (t1 & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE)) ||
 				(t2 & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE));
+		case ZEND_POW:
+			/* A non-negative exponent beyond the backend's reach throws
+			 * ArithmeticError; a boxed or unbounded exponent may exceed it. */
+			return (t1 & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE)) ||
+				(t2 & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE|MAY_BE_BIGINT)) ||
+				!OP2_HAS_RANGE() ||
+				OP2_MAX_RANGE() > INT_MAX;
 		/* Ops may throw if not an integer */
 		case ZEND_MOD:
 			if (!OP2_HAS_RANGE() ||
@@ -5095,12 +5120,19 @@ ZEND_API bool zend_may_throw_ex(const zend_op *opline, const zend_ssa_op *ssa_op
 				return 1;
 			}
 			ZEND_FALLTHROUGH;
-		case ZEND_SL:
 		case ZEND_SR:
 			return (t1 & (MAY_BE_STRING|MAY_BE_DOUBLE|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE)) ||
 				(t2 & (MAY_BE_STRING|MAY_BE_DOUBLE|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE)) ||
 				!OP2_HAS_RANGE() ||
 				OP2_MIN_RANGE() < 0;
+		case ZEND_SL:
+			/* A count beyond the backend's reach throws ArithmeticError; a
+			 * boxed or unbounded count may exceed it. */
+			return (t1 & (MAY_BE_STRING|MAY_BE_DOUBLE|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE)) ||
+				(t2 & (MAY_BE_STRING|MAY_BE_DOUBLE|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE|MAY_BE_BIGINT)) ||
+				!OP2_HAS_RANGE() ||
+				OP2_MIN_RANGE() < 0 ||
+				OP2_MAX_RANGE() > INT_MAX;
 		case ZEND_CONCAT:
 		case ZEND_FAST_CONCAT:
 			return (t1 & (MAY_BE_ARRAY|MAY_BE_OBJECT)) ||
