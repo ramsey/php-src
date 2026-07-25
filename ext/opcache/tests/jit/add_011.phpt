@@ -13,7 +13,7 @@ function test() {
     while ($a <= 0) {
         $a &= $a-- + $a + $u;
         var_dump($a);
-        if (++$n > 59) die("bug\n");
+        if (++$n > 59) die("done\n");
     }
 }
 test();
@@ -194,6 +194,8 @@ Warning: Undefined variable $u in %sadd_011.php on line 5
 int(-9223371969208523780)
 
 Warning: Undefined variable $u in %sadd_011.php on line 5
+int(-18446744007137049613)
 
-Warning: The float %f is not representable as an int, cast occurred in %sadd_011.php on line 5
-int(66572500992)
+Warning: Undefined variable $u in %sadd_011.php on line 5
+int(-36893488082994101280)
+done

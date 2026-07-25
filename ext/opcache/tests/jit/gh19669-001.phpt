@@ -21,5 +21,4 @@ function test() {
 var_dump(test());
 ?>
 --EXPECTF--
-Warning: The float -1.8446744073709552E+19 is not representable as an int, cast occurred in %s on line %d
-int(-3)
+int(-36893488147419103239)

@@ -22,4 +22,4 @@ var_dump(test());
 
 ?>
 --EXPECTF--
-float(%s)
+int(%d)

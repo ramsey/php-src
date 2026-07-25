@@ -14,4 +14,4 @@ function foo($a) {
 foo(PHP_INT_MAX);
 ?>
 --EXPECT--
-float(7.378697629483821E+19)
+int(73786976294838206456)

@@ -235,13 +235,16 @@ static void zend_persist_zval(zval *z)
 			Z_TYPE_FLAGS_P(z) = 0;
 			break;
 		case IS_BIGINT: {
+			zval orig;
 			zend_bigint *big = Z_BIG_P(z);
 			void *mem = ZCG(mem);
 
+			ZVAL_COPY_VALUE(&orig, z);
 			ZEND_ASSERT(((uintptr_t)ZCG(mem) & 0x7) == 0); /* should be 8 byte aligned */
 			ZCG(mem) = (void*)((char*)mem + ZEND_ALIGNED_SIZE(zend_bigint_persist_size(big)));
 			Z_BIG_P(z) = zend_bigint_persist_copy(mem, big);
 			Z_TYPE_FLAGS_P(z) = 0;
+			zval_ptr_dtor_nogc(&orig);
 			break;
 		}
 		case IS_ARRAY:

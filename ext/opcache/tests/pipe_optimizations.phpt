@@ -57,6 +57,7 @@ $_main:
 0016 RETURN int(1)
 LIVE RANGES:
      2: 0001 - 0002 (new)
+     2: 0006 - 0007 (tmp/var)
      2: 0009 - 0010 (tmp/var)
 
 _test1:
@@ -67,6 +68,8 @@ _test1:
 0001 T1 = ADD CV0($a) int(1)
 0002 VERIFY_RETURN_TYPE T1
 0003 RETURN T1
+LIVE RANGES:
+     1: 0002 - 0003 (tmp/var)
 
 Other::foo:
      ; (lines=4, args=1, vars=1, tmps=%d)
@@ -76,6 +79,8 @@ Other::foo:
 0001 T1 = MUL CV0($a) int(2)
 0002 VERIFY_RETURN_TYPE T1
 0003 RETURN T1
+LIVE RANGES:
+     1: 0002 - 0003 (tmp/var)
 
 Other::bar:
      ; (lines=4, args=1, vars=1, tmps=%d)
@@ -85,4 +90,6 @@ Other::bar:
 0001 T1 = SUB CV0($a) int(1)
 0002 VERIFY_RETURN_TYPE T1
 0003 RETURN T1
+LIVE RANGES:
+     1: 0002 - 0003 (tmp/var)
 int(11)

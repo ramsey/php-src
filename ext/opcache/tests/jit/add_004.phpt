@@ -20,4 +20,4 @@ function foo($var) {
 foo(PHP_INT_MAX);
 ?>
 --EXPECT--
-float(9.223372036854776E+18)
+int(9223372036854776007)

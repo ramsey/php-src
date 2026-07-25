@@ -44,5 +44,5 @@ int(1)
 int(2)
 int(4)
 int(-4)
-int(0)
+int(18446744073709551616)
 ArithmeticError: Bit shift by negative number

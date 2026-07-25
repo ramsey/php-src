@@ -363,6 +363,12 @@ static zend_always_inline uint32_t zend_jit_trace_type_to_info_ex(uint8_t type, 
 	if (type == IS_UNKNOWN) {
 		return info;
 	}
+	if (type == IS_BIGINT) {
+		/* A machine int and a boxed int are one logical type, so a slot the
+		 * optimizer typed as long may legitimately hold a box. The box is
+		 * always refcounted. */
+		return MAY_BE_BIGINT | MAY_BE_RC1 | MAY_BE_RCN;
+	}
 	ZEND_ASSERT(info & (1 << type));
 	if (type < IS_STRING) {
 		return (1 << type);
@@ -508,7 +514,7 @@ static bool zend_jit_needs_arg_dtor(const zend_function *func, uint32_t arg_num,
 				uint32_t type = STACK_TYPE(JIT_G(current_frame)->call->stack, arg_num);
 
 				if (type != IS_UNKNOWN
-				 && type < IS_STRING
+				 && type < IS_STRING && type != IS_BIGINT
 				 && ZEND_TYPE_FULL_MASK(arg_info->type) & (1u << type)) {
 					return false;
 				}
@@ -2206,7 +2212,7 @@ propagate_arg:
 							return_value_info.type &= ~MAY_BE_UNDEF;
 							return_value_info.type |= MAY_BE_NULL;
 						}
-						if (return_value_info.type & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE)) {
+						if (return_value_info.type & (MAY_BE_STRING|MAY_BE_BIGINT|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE)) {
 							/* CVs are going to be destructed and the reference-counter
 							   of return value may be decremented to 1 */
 							return_value_info.type |= MAY_BE_RC1;
@@ -2722,7 +2728,7 @@ propagate_arg:
 						if (!(t0 & MAY_BE_ARRAY)) {
 							t0 &= ~(MAY_BE_ARRAY_OF_ANY|MAY_BE_ARRAY_OF_REF|MAY_BE_ARRAY_KEY_ANY);
 						}
-						if (!(t0 & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE))) {
+						if (!(t0 & (MAY_BE_STRING|MAY_BE_BIGINT|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE))) {
 							t0 &= ~(MAY_BE_RC1|MAY_BE_RCN);
 						}
 						ssa_var_info[phi->sources[0]].type = t0;
@@ -2736,7 +2742,7 @@ propagate_arg:
 						if (!(t0 & MAY_BE_ARRAY)) {
 							t0 &= ~(MAY_BE_ARRAY_OF_ANY|MAY_BE_ARRAY_OF_REF|MAY_BE_ARRAY_KEY_ANY);
 						}
-						if (!(t0 & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE))) {
+						if (!(t0 & (MAY_BE_STRING|MAY_BE_BIGINT|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE))) {
 							t0 &= ~(MAY_BE_RC1|MAY_BE_RCN);
 						}
 						ssa_var_info[phi->sources[0]].type = t0;
@@ -2750,7 +2756,7 @@ propagate_arg:
 							if (!(t1 & MAY_BE_ARRAY)) {
 								t1 &= ~(MAY_BE_ARRAY_OF_ANY|MAY_BE_ARRAY_OF_REF|MAY_BE_ARRAY_KEY_ANY);
 							}
-							if (!(t1 & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE))) {
+							if (!(t1 & (MAY_BE_STRING|MAY_BE_BIGINT|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE))) {
 								t1 &= ~(MAY_BE_RC1|MAY_BE_RCN);
 							}
 							ssa_var_info[phi->sources[1]].type = t1;
@@ -4489,7 +4495,7 @@ static zend_vm_opcode_handler_t zend_jit_trace(zend_jit_trace_rec *trace_buffer,
 								op1_def_info, OP1_DEF_REG_ADDR(),
 								res_use_info, res_info,
 								res_addr,
-								(op1_def_info & (MAY_BE_DOUBLE|MAY_BE_GUARD)) && zend_may_overflow(opline, ssa_op, op_array, ssa),
+								(op1_def_info & (MAY_BE_DOUBLE|MAY_BE_BIGINT|MAY_BE_GUARD)) && zend_may_overflow(opline, ssa_op, op_array, ssa),
 								zend_may_throw(opline, ssa_op, op_array, ssa))) {
 							goto jit_failure;
 						}
@@ -4638,7 +4644,7 @@ static zend_vm_opcode_handler_t zend_jit_trace(zend_jit_trace_rec *trace_buffer,
 								goto jit_failure;
 							}
 						} else {
-							bool may_overflow = (op1_info & MAY_BE_LONG) && (op2_info & MAY_BE_LONG) && (res_info & (MAY_BE_DOUBLE|MAY_BE_GUARD)) && zend_may_overflow(opline, ssa_op, op_array, ssa);
+							bool may_overflow = (op1_info & MAY_BE_LONG) && (op2_info & MAY_BE_LONG) && (res_info & (MAY_BE_DOUBLE|MAY_BE_BIGINT|MAY_BE_GUARD)) && zend_may_overflow(opline, ssa_op, op_array, ssa);
 
 							if (ra
 							 && may_overflow
@@ -4725,7 +4731,7 @@ static zend_vm_opcode_handler_t zend_jit_trace(zend_jit_trace_rec *trace_buffer,
 								op1_info, op1_addr, OP1_RANGE(),
 								op1_def_info, OP1_DEF_REG_ADDR(), op1_mem_info,
 								op2_info, OP2_REG_ADDR(), OP2_RANGE(),
-								(op1_info & MAY_BE_LONG) && (op2_info & MAY_BE_LONG) && (op1_def_info & (MAY_BE_DOUBLE|MAY_BE_GUARD)) && zend_may_overflow(opline, ssa_op, op_array, ssa),
+								(op1_info & MAY_BE_LONG) && (op2_info & MAY_BE_LONG) && (op1_def_info & (MAY_BE_DOUBLE|MAY_BE_BIGINT|MAY_BE_GUARD)) && zend_may_overflow(opline, ssa_op, op_array, ssa),
 								zend_may_throw(opline, ssa_op, op_array, ssa))) {
 							goto jit_failure;
 						}
@@ -5140,12 +5146,12 @@ static zend_vm_opcode_handler_t zend_jit_trace(zend_jit_trace_rec *trace_buffer,
 						op1_info = OP1_INFO();
 						op1_def_info = OP1_DEF_INFO();
 						if (op1_type != IS_UNKNOWN && (op1_info & MAY_BE_GUARD)) {
-							if (op1_type < IS_STRING
+							if (op1_type < IS_STRING && op1_type != IS_BIGINT
 							 && (op1_info & (MAY_BE_ANY|MAY_BE_UNDEF)) != (op1_def_info & (MAY_BE_ANY|MAY_BE_UNDEF))) {
 								if (!zend_jit_scalar_type_guard(&ctx, opline, opline->op1.var)) {
 									goto jit_failure;
 								}
-								op1_info &= ~(MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE|MAY_BE_REF|MAY_BE_GUARD);
+								op1_info &= ~(MAY_BE_STRING|MAY_BE_BIGINT|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE|MAY_BE_REF|MAY_BE_GUARD);
 							} else {
 								CHECK_OP1_TRACE_TYPE();
 							}
@@ -5635,7 +5641,7 @@ static zend_vm_opcode_handler_t zend_jit_trace(zend_jit_trace_rec *trace_buffer,
 											info |= MAY_BE_NULL;
 										}
 									}
-									if (info & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE|MAY_BE_REF)) {
+									if (info & (MAY_BE_STRING|MAY_BE_BIGINT|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE|MAY_BE_REF)) {
 										if (!left_frame) {
 											left_frame = 1;
 										    if (!zend_jit_leave_frame(&ctx)) {
