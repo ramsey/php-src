@@ -1,5 +1,5 @@
 --TEST--
-testing integer underflow (64bit)
+testing integer does not underflow to float (64bit)
 --SKIPIF--
 <?php if (PHP_INT_SIZE != 8) die("skip this test is for 64bit platform only"); ?>
 --FILE--
@@ -22,8 +22,8 @@ echo "Done\n";
 ?>
 --EXPECT--
 int(-9223372036854775808)
-int(-9223372036854775808)
-int(-9223372036854775808)
-int(-9223372036854775808)
-int(-9223372036854775808)
+int(-9223372036854775809)
+int(-9223372036854775818)
+int(-9223372036854775908)
+int(-9223372036854776808)
 Done
