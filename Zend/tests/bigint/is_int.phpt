@@ -1,7 +1,5 @@
 --TEST--
 bigint: is_int/is_integer/is_long/is_scalar accept a boxed int via the compiled opcode and the real builtin
---EXTENSIONS--
-zend_test
 --FILE--
 <?php
 function check(string $expr, mixed $result): void {
@@ -9,7 +7,7 @@ function check(string $expr, mixed $result): void {
     var_dump($result);
 }
 
-$big = zend_test_bigint_make('123456789012345678901234567890');
+$big = 123456789012345678901234567890;
 
 check('is_int($big)', is_int($big));
 check('is_integer($big)', is_integer($big));

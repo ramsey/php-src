@@ -42,6 +42,7 @@
 #include "zend_constants.h"
 #include "zend_variables.h"
 #include "zend_operators.h"
+#include "zend_int.h"
 #include "zend_API.h"
 #include "zend_strtod.h"
 #include "zend_exceptions.h"
@@ -2070,13 +2071,13 @@ OPTIONAL_WHITESPACE_OR_COMMENTS ({WHITESPACE}|{MULTI_LINE_COMMENT}|{SINGLE_LINE_
 		}
 		RETURN_TOKEN_WITH_VAL(T_LNUMBER);
 	} else {
-		ZVAL_DOUBLE(zendlval, zend_bin_strtod(bin, (const char **)&end));
-		/* errno isn't checked since we allow HUGE_VAL/INF overflow */
-		ZEND_ASSERT(end == bin + len);
+		zend_bigint *big = zend_bigint_from_string(bin, len, 2);
+		ZEND_ASSERT(big != NULL);
+		zend_int_from_bigint(zendlval, big);
 		if (contains_underscores) {
 			efree(bin);
 		}
-		RETURN_TOKEN_WITH_VAL(T_DNUMBER);
+		RETURN_TOKEN_WITH_VAL(T_LNUMBER);
 	}
 }
 
@@ -2120,14 +2121,13 @@ OPTIONAL_WHITESPACE_OR_COMMENTS ({WHITESPACE}|{MULTI_LINE_COMMENT}|{SINGLE_LINE_
 	/* Reset errno */
 	errno = 0;
 
-	/* zend_oct_strtod skips leading '0' */
-	ZVAL_DOUBLE(zendlval, zend_oct_strtod(octal, (const char **)&end));
-	ZEND_ASSERT(!errno);
-	ZEND_ASSERT(end == octal + len);
+	zend_bigint *big = zend_bigint_from_string(octal, len, 8);
+	ZEND_ASSERT(big != NULL);
+	zend_int_from_bigint(zendlval, big);
 	if (contains_underscores) {
 		efree(octal);
 	}
-	RETURN_TOKEN_WITH_VAL(T_DNUMBER);
+	RETURN_TOKEN_WITH_VAL(T_LNUMBER);
 }
 
 <ST_IN_SCRIPTING>{LNUM} {
@@ -2173,16 +2173,13 @@ OPTIONAL_WHITESPACE_OR_COMMENTS ({WHITESPACE}|{MULTI_LINE_COMMENT}|{SINGLE_LINE_
 		ZVAL_LONG(zendlval, ZEND_STRTOL(lnum, &end, 0));
 		if (errno == ERANGE) { /* Overflow */
 			errno = 0;
-			if (is_octal) { /* octal overflow */
-				ZVAL_DOUBLE(zendlval, zend_oct_strtod(lnum, (const char **)&end));
-			} else {
-				ZVAL_DOUBLE(zendlval, zend_strtod(lnum, (const char **)&end));
-			}
-			ZEND_ASSERT(end == lnum + len);
+			zend_bigint *big = zend_bigint_from_string(lnum, len, is_octal ? 8 : 10);
+			ZEND_ASSERT(big != NULL);
+			zend_int_from_bigint(zendlval, big);
 			if (contains_underscores) {
 				efree(lnum);
 			}
-			RETURN_TOKEN_WITH_VAL(T_DNUMBER);
+			RETURN_TOKEN_WITH_VAL(T_LNUMBER);
 		}
 		ZEND_ASSERT(end == lnum + len);
 	}
@@ -2225,13 +2222,13 @@ OPTIONAL_WHITESPACE_OR_COMMENTS ({WHITESPACE}|{MULTI_LINE_COMMENT}|{SINGLE_LINE_
 		}
 		RETURN_TOKEN_WITH_VAL(T_LNUMBER);
 	} else {
-		ZVAL_DOUBLE(zendlval, zend_hex_strtod(hex, (const char **)&end));
-		/* errno isn't checked since we allow HUGE_VAL/INF overflow */
-		ZEND_ASSERT(end == hex + len);
+		zend_bigint *big = zend_bigint_from_string(hex, len, 16);
+		ZEND_ASSERT(big != NULL);
+		zend_int_from_bigint(zendlval, big);
 		if (contains_underscores) {
 			efree(hex);
 		}
-		RETURN_TOKEN_WITH_VAL(T_DNUMBER);
+		RETURN_TOKEN_WITH_VAL(T_LNUMBER);
 	}
 }
 

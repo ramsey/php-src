@@ -1,12 +1,10 @@
 --TEST--
 bigint: switch, match, in_array, and sort over boxes
---EXTENSIONS--
-zend_test
 --FILE--
 <?php
-$bigA = zend_test_bigint_make('100000000000000000000');
-$bigA2 = zend_test_bigint_make('100000000000000000000');
-$bigB = zend_test_bigint_make('100000000000000000001');
+$bigA = 100000000000000000000;
+$bigA2 = 100000000000000000000;
+$bigB = 100000000000000000001;
 
 switch ($bigA) {
     case $bigB:
@@ -35,16 +33,16 @@ var_dump(in_array($bigA, $haystackStrings, true));
 var_dump(in_array($bigA, $haystackStrings, false));
 
 $mixed = [
-    zend_test_bigint_make('100000000000000000001'),
+    100000000000000000001,
     5,
-    zend_test_bigint_make('-100000000000000000001'),
+    -100000000000000000001,
     0,
     -5,
-    zend_test_bigint_make('100000000000000000000'),
+    100000000000000000000,
 ];
 sort($mixed);
 foreach ($mixed as $value) {
-    echo (zend_test_int_is_boxed($value) ? zend_test_bigint_to_string($value) : (string) $value) . "\n";
+    echo $value . "\n";
 }
 ?>
 --EXPECT--

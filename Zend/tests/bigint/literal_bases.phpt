@@ -1,0 +1,27 @@
+--TEST--
+bigint: integer literals above the machine width parse as int in all four bases
+--FILE--
+<?php
+$d = 340282366920938463463374607431768211456;
+$h = 0x100000000000000000000000000000000;
+$b = 0b100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000;
+$o = 0o4000000000000000000000000000000000000000000;
+$oo = 04000000000000000000000000000000000000000000;
+
+foreach (['dec' => $d, 'hex' => $h, 'bin' => $b, 'oct' => $o, 'legacy-oct' => $oo] as $base => $v) {
+    echo $base . ': ';
+    debug_zval_dump($v);
+}
+
+var_dump($d === $h, $h === $b, $b === $o, $o === $oo);
+?>
+--EXPECTF--
+dec: int(340282366920938463463374607431768211456) bigint refcount(%d)
+hex: int(340282366920938463463374607431768211456) bigint refcount(%d)
+bin: int(340282366920938463463374607431768211456) bigint refcount(%d)
+oct: int(340282366920938463463374607431768211456) bigint refcount(%d)
+legacy-oct: int(340282366920938463463374607431768211456) bigint refcount(%d)
+bool(true)
+bool(true)
+bool(true)
+bool(true)

@@ -1,13 +1,11 @@
 --TEST--
 bigint: strict identity for boxes
---EXTENSIONS--
-zend_test
 --FILE--
 <?php
-$x = zend_test_bigint_make('100000000000000000000');
-$y = zend_test_bigint_make('100000000000000000000');
-$z = zend_test_bigint_make('100000000000000000001');
-$negX = zend_test_bigint_make('-100000000000000000000');
+$x = 100000000000000000000;
+$y = 100000000000000000000;
+$z = 100000000000000000001;
+$negX = -100000000000000000000;
 
 var_dump($x === $x);
 var_dump($x === $y);

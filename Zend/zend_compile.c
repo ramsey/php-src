@@ -29,6 +29,7 @@
 #include "zend_interfaces.h"
 #include "zend_types.h"
 #include "zend_int_backend.h"
+#include "zend_int.h"
 #include "zend_portability.h"
 #include "zend_string.h"
 #include "zend_virtual_cwd.h"
@@ -2181,6 +2182,11 @@ zend_ast *zend_negate_num_string(zend_ast *ast) /* {{{ */
 		Z_STR_P(zv) = zend_string_extend(Z_STR_P(zv), orig_len + 1, 0);
 		memmove(Z_STRVAL_P(zv) + 1, Z_STRVAL_P(zv), orig_len + 1);
 		Z_STRVAL_P(zv)[0] = '-';
+	} else if (Z_TYPE_P(zv) == IS_BIGINT) {
+		zval tmp;
+		zend_int_neg(&tmp, zv);
+		zval_ptr_dtor_nogc(zv);
+		ZVAL_COPY_VALUE(zv, &tmp);
 	} else {
 		ZEND_UNREACHABLE();
 	}

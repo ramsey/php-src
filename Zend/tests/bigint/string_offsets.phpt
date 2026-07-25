@@ -1,11 +1,9 @@
 --TEST--
 bigint: string offsets with a boxed integer: isset/empty saturate out of range, direct read still rejects the type
---EXTENSIONS--
-zend_test
 --FILE--
 <?php
-$pos = zend_test_bigint_make('340282366920938463463374607431768211456');
-$neg = zend_test_bigint_make('-340282366920938463463374607431768211456');
+$pos = 340282366920938463463374607431768211456;
+$neg = -340282366920938463463374607431768211456;
 $s = 'abc';
 
 var_dump(isset($s[$pos]));

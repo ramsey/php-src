@@ -1,7 +1,5 @@
 --TEST--
 bigint: comparison operators against box, long, double, and string
---EXTENSIONS--
-zend_test
 --FILE--
 <?php
 function check(string $expr, mixed $result): void {
@@ -9,10 +7,10 @@ function check(string $expr, mixed $result): void {
     var_dump($result);
 }
 
-$a = zend_test_bigint_make('100000000000000000000');
-$b = zend_test_bigint_make('100000000000000000001');
-$negA = zend_test_bigint_make('-100000000000000000000');
-$negB = zend_test_bigint_make('-100000000000000000001');
+$a = 100000000000000000000;
+$b = 100000000000000000001;
+$negA = -100000000000000000000;
+$negB = -100000000000000000001;
 
 check('$a == $a', $a == $a);
 check('$a == $b', $a == $b);
@@ -31,7 +29,7 @@ check('$negA < PHP_INT_MIN', $negA < PHP_INT_MIN);
 check('PHP_INT_MIN > $negA', PHP_INT_MIN > $negA);
 check('$a == PHP_INT_MAX', $a == PHP_INT_MAX);
 
-$box128 = zend_test_bigint_make('340282366920938463463374607431768211456');
+$box128 = 340282366920938463463374607431768211456;
 check('$box128 == 2.0 ** 128', $box128 == 2.0 ** 128);
 check('2.0 ** 128 == $box128', 2.0 ** 128 == $box128);
 check('$box128 <=> 2.0 ** 128', $box128 <=> 2.0 ** 128);

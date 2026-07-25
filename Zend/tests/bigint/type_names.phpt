@@ -1,10 +1,8 @@
 --TEST--
 bigint: gettype, get_debug_type, and value-name error text all report a boxed integer as int
---EXTENSIONS--
-zend_test
 --FILE--
 <?php
-$pos = zend_test_bigint_make('340282366920938463463374607431768211456');
+$pos = 340282366920938463463374607431768211456;
 var_dump(gettype($pos));
 var_dump(get_debug_type($pos));
 
