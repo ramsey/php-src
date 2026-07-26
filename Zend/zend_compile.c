@@ -28,7 +28,7 @@
 #include "zend_exceptions.h"
 #include "zend_interfaces.h"
 #include "zend_types.h"
-#include "zend_int_backend.h"
+#include "zend_bigint.h"
 #include "zend_int.h"
 #include "zend_portability.h"
 #include "zend_string.h"

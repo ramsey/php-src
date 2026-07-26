@@ -18,7 +18,7 @@
 #include "zend_virtual_cwd.h"
 #include "zend_compile.h"
 #include "zend_vm.h"
-#include "zend_int_backend.h"
+#include "zend_bigint.h"
 #include "zend_interfaces.h"
 #include "zend_attributes.h"
 #include "zend_system_id.h"

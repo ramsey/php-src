@@ -12,8 +12,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef ZEND_INT_BACKEND_H
-#define ZEND_INT_BACKEND_H
+#ifndef ZEND_BIGINT_H
+#define ZEND_BIGINT_H
 
 #include "zend_types.h"
 

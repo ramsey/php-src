@@ -12,10 +12,10 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef ZEND_INT_BACKEND_LIBTOMMATH_H
-#define ZEND_INT_BACKEND_LIBTOMMATH_H
+#ifndef ZEND_BIGINT_LIBTOMMATH_H
+#define ZEND_BIGINT_LIBTOMMATH_H
 
-#include "zend_int_backend.h"
+#include "zend_bigint.h"
 #include "Zend/bigint/libtommath/tommath.h"
 
 struct _zend_bigint {

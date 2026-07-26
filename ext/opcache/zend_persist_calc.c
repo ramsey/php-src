@@ -23,7 +23,7 @@
 #include "zend_extensions.h"
 #include "zend_shared_alloc.h"
 #include "zend_operators.h"
-#include "zend_int_backend.h"
+#include "zend_bigint.h"
 #include "zend_attributes.h"
 #include "zend_constants.h"
 

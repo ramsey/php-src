@@ -14,14 +14,14 @@
 
 #include "zend.h"
 #include "zend_exceptions.h"
-#include "zend_int_backend_libtommath.h"
+#include "zend_bigint_libtommath.h"
 
 #include <limits.h>
 #include <string.h>
 
 /* The libtommath calls below that can only fail on allocation are asserted
  * MP_OKAY rather than checked. The zend_mp_* allocator (see
- * zend_int_backend_libtommath_alloc.c) routes through emalloc/erealloc/ecalloc,
+ * zend_bigint_libtommath_alloc.c) routes through emalloc/erealloc/ecalloc,
  * which bail out on OOM instead of returning NULL. */
 
 ZEND_API zend_bigint *zend_bigint_from_long(zend_long v)

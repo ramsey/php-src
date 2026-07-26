@@ -15,7 +15,7 @@
 #ifndef ZEND_INT_H
 #define ZEND_INT_H
 
-#include "zend_int_backend.h"
+#include "zend_bigint.h"
 #include "zend_multiply.h"
 
 BEGIN_EXTERN_C()

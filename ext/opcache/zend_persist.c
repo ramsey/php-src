@@ -25,7 +25,7 @@
 #include "zend_vm.h"
 #include "zend_constants.h"
 #include "zend_operators.h"
-#include "zend_int_backend.h"
+#include "zend_bigint.h"
 #include "zend_interfaces.h"
 #include "zend_attributes.h"
 #include "zend_partial.h"

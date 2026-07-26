@@ -12,7 +12,7 @@ PHP bundles libtommath as the default backend for arbitrary-precision integers.
 - Local modifications: none to the vendored files (all configuration is via
   compile flags). The MP_MALLOC/MP_REALLOC/MP_CALLOC/MP_FREE flags route every
   allocation to `zend_mp_malloc`/`zend_mp_realloc`/`zend_mp_calloc`/`zend_mp_free`
-  in `../zend_int_backend_libtommath_alloc.c`, which implement them over the
+  in `../zend_bigint_libtommath_alloc.c`, which implement them over the
   Zend allocator (emalloc/erealloc/ecalloc/efree).
 
 ## Vendored files

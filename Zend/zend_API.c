@@ -34,7 +34,7 @@
 #include "zend_enum.h"
 #include "zend_object_handlers.h"
 #include "zend_observer.h"
-#include "zend_int_backend.h"
+#include "zend_bigint.h"
 
 #include <stdarg.h>
 

@@ -32,7 +32,7 @@
 #include "zend_weakrefs.h"
 #include "Zend/Optimizer/zend_optimizer.h"
 #include "Zend/zend_alloc.h"
-#include "Zend/zend_int_backend.h"
+#include "Zend/zend_bigint.h"
 #include "Zend/zend_int.h"
 #include "test_arginfo.h"
 #include "tmp_methods_arginfo.h"
