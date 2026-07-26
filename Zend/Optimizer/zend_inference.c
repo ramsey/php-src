@@ -2338,7 +2338,8 @@ static uint32_t binary_op_result_type(
 			if (t1_type == MAY_BE_DOUBLE || t2_type == MAY_BE_DOUBLE) {
 				tmp |= MAY_BE_DOUBLE;
 			} else {
-				tmp |= MAY_BE_LONG | MAY_BE_DOUBLE;
+				/* An exact quotient may overflow long, as LONG_MIN / -1 does. */
+				tmp |= MAY_BE_LONG | MAY_BE_DOUBLE | MAY_BE_BIGINT | MAY_BE_RC1;
 			}
 			/* Division by zero results in Inf/-Inf/Nan (double), so it doesn't need any special
 			 * handling */
@@ -2354,6 +2355,10 @@ static uint32_t binary_op_result_type(
 			break;
 		case ZEND_MOD:
 			tmp |= MAY_BE_LONG;
+			if ((t1_type & MAY_BE_BIGINT) || (t2_type & MAY_BE_BIGINT)) {
+				/* A remainder of a box stays exact and may overflow long. */
+				tmp |= MAY_BE_BIGINT | MAY_BE_RC1;
+			}
 			/* Division by zero results in an exception, so it doesn't need any special handling */
 			break;
 		case ZEND_BW_OR:
@@ -2376,6 +2381,10 @@ static uint32_t binary_op_result_type(
 			break;
 		case ZEND_SR:
 			tmp |= MAY_BE_LONG;
+			if ((t1_type & MAY_BE_BIGINT) || (t2_type & MAY_BE_BIGINT)) {
+				/* A right shift of a box stays exact and may overflow long. */
+				tmp |= MAY_BE_BIGINT | MAY_BE_RC1;
+			}
 			break;
 		case ZEND_CONCAT:
 		case ZEND_FAST_CONCAT:
