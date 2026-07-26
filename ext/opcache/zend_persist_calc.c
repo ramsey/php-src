@@ -170,7 +170,7 @@ static void zend_persist_zval_calc(zval *z)
 		case IS_PTR:
 			break;
 		default:
-			ZEND_ASSERT(Z_TYPE_P(z) < IS_STRING);
+			ZEND_ASSERT(Z_TYPE_P(z) < IS_STRING && Z_TYPE_P(z) != IS_BIGINT);
 			break;
 	}
 }

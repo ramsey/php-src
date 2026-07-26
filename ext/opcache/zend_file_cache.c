@@ -459,7 +459,7 @@ static void zend_file_cache_serialize_zval(zval                     *zv,
 			/* Used by attributes on constants, will be handled separately */
 			break;
 		default:
-			ZEND_ASSERT(Z_TYPE_P(zv) < IS_STRING);
+			ZEND_ASSERT(Z_TYPE_P(zv) < IS_STRING && Z_TYPE_P(zv) != IS_BIGINT);
 			break;
 	}
 }
@@ -1397,7 +1397,7 @@ static void zend_file_cache_unserialize_zval(zval                    *zv,
 			/* Used by attributes on constants, will be handled separately */
 			break;
 		default:
-			ZEND_ASSERT(Z_TYPE_P(zv) < IS_STRING);
+			ZEND_ASSERT(Z_TYPE_P(zv) < IS_STRING && Z_TYPE_P(zv) != IS_BIGINT);
 			break;
 	}
 }
