@@ -573,9 +573,8 @@ try_again:
 		case IS_LONG:
 			break;
 		case IS_BIGINT: {
-			zend_bigint *big = Z_BIG_P(op);
-			zend_long l = zend_bigint_sign(big) < 0 ? ZEND_LONG_MIN : ZEND_LONG_MAX;
-			zend_bigint_release(big);
+			zend_long l = zend_bigint_sign(Z_BIG_P(op)) < 0 ? ZEND_LONG_MIN : ZEND_LONG_MAX;
+			zval_ptr_dtor(op);
 			ZVAL_LONG(op, l);
 			break;
 		}
@@ -643,9 +642,8 @@ try_again:
 			ZVAL_DOUBLE(op, (double) Z_LVAL_P(op));
 			break;
 		case IS_BIGINT: {
-			zend_bigint *big = Z_BIG_P(op);
-			double d = zend_bigint_to_double(big);
-			zend_bigint_release(big);
+			double d = zend_bigint_to_double(Z_BIG_P(op));
+			zval_ptr_dtor(op);
 			ZVAL_DOUBLE(op, d);
 			break;
 		}
@@ -719,7 +717,7 @@ try_again:
 			ZVAL_BOOL(op, Z_LVAL_P(op) ? 1 : 0);
 			break;
 		case IS_BIGINT: {
-			zend_bigint_release(Z_BIG_P(op));
+			zval_ptr_dtor(op);
 			ZVAL_TRUE(op);
 			break;
 		}
@@ -798,9 +796,8 @@ try_again:
 			ZVAL_STR(op, zend_long_to_str(Z_LVAL_P(op)));
 			break;
 		case IS_BIGINT: {
-			zend_bigint *big = Z_BIG_P(op);
-			zend_string *str = zend_bigint_to_str(big);
-			zend_bigint_release(big);
+			zend_string *str = zend_bigint_to_str(Z_BIG_P(op));
+			zval_ptr_dtor(op);
 			ZVAL_NEW_STR(op, str);
 			break;
 		}

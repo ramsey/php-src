@@ -38,14 +38,6 @@ ZEND_API bool zend_int_get_long(const zval *zv, zend_long *out);
  * "<integer too large to display>" instead. */
 ZEND_API zend_string *zend_int_debug_str(const zval *zv, size_t max_digits);
 
-/* Drops one reference to a box, freeing it on the last one. */
-static zend_always_inline void zend_bigint_release(zend_bigint *big)
-{
-	if (GC_DELREF((zend_refcounted *) big) == 0) {
-		zend_bigint_free(big);
-	}
-}
-
 /* Returns true if a + b overflows zend_long. Writes the wrapped result to
  * *r regardless; it is meaningful only when this returns false. */
 static zend_always_inline bool zend_long_add_overflows(zend_long a, zend_long b, zend_long *r)
