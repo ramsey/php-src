@@ -1781,6 +1781,54 @@ div_by_zero:
 }
 /* }}} */
 
+/* Convert a scalar operand into a holder for the integer-operator bigint path.
+ * An out-of-range integer numeric string becomes a bigint (*is_bigint = true);
+ * any other value is copied verbatim, so the operator applies its existing
+ * zendi_try_get_long coercion and error. */
+static zend_always_inline zend_result zend_op_to_bigint_holder(zval *op, zval *holder, bool *is_bigint)
+{
+	*is_bigint = false;
+	if (Z_TYPE_P(op) == IS_STRING) {
+		bool trailing = false;
+		uint8_t type = zend_string_to_number(Z_STRVAL_P(op), Z_STRLEN_P(op), true, holder, &trailing);
+		if (type == IS_BIGINT) {
+			if (UNEXPECTED(trailing)) {
+				zend_error(E_WARNING, "A non-numeric value encountered");
+				if (UNEXPECTED(EG(exception))) {
+					zval_ptr_dtor(holder);
+					return FAILURE;
+				}
+			}
+			*is_bigint = true;
+			return SUCCESS;
+		}
+		if (UNEXPECTED(type == 0 && EG(exception))) {
+			return FAILURE;
+		}
+	}
+	ZVAL_COPY(holder, op);
+	return SUCCESS;
+}
+
+/* Reduce a holder that isn't already a logical int (long or bigint) to a
+ * plain long in place, via the existing zendi_try_get_long coercion. Object
+ * overloads are handled by the caller before any holder exists, so this never
+ * returns early. */
+static zend_always_inline zend_result zend_holder_coerce_to_long(zval *holder)
+{
+	if (Z_IS_INT_P(holder)) {
+		return SUCCESS;
+	}
+	bool failed;
+	zend_long lval = zendi_try_get_long(holder, &failed);
+	if (UNEXPECTED(failed)) {
+		return FAILURE;
+	}
+	zval_ptr_dtor(holder);
+	ZVAL_LONG(holder, lval);
+	return SUCCESS;
+}
+
 ZEND_API zend_result ZEND_FASTCALL mod_function(zval *result, zval *op1, zval *op2) /* {{{ */
 {
 	zend_long op1_lval, op2_lval;
@@ -1837,7 +1885,66 @@ ZEND_API zend_result ZEND_FASTCALL mod_function(zval *result, zval *op1, zval *o
 		return SUCCESS;
 	}
 
-	convert_op1_op2_long(op1, op1_lval, op2, op2_lval, result, ZEND_MOD, "%");
+	if (Z_TYPE_P(op1) == IS_STRING || Z_TYPE_P(op2) == IS_STRING) {
+		ZEND_TRY_BINARY_OBJECT_OPERATION(ZEND_MOD);
+
+		zval op1_holder, op2_holder;
+		bool op1_is_bigint, op2_is_bigint;
+		if (UNEXPECTED(zend_op_to_bigint_holder(op1, &op1_holder, &op1_is_bigint) == FAILURE)) {
+			if (op1 != result) {
+				ZVAL_UNDEF(result);
+			}
+			return FAILURE;
+		}
+		if (UNEXPECTED(zend_op_to_bigint_holder(op2, &op2_holder, &op2_is_bigint) == FAILURE)) {
+			zval_ptr_dtor(&op1_holder);
+			if (op1 != result) {
+				ZVAL_UNDEF(result);
+			}
+			return FAILURE;
+		}
+		if (UNEXPECTED(zend_holder_coerce_to_long(&op1_holder) == FAILURE)
+				|| UNEXPECTED(zend_holder_coerce_to_long(&op2_holder) == FAILURE)) {
+			zval_ptr_dtor(&op1_holder);
+			zval_ptr_dtor(&op2_holder);
+			zend_binop_error("%", op1, op2);
+			if (op1 != result) {
+				ZVAL_UNDEF(result);
+			}
+			return FAILURE;
+		}
+		if (op1_is_bigint || op2_is_bigint) {
+			if (Z_TYPE(op2_holder) == IS_LONG && Z_LVAL(op2_holder) == 0) {
+				zval_ptr_dtor(&op1_holder);
+				zval_ptr_dtor(&op2_holder);
+				/* modulus by zero */
+				if (EG(current_execute_data) && !CG(in_compilation)) {
+					zend_throw_exception_ex(zend_ce_division_by_zero_error, 0, "Modulo by zero");
+				} else {
+					zend_error_noreturn(E_ERROR, "Modulo by zero");
+				}
+				if (op1 != result) {
+					ZVAL_UNDEF(result);
+				}
+				return FAILURE;
+			}
+			zval tmp;
+			zend_int_mod(&tmp, &op1_holder, &op2_holder);
+			zval_ptr_dtor(&op1_holder);
+			zval_ptr_dtor(&op2_holder);
+			if (op1 == result) {
+				zval_ptr_dtor(result);
+			}
+			ZVAL_COPY_VALUE(result, &tmp);
+			return SUCCESS;
+		}
+		op1_lval = Z_LVAL(op1_holder);
+		op2_lval = Z_LVAL(op2_holder);
+		zval_ptr_dtor(&op1_holder);
+		zval_ptr_dtor(&op2_holder);
+	} else {
+		convert_op1_op2_long(op1, op1_lval, op2, op2_lval, result, ZEND_MOD, "%");
+	}
 
 	if (op2_lval == 0) {
 		/* modulus by zero */
@@ -2082,33 +2189,78 @@ ZEND_API zend_result ZEND_FASTCALL bitwise_or_function(zval *result, zval *op1, 
 		return SUCCESS;
 	}
 
-	if (UNEXPECTED(Z_TYPE_P(op1) != IS_LONG)) {
-		bool failed;
-		ZEND_TRY_BINARY_OP1_OBJECT_OPERATION(ZEND_BW_OR);
-		op1_lval = zendi_try_get_long(op1, &failed);
-		if (UNEXPECTED(failed)) {
+	if (Z_TYPE_P(op1) == IS_STRING || Z_TYPE_P(op2) == IS_STRING) {
+		ZEND_TRY_BINARY_OBJECT_OPERATION(ZEND_BW_OR);
+
+		zval op1_holder, op2_holder;
+		bool op1_is_bigint, op2_is_bigint;
+		if (UNEXPECTED(zend_op_to_bigint_holder(op1, &op1_holder, &op1_is_bigint) == FAILURE)) {
+			if (result != op1) {
+				ZVAL_UNDEF(result);
+			}
+			return FAILURE;
+		}
+		if (UNEXPECTED(zend_op_to_bigint_holder(op2, &op2_holder, &op2_is_bigint) == FAILURE)) {
+			zval_ptr_dtor(&op1_holder);
+			if (result != op1) {
+				ZVAL_UNDEF(result);
+			}
+			return FAILURE;
+		}
+		if (UNEXPECTED(zend_holder_coerce_to_long(&op1_holder) == FAILURE)
+				|| UNEXPECTED(zend_holder_coerce_to_long(&op2_holder) == FAILURE)) {
+			zval_ptr_dtor(&op1_holder);
+			zval_ptr_dtor(&op2_holder);
 			zend_binop_error("|", op1, op2);
 			if (result != op1) {
 				ZVAL_UNDEF(result);
 			}
 			return FAILURE;
 		}
-	} else {
-		op1_lval = Z_LVAL_P(op1);
-	}
-	if (UNEXPECTED(Z_TYPE_P(op2) != IS_LONG)) {
-		bool failed;
-		ZEND_TRY_BINARY_OP2_OBJECT_OPERATION(ZEND_BW_OR);
-		op2_lval = zendi_try_get_long(op2, &failed);
-		if (UNEXPECTED(failed)) {
-			zend_binop_error("|", op1, op2);
-			if (result != op1) {
-				ZVAL_UNDEF(result);
+		if (op1_is_bigint || op2_is_bigint) {
+			zval tmp;
+			zend_int_or(&tmp, &op1_holder, &op2_holder);
+			zval_ptr_dtor(&op1_holder);
+			zval_ptr_dtor(&op2_holder);
+			if (op1 == result) {
+				zval_ptr_dtor(result);
 			}
-			return FAILURE;
+			ZVAL_COPY_VALUE(result, &tmp);
+			return SUCCESS;
 		}
+		op1_lval = Z_LVAL(op1_holder);
+		op2_lval = Z_LVAL(op2_holder);
+		zval_ptr_dtor(&op1_holder);
+		zval_ptr_dtor(&op2_holder);
 	} else {
-		op2_lval = Z_LVAL_P(op2);
+		if (UNEXPECTED(Z_TYPE_P(op1) != IS_LONG)) {
+			bool failed;
+			ZEND_TRY_BINARY_OP1_OBJECT_OPERATION(ZEND_BW_OR);
+			op1_lval = zendi_try_get_long(op1, &failed);
+			if (UNEXPECTED(failed)) {
+				zend_binop_error("|", op1, op2);
+				if (result != op1) {
+					ZVAL_UNDEF(result);
+				}
+				return FAILURE;
+			}
+		} else {
+			op1_lval = Z_LVAL_P(op1);
+		}
+		if (UNEXPECTED(Z_TYPE_P(op2) != IS_LONG)) {
+			bool failed;
+			ZEND_TRY_BINARY_OP2_OBJECT_OPERATION(ZEND_BW_OR);
+			op2_lval = zendi_try_get_long(op2, &failed);
+			if (UNEXPECTED(failed)) {
+				zend_binop_error("|", op1, op2);
+				if (result != op1) {
+					ZVAL_UNDEF(result);
+				}
+				return FAILURE;
+			}
+		} else {
+			op2_lval = Z_LVAL_P(op2);
+		}
 	}
 
 	if (op1 == result) {
@@ -2202,33 +2354,78 @@ ZEND_API zend_result ZEND_FASTCALL bitwise_and_function(zval *result, zval *op1,
 		return SUCCESS;
 	}
 
-	if (UNEXPECTED(Z_TYPE_P(op1) != IS_LONG)) {
-		bool failed;
-		ZEND_TRY_BINARY_OP1_OBJECT_OPERATION(ZEND_BW_AND);
-		op1_lval = zendi_try_get_long(op1, &failed);
-		if (UNEXPECTED(failed)) {
+	if (Z_TYPE_P(op1) == IS_STRING || Z_TYPE_P(op2) == IS_STRING) {
+		ZEND_TRY_BINARY_OBJECT_OPERATION(ZEND_BW_AND);
+
+		zval op1_holder, op2_holder;
+		bool op1_is_bigint, op2_is_bigint;
+		if (UNEXPECTED(zend_op_to_bigint_holder(op1, &op1_holder, &op1_is_bigint) == FAILURE)) {
+			if (result != op1) {
+				ZVAL_UNDEF(result);
+			}
+			return FAILURE;
+		}
+		if (UNEXPECTED(zend_op_to_bigint_holder(op2, &op2_holder, &op2_is_bigint) == FAILURE)) {
+			zval_ptr_dtor(&op1_holder);
+			if (result != op1) {
+				ZVAL_UNDEF(result);
+			}
+			return FAILURE;
+		}
+		if (UNEXPECTED(zend_holder_coerce_to_long(&op1_holder) == FAILURE)
+				|| UNEXPECTED(zend_holder_coerce_to_long(&op2_holder) == FAILURE)) {
+			zval_ptr_dtor(&op1_holder);
+			zval_ptr_dtor(&op2_holder);
 			zend_binop_error("&", op1, op2);
 			if (result != op1) {
 				ZVAL_UNDEF(result);
 			}
 			return FAILURE;
 		}
-	} else {
-		op1_lval = Z_LVAL_P(op1);
-	}
-	if (UNEXPECTED(Z_TYPE_P(op2) != IS_LONG)) {
-		bool failed;
-		ZEND_TRY_BINARY_OP2_OBJECT_OPERATION(ZEND_BW_AND);
-		op2_lval = zendi_try_get_long(op2, &failed);
-		if (UNEXPECTED(failed)) {
-			zend_binop_error("&", op1, op2);
-			if (result != op1) {
-				ZVAL_UNDEF(result);
+		if (op1_is_bigint || op2_is_bigint) {
+			zval tmp;
+			zend_int_and(&tmp, &op1_holder, &op2_holder);
+			zval_ptr_dtor(&op1_holder);
+			zval_ptr_dtor(&op2_holder);
+			if (op1 == result) {
+				zval_ptr_dtor(result);
 			}
-			return FAILURE;
+			ZVAL_COPY_VALUE(result, &tmp);
+			return SUCCESS;
 		}
+		op1_lval = Z_LVAL(op1_holder);
+		op2_lval = Z_LVAL(op2_holder);
+		zval_ptr_dtor(&op1_holder);
+		zval_ptr_dtor(&op2_holder);
 	} else {
-		op2_lval = Z_LVAL_P(op2);
+		if (UNEXPECTED(Z_TYPE_P(op1) != IS_LONG)) {
+			bool failed;
+			ZEND_TRY_BINARY_OP1_OBJECT_OPERATION(ZEND_BW_AND);
+			op1_lval = zendi_try_get_long(op1, &failed);
+			if (UNEXPECTED(failed)) {
+				zend_binop_error("&", op1, op2);
+				if (result != op1) {
+					ZVAL_UNDEF(result);
+				}
+				return FAILURE;
+			}
+		} else {
+			op1_lval = Z_LVAL_P(op1);
+		}
+		if (UNEXPECTED(Z_TYPE_P(op2) != IS_LONG)) {
+			bool failed;
+			ZEND_TRY_BINARY_OP2_OBJECT_OPERATION(ZEND_BW_AND);
+			op2_lval = zendi_try_get_long(op2, &failed);
+			if (UNEXPECTED(failed)) {
+				zend_binop_error("&", op1, op2);
+				if (result != op1) {
+					ZVAL_UNDEF(result);
+				}
+				return FAILURE;
+			}
+		} else {
+			op2_lval = Z_LVAL_P(op2);
+		}
 	}
 
 	if (op1 == result) {
@@ -2322,33 +2519,78 @@ ZEND_API zend_result ZEND_FASTCALL bitwise_xor_function(zval *result, zval *op1,
 		return SUCCESS;
 	}
 
-	if (UNEXPECTED(Z_TYPE_P(op1) != IS_LONG)) {
-		bool failed;
-		ZEND_TRY_BINARY_OP1_OBJECT_OPERATION(ZEND_BW_XOR);
-		op1_lval = zendi_try_get_long(op1, &failed);
-		if (UNEXPECTED(failed)) {
+	if (Z_TYPE_P(op1) == IS_STRING || Z_TYPE_P(op2) == IS_STRING) {
+		ZEND_TRY_BINARY_OBJECT_OPERATION(ZEND_BW_XOR);
+
+		zval op1_holder, op2_holder;
+		bool op1_is_bigint, op2_is_bigint;
+		if (UNEXPECTED(zend_op_to_bigint_holder(op1, &op1_holder, &op1_is_bigint) == FAILURE)) {
+			if (result != op1) {
+				ZVAL_UNDEF(result);
+			}
+			return FAILURE;
+		}
+		if (UNEXPECTED(zend_op_to_bigint_holder(op2, &op2_holder, &op2_is_bigint) == FAILURE)) {
+			zval_ptr_dtor(&op1_holder);
+			if (result != op1) {
+				ZVAL_UNDEF(result);
+			}
+			return FAILURE;
+		}
+		if (UNEXPECTED(zend_holder_coerce_to_long(&op1_holder) == FAILURE)
+				|| UNEXPECTED(zend_holder_coerce_to_long(&op2_holder) == FAILURE)) {
+			zval_ptr_dtor(&op1_holder);
+			zval_ptr_dtor(&op2_holder);
 			zend_binop_error("^", op1, op2);
 			if (result != op1) {
 				ZVAL_UNDEF(result);
 			}
 			return FAILURE;
 		}
-	} else {
-		op1_lval = Z_LVAL_P(op1);
-	}
-	if (UNEXPECTED(Z_TYPE_P(op2) != IS_LONG)) {
-		bool failed;
-		ZEND_TRY_BINARY_OP2_OBJECT_OPERATION(ZEND_BW_XOR);
-		op2_lval = zendi_try_get_long(op2, &failed);
-		if (UNEXPECTED(failed)) {
-			zend_binop_error("^", op1, op2);
-			if (result != op1) {
-				ZVAL_UNDEF(result);
+		if (op1_is_bigint || op2_is_bigint) {
+			zval tmp;
+			zend_int_xor(&tmp, &op1_holder, &op2_holder);
+			zval_ptr_dtor(&op1_holder);
+			zval_ptr_dtor(&op2_holder);
+			if (op1 == result) {
+				zval_ptr_dtor(result);
 			}
-			return FAILURE;
+			ZVAL_COPY_VALUE(result, &tmp);
+			return SUCCESS;
 		}
+		op1_lval = Z_LVAL(op1_holder);
+		op2_lval = Z_LVAL(op2_holder);
+		zval_ptr_dtor(&op1_holder);
+		zval_ptr_dtor(&op2_holder);
 	} else {
-		op2_lval = Z_LVAL_P(op2);
+		if (UNEXPECTED(Z_TYPE_P(op1) != IS_LONG)) {
+			bool failed;
+			ZEND_TRY_BINARY_OP1_OBJECT_OPERATION(ZEND_BW_XOR);
+			op1_lval = zendi_try_get_long(op1, &failed);
+			if (UNEXPECTED(failed)) {
+				zend_binop_error("^", op1, op2);
+				if (result != op1) {
+					ZVAL_UNDEF(result);
+				}
+				return FAILURE;
+			}
+		} else {
+			op1_lval = Z_LVAL_P(op1);
+		}
+		if (UNEXPECTED(Z_TYPE_P(op2) != IS_LONG)) {
+			bool failed;
+			ZEND_TRY_BINARY_OP2_OBJECT_OPERATION(ZEND_BW_XOR);
+			op2_lval = zendi_try_get_long(op2, &failed);
+			if (UNEXPECTED(failed)) {
+				zend_binop_error("^", op1, op2);
+				if (result != op1) {
+					ZVAL_UNDEF(result);
+				}
+				return FAILURE;
+			}
+		} else {
+			op2_lval = Z_LVAL_P(op2);
+		}
 	}
 
 	if (op1 == result) {
@@ -2424,15 +2666,90 @@ ZEND_API zend_result ZEND_FASTCALL shift_left_function(zval *result, zval *op1, 
 		return SUCCESS;
 	}
 
-	convert_op1_op2_long(op1, op1_lval, op2, op2_lval, result, ZEND_SL, "<<");
+	if (Z_TYPE_P(op1) == IS_STRING || Z_TYPE_P(op2) == IS_STRING) {
+		ZEND_TRY_BINARY_OBJECT_OPERATION(ZEND_SL);
+
+		zval op1_holder, op2_holder;
+		bool op1_is_bigint, op2_is_bigint;
+		if (UNEXPECTED(zend_op_to_bigint_holder(op1, &op1_holder, &op1_is_bigint) == FAILURE)) {
+			if (op1 != result) {
+				ZVAL_UNDEF(result);
+			}
+			return FAILURE;
+		}
+		if (UNEXPECTED(zend_op_to_bigint_holder(op2, &op2_holder, &op2_is_bigint) == FAILURE)) {
+			zval_ptr_dtor(&op1_holder);
+			if (op1 != result) {
+				ZVAL_UNDEF(result);
+			}
+			return FAILURE;
+		}
+		if (UNEXPECTED(zend_holder_coerce_to_long(&op1_holder) == FAILURE)
+				|| UNEXPECTED(zend_holder_coerce_to_long(&op2_holder) == FAILURE)) {
+			zval_ptr_dtor(&op1_holder);
+			zval_ptr_dtor(&op2_holder);
+			zend_binop_error("<<", op1, op2);
+			if (op1 != result) {
+				ZVAL_UNDEF(result);
+			}
+			return FAILURE;
+		}
+		if (op1_is_bigint || op2_is_bigint) {
+			if (zend_int_sign(&op2_holder) < 0) {
+				zval_ptr_dtor(&op1_holder);
+				zval_ptr_dtor(&op2_holder);
+				if (EG(current_execute_data) && !CG(in_compilation)) {
+					zend_throw_exception_ex(zend_ce_arithmetic_error, 0, "Bit shift by negative number");
+				} else {
+					zend_error_noreturn(E_ERROR, "Bit shift by negative number");
+				}
+				if (op1 != result) {
+					ZVAL_UNDEF(result);
+				}
+				return FAILURE;
+			}
+			zval tmp;
+			if (zend_int_shift_left(&tmp, &op1_holder, &op2_holder) == FAILURE) {
+				/* The backend's over-reach ArithmeticError has been thrown. */
+				zval_ptr_dtor(&op1_holder);
+				zval_ptr_dtor(&op2_holder);
+				if (op1 != result) {
+					ZVAL_UNDEF(result);
+				}
+				return FAILURE;
+			}
+			zval_ptr_dtor(&op1_holder);
+			zval_ptr_dtor(&op2_holder);
+			if (op1 == result) {
+				zval_ptr_dtor(result);
+			}
+			ZVAL_COPY_VALUE(result, &tmp);
+			return SUCCESS;
+		}
+		op1_lval = Z_LVAL(op1_holder);
+		op2_lval = Z_LVAL(op2_holder);
+		zval_ptr_dtor(&op1_holder);
+		zval_ptr_dtor(&op2_holder);
+	} else {
+		convert_op1_op2_long(op1, op1_lval, op2, op2_lval, result, ZEND_SL, "<<");
+	}
 
 	/* prevent wrapping quirkiness on some processors where << 64 + x == << x */
 	if (UNEXPECTED((zend_ulong)op2_lval >= SIZEOF_ZEND_LONG * 8)) {
 		if (EXPECTED(op2_lval > 0)) {
+			zval a, b, tmp;
+			ZVAL_LONG(&a, op1_lval);
+			ZVAL_LONG(&b, op2_lval);
+			if (zend_int_shift_left(&tmp, &a, &b) == FAILURE) {
+				if (op1 != result) {
+					ZVAL_UNDEF(result);
+				}
+				return FAILURE;
+			}
 			if (op1 == result) {
 				zval_ptr_dtor(result);
 			}
-			ZVAL_LONG(result, 0);
+			ZVAL_COPY_VALUE(result, &tmp);
 			return SUCCESS;
 		} else {
 			if (EG(current_execute_data) && !CG(in_compilation)) {
@@ -2516,7 +2833,65 @@ ZEND_API zend_result ZEND_FASTCALL shift_right_function(zval *result, zval *op1,
 		return SUCCESS;
 	}
 
-	convert_op1_op2_long(op1, op1_lval, op2, op2_lval, result, ZEND_SR, ">>");
+	if (Z_TYPE_P(op1) == IS_STRING || Z_TYPE_P(op2) == IS_STRING) {
+		ZEND_TRY_BINARY_OBJECT_OPERATION(ZEND_SR);
+
+		zval op1_holder, op2_holder;
+		bool op1_is_bigint, op2_is_bigint;
+		if (UNEXPECTED(zend_op_to_bigint_holder(op1, &op1_holder, &op1_is_bigint) == FAILURE)) {
+			if (op1 != result) {
+				ZVAL_UNDEF(result);
+			}
+			return FAILURE;
+		}
+		if (UNEXPECTED(zend_op_to_bigint_holder(op2, &op2_holder, &op2_is_bigint) == FAILURE)) {
+			zval_ptr_dtor(&op1_holder);
+			if (op1 != result) {
+				ZVAL_UNDEF(result);
+			}
+			return FAILURE;
+		}
+		if (UNEXPECTED(zend_holder_coerce_to_long(&op1_holder) == FAILURE)
+				|| UNEXPECTED(zend_holder_coerce_to_long(&op2_holder) == FAILURE)) {
+			zval_ptr_dtor(&op1_holder);
+			zval_ptr_dtor(&op2_holder);
+			zend_binop_error(">>", op1, op2);
+			if (op1 != result) {
+				ZVAL_UNDEF(result);
+			}
+			return FAILURE;
+		}
+		if (op1_is_bigint || op2_is_bigint) {
+			if (zend_int_sign(&op2_holder) < 0) {
+				zval_ptr_dtor(&op1_holder);
+				zval_ptr_dtor(&op2_holder);
+				if (EG(current_execute_data) && !CG(in_compilation)) {
+					zend_throw_exception_ex(zend_ce_arithmetic_error, 0, "Bit shift by negative number");
+				} else {
+					zend_error_noreturn(E_ERROR, "Bit shift by negative number");
+				}
+				if (op1 != result) {
+					ZVAL_UNDEF(result);
+				}
+				return FAILURE;
+			}
+			zval tmp;
+			zend_int_shift_right(&tmp, &op1_holder, &op2_holder);
+			zval_ptr_dtor(&op1_holder);
+			zval_ptr_dtor(&op2_holder);
+			if (op1 == result) {
+				zval_ptr_dtor(result);
+			}
+			ZVAL_COPY_VALUE(result, &tmp);
+			return SUCCESS;
+		}
+		op1_lval = Z_LVAL(op1_holder);
+		op2_lval = Z_LVAL(op2_holder);
+		zval_ptr_dtor(&op1_holder);
+		zval_ptr_dtor(&op2_holder);
+	} else {
+		convert_op1_op2_long(op1, op1_lval, op2, op2_lval, result, ZEND_SR, ">>");
+	}
 
 	/* prevent wrapping quirkiness on some processors where >> 64 + x == >> x */
 	if (UNEXPECTED((zend_ulong)op2_lval >= SIZEOF_ZEND_LONG * 8)) {

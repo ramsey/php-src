@@ -40,7 +40,7 @@ $n %= $n;
 var_dump($n);
 ?>
 --EXPECT--
-int(0)
+int(2398076729582241710080)
 ArithmeticError: Bit shift by negative number
 int(0)
 ArithmeticError: Bit shift by negative number
