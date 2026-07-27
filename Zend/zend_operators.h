@@ -103,6 +103,16 @@ ZEND_API bool zend_string_only_has_ascii_alphanumeric(const zend_string *str);
 ZEND_API uint8_t ZEND_FASTCALL _is_numeric_string_ex(const char *str, size_t length, zend_long *lval,
 	double *dval, bool allow_errors, int *oflow_info, bool *trailing_data);
 
+/**
+ * Converts a numeric string to a zval. An in-range integer string becomes
+ * IS_LONG, a float-shaped string becomes IS_DOUBLE, and an out-of-range
+ * integer string becomes an IS_BIGINT box owned by the caller. Returns 0 if
+ * the string is not numeric. See is_numeric_string_ex() for the allow_errors
+ * and trailing_data semantics.
+ */
+ZEND_API uint8_t ZEND_FASTCALL zend_string_to_number(const char *str, size_t len,
+	bool allow_errors, zval *result, bool *trailing_data);
+
 ZEND_API const char* ZEND_FASTCALL zend_memnstr_ex(const char *haystack, const char *needle, size_t needle_len, const char *end);
 ZEND_API const char* ZEND_FASTCALL zend_memnrstr_ex(const char *haystack, const char *needle, size_t needle_len, const char *end);
 

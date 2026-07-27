@@ -653,6 +653,17 @@ function zend_test_override_libxml_global_state(): void {}
      * @return mixed
      */
     function zend_test_int_from_double(float $value) {}
+
+    /**
+     * Classifies a numeric string as int, float, an IS_BIGINT box when the
+     * integer is out of long range, or false when the string is not numeric.
+     * The return type is PHPDoc-only for the same reason as
+     * zend_test_bigint_make.
+     *
+     * @param bool $trailingData
+     * @return mixed
+     */
+    function zend_test_string_to_number(string $str, bool $allowErrors = true, &$trailingData = null) {}
 }
 
 namespace ZendTestNS {

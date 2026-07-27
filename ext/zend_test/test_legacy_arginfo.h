@@ -1,5 +1,5 @@
 /* This is a generated file, edit test.stub.php instead.
- * Stub hash: 592b3268166cb3f341f6f02c41e4ac4d7f130ca6
+ * Stub hash: 0e1bbab1ea9472a8466b0190b592c3571ab9ad74
  * Has decl header: yes */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_zend_trigger_bailout, 0, 0, 0)
@@ -332,6 +332,12 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_zend_test_int_from_double arginfo_zend_test_refcount
 
+ZEND_BEGIN_ARG_INFO_EX(arginfo_zend_test_string_to_number, 0, 0, 1)
+	ZEND_ARG_INFO(0, str)
+	ZEND_ARG_INFO(0, allowErrors)
+	ZEND_ARG_INFO(1, trailingData)
+ZEND_END_ARG_INFO()
+
 #define arginfo_ZendTestNS2_namespaced_func arginfo_zend_trigger_bailout
 
 #define arginfo_ZendTestNS2_namespaced_deprecated_func arginfo_zend_trigger_bailout
@@ -539,6 +545,7 @@ static ZEND_FUNCTION(zend_test_int_is_odd);
 static ZEND_FUNCTION(zend_test_int_bit_length);
 static ZEND_FUNCTION(zend_test_int_to_double);
 static ZEND_FUNCTION(zend_test_int_from_double);
+static ZEND_FUNCTION(zend_test_string_to_number);
 static ZEND_FUNCTION(ZendTestNS2_namespaced_func);
 static ZEND_FUNCTION(ZendTestNS2_namespaced_deprecated_func);
 static ZEND_FUNCTION(ZendTestNS2_ZendSubNS_namespaced_func);
@@ -716,6 +723,7 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(zend_test_int_bit_length, arginfo_zend_test_int_bit_length)
 	ZEND_FE(zend_test_int_to_double, arginfo_zend_test_int_to_double)
 	ZEND_FE(zend_test_int_from_double, arginfo_zend_test_int_from_double)
+	ZEND_FE(zend_test_string_to_number, arginfo_zend_test_string_to_number)
 #if (PHP_VERSION_ID >= 80400)
 	ZEND_RAW_FENTRY(ZEND_NS_NAME("ZendTestNS2", "namespaced_func"), zif_ZendTestNS2_namespaced_func, arginfo_ZendTestNS2_namespaced_func, 0, NULL, NULL)
 #else

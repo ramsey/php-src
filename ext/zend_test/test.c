@@ -3044,3 +3044,28 @@ static ZEND_FUNCTION(zend_test_int_from_double)
 
 	zend_int_from_double(return_value, d);
 }
+
+static ZEND_FUNCTION(zend_test_string_to_number)
+{
+	zend_string *str;
+	bool allow_errors = true;
+	zval *trailing_data_zv = NULL;
+	bool trailing_data = false;
+
+	ZEND_PARSE_PARAMETERS_START(1, 3)
+		Z_PARAM_STR(str)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_BOOL(allow_errors)
+		Z_PARAM_ZVAL(trailing_data_zv)
+	ZEND_PARSE_PARAMETERS_END();
+
+	uint8_t type = zend_string_to_number(ZSTR_VAL(str), ZSTR_LEN(str), allow_errors, return_value, &trailing_data);
+
+	if (trailing_data_zv) {
+		ZEND_TRY_ASSIGN_REF_BOOL(trailing_data_zv, trailing_data);
+	}
+
+	if (type == 0) {
+		RETURN_FALSE;
+	}
+}

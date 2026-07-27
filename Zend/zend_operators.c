@@ -4281,6 +4281,58 @@ process_double:
 }
 /* }}} */
 
+/* Locate the integer span of a numeric string already validated as an
+ * out-of-range integer. Skip leading whitespace. *start points at the optional
+ * sign or first digit. *digit_end points just past the digit run. The span
+ * [*start, *digit_end) is what the bigint parser consumes (sign and leading
+ * zeros included); the scan stops at the first non-digit. */
+static void zend_locate_integer_span(const char *s, size_t len, const char **start, const char **digit_end)
+{
+	const char *p = s;
+	const char *end = s + len;
+	while (p < end && (*p == ' ' || *p == '\t' || *p == '\n' || *p == '\r' || *p == '\v' || *p == '\f')) {
+		p++;
+	}
+	*start = p;
+	if (p < end && (*p == '+' || *p == '-')) {
+		p++;
+	}
+	while (p < end && ZEND_IS_DIGIT(*p)) {
+		p++;
+	}
+	*digit_end = p;
+}
+
+ZEND_API uint8_t ZEND_FASTCALL zend_string_to_number(const char *str, size_t len,
+	bool allow_errors, zval *result, bool *trailing_data)
+{
+	zend_long lval;
+	double dval;
+	int oflow_info = 0;
+	uint8_t type = is_numeric_string_ex(str, len, &lval, &dval, allow_errors, &oflow_info, trailing_data);
+
+	if (type == IS_LONG) {
+		ZVAL_LONG(result, lval);
+		return IS_LONG;
+	}
+	if (type == 0) {
+		return 0;
+	}
+	if (oflow_info == 0) {
+		ZVAL_DOUBLE(result, dval);
+		return IS_DOUBLE;
+	}
+
+	/* An integer out of long range becomes a bigint, parsed from its exact
+	 * integer span (sign and leading zeros kept). */
+	const char *num, *num_end;
+	zend_locate_integer_span(str, len, &num, &num_end);
+	zend_bigint *big = zend_bigint_from_string(num, (size_t) (num_end - num), 10);
+	ZEND_ASSERT(big != NULL);
+	zend_int_from_bigint(result, big);
+	return Z_TYPE_P(result);
+}
+
 /*
  * String matching - Sunday algorithm
  * http://www.iti.fh-flensburg.de/lang/algorithmen/pattern/sundayen.htm
