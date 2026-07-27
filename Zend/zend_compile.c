@@ -10641,6 +10641,17 @@ ZEND_API bool zend_binary_op_produces_error(uint32_t opcode, const zval *op1, co
 				&& !zend_bigint_can_pow(Z_LVAL_P(op2))) {
 			return 1;
 		}
+		if (Z_TYPE_P(op2) == IS_STRING) {
+			zval num;
+			uint8_t type = zend_string_to_number(Z_STRVAL_P(op2), Z_STRLEN_P(op2), false, &num, NULL);
+			if (type == IS_BIGINT) {
+				zval_ptr_dtor_nogc(&num);
+				return 1;
+			}
+			if (type == IS_LONG && Z_LVAL(num) >= 0 && !zend_bigint_can_pow(Z_LVAL(num))) {
+				return 1;
+			}
+		}
 	}
 	if (opcode == ZEND_SL) {
 		if (Z_TYPE_P(op2) == IS_BIGINT) {

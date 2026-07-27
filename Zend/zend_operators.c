@@ -336,14 +336,16 @@ static zend_never_inline zend_result ZEND_FASTCALL _zendi_try_convert_scalar_to_
 		{
 			bool trailing_data = false;
 			/* For BC reasons we allow errors so that we can warn on leading numeric string */
-			if (0 == (Z_TYPE_INFO_P(holder) = is_numeric_string_ex(Z_STRVAL_P(op), Z_STRLEN_P(op),
-					&Z_LVAL_P(holder), &Z_DVAL_P(holder),  /* allow errors */ true, NULL, &trailing_data))) {
+			uint8_t type = zend_string_to_number(Z_STRVAL_P(op), Z_STRLEN_P(op),
+				/* allow_errors */ true, holder, &trailing_data);
+			if (type == 0) {
 				/* Will lead to invalid OP type error */
 				return FAILURE;
 			}
 			if (UNEXPECTED(trailing_data)) {
 				zend_error(E_WARNING, "A non-numeric value encountered");
 				if (UNEXPECTED(EG(exception))) {
+					zval_ptr_dtor(holder);
 					return FAILURE;
 				}
 			}
@@ -367,7 +369,9 @@ static zend_never_inline zend_result ZEND_FASTCALL _zendi_try_convert_scalar_to_
 static zend_always_inline zend_result zendi_try_convert_scalar_to_number(zval *op, zval *holder) /* {{{ */
 {
 	if (Z_TYPE_P(op) == IS_LONG || Z_TYPE_P(op) == IS_DOUBLE || Z_TYPE_P(op) == IS_BIGINT) {
-		ZVAL_COPY_VALUE(holder, op);
+		/* Addref (a no-op for long/double) so the holder is always an owned
+		 * reference; every caller releases it on every exit. */
+		ZVAL_COPY(holder, op);
 		return SUCCESS;
 	} else {
 		return _zendi_try_convert_scalar_to_number(op, holder);
@@ -1221,8 +1225,15 @@ static zend_never_inline zend_result ZEND_FASTCALL add_function_slow(zval *resul
 	ZEND_TRY_BINARY_OBJECT_OPERATION(ZEND_ADD);
 
 	zval op1_copy, op2_copy;
-	if (UNEXPECTED(zendi_try_convert_scalar_to_number(op1, &op1_copy) == FAILURE)
-			|| UNEXPECTED(zendi_try_convert_scalar_to_number(op2, &op2_copy) == FAILURE)) {
+	if (UNEXPECTED(zendi_try_convert_scalar_to_number(op1, &op1_copy) == FAILURE)) {
+		zend_binop_error("+", op1, op2);
+		if (result != op1) {
+			ZVAL_UNDEF(result);
+		}
+		return FAILURE;
+	}
+	if (UNEXPECTED(zendi_try_convert_scalar_to_number(op2, &op2_copy) == FAILURE)) {
+		zval_ptr_dtor(&op1_copy);
 		zend_binop_error("+", op1, op2);
 		if (result != op1) {
 			ZVAL_UNDEF(result);
@@ -1232,12 +1243,16 @@ static zend_never_inline zend_result ZEND_FASTCALL add_function_slow(zval *resul
 
 	zval result_copy;
 	if (add_function_fast(&result_copy, &op1_copy, &op2_copy) == SUCCESS) {
+		zval_ptr_dtor(&op1_copy);
+		zval_ptr_dtor(&op2_copy);
 		if (result == op1) {
 			zval_ptr_dtor(result);
 		}
 		ZVAL_COPY_VALUE(result, &result_copy);
 		return SUCCESS;
 	}
+	zval_ptr_dtor(&op1_copy);
+	zval_ptr_dtor(&op2_copy);
 
 	ZEND_ASSERT(0 && "Operation must succeed");
 	return FAILURE;
@@ -1304,8 +1319,15 @@ static zend_never_inline zend_result ZEND_FASTCALL sub_function_slow(zval *resul
 	ZEND_TRY_BINARY_OBJECT_OPERATION(ZEND_SUB);
 
 	zval op1_copy, op2_copy;
-	if (UNEXPECTED(zendi_try_convert_scalar_to_number(op1, &op1_copy) == FAILURE)
-			|| UNEXPECTED(zendi_try_convert_scalar_to_number(op2, &op2_copy) == FAILURE)) {
+	if (UNEXPECTED(zendi_try_convert_scalar_to_number(op1, &op1_copy) == FAILURE)) {
+		zend_binop_error("-", op1, op2);
+		if (result != op1) {
+			ZVAL_UNDEF(result);
+		}
+		return FAILURE;
+	}
+	if (UNEXPECTED(zendi_try_convert_scalar_to_number(op2, &op2_copy) == FAILURE)) {
+		zval_ptr_dtor(&op1_copy);
 		zend_binop_error("-", op1, op2);
 		if (result != op1) {
 			ZVAL_UNDEF(result);
@@ -1315,12 +1337,16 @@ static zend_never_inline zend_result ZEND_FASTCALL sub_function_slow(zval *resul
 
 	zval result_copy;
 	if (sub_function_fast(&result_copy, &op1_copy, &op2_copy) == SUCCESS) {
+		zval_ptr_dtor(&op1_copy);
+		zval_ptr_dtor(&op2_copy);
 		if (result == op1) {
 			zval_ptr_dtor(result);
 		}
 		ZVAL_COPY_VALUE(result, &result_copy);
 		return SUCCESS;
 	}
+	zval_ptr_dtor(&op1_copy);
+	zval_ptr_dtor(&op2_copy);
 
 	ZEND_ASSERT(0 && "Operation must succeed");
 	return FAILURE;
@@ -1396,8 +1422,15 @@ static zend_never_inline zend_result ZEND_FASTCALL mul_function_slow(zval *resul
 	ZEND_TRY_BINARY_OBJECT_OPERATION(ZEND_MUL);
 
 	zval op1_copy, op2_copy;
-	if (UNEXPECTED(zendi_try_convert_scalar_to_number(op1, &op1_copy) == FAILURE)
-			|| UNEXPECTED(zendi_try_convert_scalar_to_number(op2, &op2_copy) == FAILURE)) {
+	if (UNEXPECTED(zendi_try_convert_scalar_to_number(op1, &op1_copy) == FAILURE)) {
+		zend_binop_error("*", op1, op2);
+		if (result != op1) {
+			ZVAL_UNDEF(result);
+		}
+		return FAILURE;
+	}
+	if (UNEXPECTED(zendi_try_convert_scalar_to_number(op2, &op2_copy) == FAILURE)) {
+		zval_ptr_dtor(&op1_copy);
 		zend_binop_error("*", op1, op2);
 		if (result != op1) {
 			ZVAL_UNDEF(result);
@@ -1407,12 +1440,16 @@ static zend_never_inline zend_result ZEND_FASTCALL mul_function_slow(zval *resul
 
 	zval result_copy;
 	if (mul_function_fast(&result_copy, &op1_copy, &op2_copy) == SUCCESS) {
+		zval_ptr_dtor(&op1_copy);
+		zval_ptr_dtor(&op2_copy);
 		if (result == op1) {
 			zval_ptr_dtor(result);
 		}
 		ZVAL_COPY_VALUE(result, &result_copy);
 		return SUCCESS;
 	}
+	zval_ptr_dtor(&op1_copy);
+	zval_ptr_dtor(&op2_copy);
 
 	ZEND_ASSERT(0 && "Operation must succeed");
 	return FAILURE;
@@ -1545,8 +1582,15 @@ ZEND_API zend_result ZEND_FASTCALL pow_function(zval *result, zval *op1, zval *o
 	ZEND_TRY_BINARY_OBJECT_OPERATION(ZEND_POW);
 
 	zval op1_copy, op2_copy;
-	if (UNEXPECTED(zendi_try_convert_scalar_to_number(op1, &op1_copy) == FAILURE)
-			|| UNEXPECTED(zendi_try_convert_scalar_to_number(op2, &op2_copy) == FAILURE)) {
+	if (UNEXPECTED(zendi_try_convert_scalar_to_number(op1, &op1_copy) == FAILURE)) {
+		zend_binop_error("**", op1, op2);
+		if (result != op1) {
+			ZVAL_UNDEF(result);
+		}
+		return FAILURE;
+	}
+	if (UNEXPECTED(zendi_try_convert_scalar_to_number(op2, &op2_copy) == FAILURE)) {
+		zval_ptr_dtor(&op1_copy);
 		zend_binop_error("**", op1, op2);
 		if (result != op1) {
 			ZVAL_UNDEF(result);
@@ -1556,6 +1600,8 @@ ZEND_API zend_result ZEND_FASTCALL pow_function(zval *result, zval *op1, zval *o
 
 	zval result_copy;
 	if (pow_function_base(&result_copy, &op1_copy, &op2_copy) == SUCCESS) {
+		zval_ptr_dtor(&op1_copy);
+		zval_ptr_dtor(&op2_copy);
 		if (result == op1) {
 			zval_ptr_dtor(result);
 		}
@@ -1564,12 +1610,16 @@ ZEND_API zend_result ZEND_FASTCALL pow_function(zval *result, zval *op1, zval *o
 	}
 	if (UNEXPECTED(EG(exception))) {
 		/* The backend's over-reach ArithmeticError propagates. */
+		zval_ptr_dtor(&op1_copy);
+		zval_ptr_dtor(&op2_copy);
 		if (result != op1) {
 			ZVAL_UNDEF(result);
 		}
 		return FAILURE;
 	}
 
+	zval_ptr_dtor(&op1_copy);
+	zval_ptr_dtor(&op2_copy);
 	ZEND_ASSERT(0 && "Operation must succeed");
 	return FAILURE;
 }
@@ -1689,9 +1739,16 @@ ZEND_API zend_result ZEND_FASTCALL div_function(zval *result, zval *op1, zval *o
 
 	ZEND_TRY_BINARY_OBJECT_OPERATION(ZEND_DIV);
 
-	zval result_copy, op1_copy, op2_copy;
-	if (UNEXPECTED(zendi_try_convert_scalar_to_number(op1, &op1_copy) == FAILURE)
-			|| UNEXPECTED(zendi_try_convert_scalar_to_number(op2, &op2_copy) == FAILURE)) {
+	zval op1_copy, op2_copy;
+	if (UNEXPECTED(zendi_try_convert_scalar_to_number(op1, &op1_copy) == FAILURE)) {
+		zend_binop_error("/", op1, op2);
+		if (result != op1) {
+			ZVAL_UNDEF(result);
+		}
+		return FAILURE;
+	}
+	if (UNEXPECTED(zendi_try_convert_scalar_to_number(op2, &op2_copy) == FAILURE)) {
+		zval_ptr_dtor(&op1_copy);
 		zend_binop_error("/", op1, op2);
 		if (result != op1) {
 			ZVAL_UNDEF(result);
@@ -1699,14 +1756,20 @@ ZEND_API zend_result ZEND_FASTCALL div_function(zval *result, zval *op1, zval *o
 		return FAILURE;
 	}
 
+	zval result_copy;
 	retval = div_function_base(&result_copy, &op1_copy, &op2_copy);
 	if (retval == DIV_SUCCESS) {
+		zval_ptr_dtor(&op1_copy);
+		zval_ptr_dtor(&op2_copy);
 		if (result == op1) {
 			zval_ptr_dtor(result);
 		}
 		ZVAL_COPY_VALUE(result, &result_copy);
 		return SUCCESS;
 	}
+
+	zval_ptr_dtor(&op1_copy);
+	zval_ptr_dtor(&op2_copy);
 
 div_by_zero:
 	ZEND_ASSERT(retval == DIV_BY_ZERO && "DIV_TYPES_NOT_HANDLED should not occur here");
@@ -3247,26 +3310,35 @@ try_again:
 			ZVAL_LONG(op1, 1);
 			break;
 		case IS_STRING: {
-				zend_long lval;
-				double dval;
+				zval num;
 
-				switch (is_numeric_str_function(Z_STR_P(op1), &lval, &dval)) {
+				switch (zend_string_to_number(Z_STRVAL_P(op1), Z_STRLEN_P(op1), /* allow_errors */ false, &num, NULL)) {
 					case IS_LONG:
 						zval_ptr_dtor_str(op1);
-						if (lval == ZEND_LONG_MAX) {
+						if (Z_LVAL(num) == ZEND_LONG_MAX) {
 							/* The string converted exactly; the increment overflows. */
 							zval one;
 							ZVAL_LONG(op1, ZEND_LONG_MAX);
 							ZVAL_LONG(&one, 1);
 							zend_int_add_slow(op1, op1, &one);
 						} else {
-							ZVAL_LONG(op1, lval+1);
+							ZVAL_LONG(op1, Z_LVAL(num) + 1);
 						}
 						break;
 					case IS_DOUBLE:
 						zval_ptr_dtor_str(op1);
-						ZVAL_DOUBLE(op1, dval+1);
+						ZVAL_DOUBLE(op1, Z_DVAL(num) + 1);
 						break;
+					case IS_BIGINT: {
+						zval one, tmp;
+						zval_ptr_dtor_str(op1);
+						ZVAL_COPY_VALUE(op1, &num);
+						ZVAL_LONG(&one, 1);
+						zend_int_add(&tmp, op1, &one);
+						zval_ptr_dtor_nogc(op1);
+						ZVAL_COPY_VALUE(op1, &tmp);
+						break;
+					}
 					default:
 						/* Perl style string increment */
 						increment_string(op1);
@@ -3322,9 +3394,6 @@ try_again:
 
 ZEND_API zend_result ZEND_FASTCALL decrement_function(zval *op1) /* {{{ */
 {
-	zend_long lval;
-	double dval;
-
 try_again:
 	switch (Z_TYPE_P(op1)) {
 		case IS_LONG:
@@ -3352,34 +3421,47 @@ try_again:
 				ZVAL_LONG(op1, -1);
 				break;
 			}
-			switch (is_numeric_str_function(Z_STR_P(op1), &lval, &dval)) {
-				case IS_LONG:
-					zval_ptr_dtor_str(op1);
-					if (lval == ZEND_LONG_MIN) {
-						/* The string converted exactly; the decrement overflows. */
-						zval one;
-						ZVAL_LONG(op1, ZEND_LONG_MIN);
+			{
+				zval num;
+				switch (zend_string_to_number(Z_STRVAL_P(op1), Z_STRLEN_P(op1), /* allow_errors */ false, &num, NULL)) {
+					case IS_LONG:
+						zval_ptr_dtor_str(op1);
+						if (Z_LVAL(num) == ZEND_LONG_MIN) {
+							/* The string converted exactly; the decrement overflows. */
+							zval one;
+							ZVAL_LONG(op1, ZEND_LONG_MIN);
+							ZVAL_LONG(&one, 1);
+							zend_int_sub_slow(op1, op1, &one);
+						} else {
+							ZVAL_LONG(op1, Z_LVAL(num) - 1);
+						}
+						break;
+					case IS_DOUBLE:
+						zval_ptr_dtor_str(op1);
+						ZVAL_DOUBLE(op1, Z_DVAL(num) - 1);
+						break;
+					case IS_BIGINT: {
+						zval one, tmp;
+						zval_ptr_dtor_str(op1);
+						ZVAL_COPY_VALUE(op1, &num);
 						ZVAL_LONG(&one, 1);
-						zend_int_sub_slow(op1, op1, &one);
-					} else {
-						ZVAL_LONG(op1, lval-1);
+						zend_int_sub(&tmp, op1, &one);
+						zval_ptr_dtor_nogc(op1);
+						ZVAL_COPY_VALUE(op1, &tmp);
+						break;
 					}
-					break;
-				case IS_DOUBLE:
-					zval_ptr_dtor_str(op1);
-					ZVAL_DOUBLE(op1, dval - 1);
-					break;
-				default: {
-					/* Error handler can unset the variable */
-					zend_string *zstr = Z_STR_P(op1);
-					zend_string_addref(zstr);
-					zend_error(E_DEPRECATED, "Decrement on non-numeric string has no effect and is deprecated");
-					if (EG(exception)) {
-						zend_string_release(zstr);
-						return FAILURE;
+					default: {
+						/* Error handler can unset the variable */
+						zend_string *zstr = Z_STR_P(op1);
+						zend_string_addref(zstr);
+						zend_error(E_DEPRECATED, "Decrement on non-numeric string has no effect and is deprecated");
+						if (EG(exception)) {
+							zend_string_release(zstr);
+							return FAILURE;
+						}
+						zval_ptr_dtor(op1);
+						ZVAL_STR(op1, zstr);
 					}
-					zval_ptr_dtor(op1);
-					ZVAL_STR(op1, zstr);
 				}
 			}
 			break;
