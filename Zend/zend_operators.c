@@ -2106,6 +2106,46 @@ try_again:
 }
 /* }}} */
 
+/* Shared IS_BIGINT operand arm for the bitwise operators. */
+#define bitwise_bigint_op(op1, op2, result, opcode, sigil, int_fn) \
+	do { \
+		zval op1_holder, op2_holder; \
+		zval *a = op1, *b = op2; \
+		if (!Z_IS_INT_P(op1)) { \
+			bool failed; \
+			ZEND_TRY_BINARY_OP1_OBJECT_OPERATION(opcode); \
+			ZVAL_LONG(&op1_holder, zendi_try_get_long(op1, &failed)); \
+			if (UNEXPECTED(failed)) { \
+				zend_binop_error(sigil, op1, op2); \
+				if (result != op1) { \
+					ZVAL_UNDEF(result); \
+				} \
+				return FAILURE; \
+			} \
+			a = &op1_holder; \
+		} \
+		if (!Z_IS_INT_P(op2)) { \
+			bool failed; \
+			ZEND_TRY_BINARY_OP2_OBJECT_OPERATION(opcode); \
+			ZVAL_LONG(&op2_holder, zendi_try_get_long(op2, &failed)); \
+			if (UNEXPECTED(failed)) { \
+				zend_binop_error(sigil, op1, op2); \
+				if (result != op1) { \
+					ZVAL_UNDEF(result); \
+				} \
+				return FAILURE; \
+			} \
+			b = &op2_holder; \
+		} \
+		zval tmp; \
+		int_fn(&tmp, a, b); \
+		if (op1 == result) { \
+			zval_ptr_dtor(result); \
+		} \
+		ZVAL_COPY_VALUE(result, &tmp); \
+		return SUCCESS; \
+	} while (0)
+
 ZEND_API zend_result ZEND_FASTCALL bitwise_or_function(zval *result, zval *op1, zval *op2) /* {{{ */
 {
 	zend_long op1_lval, op2_lval;
@@ -2119,41 +2159,7 @@ ZEND_API zend_result ZEND_FASTCALL bitwise_or_function(zval *result, zval *op1, 
 	ZVAL_DEREF(op2);
 
 	if (Z_TYPE_P(op1) == IS_BIGINT || Z_TYPE_P(op2) == IS_BIGINT) {
-		zval op1_holder, op2_holder;
-		zval *a = op1, *b = op2;
-		if (!Z_IS_INT_P(op1)) {
-			bool failed;
-			ZEND_TRY_BINARY_OP1_OBJECT_OPERATION(ZEND_BW_OR);
-			ZVAL_LONG(&op1_holder, zendi_try_get_long(op1, &failed));
-			if (UNEXPECTED(failed)) {
-				zend_binop_error("|", op1, op2);
-				if (result != op1) {
-					ZVAL_UNDEF(result);
-				}
-				return FAILURE;
-			}
-			a = &op1_holder;
-		}
-		if (!Z_IS_INT_P(op2)) {
-			bool failed;
-			ZEND_TRY_BINARY_OP2_OBJECT_OPERATION(ZEND_BW_OR);
-			ZVAL_LONG(&op2_holder, zendi_try_get_long(op2, &failed));
-			if (UNEXPECTED(failed)) {
-				zend_binop_error("|", op1, op2);
-				if (result != op1) {
-					ZVAL_UNDEF(result);
-				}
-				return FAILURE;
-			}
-			b = &op2_holder;
-		}
-		zval tmp;
-		zend_int_or(&tmp, a, b);
-		if (op1 == result) {
-			zval_ptr_dtor(result);
-		}
-		ZVAL_COPY_VALUE(result, &tmp);
-		return SUCCESS;
+		bitwise_bigint_op(op1, op2, result, ZEND_BW_OR, "|", zend_int_or);
 	}
 
 	if (Z_TYPE_P(op1) == IS_STRING && EXPECTED(Z_TYPE_P(op2) == IS_STRING)) {
@@ -2284,41 +2290,7 @@ ZEND_API zend_result ZEND_FASTCALL bitwise_and_function(zval *result, zval *op1,
 	ZVAL_DEREF(op2);
 
 	if (Z_TYPE_P(op1) == IS_BIGINT || Z_TYPE_P(op2) == IS_BIGINT) {
-		zval op1_holder, op2_holder;
-		zval *a = op1, *b = op2;
-		if (!Z_IS_INT_P(op1)) {
-			bool failed;
-			ZEND_TRY_BINARY_OP1_OBJECT_OPERATION(ZEND_BW_AND);
-			ZVAL_LONG(&op1_holder, zendi_try_get_long(op1, &failed));
-			if (UNEXPECTED(failed)) {
-				zend_binop_error("&", op1, op2);
-				if (result != op1) {
-					ZVAL_UNDEF(result);
-				}
-				return FAILURE;
-			}
-			a = &op1_holder;
-		}
-		if (!Z_IS_INT_P(op2)) {
-			bool failed;
-			ZEND_TRY_BINARY_OP2_OBJECT_OPERATION(ZEND_BW_AND);
-			ZVAL_LONG(&op2_holder, zendi_try_get_long(op2, &failed));
-			if (UNEXPECTED(failed)) {
-				zend_binop_error("&", op1, op2);
-				if (result != op1) {
-					ZVAL_UNDEF(result);
-				}
-				return FAILURE;
-			}
-			b = &op2_holder;
-		}
-		zval tmp;
-		zend_int_and(&tmp, a, b);
-		if (op1 == result) {
-			zval_ptr_dtor(result);
-		}
-		ZVAL_COPY_VALUE(result, &tmp);
-		return SUCCESS;
+		bitwise_bigint_op(op1, op2, result, ZEND_BW_AND, "&", zend_int_and);
 	}
 
 	if (Z_TYPE_P(op1) == IS_STRING && Z_TYPE_P(op2) == IS_STRING) {
@@ -2449,41 +2421,7 @@ ZEND_API zend_result ZEND_FASTCALL bitwise_xor_function(zval *result, zval *op1,
 	ZVAL_DEREF(op2);
 
 	if (Z_TYPE_P(op1) == IS_BIGINT || Z_TYPE_P(op2) == IS_BIGINT) {
-		zval op1_holder, op2_holder;
-		zval *a = op1, *b = op2;
-		if (!Z_IS_INT_P(op1)) {
-			bool failed;
-			ZEND_TRY_BINARY_OP1_OBJECT_OPERATION(ZEND_BW_XOR);
-			ZVAL_LONG(&op1_holder, zendi_try_get_long(op1, &failed));
-			if (UNEXPECTED(failed)) {
-				zend_binop_error("^", op1, op2);
-				if (result != op1) {
-					ZVAL_UNDEF(result);
-				}
-				return FAILURE;
-			}
-			a = &op1_holder;
-		}
-		if (!Z_IS_INT_P(op2)) {
-			bool failed;
-			ZEND_TRY_BINARY_OP2_OBJECT_OPERATION(ZEND_BW_XOR);
-			ZVAL_LONG(&op2_holder, zendi_try_get_long(op2, &failed));
-			if (UNEXPECTED(failed)) {
-				zend_binop_error("^", op1, op2);
-				if (result != op1) {
-					ZVAL_UNDEF(result);
-				}
-				return FAILURE;
-			}
-			b = &op2_holder;
-		}
-		zval tmp;
-		zend_int_xor(&tmp, a, b);
-		if (op1 == result) {
-			zval_ptr_dtor(result);
-		}
-		ZVAL_COPY_VALUE(result, &tmp);
-		return SUCCESS;
+		bitwise_bigint_op(op1, op2, result, ZEND_BW_XOR, "^", zend_int_xor);
 	}
 
 	if (Z_TYPE_P(op1) == IS_STRING && Z_TYPE_P(op2) == IS_STRING) {
