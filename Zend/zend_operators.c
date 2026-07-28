@@ -3027,18 +3027,61 @@ ZEND_API zend_result ZEND_FASTCALL compare_function(zval *result, zval *op1, zva
 }
 /* }}} */
 
+/* Defined below, alongside zend_string_to_number. */
+static void zend_locate_integer_span(const char *s, size_t len, const char **start, const char **digit_end);
+static bool zend_integer_span_is_pure(const char *s, size_t len, const char *digit_end);
+
+/* Significant decimal-digit run (sign and leading zeros stripped) of an
+ * integer string, so two integers can be compared by magnitude without
+ * materializing a bignum. */
+static void zend_extract_decimal_magnitude(const char *s, size_t len, const char **digits, size_t *ndigits)
+{
+	const char *p, *end;
+	zend_locate_integer_span(s, len, &p, &end);
+	if (p < end && (*p == '+' || *p == '-')) {
+		p++;
+	}
+	while (p < end && *p == '0') {
+		p++;
+	}
+	*digits = p;
+	*ndigits = (size_t) (end - p);
+}
+
+/* Compare the magnitudes (ignoring sign) of two decimal integer strings by
+ * significant-digit count, then lexicographically. Returns -1, 0, or 1. */
+static int zend_compare_decimal_magnitude(const char *a, size_t alen, const char *b, size_t blen)
+{
+	const char *ad, *bd;
+	size_t an, bn;
+	zend_extract_decimal_magnitude(a, alen, &ad, &an);
+	zend_extract_decimal_magnitude(b, blen, &bd, &bn);
+	if (an != bn) {
+		return an < bn ? -1 : 1;
+	}
+	return ZEND_NORMALIZE_BOOL(memcmp(ad, bd, an));
+}
+
 static int compare_long_to_string(zend_long lval, const zend_string *str) /* {{{ */
 {
 	zend_long str_lval;
 	double str_dval;
-	uint8_t type = is_numeric_string(ZSTR_VAL(str), ZSTR_LEN(str), &str_lval, &str_dval, 0);
+	int oflow;
+	uint8_t type = is_numeric_string_ex(ZSTR_VAL(str), ZSTR_LEN(str), &str_lval, &str_dval, 0, &oflow, NULL);
 
 	if (type == IS_LONG) {
 		return lval > str_lval ? 1 : lval < str_lval ? -1 : 0;
 	}
 
 	if (type == IS_DOUBLE) {
-		return ZEND_THREEWAY_COMPARE((double) lval, str_dval);
+		if (oflow != 0) {
+			const char *num, *num_end;
+			zend_locate_integer_span(ZSTR_VAL(str), ZSTR_LEN(str), &num, &num_end);
+			if (zend_integer_span_is_pure(ZSTR_VAL(str), ZSTR_LEN(str), num_end)) {
+				return -oflow;
+			}
+		}
+		return zend_long_cmp_double(lval, str_dval);
 	}
 
 	zend_string *lval_as_str = zend_long_to_str(lval);
@@ -3053,14 +3096,30 @@ static int compare_bigint_to_string(const zend_bigint *big, const zend_string *s
 {
 	zend_long str_lval;
 	double str_dval;
-	uint8_t type = is_numeric_string(ZSTR_VAL(str), ZSTR_LEN(str), &str_lval, &str_dval, 0);
+	int oflow;
+	uint8_t type = is_numeric_string_ex(ZSTR_VAL(str), ZSTR_LEN(str), &str_lval, &str_dval, 0, &oflow, NULL);
 
 	if (type == IS_LONG) {
 		return zend_bigint_cmp_long(big, str_lval);
 	}
 
 	if (type == IS_DOUBLE) {
-		return ZEND_THREEWAY_COMPARE(zend_bigint_to_double(big), str_dval);
+		if (oflow != 0) {
+			const char *num, *num_end;
+			zend_locate_integer_span(ZSTR_VAL(str), ZSTR_LEN(str), &num, &num_end);
+			if (zend_integer_span_is_pure(ZSTR_VAL(str), ZSTR_LEN(str), num_end)) {
+				int big_sign = zend_bigint_sign(big);
+				if (big_sign != oflow) {
+					return big_sign > oflow ? 1 : -1;
+				}
+				zend_string *big_as_str = zend_bigint_to_str(big);
+				int mag = zend_compare_decimal_magnitude(
+					ZSTR_VAL(big_as_str), ZSTR_LEN(big_as_str), ZSTR_VAL(str), ZSTR_LEN(str));
+				zend_string_release(big_as_str);
+				return big_sign > 0 ? mag : -mag;
+			}
+		}
+		return zend_bigint_cmp_double(big, str_dval);
 	}
 
 	zend_string *big_as_str = zend_bigint_to_str(big);
@@ -3075,15 +3134,27 @@ static int compare_double_to_string(double dval, const zend_string *str) /* {{{ 
 {
 	zend_long str_lval;
 	double str_dval;
-	uint8_t type = is_numeric_string(ZSTR_VAL(str), ZSTR_LEN(str), &str_lval, &str_dval, 0);
+	int oflow;
+	uint8_t type = is_numeric_string_ex(ZSTR_VAL(str), ZSTR_LEN(str), &str_lval, &str_dval, 0, &oflow, NULL);
 
 	ZEND_ASSERT(!zend_isnan(dval));
 
 	if (type == IS_LONG) {
-		return ZEND_THREEWAY_COMPARE(dval, (double) str_lval);
+		return -zend_long_cmp_double(str_lval, dval);
 	}
 
 	if (type == IS_DOUBLE) {
+		if (oflow != 0) {
+			const char *num, *num_end;
+			zend_locate_integer_span(ZSTR_VAL(str), ZSTR_LEN(str), &num, &num_end);
+			if (zend_integer_span_is_pure(ZSTR_VAL(str), ZSTR_LEN(str), num_end)) {
+				zend_bigint *tmp = zend_bigint_from_string(num, (size_t) (num_end - num), 10);
+				ZEND_ASSERT(tmp != NULL);
+				int r = -zend_bigint_cmp_double(tmp, dval);
+				zend_bigint_free(tmp);
+				return r;
+			}
+		}
 		return ZEND_THREEWAY_COMPARE(dval, str_dval);
 	}
 
@@ -3106,10 +3177,16 @@ ZEND_API int ZEND_FASTCALL zend_compare(zval *op1, zval *op2) /* {{{ */
 				return Z_LVAL_P(op1)>Z_LVAL_P(op2)?1:(Z_LVAL_P(op1)<Z_LVAL_P(op2)?-1:0);
 
 			case TYPE_PAIR(IS_DOUBLE, IS_LONG):
-				return ZEND_THREEWAY_COMPARE(Z_DVAL_P(op1), (double)Z_LVAL_P(op2));
+				if (UNEXPECTED(zend_isnan(Z_DVAL_P(op1)))) {
+					return 1;
+				}
+				return -zend_long_cmp_double(Z_LVAL_P(op2), Z_DVAL_P(op1));
 
 			case TYPE_PAIR(IS_LONG, IS_DOUBLE):
-				return ZEND_THREEWAY_COMPARE((double)Z_LVAL_P(op1), Z_DVAL_P(op2));
+				if (UNEXPECTED(zend_isnan(Z_DVAL_P(op2)))) {
+					return 1;
+				}
+				return zend_long_cmp_double(Z_LVAL_P(op1), Z_DVAL_P(op2));
 
 			case TYPE_PAIR(IS_DOUBLE, IS_DOUBLE):
 				return ZEND_THREEWAY_COMPARE(Z_DVAL_P(op1), Z_DVAL_P(op2));
@@ -3124,10 +3201,16 @@ ZEND_API int ZEND_FASTCALL zend_compare(zval *op1, zval *op2) /* {{{ */
 				return -zend_bigint_cmp_long(Z_BIG_P(op2), Z_LVAL_P(op1));
 
 			case TYPE_PAIR(IS_BIGINT, IS_DOUBLE):
-				return ZEND_THREEWAY_COMPARE(zend_bigint_to_double(Z_BIG_P(op1)), Z_DVAL_P(op2));
+				if (UNEXPECTED(zend_isnan(Z_DVAL_P(op2)))) {
+					return 1;
+				}
+				return zend_bigint_cmp_double(Z_BIG_P(op1), Z_DVAL_P(op2));
 
 			case TYPE_PAIR(IS_DOUBLE, IS_BIGINT):
-				return ZEND_THREEWAY_COMPARE(Z_DVAL_P(op1), zend_bigint_to_double(Z_BIG_P(op2)));
+				if (UNEXPECTED(zend_isnan(Z_DVAL_P(op1)))) {
+					return 1;
+				}
+				return -zend_bigint_cmp_double(Z_BIG_P(op2), Z_DVAL_P(op1));
 
 			case TYPE_PAIR(IS_BIGINT, IS_STRING):
 				return compare_bigint_to_string(Z_BIG_P(op1), Z_STR_P(op2));
@@ -4229,9 +4312,29 @@ ZEND_API bool ZEND_FASTCALL zendi_smart_streq(const zend_string *s1, const zend_
 #else
 		if (oflow1 != 0 && oflow1 == oflow2 && dval1 - dval2 == 0.) {
 #endif
-			/* both values are integers overflown to the same side, and the
-			 * double comparison may have resulted in crucial accuracy lost */
-			goto string_cmp;
+			const char *num1, *num1_end, *num2, *num2_end;
+			zend_locate_integer_span(s1->val, s1->len, &num1, &num1_end);
+			zend_locate_integer_span(s2->val, s2->len, &num2, &num2_end);
+			bool pure1 = zend_integer_span_is_pure(s1->val, s1->len, num1_end);
+			bool pure2 = zend_integer_span_is_pure(s2->val, s2->len, num2_end);
+			if (pure1 && pure2) {
+				/* Same-side overflow collides the lossy doubles; compare exact
+				 * decimal magnitude instead. */
+				return zend_compare_decimal_magnitude(s1->val, s1->len, s2->val, s2->len) == 0;
+			}
+			if (pure1 != pure2) {
+				const char *num = pure1 ? num1 : num2;
+				const char *num_end = pure1 ? num1_end : num2_end;
+				double other_dval = pure1 ? dval2 : dval1;
+				zend_bigint *tmp = zend_bigint_from_string(num, (size_t) (num_end - num), 10);
+				ZEND_ASSERT(tmp != NULL);
+				bool eq = zend_bigint_cmp_double(tmp, other_dval) == 0;
+				zend_bigint_free(tmp);
+				return eq;
+			}
+			/* Both non-pure: their double values are equal by the collision
+			 * condition above. */
+			return true;
 		}
 		if ((ret1 == IS_DOUBLE) || (ret2 == IS_DOUBLE)) {
 			if (ret1 != IS_DOUBLE) {
@@ -4277,9 +4380,30 @@ ZEND_API int ZEND_FASTCALL zendi_smart_strcmp(const zend_string *s1, const zend_
 #else
 		if (oflow1 != 0 && oflow1 == oflow2 && dval1 - dval2 == 0.) {
 #endif
-			/* both values are integers overflowed to the same side, and the
-			 * double comparison may have resulted in crucial accuracy lost */
-			goto string_cmp;
+			const char *num1, *num1_end, *num2, *num2_end;
+			zend_locate_integer_span(s1->val, s1->len, &num1, &num1_end);
+			zend_locate_integer_span(s2->val, s2->len, &num2, &num2_end);
+			bool pure1 = zend_integer_span_is_pure(s1->val, s1->len, num1_end);
+			bool pure2 = zend_integer_span_is_pure(s2->val, s2->len, num2_end);
+			if (pure1 && pure2) {
+				/* Same-side overflow collides the lossy doubles; compare exact
+				 * decimal magnitude instead. */
+				int mag = zend_compare_decimal_magnitude(s1->val, s1->len, s2->val, s2->len);
+				return oflow1 > 0 ? mag : -mag;
+			}
+			if (pure1 != pure2) {
+				const char *num = pure1 ? num1 : num2;
+				const char *num_end = pure1 ? num1_end : num2_end;
+				double other_dval = pure1 ? dval2 : dval1;
+				zend_bigint *tmp = zend_bigint_from_string(num, (size_t) (num_end - num), 10);
+				ZEND_ASSERT(tmp != NULL);
+				int r = zend_bigint_cmp_double(tmp, other_dval);
+				zend_bigint_free(tmp);
+				return pure1 ? r : -r;
+			}
+			/* Both non-pure: their double values are equal by the collision
+			 * condition above. */
+			return 0;
 		}
 		if ((ret1 == IS_DOUBLE) || (ret2 == IS_DOUBLE)) {
 			if (ret1 != IS_DOUBLE) {
@@ -4619,6 +4743,15 @@ static void zend_locate_integer_span(const char *s, size_t len, const char **sta
 		p++;
 	}
 	*digit_end = p;
+}
+
+/* True when the numeric token is an integer spelling: nothing but its digit
+ * run remains, so the span is the whole value. A '.', 'e', or 'E' at the end
+ * of the span means the token continues as a float form. */
+static bool zend_integer_span_is_pure(const char *s, size_t len, const char *digit_end)
+{
+	return digit_end == s + len
+		|| (*digit_end != '.' && *digit_end != 'e' && *digit_end != 'E');
 }
 
 ZEND_API uint8_t ZEND_FASTCALL zend_string_to_number(const char *str, size_t len,
