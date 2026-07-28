@@ -96,6 +96,7 @@ ZEND_API zend_result zend_int_shift_left_slow(zval *result, const zval *op1, con
 ZEND_API void zend_int_shift_right_slow(zval *result, const zval *op1, const zval *op2);
 ZEND_API zend_result zend_int_pow_slow(zval *result, const zval *op1, const zval *op2);
 ZEND_API int zend_int_cmp_slow(const zval *op1, const zval *op2);
+ZEND_API int zend_int_cmp_double_slow(const zval *op, double d);
 
 /* Value-op arithmetic on logical integers. Each stores a canonical integer
  * in result, an IS_LONG when the value fits zend_long and an IS_BIGINT box
@@ -300,6 +301,41 @@ static zend_always_inline int zend_int_cmp_long(const zval *op, zend_long n)
 		return Z_LVAL_P(op) < n ? -1 : (Z_LVAL_P(op) > n ? 1 : 0);
 	}
 	return zend_bigint_cmp_long(Z_BIG_P(op), n);
+}
+
+/* Exact three-way compare of a machine long against a finite double. The
+ * common band (|l| <= 2^53) is exactly representable as a double, so the
+ * plain double compare is already exact and stays the hot path. */
+static zend_always_inline int zend_long_cmp_double(zend_long l, double d)
+{
+#if SIZEOF_ZEND_LONG == 4
+	return ZEND_THREEWAY_COMPARE((double) l, d);
+#else
+	if (EXPECTED(l >= -(1LL << 53) && l <= (1LL << 53))) {
+		return ZEND_THREEWAY_COMPARE((double) l, d);
+	}
+	if (d >= 9223372036854775808.0) {
+		return -1;
+	}
+	if (d < -9223372036854775808.0) {
+		return 1;
+	}
+	if (d >= 4503599627370496.0 || d <= -4503599627370496.0) {
+		/* |d| >= 2^52, so d is integral and in long range. */
+		zend_long dl = (zend_long) d;
+		return l > dl ? 1 : (l < dl ? -1 : 0);
+	}
+	/* |d| < 2^52 < |l|, so the sign of l decides. */
+	return l > 0 ? 1 : -1;
+#endif
+}
+
+static zend_always_inline int zend_int_cmp_double(const zval *op, double d)
+{
+	if (EXPECTED(Z_TYPE_P(op) == IS_LONG)) {
+		return zend_long_cmp_double(Z_LVAL_P(op), d);
+	}
+	return zend_int_cmp_double_slow(op, d);
 }
 
 static zend_always_inline int zend_int_sign(const zval *op)

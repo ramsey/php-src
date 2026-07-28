@@ -2970,6 +2970,24 @@ static ZEND_FUNCTION(zend_test_int_cmp_long)
 	RETURN_LONG(zend_int_cmp_long(op1, n));
 }
 
+static ZEND_FUNCTION(zend_test_int_cmp_double)
+{
+	zval *a;
+	double b;
+
+	ZEND_PARSE_PARAMETERS_START(2, 2)
+		Z_PARAM_ZVAL(a)
+		Z_PARAM_DOUBLE(b)
+	ZEND_PARSE_PARAMETERS_END();
+
+	if (!Z_IS_INT_P(a)) {
+		zend_argument_type_error(1, "must be an integer");
+		RETURN_THROWS();
+	}
+
+	RETURN_LONG(zend_int_cmp_double(a, b));
+}
+
 static ZEND_FUNCTION(zend_test_int_sign)
 {
 	zval *op;

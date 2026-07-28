@@ -637,6 +637,8 @@ function zend_test_override_libxml_global_state(): void {}
 
     function zend_test_int_cmp_long(mixed $a, int $b): int {}
 
+    function zend_test_int_cmp_double(mixed $a, float $b): int {}
+
     function zend_test_int_sign(mixed $value): int {}
 
     function zend_test_int_is_odd(mixed $value): bool {}

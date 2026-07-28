@@ -294,6 +294,12 @@ ZEND_API int zend_int_cmp_slow(const zval *op1, const zval *op2)
 	return zend_bigint_cmp(Z_BIG_P(op1), Z_BIG_P(op2));
 }
 
+ZEND_API int zend_int_cmp_double_slow(const zval *op, double d)
+{
+	ZEND_ASSERT(Z_TYPE_P(op) == IS_BIGINT);
+	return zend_bigint_cmp_double(Z_BIG_P(op), d);
+}
+
 ZEND_API void zend_int_from_double(zval *result, double d)
 {
 	ZEND_ASSERT(zend_finite(d));

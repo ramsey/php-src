@@ -1,5 +1,5 @@
 /* This is a generated file, edit test.stub.php instead.
- * Stub hash: 0e1bbab1ea9472a8466b0190b592c3571ab9ad74
+ * Stub hash: 1d6250315e6253750b6545a1c2de59122d1f41a4
  * Has decl header: yes */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_zend_trigger_bailout, 0, 0, IS_NEVER, 0)
@@ -403,6 +403,11 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_zend_test_int_cmp_long, 0, 2, IS
 	ZEND_ARG_TYPE_INFO(0, b, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_zend_test_int_cmp_double, 0, 2, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO(0, a, IS_MIXED, 0)
+	ZEND_ARG_TYPE_INFO(0, b, IS_DOUBLE, 0)
+ZEND_END_ARG_INFO()
+
 #define arginfo_zend_test_int_sign arginfo_zend_test_refcount
 
 #define arginfo_zend_test_int_is_odd arginfo_zend_test_int_is_boxed
@@ -638,6 +643,7 @@ static ZEND_FUNCTION(zend_test_int_shift_right);
 static ZEND_FUNCTION(zend_test_int_pow);
 static ZEND_FUNCTION(zend_test_int_cmp);
 static ZEND_FUNCTION(zend_test_int_cmp_long);
+static ZEND_FUNCTION(zend_test_int_cmp_double);
 static ZEND_FUNCTION(zend_test_int_sign);
 static ZEND_FUNCTION(zend_test_int_is_odd);
 static ZEND_FUNCTION(zend_test_int_bit_length);
@@ -852,6 +858,7 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(zend_test_int_pow, arginfo_zend_test_int_pow)
 	ZEND_FE(zend_test_int_cmp, arginfo_zend_test_int_cmp)
 	ZEND_FE(zend_test_int_cmp_long, arginfo_zend_test_int_cmp_long)
+	ZEND_FE(zend_test_int_cmp_double, arginfo_zend_test_int_cmp_double)
 	ZEND_FE(zend_test_int_sign, arginfo_zend_test_int_sign)
 	ZEND_FE(zend_test_int_is_odd, arginfo_zend_test_int_is_odd)
 	ZEND_FE(zend_test_int_bit_length, arginfo_zend_test_int_bit_length)

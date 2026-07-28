@@ -30,6 +30,7 @@ ZEND_API zend_long    zend_bigint_to_long(const zend_bigint *b);
 ZEND_API int          zend_bigint_sign(const zend_bigint *b);
 ZEND_API int          zend_bigint_cmp(const zend_bigint *a, const zend_bigint *b);
 ZEND_API int          zend_bigint_cmp_long(const zend_bigint *a, zend_long b);
+ZEND_API int          zend_bigint_cmp_double(const zend_bigint *a, double d);
 ZEND_API bool         zend_bigint_is_odd(const zend_bigint *b);
 ZEND_API uint64_t     zend_bigint_bit_length(const zend_bigint *b);
 ZEND_API double       zend_bigint_to_double(const zend_bigint *b);

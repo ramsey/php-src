@@ -17,6 +17,7 @@
 #include "zend_bigint_libtommath.h"
 
 #include <limits.h>
+#include <math.h>
 #include <string.h>
 
 /* The libtommath calls below that can only fail on allocation are asserted
@@ -157,6 +158,56 @@ ZEND_API int zend_bigint_cmp_long(const zend_bigint *a, zend_long b)
 	mp_clear(&t);
 	(void) err;
 	return r;
+}
+
+/* mp_count_bits and the frexp exponent both count binary digits in front
+ * of the point, so unequal counts settle the order outright. On a matching
+ * count the whole-number part of d compares exactly, and a leftover
+ * fraction breaks a tie by pushing d away from zero. */
+ZEND_API int zend_bigint_cmp_double(const zend_bigint *a, double d)
+{
+	ZEND_ASSERT(!zend_isnan(d));
+
+	int a_sign = zend_bigint_sign(a);
+	int d_sign = (d > 0.0) - (d < 0.0);
+
+	if (a_sign != d_sign) {
+		return a_sign > d_sign ? 1 : -1;
+	}
+	if (a_sign == 0) {
+		return 0;
+	}
+	if (zend_isinf(d)) {
+		return a_sign > 0 ? -1 : 1;
+	}
+
+	int a_bits = mp_count_bits(&a->mp);
+	int d_exp;
+	frexp(d, &d_exp);
+	if (a_bits != d_exp) {
+		return a_bits > d_exp ? a_sign : -a_sign;
+	}
+
+	double int_part;
+	double frac = modf(d, &int_part);
+
+	mp_int d_int;
+	mp_err err = mp_init(&d_int);
+	ZEND_ASSERT(err == MP_OKAY);
+	err = mp_set_double(&d_int, int_part);
+	ZEND_ASSERT(err == MP_OKAY);
+	(void) err;
+
+	int cmp = (int) mp_cmp(&a->mp, &d_int);
+	mp_clear(&d_int);
+
+	if (cmp != 0) {
+		return cmp;
+	}
+	if (frac == 0.0) {
+		return 0;
+	}
+	return frac > 0.0 ? -1 : 1;
 }
 
 ZEND_API bool zend_bigint_is_odd(const zend_bigint *b)
