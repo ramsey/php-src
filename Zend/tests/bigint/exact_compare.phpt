@@ -38,8 +38,8 @@ foreach ($pairs as $label => [$a, $b]) {
 ?>
 --EXPECT--
 9223372036854775807 == 9.2233720368547758E+18: bool(false)
-PHP_INT_MAX == (float) PHP_INT_MAX: bool(true)
-PHP_INT_MAX < (float) PHP_INT_MAX: bool(false)
+PHP_INT_MAX == (float) PHP_INT_MAX: bool(false)
+PHP_INT_MAX < (float) PHP_INT_MAX: bool(true)
 2 ** 64 == 2.0 ** 64: bool(true)
 2 ** 64 + 1 == 2.0 ** 64: bool(false)
 2 ** 64 + 1 > 2.0 ** 64: bool(true)

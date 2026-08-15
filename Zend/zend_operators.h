@@ -549,6 +549,11 @@ ZEND_API void zend_reset_lc_ctype_locale(void);
 ZEND_API void zend_int_add_slow(zval *result, const zval *op1, const zval *op2);
 ZEND_API void zend_int_sub_slow(zval *result, const zval *op1, const zval *op2);
 
+/* Out-of-line twin of the zend_long_cmp_double inline (zend_int.h), for the
+ * same header-hygiene reason. */
+
+ZEND_API int ZEND_FASTCALL zend_long_cmp_double_helper(zend_long l, double d);
+
 /* The cold overflow tails shared by every fast_long_increment_function and
  * fast_long_decrement_function branch. A long increment overflows only at
  * ZEND_LONG_MAX and a decrement only at ZEND_LONG_MIN, so the pre-overflow
@@ -938,19 +943,34 @@ static zend_always_inline bool zend_fast_equal_strings(zend_string *s1, zend_str
 	}
 }
 
+static zend_always_inline int zend_fast_long_cmp_double(zend_long l, double d, bool negate)
+{
+	if (UNEXPECTED(zend_isnan(d))) {
+		return ZEND_UNCOMPARABLE;
+	}
+	int c = zend_long_cmp_double_helper(l, d);
+	return negate ? -c : c;
+}
+
 static zend_always_inline bool fast_equal_check_function(zval *op1, zval *op2)
 {
 	if (EXPECTED(Z_TYPE_P(op1) == IS_LONG)) {
 		if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
 			return Z_LVAL_P(op1) == Z_LVAL_P(op2);
 		} else if (EXPECTED(Z_TYPE_P(op2) == IS_DOUBLE)) {
-			return ((double)Z_LVAL_P(op1)) == Z_DVAL_P(op2);
+			if (EXPECTED(Z_LVAL_P(op1) >= -(1LL << 53) && Z_LVAL_P(op1) <= (1LL << 53))) {
+				return ((double)Z_LVAL_P(op1)) == Z_DVAL_P(op2);
+			}
+			return zend_fast_long_cmp_double(Z_LVAL_P(op1), Z_DVAL_P(op2), false) == 0;
 		}
 	} else if (EXPECTED(Z_TYPE_P(op1) == IS_DOUBLE)) {
 		if (EXPECTED(Z_TYPE_P(op2) == IS_DOUBLE)) {
 			return Z_DVAL_P(op1) == Z_DVAL_P(op2);
 		} else if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
-			return Z_DVAL_P(op1) == ((double)Z_LVAL_P(op2));
+			if (EXPECTED(Z_LVAL_P(op2) >= -(1LL << 53) && Z_LVAL_P(op2) <= (1LL << 53))) {
+				return Z_DVAL_P(op1) == ((double)Z_LVAL_P(op2));
+			}
+			return zend_fast_long_cmp_double(Z_LVAL_P(op2), Z_DVAL_P(op1), true) == 0;
 		}
 	} else if (EXPECTED(Z_TYPE_P(op1) == IS_STRING)) {
 		if (EXPECTED(Z_TYPE_P(op2) == IS_STRING)) {

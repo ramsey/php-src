@@ -6738,9 +6738,21 @@ static ir_ref zend_jit_cmp_long_long(zend_jit_ctx   *jit,
 	}
 }
 
+/* A long may exceed the double mantissa (|l| > 2^53), so INT2D would lose
+ * precision; the exact compare is delegated to the same out-of-line helper
+ * used by the VM's inline fast paths. This always pays for the call rather
+ * than proving the long side's range small enough to keep the cheap INT2D
+ * emission. NaN is detected via self compare (only NaN is unequal to itself)
+ * and maps to ZEND_UNCOMPARABLE, matching zend_compare, discarding the
+ * helper's result for that case. */
+
 static ir_ref zend_jit_cmp_long_double(zend_jit_ctx *jit, const zend_op *opline, zend_jit_addr op1_addr, zend_jit_addr op2_addr, zend_jit_addr res_addr, uint8_t smart_branch_opcode, uint32_t target_label, uint32_t target_label2, const void *exit_addr)
 {
-	ir_ref ref = ir_CMP_OP(zend_jit_cmp_op(opline), ir_INT2D(jit_Z_LVAL(jit, op1_addr)), jit_Z_DVAL(jit, op2_addr));
+	ir_ref dval = jit_Z_DVAL(jit, op2_addr);
+	ir_ref cmp = ir_CALL_2(IR_I32, ir_CONST_FC_FUNC(zend_long_cmp_double_helper),
+		jit_Z_LVAL(jit, op1_addr), dval);
+	cmp = ir_COND(IR_I32, ir_CMP_OP(IR_NE, dval, dval), ir_CONST_I32(ZEND_UNCOMPARABLE), cmp);
+	ir_ref ref = ir_CMP_OP(zend_jit_cmp_op(opline), cmp, ir_CONST_I32(0));
 
 	if (!smart_branch_opcode || smart_branch_opcode == ZEND_JMPNZ_EX || smart_branch_opcode == ZEND_JMPZ_EX) {
 		jit_set_Z_TYPE_INFO_ref(jit, jit_ZVAL_ADDR(jit, res_addr),
@@ -6761,7 +6773,13 @@ static ir_ref zend_jit_cmp_long_double(zend_jit_ctx *jit, const zend_op *opline,
 
 static ir_ref zend_jit_cmp_double_long(zend_jit_ctx *jit, const zend_op *opline, zend_jit_addr op1_addr, zend_jit_addr op2_addr, zend_jit_addr res_addr, uint8_t smart_branch_opcode, uint32_t target_label, uint32_t target_label2, const void *exit_addr)
 {
-	ir_ref ref = ir_CMP_OP(zend_jit_cmp_op(opline), jit_Z_DVAL(jit, op1_addr), ir_INT2D(jit_Z_LVAL(jit, op2_addr)));
+	ir_ref dval = jit_Z_DVAL(jit, op1_addr);
+	ir_ref cmp = ir_CALL_2(IR_I32, ir_CONST_FC_FUNC(zend_long_cmp_double_helper),
+		jit_Z_LVAL(jit, op2_addr), dval);
+	/* NEG runs before COND so the ZEND_UNCOMPARABLE sentinel is not itself negated. */
+	cmp = ir_NEG(IR_I32, cmp);
+	cmp = ir_COND(IR_I32, ir_CMP_OP(IR_NE, dval, dval), ir_CONST_I32(ZEND_UNCOMPARABLE), cmp);
+	ir_ref ref = ir_CMP_OP(zend_jit_cmp_op(opline), cmp, ir_CONST_I32(0));
 
 	if (!smart_branch_opcode || smart_branch_opcode == ZEND_JMPNZ_EX || smart_branch_opcode == ZEND_JMPZ_EX) {
 		jit_set_Z_TYPE_INFO_ref(jit, jit_ZVAL_ADDR(jit, res_addr),

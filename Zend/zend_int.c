@@ -300,6 +300,19 @@ ZEND_API int zend_int_cmp_double_slow(const zval *op, double d)
 	return zend_bigint_cmp_double(Z_BIG_P(op), d);
 }
 
+/* Out-of-line twin of the zend_long_cmp_double inline in Zend/zend_int.h,
+ * for callers that cannot include that header (the VM's inline compare fast
+ * paths and the JIT). Unlike the inline, this helper is NaN-total. It maps
+ * NaN to ZEND_UNCOMPARABLE itself, so the JIT's discarded-result call site
+ * stays within contract even though it passes d unconditionally. */
+ZEND_API int ZEND_FASTCALL zend_long_cmp_double_helper(zend_long l, double d)
+{
+	if (UNEXPECTED(zend_isnan(d))) {
+		return ZEND_UNCOMPARABLE;
+	}
+	return zend_long_cmp_double(l, d);
+}
+
 ZEND_API void zend_int_from_double(zval *result, double d)
 {
 	ZEND_ASSERT(zend_finite(d));

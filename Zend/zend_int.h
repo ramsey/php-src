@@ -97,6 +97,7 @@ ZEND_API void zend_int_shift_right_slow(zval *result, const zval *op1, const zva
 ZEND_API zend_result zend_int_pow_slow(zval *result, const zval *op1, const zval *op2);
 ZEND_API int zend_int_cmp_slow(const zval *op1, const zval *op2);
 ZEND_API int zend_int_cmp_double_slow(const zval *op, double d);
+ZEND_API int ZEND_FASTCALL zend_long_cmp_double_helper(zend_long l, double d);
 
 /* Value-op arithmetic on logical integers. Each stores a canonical integer
  * in result, an IS_LONG when the value fits zend_long and an IS_BIGINT box
