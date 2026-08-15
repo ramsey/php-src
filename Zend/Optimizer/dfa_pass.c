@@ -1057,6 +1057,23 @@ static bool zend_dfa_try_to_replace_result(const zend_op_array *op_array, const 
 	return false;
 }
 
+/* Narrowing a long constant operand to double at compile time is safe for
+ * ADD/SUB/MUL regardless of magnitude, since the runtime op promotes to
+ * double either way. A comparison instead needs the constant to stay exact,
+ * so narrowing it is only safe within the double's exact integer band. */
+static bool zend_dfa_const_narrowing_preserves_value(uint8_t opcode, zend_long lval)
+{
+	switch (opcode) {
+		case ZEND_IS_EQUAL:
+		case ZEND_IS_NOT_EQUAL:
+		case ZEND_IS_SMALLER:
+		case ZEND_IS_SMALLER_OR_EQUAL:
+			return lval >= -(1LL << 53) && lval <= (1LL << 53);
+		default:
+			return true;
+	}
+}
+
 void zend_dfa_optimize_op_array(zend_op_array *op_array, zend_optimizer_ctx *ctx, zend_ssa *ssa, zend_call_info **call_map)
 {
 	if (ctx->debug_level & ZEND_DUMP_BEFORE_DFA_PASS) {
@@ -1167,7 +1184,8 @@ void zend_dfa_optimize_op_array(zend_op_array *op_array, zend_optimizer_ctx *ctx
 						zval *zv = CT_CONSTANT_EX(op_array, opline->op1.constant);
 
 						if ((OP2_INFO() & MAY_BE_ANY) == MAY_BE_DOUBLE
-						 && Z_TYPE_INFO_P(zv) == IS_LONG) {
+						 && Z_TYPE_INFO_P(zv) == IS_LONG
+						 && zend_dfa_const_narrowing_preserves_value(opline->opcode, Z_LVAL_P(zv))) {
 
 // op_1: #v.? = ADD long(?), #?.? [double] => #v.? = ADD double(?), #?.? [double]
 
@@ -1220,7 +1238,8 @@ void zend_dfa_optimize_op_array(zend_op_array *op_array, zend_optimizer_ctx *ctx
 						zval *zv = CT_CONSTANT_EX(op_array, opline->op2.constant);
 
 						if ((OP1_INFO() & MAY_BE_ANY) == MAY_BE_DOUBLE
-						 && Z_TYPE_INFO_P(CT_CONSTANT_EX(op_array, opline->op2.constant)) == IS_LONG) {
+						 && Z_TYPE_INFO_P(CT_CONSTANT_EX(op_array, opline->op2.constant)) == IS_LONG
+						 && zend_dfa_const_narrowing_preserves_value(opline->opcode, Z_LVAL_P(zv))) {
 
 // op_1: #v.? = ADD #?.? [double], long(?) => #v.? = ADD #?.? [double], double(?)
 
