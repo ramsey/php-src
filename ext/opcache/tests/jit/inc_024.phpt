@@ -12,11 +12,13 @@ opcache.protect_memory=1
 function test($b) {
     $a = "0";
     $i = 0;
-    while (is_numeric($a)) {
+    $n = 0;
+    while (is_numeric($a) && $n < 23) {
         $a .= $b;
         $a--;
         $i .= $a;
         $i++;
+        $n++;
     }
     var_dump($a, $i);
 }
@@ -67,8 +69,6 @@ Deprecated: Increment on non-numeric string is deprecated, use str_increment() i
 
 Deprecated: Increment on non-numeric string is deprecated, use str_increment() instead in %s on line %d
 
-Deprecated: Decrement on non-numeric string has no effect and is deprecated in %s on line %d
-
 Deprecated: Increment on non-numeric string is deprecated, use str_increment() instead in %s on line %d
-string(5) "-INF0"
-string(260) "0-2-12-112-1112-11112-111112-1111112-11111112-111111112-1111111112-11111111112-111111111112-1111111111112-11111111111112-111111111111112-1111111111111112-11111111111111112-111111111111111112-1111111111111111112-1.1111111111111E+20-1.1111111111111E+191-ING-INF1"
+int(-11111111111111111111111)
+string(300) "0-2-12-112-1112-11112-111112-1111112-11111112-111111112-1111111112-11111111112-111111111112-1111111111112-11111111111112-111111111111112-1111111111111112-11111111111111112-111111111111111112-1111111111111111112-11111111111111111112-111111111111111111112-1111111111111111111112-11111111111111111111112"
