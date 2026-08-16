@@ -449,7 +449,7 @@ class SimpleType {
             "false" => "MAY_BE_ARRAY_OF_FALSE",
             "true" => "MAY_BE_ARRAY_OF_TRUE",
             "bool" => "MAY_BE_ARRAY_OF_FALSE|MAY_BE_ARRAY_OF_TRUE",
-            "int" => "MAY_BE_ARRAY_OF_LONG",
+            "int" => "MAY_BE_ARRAY_OF_LONG|MAY_BE_ARRAY_OF_BIGINT",
             "float" => "MAY_BE_ARRAY_OF_DOUBLE",
             "string" => "MAY_BE_ARRAY_OF_STRING",
             "array" => "MAY_BE_ARRAY_OF_ARRAY",

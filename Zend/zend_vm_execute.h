@@ -18284,11 +18284,7 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_F
 		}
 		Z_FE_POS_P(array) = pos;
 		if (RETURN_VALUE_USED(opline)) {
-			if (!p->key) {
-				ZVAL_LONG(EX_VAR(opline->result.var), p->h);
-			} else {
-				ZVAL_STR_COPY(EX_VAR(opline->result.var), p->key);
-			}
+			zend_array_key_to_zval(EX_VAR(opline->result.var), p->key, p->h);
 		}
 	}
 	if (EXPECTED(opline->op2_type == IS_CV)) {
@@ -24408,11 +24404,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_FE_FETCH_RW_S
 			}
 			EG(ht_iterators)[Z_FE_ITER_P(EX_VAR(opline->op1.var))].pos = pos;
 			if (RETURN_VALUE_USED(opline)) {
-				if (!p->key) {
-					ZVAL_LONG(EX_VAR(opline->result.var), p->h);
-				} else {
-					ZVAL_STR_COPY(EX_VAR(opline->result.var), p->key);
-				}
+				zend_array_key_to_zval(EX_VAR(opline->result.var), p->key, p->h);
 			}
 		}
 	} else if (EXPECTED(Z_TYPE_P(array) == IS_OBJECT)) {
@@ -33501,11 +33493,7 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_F
 		}
 		Z_FE_POS_P(array) = pos;
 		if (0) {
-			if (!p->key) {
-				ZVAL_LONG(EX_VAR(opline->result.var), p->h);
-			} else {
-				ZVAL_STR_COPY(EX_VAR(opline->result.var), p->key);
-			}
+			zend_array_key_to_zval(EX_VAR(opline->result.var), p->key, p->h);
 		}
 	}
 
@@ -33569,11 +33557,7 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_F
 		}
 		Z_FE_POS_P(array) = pos;
 		if (1) {
-			if (!p->key) {
-				ZVAL_LONG(EX_VAR(opline->result.var), p->h);
-			} else {
-				ZVAL_STR_COPY(EX_VAR(opline->result.var), p->key);
-			}
+			zend_array_key_to_zval(EX_VAR(opline->result.var), p->key, p->h);
 		}
 	}
 
@@ -72127,11 +72111,7 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_FE_FET
 		}
 		Z_FE_POS_P(array) = pos;
 		if (RETURN_VALUE_USED(opline)) {
-			if (!p->key) {
-				ZVAL_LONG(EX_VAR(opline->result.var), p->h);
-			} else {
-				ZVAL_STR_COPY(EX_VAR(opline->result.var), p->key);
-			}
+			zend_array_key_to_zval(EX_VAR(opline->result.var), p->key, p->h);
 		}
 	}
 	if (EXPECTED(opline->op2_type == IS_CV)) {
@@ -78151,11 +78131,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_FE_FETCH_RW_SPEC_V
 			}
 			EG(ht_iterators)[Z_FE_ITER_P(EX_VAR(opline->op1.var))].pos = pos;
 			if (RETURN_VALUE_USED(opline)) {
-				if (!p->key) {
-					ZVAL_LONG(EX_VAR(opline->result.var), p->h);
-				} else {
-					ZVAL_STR_COPY(EX_VAR(opline->result.var), p->key);
-				}
+				zend_array_key_to_zval(EX_VAR(opline->result.var), p->key, p->h);
 			}
 		}
 	} else if (EXPECTED(Z_TYPE_P(array) == IS_OBJECT)) {
@@ -87244,11 +87220,7 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_FE_FET
 		}
 		Z_FE_POS_P(array) = pos;
 		if (0) {
-			if (!p->key) {
-				ZVAL_LONG(EX_VAR(opline->result.var), p->h);
-			} else {
-				ZVAL_STR_COPY(EX_VAR(opline->result.var), p->key);
-			}
+			zend_array_key_to_zval(EX_VAR(opline->result.var), p->key, p->h);
 		}
 	}
 
@@ -87312,11 +87284,7 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_FE_FET
 		}
 		Z_FE_POS_P(array) = pos;
 		if (1) {
-			if (!p->key) {
-				ZVAL_LONG(EX_VAR(opline->result.var), p->h);
-			} else {
-				ZVAL_STR_COPY(EX_VAR(opline->result.var), p->key);
-			}
+			zend_array_key_to_zval(EX_VAR(opline->result.var), p->key, p->h);
 		}
 	}
 

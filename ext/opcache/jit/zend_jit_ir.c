@@ -13868,25 +13868,15 @@ static int zend_jit_fe_fetch(zend_jit_ctx *jit, const zend_op *opline, uint32_t 
 					ir_IF_TRUE(if_key);
 				}
 				if (op1_info & MAY_BE_ARRAY_KEY_STRING) {
-					ir_ref if_interned, interned_path;
-
-					// JIT: ZVAL_STR_COPY(EX_VAR(opline->result.var), p->key);
-					jit_set_Z_PTR(jit, res_addr, key_ref);
-					ref = ir_AND_U32(
-						ir_LOAD_U32(ir_ADD_OFFSET(key_ref, offsetof(zend_refcounted, gc.u.type_info))),
-						ir_CONST_U32(IS_STR_INTERNED));
-					if_interned = ir_IF(ref);
-					ir_IF_TRUE(if_interned);
-
-					jit_set_Z_TYPE_INFO(jit, res_addr, IS_STRING);
-
-					interned_path = ir_END();
-					ir_IF_FALSE(if_interned);
-
-					jit_GC_ADDREF(jit, key_ref);
-					jit_set_Z_TYPE_INFO(jit, res_addr, IS_STRING_EX);
-
-					ir_MERGE_WITH(interned_path);
+					/* A string key can be the decimal form of an integer beyond
+					 * long range, so the key zval is built by the same helper the
+					 * interpreter uses. This always pays for the call rather than
+					 * classifying the key inline. */
+					// JIT: zend_array_key_to_zval(EX_VAR(opline->result.var), p->key, p->h);
+					ir_CALL_3(IR_VOID, ir_CONST_FC_FUNC(zend_array_key_to_zval),
+						jit_ZVAL_ADDR(jit, res_addr),
+						key_ref,
+						ir_LOAD_L(ir_ADD_OFFSET(hash_p_ref, offsetof(Bucket, h))));
 
 					if (op1_info & MAY_BE_ARRAY_KEY_LONG) {
 						key_path = ir_END();

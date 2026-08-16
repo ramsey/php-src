@@ -48,6 +48,8 @@ static void php_array_element_dump(zval *zv, zend_ulong index, zend_string *key,
 #endif
 	if (key == NULL) { /* numeric key */
 		php_printf("%*c[" ZEND_LONG_FMT "]=>\n", level + 1, ' ', index);
+	} else if (zend_string_is_canonical_bigint_key(key)) { /* bigint key */
+		php_printf("%*c[%s]=>\n", level + 1, ' ', ZSTR_VAL(key));
 	} else { /* string key */
 		php_printf("%*c[\"", level + 1, ' ');
 		PHPWRITE(ZSTR_VAL(key), ZSTR_LEN(key));
@@ -278,6 +280,8 @@ static void zval_array_element_dump(zval *zv, zend_ulong index, zend_string *key
 #endif
 	if (key == NULL) { /* numeric key */
 		php_printf("%*c[" ZEND_LONG_FMT "]=>\n", level + 1, ' ', index);
+	} else if (zend_string_is_canonical_bigint_key(key)) { /* bigint key */
+		php_printf("%*c[%s]=>\n", level + 1, ' ', ZSTR_VAL(key));
 	} else { /* string key */
 		php_printf("%*c[\"", level + 1, ' ');
 		PHPWRITE(ZSTR_VAL(key), ZSTR_LEN(key));
@@ -494,6 +498,11 @@ static zend_result php_array_element_export(zval *zv, zend_ulong index, zend_str
 	if (key == NULL) { /* numeric key */
 		buffer_append_spaces(buf, level+1);
 		smart_str_append_long(buf, (zend_long) index);
+		smart_str_appendl(buf, " => ", 4);
+
+	} else if (zend_string_is_canonical_bigint_key(key)) { /* bigint key */
+		buffer_append_spaces(buf, level + 1);
+		smart_str_append(buf, key);
 		smart_str_appendl(buf, " => ", 4);
 
 	} else { /* string key */

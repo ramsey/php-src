@@ -3598,7 +3598,10 @@ static zend_always_inline zend_result _zend_update_type_info(
 						tmp |= MAY_BE_LONG;
 					}
 					if (t1 & MAY_BE_ARRAY_KEY_STRING) {
-						tmp |= MAY_BE_STRING | MAY_BE_RCN;
+						/* A string key is copied from the bucket, so it is
+						 * shared. A canonical decimal key beyond long range
+						 * instead yields a freshly built box. */
+						tmp |= MAY_BE_STRING | MAY_BE_RCN | MAY_BE_BIGINT | MAY_BE_RC1;
 					}
 				}
 				UPDATE_SSA_TYPE(tmp, ssa_op->result_def);
