@@ -1,5 +1,5 @@
 --TEST--
-Implicit float to int conversions when float too large should warn, array variant
+Floats too large for int used as array keys convert exactly
 --FILE--
 <?php
 
@@ -26,31 +26,27 @@ var_dump($array[$string_float]);
 Warning: The float 1.0E+121 is not representable as an int, cast occurred in %s on line %d
 int(0)
 bool(true)
-
-Warning: The float 1.0E+121 is not representable as an int, cast occurred in %s on line %d
-
-Warning: The float 1.0E+121 is not representable as an int, cast occurred in %s on line %d
 array(2) {
-  [0]=>
+  ["10000000000000000373409337471459889719393275754491820381027730410378005080671497101378613371421126415052399029342192009216"]=>
   string(11) "Large float"
   ["1.0E+121"]=>
   string(18) "String large float"
 }
 array(2) {
-  [0]=>
+  ["10000000000000000373409337471459889719393275754491820381027730410378005080671497101378613371421126415052399029342192009216"]=>
   string(11) "Large float"
   ["1.0E+121"]=>
   string(18) "String large float"
 }
 
-Warning: The float 1.0E+121 is not representable as an int, cast occurred in %s on line %d
-string(1) "0"
+Warning: Undefined array key 10000000000000000373409337471459889719393275754491820381027730410378005080671497101378613371421126415052399029342192009216 in %s on line %d
+NULL
 
 Warning: Undefined array key "1.0E+121" in %s on line %d
 NULL
 
-Warning: The float 1.0E+121 is not representable as an int, cast occurred in %s on line %d
-string(1) "0"
+Warning: Undefined array key 10000000000000000373409337471459889719393275754491820381027730410378005080671497101378613371421126415052399029342192009216 in %s on line %d
+NULL
 
 Warning: Undefined array key "1.0E+121" in %s on line %d
 NULL

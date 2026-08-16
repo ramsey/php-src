@@ -17,6 +17,7 @@
 #include "Zend/zend_portability.h"
 #include "Zend/zend_types.h"
 #include "Zend/zend_API.h"
+#include "Zend/zend_int.h"
 
 static ZEND_COLD void undef_result_after_exception(void) {
 	const zend_op *opline = EG(opline_before_exception);
@@ -511,7 +512,7 @@ static void ZEND_FASTCALL zend_jit_fetch_dim_r_helper(zend_array *ht, zval *dim,
 				zend_error(E_WARNING, "Undefined array key \"\"");
 			}
 			return;
-		case IS_DOUBLE:
+		case IS_DOUBLE: {
 			/* The array may be destroyed while throwing the notice.
 			 * Temporarily increase the refcount to detect this situation. */
 			if (!(GC_FLAGS(ht) & IS_ARRAY_IMMUTABLE)) {
@@ -519,8 +520,12 @@ static void ZEND_FASTCALL zend_jit_fetch_dim_r_helper(zend_array *ht, zval *dim,
 			}
 			execute_data = EG(current_execute_data);
 			opline = EX(opline);
-			hval = zend_dval_to_lval_safe(Z_DVAL_P(dim));
+			zval key_zv;
+			zend_double_to_int_key(&key_zv, Z_DVAL_P(dim));
 			if (!(GC_FLAGS(ht) & IS_ARRAY_IMMUTABLE) && !GC_DELREF(ht)) {
+				if (!EG(exception)) {
+					zval_ptr_dtor_nogc(&key_zv);
+				}
 				zend_array_destroy(ht);
 				if (opline->result_type & (IS_VAR | IS_TMP_VAR)) {
 					if (EG(exception)) {
@@ -537,7 +542,22 @@ static void ZEND_FASTCALL zend_jit_fetch_dim_r_helper(zend_array *ht, zval *dim,
 				}
 				return;
 			}
-			goto num_index;
+			if (Z_TYPE(key_zv) == IS_LONG) {
+				hval = Z_LVAL(key_zv);
+				goto num_index;
+			}
+			zend_string *dbl_key = zend_bigint_to_str(Z_BIG(key_zv));
+			retval = zend_hash_find(ht, dbl_key);
+			if (!retval) {
+				zend_undefined_index(dbl_key);
+				ZVAL_NULL(result);
+			} else {
+				ZVAL_COPY_DEREF(result, retval);
+			}
+			zend_string_release(dbl_key);
+			zval_ptr_dtor_nogc(&key_zv);
+			return;
+		}
 		case IS_RESOURCE:
 			/* The array may be destroyed while throwing the notice.
 			 * Temporarily increase the refcount to detect this situation. */
@@ -572,6 +592,18 @@ static void ZEND_FASTCALL zend_jit_fetch_dim_r_helper(zend_array *ht, zval *dim,
 		case IS_TRUE:
 			hval = 1;
 			goto num_index;
+		case IS_BIGINT: {
+			zend_string *key = zend_bigint_to_str(Z_BIG_P(dim));
+			retval = zend_hash_find(ht, key);
+			if (!retval) {
+				zend_undefined_index(key);
+				ZVAL_NULL(result);
+			} else {
+				ZVAL_COPY_DEREF(result, retval);
+			}
+			zend_string_release(key);
+			return;
+		}
 		default:
 			zend_illegal_container_offset(ZSTR_KNOWN(ZEND_STR_ARRAY), dim, BP_VAR_R);
 			undef_result_after_exception();
@@ -584,7 +616,7 @@ str_index:
 	}
 	retval = zend_hash_find(ht, offset_key);
 	if (!retval) {
-		zend_error(E_WARNING, "Undefined array key \"%s\"", ZSTR_VAL(offset_key));
+		zend_undefined_index(offset_key);
 		ZVAL_NULL(result);
 		return;
 	}
@@ -658,7 +690,7 @@ static void ZEND_FASTCALL zend_jit_fetch_dim_is_helper(zend_array *ht, zval *dim
 			zend_error(E_DEPRECATED, "Using null as an array offset is deprecated, use an empty string instead");
 
 			return;
-		case IS_DOUBLE:
+		case IS_DOUBLE: {
 			/* The array may be destroyed while throwing the notice.
 			 * Temporarily increase the refcount to detect this situation. */
 			if (!(GC_FLAGS(ht) & IS_ARRAY_IMMUTABLE)) {
@@ -666,8 +698,12 @@ static void ZEND_FASTCALL zend_jit_fetch_dim_is_helper(zend_array *ht, zval *dim
 			}
 			execute_data = EG(current_execute_data);
 			opline = EX(opline);
-			hval = zend_dval_to_lval_safe(Z_DVAL_P(dim));
+			zval key_zv;
+			zend_double_to_int_key(&key_zv, Z_DVAL_P(dim));
 			if (!(GC_FLAGS(ht) & IS_ARRAY_IMMUTABLE) && !GC_DELREF(ht)) {
+				if (!EG(exception)) {
+					zval_ptr_dtor_nogc(&key_zv);
+				}
 				zend_array_destroy(ht);
 				if (opline->result_type & (IS_VAR | IS_TMP_VAR)) {
 					if (EG(exception)) {
@@ -684,7 +720,21 @@ static void ZEND_FASTCALL zend_jit_fetch_dim_is_helper(zend_array *ht, zval *dim
 				}
 				return;
 			}
-			goto num_index;
+			if (Z_TYPE(key_zv) == IS_LONG) {
+				hval = Z_LVAL(key_zv);
+				goto num_index;
+			}
+			zend_string *dbl_key = zend_bigint_to_str(Z_BIG(key_zv));
+			retval = zend_hash_find(ht, dbl_key);
+			zend_string_release(dbl_key);
+			if (!retval) {
+				ZVAL_NULL(result);
+			} else {
+				ZVAL_COPY_DEREF(result, retval);
+			}
+			zval_ptr_dtor_nogc(&key_zv);
+			return;
+		}
 		case IS_RESOURCE:
 			/* The array may be destroyed while throwing the notice.
 			 * Temporarily increase the refcount to detect this situation. */
@@ -719,6 +769,17 @@ static void ZEND_FASTCALL zend_jit_fetch_dim_is_helper(zend_array *ht, zval *dim
 		case IS_TRUE:
 			hval = 1;
 			goto num_index;
+		case IS_BIGINT: {
+			zend_string *key = zend_bigint_to_str(Z_BIG_P(dim));
+			retval = zend_hash_find(ht, key);
+			zend_string_release(key);
+			if (!retval) {
+				ZVAL_NULL(result);
+			} else {
+				ZVAL_COPY_DEREF(result, retval);
+			}
+			return;
+		}
 		default:
 			zend_illegal_container_offset(ZSTR_KNOWN(ZEND_STR_ARRAY), dim,
 				EG(current_execute_data)->opline->opcode == ZEND_ISSET_ISEMPTY_DIM_OBJ ?
@@ -791,21 +852,40 @@ static int ZEND_FASTCALL zend_jit_fetch_dim_isset_helper(zend_array *ht, zval *d
 
 			return result;
 		}
-		case IS_DOUBLE:
+		case IS_DOUBLE: {
 			/* The array may be destroyed while throwing the notice.
 			 * Temporarily increase the refcount to detect this situation. */
 			if (!(GC_FLAGS(ht) & IS_ARRAY_IMMUTABLE)) {
 				GC_ADDREF(ht);
 			}
-			hval = zend_dval_to_lval_safe(Z_DVAL_P(dim));
+			zval key_zv;
+			zend_double_to_int_key(&key_zv, Z_DVAL_P(dim));
 			if (!(GC_FLAGS(ht) & IS_ARRAY_IMMUTABLE) && !GC_DELREF(ht)) {
+				if (!EG(exception)) {
+					zval_ptr_dtor_nogc(&key_zv);
+				}
 				zend_array_destroy(ht);
 				return 0;
 			}
 			if (EG(exception)) {
 				return 0;
 			}
-			goto num_index;
+			if (Z_TYPE(key_zv) == IS_LONG) {
+				hval = Z_LVAL(key_zv);
+				goto num_index;
+			}
+			zend_string *dbl_key = zend_bigint_to_str(Z_BIG(key_zv));
+			retval = zend_hash_find(ht, dbl_key);
+			zend_string_release(dbl_key);
+			zval_ptr_dtor_nogc(&key_zv);
+			if (!retval) {
+				return 0;
+			}
+			if (UNEXPECTED(Z_TYPE_P(retval) == IS_REFERENCE)) {
+				retval = Z_REFVAL_P(retval);
+			}
+			return Z_TYPE_P(retval) > IS_NULL;
+		}
 		case IS_RESOURCE:
 			/* The array may be destroyed while throwing the notice.
 			 * Temporarily increase the refcount to detect this situation. */
@@ -828,6 +908,18 @@ static int ZEND_FASTCALL zend_jit_fetch_dim_isset_helper(zend_array *ht, zval *d
 		case IS_TRUE:
 			hval = 1;
 			goto num_index;
+		case IS_BIGINT: {
+			zend_string *key = zend_bigint_to_str(Z_BIG_P(dim));
+			retval = zend_hash_find(ht, key);
+			zend_string_release(key);
+			if (!retval) {
+				return 0;
+			}
+			if (UNEXPECTED(Z_TYPE_P(retval) == IS_REFERENCE)) {
+				retval = Z_REFVAL_P(retval);
+			}
+			return Z_TYPE_P(retval) > IS_NULL;
+		}
 		default:
 			zend_illegal_container_offset(ZSTR_KNOWN(ZEND_STR_ARRAY), dim, BP_VAR_IS);
 			return 0;
@@ -922,7 +1014,7 @@ static zval* ZEND_FASTCALL zend_jit_fetch_dim_rw_helper(zend_array *ht, zval *di
 			}
 			offset_key = ZSTR_EMPTY_ALLOC();
 			goto str_index;
-		case IS_DOUBLE:
+		case IS_DOUBLE: {
 			/* The array may be destroyed while throwing the notice.
 			 * Temporarily increase the refcount to detect this situation. */
 			if (!(GC_FLAGS(ht) & IS_ARRAY_IMMUTABLE)) {
@@ -930,8 +1022,12 @@ static zval* ZEND_FASTCALL zend_jit_fetch_dim_rw_helper(zend_array *ht, zval *di
 			}
 			execute_data = EG(current_execute_data);
 			opline = EX(opline);
-			hval = zend_dval_to_lval_safe(Z_DVAL_P(dim));
+			zval key_zv;
+			zend_double_to_int_key(&key_zv, Z_DVAL_P(dim));
 			if (!(GC_FLAGS(ht) & IS_ARRAY_IMMUTABLE) && GC_DELREF(ht) != 1) {
+				if (!EG(exception)) {
+					zval_ptr_dtor_nogc(&key_zv);
+				}
 				if (!GC_REFCOUNT(ht)) {
 					zend_array_destroy(ht);
 				}
@@ -950,7 +1046,19 @@ static zval* ZEND_FASTCALL zend_jit_fetch_dim_rw_helper(zend_array *ht, zval *di
 				}
 				return NULL;
 			}
-			goto num_index;
+			if (Z_TYPE(key_zv) == IS_LONG) {
+				hval = Z_LVAL(key_zv);
+				goto num_index;
+			}
+			zend_string *dbl_key = zend_bigint_to_str(Z_BIG(key_zv));
+			retval = zend_hash_find(ht, dbl_key);
+			if (!retval) {
+				retval = zend_undefined_index_write(ht, dbl_key);
+			}
+			zend_string_release(dbl_key);
+			zval_ptr_dtor_nogc(&key_zv);
+			return retval;
+		}
 		case IS_RESOURCE:
 			/* The array may be destroyed while throwing the notice.
 			 * Temporarily increase the refcount to detect this situation. */
@@ -987,6 +1095,15 @@ static zval* ZEND_FASTCALL zend_jit_fetch_dim_rw_helper(zend_array *ht, zval *di
 		case IS_TRUE:
 			hval = 1;
 			goto num_index;
+		case IS_BIGINT: {
+			zend_string *key = zend_bigint_to_str(Z_BIG_P(dim));
+			retval = zend_hash_find(ht, key);
+			if (!retval) {
+				retval = zend_undefined_index_write(ht, key);
+			}
+			zend_string_release(key);
+			return retval;
+		}
 		default:
 			zend_illegal_container_offset(ZSTR_KNOWN(ZEND_STR_ARRAY), dim, BP_VAR_RW);
 			undef_result_after_exception();
@@ -1082,7 +1199,7 @@ static zval* ZEND_FASTCALL zend_jit_fetch_dim_w_helper(zend_array *ht, zval *dim
 			}
 			offset_key = ZSTR_EMPTY_ALLOC();
 			goto str_index;
-		case IS_DOUBLE:
+		case IS_DOUBLE: {
 			/* The array may be destroyed while throwing the notice.
 			 * Temporarily increase the refcount to detect this situation. */
 			if (!(GC_FLAGS(ht) & IS_ARRAY_IMMUTABLE)) {
@@ -1090,8 +1207,12 @@ static zval* ZEND_FASTCALL zend_jit_fetch_dim_w_helper(zend_array *ht, zval *dim
 			}
 			execute_data = EG(current_execute_data);
 			opline = EX(opline);
-			hval = zend_dval_to_lval_safe(Z_DVAL_P(dim));
+			zval key_zv;
+			zend_double_to_int_key(&key_zv, Z_DVAL_P(dim));
 			if (!(GC_FLAGS(ht) & IS_ARRAY_IMMUTABLE) && GC_DELREF(ht) != 1) {
+				if (!EG(exception)) {
+					zval_ptr_dtor_nogc(&key_zv);
+				}
 				if (!GC_REFCOUNT(ht)) {
 					zend_array_destroy(ht);
 				}
@@ -1110,7 +1231,16 @@ static zval* ZEND_FASTCALL zend_jit_fetch_dim_w_helper(zend_array *ht, zval *dim
 				}
 				return NULL;
 			}
-			goto num_index;
+			if (Z_TYPE(key_zv) == IS_LONG) {
+				hval = Z_LVAL(key_zv);
+				goto num_index;
+			}
+			zend_string *dbl_key = zend_bigint_to_str(Z_BIG(key_zv));
+			retval = zend_hash_lookup(ht, dbl_key);
+			zend_string_release(dbl_key);
+			zval_ptr_dtor_nogc(&key_zv);
+			return retval;
+		}
 		case IS_RESOURCE:
 			/* The array may be destroyed while throwing the notice.
 			 * Temporarily increase the refcount to detect this situation. */
@@ -1147,6 +1277,12 @@ static zval* ZEND_FASTCALL zend_jit_fetch_dim_w_helper(zend_array *ht, zval *dim
 		case IS_TRUE:
 			hval = 1;
 			goto num_index;
+		case IS_BIGINT: {
+			zend_string *key = zend_bigint_to_str(Z_BIG_P(dim));
+			retval = zend_hash_lookup(ht, key);
+			zend_string_release(key);
+			return retval;
+		}
 		default:
 			zend_illegal_container_offset(ZSTR_KNOWN(ZEND_STR_ARRAY), dim, BP_VAR_R);
 			undef_result_after_exception();

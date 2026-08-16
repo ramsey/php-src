@@ -84,6 +84,7 @@ ZEND_API zend_never_inline ZEND_COLD void zend_throw_ref_type_error_zval(const z
 ZEND_API zend_never_inline ZEND_COLD void zend_throw_ref_type_error_type(const zend_property_info *prop1, const zend_property_info *prop2, const zval *zv);
 ZEND_API ZEND_COLD zval* ZEND_FASTCALL zend_undefined_offset_write(HashTable *ht, zend_long lval);
 ZEND_API ZEND_COLD zval* ZEND_FASTCALL zend_undefined_index_write(HashTable *ht, zend_string *offset);
+ZEND_API ZEND_COLD void ZEND_FASTCALL zend_undefined_index(const zend_string *offset);
 ZEND_API zend_never_inline ZEND_COLD void zend_wrong_string_offset_error(void);
 
 ZEND_API zend_never_inline ZEND_COLD void ZEND_FASTCALL zend_readonly_property_modification_error(const zend_property_info *info);

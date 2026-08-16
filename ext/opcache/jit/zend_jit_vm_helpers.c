@@ -347,7 +347,7 @@ void ZEND_FASTCALL zend_jit_undefined_string_key(EXECUTE_DATA_D)
 	if (ZEND_HANDLE_NUMERIC(Z_STR_P(dim), lval)) {
 		zend_error(E_WARNING, "Undefined array key " ZEND_LONG_FMT, lval);
 	} else {
-		zend_error(E_WARNING, "Undefined array key \"%s\"", Z_STRVAL_P(dim));
+		zend_undefined_index(Z_STR_P(dim));
 	}
 	ZVAL_NULL(result);
 }

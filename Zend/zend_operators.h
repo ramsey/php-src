@@ -554,6 +554,15 @@ ZEND_API void zend_int_sub_slow(zval *result, const zval *op1, const zval *op2);
 
 ZEND_API int ZEND_FASTCALL zend_long_cmp_double_helper(zend_long l, double d);
 
+/* Converts a double array key exactly. A finite, integral double in range
+ * becomes a long directly; an out-of-range integral double becomes a bigint.
+ * A fractional double raises the same deprecation as an incompatible int
+ * cast, then truncates toward zero. A non-finite double raises the
+ * not-representable warning and resolves to zero; NaN also raises the
+ * incompatible-cast deprecation afterward. FAILURE only when a warning or
+ * the deprecation is promoted to an exception. */
+ZEND_API zend_result ZEND_FASTCALL zend_double_to_int_key(zval *result, double d);
+
 /* The cold overflow tails shared by every fast_long_increment_function and
  * fast_long_decrement_function branch. A long increment overflows only at
  * ZEND_LONG_MAX and a decrement only at ZEND_LONG_MIN, so the pre-overflow

@@ -979,6 +979,30 @@ ZEND_API void ZEND_COLD zend_nan_coerced_to_type_warning(uint8_t type)
 	zend_error(E_WARNING, "unexpected NAN value was coerced to %s", zend_get_type_by_const(type));
 }
 
+ZEND_API zend_result ZEND_FASTCALL zend_double_to_int_key(zval *result, double d)
+{
+	if (UNEXPECTED(!zend_finite(d))) {
+		ZVAL_LONG(result, zend_dval_to_lval_safe(d));
+		if (UNEXPECTED(EG(exception))) {
+			return FAILURE;
+		}
+		return SUCCESS;
+	}
+	if (UNEXPECTED(trunc(d) != d)) {
+		zend_incompatible_double_to_long_error(d);
+		if (UNEXPECTED(EG(exception))) {
+			return FAILURE;
+		}
+		d = trunc(d);
+	}
+	if (EXPECTED(ZEND_DOUBLE_FITS_LONG(d))) {
+		ZVAL_LONG(result, (zend_long) d);
+		return SUCCESS;
+	}
+	zend_int_from_double(result, d);
+	return SUCCESS;
+}
+
 ZEND_API zend_long ZEND_FASTCALL zval_get_long_func(const zval *op, bool is_strict) /* {{{ */
 {
 try_again:

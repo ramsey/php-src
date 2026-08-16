@@ -2326,9 +2326,28 @@ ZEND_API zend_result array_set_zval_key(HashTable *ht, zval *key, zval *value) /
 		case IS_LONG:
 			result = zend_hash_index_update(ht, Z_LVAL_P(key), value);
 			break;
-		case IS_DOUBLE:
-			result = zend_hash_index_update(ht, zend_dval_to_lval_safe(Z_DVAL_P(key)), value);
+		case IS_DOUBLE: {
+			zval key_zv;
+			zend_double_to_int_key(&key_zv, Z_DVAL_P(key));
+			if (UNEXPECTED(EG(exception))) {
+				return FAILURE;
+			}
+			if (Z_TYPE(key_zv) == IS_LONG) {
+				result = zend_hash_index_update(ht, Z_LVAL(key_zv), value);
+			} else {
+				zend_string *dbl_key = zend_bigint_to_str(Z_BIG(key_zv));
+				result = zend_hash_update(ht, dbl_key, value);
+				zend_string_release(dbl_key);
+				zval_ptr_dtor_nogc(&key_zv);
+			}
 			break;
+		}
+		case IS_BIGINT: {
+			zend_string *bigint_key = zend_bigint_to_str(Z_BIG_P(key));
+			result = zend_hash_update(ht, bigint_key, value);
+			zend_string_release(bigint_key);
+			break;
+		}
 		case IS_NULL:
 			zend_error(E_DEPRECATED, "Using null as an array offset is deprecated, use an empty string instead");
 			if (UNEXPECTED(EG(exception))) {

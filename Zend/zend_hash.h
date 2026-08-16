@@ -354,6 +354,9 @@ ZEND_API HashTable* ZEND_FASTCALL zend_proptable_to_symtable(HashTable *ht, bool
 
 ZEND_API bool ZEND_FASTCALL _zend_handle_numeric_str_ex(const char *key, size_t length, zend_ulong *idx);
 
+ZEND_API bool ZEND_FASTCALL zend_string_is_canonical_bigint_key(const zend_string *key);
+ZEND_API void ZEND_FASTCALL zend_array_key_to_zval(zval *dest, const zend_string *key, zend_ulong h);
+
 ZEND_API uint32_t     ZEND_FASTCALL zend_hash_iterator_add(HashTable *ht, HashPosition pos);
 ZEND_API HashPosition ZEND_FASTCALL zend_hash_iterator_pos(uint32_t idx, HashTable *ht);
 ZEND_API HashPosition ZEND_FASTCALL zend_hash_iterator_pos_ex(uint32_t idx, zval *array);

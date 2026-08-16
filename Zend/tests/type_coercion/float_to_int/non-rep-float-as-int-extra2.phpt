@@ -1,5 +1,5 @@
 --TEST--
-Non rep float string to int conversions should not crash when modified
+Non rep float to int conversions should not crash when modified
 --FILE--
 <?php
 
@@ -10,8 +10,8 @@ set_error_handler(function ($errno, $errstr) {
 });
 
 $ary = [rand()];
-unset($ary[1.0E+42]);
+unset($ary[INF]);
 
 ?>
 --EXPECT--
-The float 1.0E+42 is not representable as an int, cast occurred
+The float INF is not representable as an int, cast occurred

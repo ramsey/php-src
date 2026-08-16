@@ -20,6 +20,7 @@
 #include "zend.h"
 #include "zend_globals.h"
 #include "zend_variables.h"
+#include "zend_int.h"
 
 #if defined(__aarch64__) || defined(_M_ARM64)
 # include <arm_neon.h>
@@ -3281,6 +3282,51 @@ ZEND_API bool ZEND_FASTCALL _zend_handle_numeric_str_ex(const char *key, size_t 
 		} else {
 			return 0;
 		}
+	}
+}
+
+/* True if a string array key is a canonical decimal integer literal that is out
+ * of zend_long range: optional leading "-", a non-zero first digit, then digits
+ * only (i.e., no leading zeros and no "-0"). Out-of-range keys of this form are
+ * how boxed integer keys are stored, so readback converts them to integers.
+ * In-range decimal strings can occur as genuine string keys through variable
+ * variables and property names, so they return false and stay strings. */
+ZEND_API bool ZEND_FASTCALL zend_string_is_canonical_bigint_key(const zend_string *key)
+{
+	const char *p = ZSTR_VAL(key);
+	size_t len = ZSTR_LEN(key);
+	zend_ulong idx;
+
+	if (len == 0) {
+		return false;
+	}
+	if (*p == '-') {
+		p++;
+		len--;
+	}
+	if (len == 0 || *p == '0') {
+		return false;
+	}
+	for (size_t i = 0; i < len; i++) {
+		if (p[i] < '0' || p[i] > '9') {
+			return false;
+		}
+	}
+	return !_zend_handle_numeric_str_ex(ZSTR_VAL(key), ZSTR_LEN(key), &idx);
+}
+
+/* Builds the zval that an array yields for a bucket key on readback. An integer
+ * key (i.e., key == NULL) becomes a long; a canonical out-of-range decimal
+ * string key becomes a bigint; any other string key is copied as-is. */
+ZEND_API void ZEND_FASTCALL zend_array_key_to_zval(zval *dest, const zend_string *key, zend_ulong h)
+{
+	if (key == NULL) {
+		ZVAL_LONG(dest, (zend_long) h);
+	} else if (zend_string_is_canonical_bigint_key(key)) {
+		zend_bigint *big = zend_bigint_from_string(ZSTR_VAL(key), ZSTR_LEN(key), 10);
+		zend_int_from_bigint(dest, big);
+	} else {
+		ZVAL_STR_COPY(dest, (zend_string *) key);
 	}
 }
 

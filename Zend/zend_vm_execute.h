@@ -8083,8 +8083,20 @@ num_index:
 			str = ZSTR_EMPTY_ALLOC();
 			goto str_index;
 		} else if (Z_TYPE_P(offset) == IS_DOUBLE) {
-			hval = zend_dval_to_lval_safe(Z_DVAL_P(offset));
-			goto num_index;
+			zval key_zv;
+			zend_double_to_int_key(&key_zv, Z_DVAL_P(offset));
+			if (UNEXPECTED(EG(exception))) {
+				zval_ptr_dtor_nogc(expr_ptr);
+				HANDLE_EXCEPTION();
+			}
+			if (Z_TYPE(key_zv) == IS_LONG) {
+				hval = Z_LVAL(key_zv);
+				goto num_index;
+			}
+			str = zend_bigint_to_str(Z_BIG(key_zv));
+			zend_hash_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), str, expr_ptr);
+			zend_string_release(str);
+			zval_ptr_dtor_nogc(&key_zv);
 		} else if (Z_TYPE_P(offset) == IS_FALSE) {
 			hval = 0;
 			goto num_index;
@@ -8099,6 +8111,10 @@ num_index:
 			ZVAL_UNDEFINED_OP2();
 			str = ZSTR_EMPTY_ALLOC();
 			goto str_index;
+		} else if (Z_TYPE_P(offset) == IS_BIGINT) {
+			str = zend_bigint_to_str(Z_BIG_P(offset));
+			zend_hash_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), str, expr_ptr);
+			zend_string_release(str);
 		} else {
 			zend_illegal_array_offset_access(offset);
 			zval_ptr_dtor_nogc(expr_ptr);
@@ -10720,8 +10736,20 @@ num_index:
 			str = ZSTR_EMPTY_ALLOC();
 			goto str_index;
 		} else if (Z_TYPE_P(offset) == IS_DOUBLE) {
-			hval = zend_dval_to_lval_safe(Z_DVAL_P(offset));
-			goto num_index;
+			zval key_zv;
+			zend_double_to_int_key(&key_zv, Z_DVAL_P(offset));
+			if (UNEXPECTED(EG(exception))) {
+				zval_ptr_dtor_nogc(expr_ptr);
+				HANDLE_EXCEPTION();
+			}
+			if (Z_TYPE(key_zv) == IS_LONG) {
+				hval = Z_LVAL(key_zv);
+				goto num_index;
+			}
+			str = zend_bigint_to_str(Z_BIG(key_zv));
+			zend_hash_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), str, expr_ptr);
+			zend_string_release(str);
+			zval_ptr_dtor_nogc(&key_zv);
 		} else if (Z_TYPE_P(offset) == IS_FALSE) {
 			hval = 0;
 			goto num_index;
@@ -10736,6 +10764,10 @@ num_index:
 			ZVAL_UNDEFINED_OP2();
 			str = ZSTR_EMPTY_ALLOC();
 			goto str_index;
+		} else if (Z_TYPE_P(offset) == IS_BIGINT) {
+			str = zend_bigint_to_str(Z_BIG_P(offset));
+			zend_hash_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), str, expr_ptr);
+			zend_string_release(str);
 		} else {
 			zend_illegal_array_offset_access(offset);
 			zval_ptr_dtor_nogc(expr_ptr);
@@ -11684,8 +11716,20 @@ num_index:
 			str = ZSTR_EMPTY_ALLOC();
 			goto str_index;
 		} else if (Z_TYPE_P(offset) == IS_DOUBLE) {
-			hval = zend_dval_to_lval_safe(Z_DVAL_P(offset));
-			goto num_index;
+			zval key_zv;
+			zend_double_to_int_key(&key_zv, Z_DVAL_P(offset));
+			if (UNEXPECTED(EG(exception))) {
+				zval_ptr_dtor_nogc(expr_ptr);
+				HANDLE_EXCEPTION();
+			}
+			if (Z_TYPE(key_zv) == IS_LONG) {
+				hval = Z_LVAL(key_zv);
+				goto num_index;
+			}
+			str = zend_bigint_to_str(Z_BIG(key_zv));
+			zend_hash_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), str, expr_ptr);
+			zend_string_release(str);
+			zval_ptr_dtor_nogc(&key_zv);
 		} else if (Z_TYPE_P(offset) == IS_FALSE) {
 			hval = 0;
 			goto num_index;
@@ -11700,6 +11744,10 @@ num_index:
 			ZVAL_UNDEFINED_OP2();
 			str = ZSTR_EMPTY_ALLOC();
 			goto str_index;
+		} else if (Z_TYPE_P(offset) == IS_BIGINT) {
+			str = zend_bigint_to_str(Z_BIG_P(offset));
+			zend_hash_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), str, expr_ptr);
+			zend_string_release(str);
 		} else {
 			zend_illegal_array_offset_access(offset);
 			zval_ptr_dtor_nogc(expr_ptr);
@@ -13386,8 +13434,20 @@ num_index:
 			str = ZSTR_EMPTY_ALLOC();
 			goto str_index;
 		} else if (Z_TYPE_P(offset) == IS_DOUBLE) {
-			hval = zend_dval_to_lval_safe(Z_DVAL_P(offset));
-			goto num_index;
+			zval key_zv;
+			zend_double_to_int_key(&key_zv, Z_DVAL_P(offset));
+			if (UNEXPECTED(EG(exception))) {
+				zval_ptr_dtor_nogc(expr_ptr);
+				HANDLE_EXCEPTION();
+			}
+			if (Z_TYPE(key_zv) == IS_LONG) {
+				hval = Z_LVAL(key_zv);
+				goto num_index;
+			}
+			str = zend_bigint_to_str(Z_BIG(key_zv));
+			zend_hash_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), str, expr_ptr);
+			zend_string_release(str);
+			zval_ptr_dtor_nogc(&key_zv);
 		} else if (Z_TYPE_P(offset) == IS_FALSE) {
 			hval = 0;
 			goto num_index;
@@ -13402,6 +13462,10 @@ num_index:
 			ZVAL_UNDEFINED_OP2();
 			str = ZSTR_EMPTY_ALLOC();
 			goto str_index;
+		} else if (Z_TYPE_P(offset) == IS_BIGINT) {
+			str = zend_bigint_to_str(Z_BIG_P(offset));
+			zend_hash_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), str, expr_ptr);
+			zend_string_release(str);
 		} else {
 			zend_illegal_array_offset_access(offset);
 			zval_ptr_dtor_nogc(expr_ptr);
@@ -19908,8 +19972,20 @@ num_index:
 			str = ZSTR_EMPTY_ALLOC();
 			goto str_index;
 		} else if (Z_TYPE_P(offset) == IS_DOUBLE) {
-			hval = zend_dval_to_lval_safe(Z_DVAL_P(offset));
-			goto num_index;
+			zval key_zv;
+			zend_double_to_int_key(&key_zv, Z_DVAL_P(offset));
+			if (UNEXPECTED(EG(exception))) {
+				zval_ptr_dtor_nogc(expr_ptr);
+				HANDLE_EXCEPTION();
+			}
+			if (Z_TYPE(key_zv) == IS_LONG) {
+				hval = Z_LVAL(key_zv);
+				goto num_index;
+			}
+			str = zend_bigint_to_str(Z_BIG(key_zv));
+			zend_hash_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), str, expr_ptr);
+			zend_string_release(str);
+			zval_ptr_dtor_nogc(&key_zv);
 		} else if (Z_TYPE_P(offset) == IS_FALSE) {
 			hval = 0;
 			goto num_index;
@@ -19924,6 +20000,10 @@ num_index:
 			ZVAL_UNDEFINED_OP2();
 			str = ZSTR_EMPTY_ALLOC();
 			goto str_index;
+		} else if (Z_TYPE_P(offset) == IS_BIGINT) {
+			str = zend_bigint_to_str(Z_BIG_P(offset));
+			zend_hash_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), str, expr_ptr);
+			zend_string_release(str);
 		} else {
 			zend_illegal_array_offset_access(offset);
 			zval_ptr_dtor_nogc(expr_ptr);
@@ -21528,8 +21608,20 @@ num_index:
 			str = ZSTR_EMPTY_ALLOC();
 			goto str_index;
 		} else if (Z_TYPE_P(offset) == IS_DOUBLE) {
-			hval = zend_dval_to_lval_safe(Z_DVAL_P(offset));
-			goto num_index;
+			zval key_zv;
+			zend_double_to_int_key(&key_zv, Z_DVAL_P(offset));
+			if (UNEXPECTED(EG(exception))) {
+				zval_ptr_dtor_nogc(expr_ptr);
+				HANDLE_EXCEPTION();
+			}
+			if (Z_TYPE(key_zv) == IS_LONG) {
+				hval = Z_LVAL(key_zv);
+				goto num_index;
+			}
+			str = zend_bigint_to_str(Z_BIG(key_zv));
+			zend_hash_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), str, expr_ptr);
+			zend_string_release(str);
+			zval_ptr_dtor_nogc(&key_zv);
 		} else if (Z_TYPE_P(offset) == IS_FALSE) {
 			hval = 0;
 			goto num_index;
@@ -21544,6 +21636,10 @@ num_index:
 			ZVAL_UNDEFINED_OP2();
 			str = ZSTR_EMPTY_ALLOC();
 			goto str_index;
+		} else if (Z_TYPE_P(offset) == IS_BIGINT) {
+			str = zend_bigint_to_str(Z_BIG_P(offset));
+			zend_hash_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), str, expr_ptr);
+			zend_string_release(str);
 		} else {
 			zend_illegal_array_offset_access(offset);
 			zval_ptr_dtor_nogc(expr_ptr);
@@ -22293,8 +22389,20 @@ num_index:
 			str = ZSTR_EMPTY_ALLOC();
 			goto str_index;
 		} else if (Z_TYPE_P(offset) == IS_DOUBLE) {
-			hval = zend_dval_to_lval_safe(Z_DVAL_P(offset));
-			goto num_index;
+			zval key_zv;
+			zend_double_to_int_key(&key_zv, Z_DVAL_P(offset));
+			if (UNEXPECTED(EG(exception))) {
+				zval_ptr_dtor_nogc(expr_ptr);
+				HANDLE_EXCEPTION();
+			}
+			if (Z_TYPE(key_zv) == IS_LONG) {
+				hval = Z_LVAL(key_zv);
+				goto num_index;
+			}
+			str = zend_bigint_to_str(Z_BIG(key_zv));
+			zend_hash_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), str, expr_ptr);
+			zend_string_release(str);
+			zval_ptr_dtor_nogc(&key_zv);
 		} else if (Z_TYPE_P(offset) == IS_FALSE) {
 			hval = 0;
 			goto num_index;
@@ -22309,6 +22417,10 @@ num_index:
 			ZVAL_UNDEFINED_OP2();
 			str = ZSTR_EMPTY_ALLOC();
 			goto str_index;
+		} else if (Z_TYPE_P(offset) == IS_BIGINT) {
+			str = zend_bigint_to_str(Z_BIG_P(offset));
+			zend_hash_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), str, expr_ptr);
+			zend_string_release(str);
 		} else {
 			zend_illegal_array_offset_access(offset);
 			zval_ptr_dtor_nogc(expr_ptr);
@@ -23404,8 +23516,20 @@ num_index:
 			str = ZSTR_EMPTY_ALLOC();
 			goto str_index;
 		} else if (Z_TYPE_P(offset) == IS_DOUBLE) {
-			hval = zend_dval_to_lval_safe(Z_DVAL_P(offset));
-			goto num_index;
+			zval key_zv;
+			zend_double_to_int_key(&key_zv, Z_DVAL_P(offset));
+			if (UNEXPECTED(EG(exception))) {
+				zval_ptr_dtor_nogc(expr_ptr);
+				HANDLE_EXCEPTION();
+			}
+			if (Z_TYPE(key_zv) == IS_LONG) {
+				hval = Z_LVAL(key_zv);
+				goto num_index;
+			}
+			str = zend_bigint_to_str(Z_BIG(key_zv));
+			zend_hash_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), str, expr_ptr);
+			zend_string_release(str);
+			zval_ptr_dtor_nogc(&key_zv);
 		} else if (Z_TYPE_P(offset) == IS_FALSE) {
 			hval = 0;
 			goto num_index;
@@ -23420,6 +23544,10 @@ num_index:
 			ZVAL_UNDEFINED_OP2();
 			str = ZSTR_EMPTY_ALLOC();
 			goto str_index;
+		} else if (Z_TYPE_P(offset) == IS_BIGINT) {
+			str = zend_bigint_to_str(Z_BIG_P(offset));
+			zend_hash_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), str, expr_ptr);
+			zend_string_release(str);
 		} else {
 			zend_illegal_array_offset_access(offset);
 			zval_ptr_dtor_nogc(expr_ptr);
@@ -26745,8 +26873,20 @@ num_index:
 			str = ZSTR_EMPTY_ALLOC();
 			goto str_index;
 		} else if (Z_TYPE_P(offset) == IS_DOUBLE) {
-			hval = zend_dval_to_lval_safe(Z_DVAL_P(offset));
-			goto num_index;
+			zval key_zv;
+			zend_double_to_int_key(&key_zv, Z_DVAL_P(offset));
+			if (UNEXPECTED(EG(exception))) {
+				zval_ptr_dtor_nogc(expr_ptr);
+				HANDLE_EXCEPTION();
+			}
+			if (Z_TYPE(key_zv) == IS_LONG) {
+				hval = Z_LVAL(key_zv);
+				goto num_index;
+			}
+			str = zend_bigint_to_str(Z_BIG(key_zv));
+			zend_hash_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), str, expr_ptr);
+			zend_string_release(str);
+			zval_ptr_dtor_nogc(&key_zv);
 		} else if (Z_TYPE_P(offset) == IS_FALSE) {
 			hval = 0;
 			goto num_index;
@@ -26761,6 +26901,10 @@ num_index:
 			ZVAL_UNDEFINED_OP2();
 			str = ZSTR_EMPTY_ALLOC();
 			goto str_index;
+		} else if (Z_TYPE_P(offset) == IS_BIGINT) {
+			str = zend_bigint_to_str(Z_BIG_P(offset));
+			zend_hash_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), str, expr_ptr);
+			zend_string_release(str);
 		} else {
 			zend_illegal_array_offset_access(offset);
 			zval_ptr_dtor_nogc(expr_ptr);
@@ -26839,15 +26983,27 @@ num_index_dim:
 				/* The array may be destroyed while throwing a warning in case the float is not representable as an int.
 				 * Temporarily increase the refcount to detect this situation. */
 				GC_TRY_ADDREF(ht);
-				hval = zend_dval_to_lval_safe(Z_DVAL_P(offset));
+				zval key_zv;
+				zend_double_to_int_key(&key_zv, Z_DVAL_P(offset));
 				if (!(GC_FLAGS(ht) & IS_ARRAY_IMMUTABLE) && !GC_DELREF(ht)) {
+					if (!EG(exception)) {
+						zval_ptr_dtor_nogc(&key_zv);
+					}
 					zend_array_destroy(ht);
 					break;
 				}
 				if (EG(exception)) {
 					break;
 				}
-				goto num_index_dim;
+				if (Z_TYPE(key_zv) == IS_LONG) {
+					hval = Z_LVAL(key_zv);
+					goto num_index_dim;
+				}
+				key = zend_bigint_to_str(Z_BIG(key_zv));
+				ZEND_ASSERT(ht != &EG(symbol_table));
+				zend_hash_del(ht, key);
+				zend_string_release(key);
+				zval_ptr_dtor_nogc(&key_zv);
 			} else if (Z_TYPE_P(offset) == IS_NULL) {
 				key = ZSTR_EMPTY_ALLOC();
 				goto str_index_dim;
@@ -26865,6 +27021,11 @@ num_index_dim:
 				ZVAL_UNDEFINED_OP2();
 				key = ZSTR_EMPTY_ALLOC();
 				goto str_index_dim;
+			} else if (Z_TYPE_P(offset) == IS_BIGINT) {
+				key = zend_bigint_to_str(Z_BIG_P(offset));
+				ZEND_ASSERT(ht != &EG(symbol_table));
+				zend_hash_del(ht, key);
+				zend_string_release(key);
 			} else {
 				zend_illegal_array_offset_unset(offset);
 			}
@@ -29004,8 +29165,20 @@ num_index:
 			str = ZSTR_EMPTY_ALLOC();
 			goto str_index;
 		} else if (Z_TYPE_P(offset) == IS_DOUBLE) {
-			hval = zend_dval_to_lval_safe(Z_DVAL_P(offset));
-			goto num_index;
+			zval key_zv;
+			zend_double_to_int_key(&key_zv, Z_DVAL_P(offset));
+			if (UNEXPECTED(EG(exception))) {
+				zval_ptr_dtor_nogc(expr_ptr);
+				HANDLE_EXCEPTION();
+			}
+			if (Z_TYPE(key_zv) == IS_LONG) {
+				hval = Z_LVAL(key_zv);
+				goto num_index;
+			}
+			str = zend_bigint_to_str(Z_BIG(key_zv));
+			zend_hash_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), str, expr_ptr);
+			zend_string_release(str);
+			zval_ptr_dtor_nogc(&key_zv);
 		} else if (Z_TYPE_P(offset) == IS_FALSE) {
 			hval = 0;
 			goto num_index;
@@ -29020,6 +29193,10 @@ num_index:
 			ZVAL_UNDEFINED_OP2();
 			str = ZSTR_EMPTY_ALLOC();
 			goto str_index;
+		} else if (Z_TYPE_P(offset) == IS_BIGINT) {
+			str = zend_bigint_to_str(Z_BIG_P(offset));
+			zend_hash_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), str, expr_ptr);
+			zend_string_release(str);
 		} else {
 			zend_illegal_array_offset_access(offset);
 			zval_ptr_dtor_nogc(expr_ptr);
@@ -29097,15 +29274,27 @@ num_index_dim:
 				/* The array may be destroyed while throwing a warning in case the float is not representable as an int.
 				 * Temporarily increase the refcount to detect this situation. */
 				GC_TRY_ADDREF(ht);
-				hval = zend_dval_to_lval_safe(Z_DVAL_P(offset));
+				zval key_zv;
+				zend_double_to_int_key(&key_zv, Z_DVAL_P(offset));
 				if (!(GC_FLAGS(ht) & IS_ARRAY_IMMUTABLE) && !GC_DELREF(ht)) {
+					if (!EG(exception)) {
+						zval_ptr_dtor_nogc(&key_zv);
+					}
 					zend_array_destroy(ht);
 					break;
 				}
 				if (EG(exception)) {
 					break;
 				}
-				goto num_index_dim;
+				if (Z_TYPE(key_zv) == IS_LONG) {
+					hval = Z_LVAL(key_zv);
+					goto num_index_dim;
+				}
+				key = zend_bigint_to_str(Z_BIG(key_zv));
+				ZEND_ASSERT(ht != &EG(symbol_table));
+				zend_hash_del(ht, key);
+				zend_string_release(key);
+				zval_ptr_dtor_nogc(&key_zv);
 			} else if (Z_TYPE_P(offset) == IS_NULL) {
 				key = ZSTR_EMPTY_ALLOC();
 				goto str_index_dim;
@@ -29123,6 +29312,11 @@ num_index_dim:
 				ZVAL_UNDEFINED_OP2();
 				key = ZSTR_EMPTY_ALLOC();
 				goto str_index_dim;
+			} else if (Z_TYPE_P(offset) == IS_BIGINT) {
+				key = zend_bigint_to_str(Z_BIG_P(offset));
+				ZEND_ASSERT(ht != &EG(symbol_table));
+				zend_hash_del(ht, key);
+				zend_string_release(key);
 			} else {
 				zend_illegal_array_offset_unset(offset);
 			}
@@ -30775,8 +30969,20 @@ num_index:
 			str = ZSTR_EMPTY_ALLOC();
 			goto str_index;
 		} else if (Z_TYPE_P(offset) == IS_DOUBLE) {
-			hval = zend_dval_to_lval_safe(Z_DVAL_P(offset));
-			goto num_index;
+			zval key_zv;
+			zend_double_to_int_key(&key_zv, Z_DVAL_P(offset));
+			if (UNEXPECTED(EG(exception))) {
+				zval_ptr_dtor_nogc(expr_ptr);
+				HANDLE_EXCEPTION();
+			}
+			if (Z_TYPE(key_zv) == IS_LONG) {
+				hval = Z_LVAL(key_zv);
+				goto num_index;
+			}
+			str = zend_bigint_to_str(Z_BIG(key_zv));
+			zend_hash_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), str, expr_ptr);
+			zend_string_release(str);
+			zval_ptr_dtor_nogc(&key_zv);
 		} else if (Z_TYPE_P(offset) == IS_FALSE) {
 			hval = 0;
 			goto num_index;
@@ -30791,6 +30997,10 @@ num_index:
 			ZVAL_UNDEFINED_OP2();
 			str = ZSTR_EMPTY_ALLOC();
 			goto str_index;
+		} else if (Z_TYPE_P(offset) == IS_BIGINT) {
+			str = zend_bigint_to_str(Z_BIG_P(offset));
+			zend_hash_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), str, expr_ptr);
+			zend_string_release(str);
 		} else {
 			zend_illegal_array_offset_access(offset);
 			zval_ptr_dtor_nogc(expr_ptr);
@@ -32883,8 +33093,20 @@ num_index:
 			str = ZSTR_EMPTY_ALLOC();
 			goto str_index;
 		} else if (Z_TYPE_P(offset) == IS_DOUBLE) {
-			hval = zend_dval_to_lval_safe(Z_DVAL_P(offset));
-			goto num_index;
+			zval key_zv;
+			zend_double_to_int_key(&key_zv, Z_DVAL_P(offset));
+			if (UNEXPECTED(EG(exception))) {
+				zval_ptr_dtor_nogc(expr_ptr);
+				HANDLE_EXCEPTION();
+			}
+			if (Z_TYPE(key_zv) == IS_LONG) {
+				hval = Z_LVAL(key_zv);
+				goto num_index;
+			}
+			str = zend_bigint_to_str(Z_BIG(key_zv));
+			zend_hash_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), str, expr_ptr);
+			zend_string_release(str);
+			zval_ptr_dtor_nogc(&key_zv);
 		} else if (Z_TYPE_P(offset) == IS_FALSE) {
 			hval = 0;
 			goto num_index;
@@ -32899,6 +33121,10 @@ num_index:
 			ZVAL_UNDEFINED_OP2();
 			str = ZSTR_EMPTY_ALLOC();
 			goto str_index;
+		} else if (Z_TYPE_P(offset) == IS_BIGINT) {
+			str = zend_bigint_to_str(Z_BIG_P(offset));
+			zend_hash_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), str, expr_ptr);
+			zend_string_release(str);
 		} else {
 			zend_illegal_array_offset_access(offset);
 			zval_ptr_dtor_nogc(expr_ptr);
@@ -32977,15 +33203,27 @@ num_index_dim:
 				/* The array may be destroyed while throwing a warning in case the float is not representable as an int.
 				 * Temporarily increase the refcount to detect this situation. */
 				GC_TRY_ADDREF(ht);
-				hval = zend_dval_to_lval_safe(Z_DVAL_P(offset));
+				zval key_zv;
+				zend_double_to_int_key(&key_zv, Z_DVAL_P(offset));
 				if (!(GC_FLAGS(ht) & IS_ARRAY_IMMUTABLE) && !GC_DELREF(ht)) {
+					if (!EG(exception)) {
+						zval_ptr_dtor_nogc(&key_zv);
+					}
 					zend_array_destroy(ht);
 					break;
 				}
 				if (EG(exception)) {
 					break;
 				}
-				goto num_index_dim;
+				if (Z_TYPE(key_zv) == IS_LONG) {
+					hval = Z_LVAL(key_zv);
+					goto num_index_dim;
+				}
+				key = zend_bigint_to_str(Z_BIG(key_zv));
+				ZEND_ASSERT(ht != &EG(symbol_table));
+				zend_hash_del(ht, key);
+				zend_string_release(key);
+				zval_ptr_dtor_nogc(&key_zv);
 			} else if (Z_TYPE_P(offset) == IS_NULL) {
 				key = ZSTR_EMPTY_ALLOC();
 				goto str_index_dim;
@@ -33003,6 +33241,11 @@ num_index_dim:
 				ZVAL_UNDEFINED_OP2();
 				key = ZSTR_EMPTY_ALLOC();
 				goto str_index_dim;
+			} else if (Z_TYPE_P(offset) == IS_BIGINT) {
+				key = zend_bigint_to_str(Z_BIG_P(offset));
+				ZEND_ASSERT(ht != &EG(symbol_table));
+				zend_hash_del(ht, key);
+				zend_string_release(key);
 			} else {
 				zend_illegal_array_offset_unset(offset);
 			}
@@ -44903,8 +45146,20 @@ num_index:
 			str = ZSTR_EMPTY_ALLOC();
 			goto str_index;
 		} else if (Z_TYPE_P(offset) == IS_DOUBLE) {
-			hval = zend_dval_to_lval_safe(Z_DVAL_P(offset));
-			goto num_index;
+			zval key_zv;
+			zend_double_to_int_key(&key_zv, Z_DVAL_P(offset));
+			if (UNEXPECTED(EG(exception))) {
+				zval_ptr_dtor_nogc(expr_ptr);
+				HANDLE_EXCEPTION();
+			}
+			if (Z_TYPE(key_zv) == IS_LONG) {
+				hval = Z_LVAL(key_zv);
+				goto num_index;
+			}
+			str = zend_bigint_to_str(Z_BIG(key_zv));
+			zend_hash_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), str, expr_ptr);
+			zend_string_release(str);
+			zval_ptr_dtor_nogc(&key_zv);
 		} else if (Z_TYPE_P(offset) == IS_FALSE) {
 			hval = 0;
 			goto num_index;
@@ -44919,6 +45174,10 @@ num_index:
 			ZVAL_UNDEFINED_OP2();
 			str = ZSTR_EMPTY_ALLOC();
 			goto str_index;
+		} else if (Z_TYPE_P(offset) == IS_BIGINT) {
+			str = zend_bigint_to_str(Z_BIG_P(offset));
+			zend_hash_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), str, expr_ptr);
+			zend_string_release(str);
 		} else {
 			zend_illegal_array_offset_access(offset);
 			zval_ptr_dtor_nogc(expr_ptr);
@@ -44997,15 +45256,27 @@ num_index_dim:
 				/* The array may be destroyed while throwing a warning in case the float is not representable as an int.
 				 * Temporarily increase the refcount to detect this situation. */
 				GC_TRY_ADDREF(ht);
-				hval = zend_dval_to_lval_safe(Z_DVAL_P(offset));
+				zval key_zv;
+				zend_double_to_int_key(&key_zv, Z_DVAL_P(offset));
 				if (!(GC_FLAGS(ht) & IS_ARRAY_IMMUTABLE) && !GC_DELREF(ht)) {
+					if (!EG(exception)) {
+						zval_ptr_dtor_nogc(&key_zv);
+					}
 					zend_array_destroy(ht);
 					break;
 				}
 				if (EG(exception)) {
 					break;
 				}
-				goto num_index_dim;
+				if (Z_TYPE(key_zv) == IS_LONG) {
+					hval = Z_LVAL(key_zv);
+					goto num_index_dim;
+				}
+				key = zend_bigint_to_str(Z_BIG(key_zv));
+				ZEND_ASSERT(ht != &EG(symbol_table));
+				zend_hash_del(ht, key);
+				zend_string_release(key);
+				zval_ptr_dtor_nogc(&key_zv);
 			} else if (Z_TYPE_P(offset) == IS_NULL) {
 				key = ZSTR_EMPTY_ALLOC();
 				goto str_index_dim;
@@ -45023,6 +45294,11 @@ num_index_dim:
 				ZVAL_UNDEFINED_OP2();
 				key = ZSTR_EMPTY_ALLOC();
 				goto str_index_dim;
+			} else if (Z_TYPE_P(offset) == IS_BIGINT) {
+				key = zend_bigint_to_str(Z_BIG_P(offset));
+				ZEND_ASSERT(ht != &EG(symbol_table));
+				zend_hash_del(ht, key);
+				zend_string_release(key);
 			} else {
 				zend_illegal_array_offset_unset(offset);
 			}
@@ -48638,8 +48914,20 @@ num_index:
 			str = ZSTR_EMPTY_ALLOC();
 			goto str_index;
 		} else if (Z_TYPE_P(offset) == IS_DOUBLE) {
-			hval = zend_dval_to_lval_safe(Z_DVAL_P(offset));
-			goto num_index;
+			zval key_zv;
+			zend_double_to_int_key(&key_zv, Z_DVAL_P(offset));
+			if (UNEXPECTED(EG(exception))) {
+				zval_ptr_dtor_nogc(expr_ptr);
+				HANDLE_EXCEPTION();
+			}
+			if (Z_TYPE(key_zv) == IS_LONG) {
+				hval = Z_LVAL(key_zv);
+				goto num_index;
+			}
+			str = zend_bigint_to_str(Z_BIG(key_zv));
+			zend_hash_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), str, expr_ptr);
+			zend_string_release(str);
+			zval_ptr_dtor_nogc(&key_zv);
 		} else if (Z_TYPE_P(offset) == IS_FALSE) {
 			hval = 0;
 			goto num_index;
@@ -48654,6 +48942,10 @@ num_index:
 			ZVAL_UNDEFINED_OP2();
 			str = ZSTR_EMPTY_ALLOC();
 			goto str_index;
+		} else if (Z_TYPE_P(offset) == IS_BIGINT) {
+			str = zend_bigint_to_str(Z_BIG_P(offset));
+			zend_hash_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), str, expr_ptr);
+			zend_string_release(str);
 		} else {
 			zend_illegal_array_offset_access(offset);
 			zval_ptr_dtor_nogc(expr_ptr);
@@ -48731,15 +49023,27 @@ num_index_dim:
 				/* The array may be destroyed while throwing a warning in case the float is not representable as an int.
 				 * Temporarily increase the refcount to detect this situation. */
 				GC_TRY_ADDREF(ht);
-				hval = zend_dval_to_lval_safe(Z_DVAL_P(offset));
+				zval key_zv;
+				zend_double_to_int_key(&key_zv, Z_DVAL_P(offset));
 				if (!(GC_FLAGS(ht) & IS_ARRAY_IMMUTABLE) && !GC_DELREF(ht)) {
+					if (!EG(exception)) {
+						zval_ptr_dtor_nogc(&key_zv);
+					}
 					zend_array_destroy(ht);
 					break;
 				}
 				if (EG(exception)) {
 					break;
 				}
-				goto num_index_dim;
+				if (Z_TYPE(key_zv) == IS_LONG) {
+					hval = Z_LVAL(key_zv);
+					goto num_index_dim;
+				}
+				key = zend_bigint_to_str(Z_BIG(key_zv));
+				ZEND_ASSERT(ht != &EG(symbol_table));
+				zend_hash_del(ht, key);
+				zend_string_release(key);
+				zval_ptr_dtor_nogc(&key_zv);
 			} else if (Z_TYPE_P(offset) == IS_NULL) {
 				key = ZSTR_EMPTY_ALLOC();
 				goto str_index_dim;
@@ -48757,6 +49061,11 @@ num_index_dim:
 				ZVAL_UNDEFINED_OP2();
 				key = ZSTR_EMPTY_ALLOC();
 				goto str_index_dim;
+			} else if (Z_TYPE_P(offset) == IS_BIGINT) {
+				key = zend_bigint_to_str(Z_BIG_P(offset));
+				ZEND_ASSERT(ht != &EG(symbol_table));
+				zend_hash_del(ht, key);
+				zend_string_release(key);
 			} else {
 				zend_illegal_array_offset_unset(offset);
 			}
@@ -50346,8 +50655,20 @@ num_index:
 			str = ZSTR_EMPTY_ALLOC();
 			goto str_index;
 		} else if (Z_TYPE_P(offset) == IS_DOUBLE) {
-			hval = zend_dval_to_lval_safe(Z_DVAL_P(offset));
-			goto num_index;
+			zval key_zv;
+			zend_double_to_int_key(&key_zv, Z_DVAL_P(offset));
+			if (UNEXPECTED(EG(exception))) {
+				zval_ptr_dtor_nogc(expr_ptr);
+				HANDLE_EXCEPTION();
+			}
+			if (Z_TYPE(key_zv) == IS_LONG) {
+				hval = Z_LVAL(key_zv);
+				goto num_index;
+			}
+			str = zend_bigint_to_str(Z_BIG(key_zv));
+			zend_hash_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), str, expr_ptr);
+			zend_string_release(str);
+			zval_ptr_dtor_nogc(&key_zv);
 		} else if (Z_TYPE_P(offset) == IS_FALSE) {
 			hval = 0;
 			goto num_index;
@@ -50362,6 +50683,10 @@ num_index:
 			ZVAL_UNDEFINED_OP2();
 			str = ZSTR_EMPTY_ALLOC();
 			goto str_index;
+		} else if (Z_TYPE_P(offset) == IS_BIGINT) {
+			str = zend_bigint_to_str(Z_BIG_P(offset));
+			zend_hash_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), str, expr_ptr);
+			zend_string_release(str);
 		} else {
 			zend_illegal_array_offset_access(offset);
 			zval_ptr_dtor_nogc(expr_ptr);
@@ -53883,8 +54208,20 @@ num_index:
 			str = ZSTR_EMPTY_ALLOC();
 			goto str_index;
 		} else if (Z_TYPE_P(offset) == IS_DOUBLE) {
-			hval = zend_dval_to_lval_safe(Z_DVAL_P(offset));
-			goto num_index;
+			zval key_zv;
+			zend_double_to_int_key(&key_zv, Z_DVAL_P(offset));
+			if (UNEXPECTED(EG(exception))) {
+				zval_ptr_dtor_nogc(expr_ptr);
+				HANDLE_EXCEPTION();
+			}
+			if (Z_TYPE(key_zv) == IS_LONG) {
+				hval = Z_LVAL(key_zv);
+				goto num_index;
+			}
+			str = zend_bigint_to_str(Z_BIG(key_zv));
+			zend_hash_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), str, expr_ptr);
+			zend_string_release(str);
+			zval_ptr_dtor_nogc(&key_zv);
 		} else if (Z_TYPE_P(offset) == IS_FALSE) {
 			hval = 0;
 			goto num_index;
@@ -53899,6 +54236,10 @@ num_index:
 			ZVAL_UNDEFINED_OP2();
 			str = ZSTR_EMPTY_ALLOC();
 			goto str_index;
+		} else if (Z_TYPE_P(offset) == IS_BIGINT) {
+			str = zend_bigint_to_str(Z_BIG_P(offset));
+			zend_hash_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), str, expr_ptr);
+			zend_string_release(str);
 		} else {
 			zend_illegal_array_offset_access(offset);
 			zval_ptr_dtor_nogc(expr_ptr);
@@ -53977,15 +54318,27 @@ num_index_dim:
 				/* The array may be destroyed while throwing a warning in case the float is not representable as an int.
 				 * Temporarily increase the refcount to detect this situation. */
 				GC_TRY_ADDREF(ht);
-				hval = zend_dval_to_lval_safe(Z_DVAL_P(offset));
+				zval key_zv;
+				zend_double_to_int_key(&key_zv, Z_DVAL_P(offset));
 				if (!(GC_FLAGS(ht) & IS_ARRAY_IMMUTABLE) && !GC_DELREF(ht)) {
+					if (!EG(exception)) {
+						zval_ptr_dtor_nogc(&key_zv);
+					}
 					zend_array_destroy(ht);
 					break;
 				}
 				if (EG(exception)) {
 					break;
 				}
-				goto num_index_dim;
+				if (Z_TYPE(key_zv) == IS_LONG) {
+					hval = Z_LVAL(key_zv);
+					goto num_index_dim;
+				}
+				key = zend_bigint_to_str(Z_BIG(key_zv));
+				ZEND_ASSERT(ht != &EG(symbol_table));
+				zend_hash_del(ht, key);
+				zend_string_release(key);
+				zval_ptr_dtor_nogc(&key_zv);
 			} else if (Z_TYPE_P(offset) == IS_NULL) {
 				key = ZSTR_EMPTY_ALLOC();
 				goto str_index_dim;
@@ -54003,6 +54356,11 @@ num_index_dim:
 				ZVAL_UNDEFINED_OP2();
 				key = ZSTR_EMPTY_ALLOC();
 				goto str_index_dim;
+			} else if (Z_TYPE_P(offset) == IS_BIGINT) {
+				key = zend_bigint_to_str(Z_BIG_P(offset));
+				ZEND_ASSERT(ht != &EG(symbol_table));
+				zend_hash_del(ht, key);
+				zend_string_release(key);
 			} else {
 				zend_illegal_array_offset_unset(offset);
 			}
@@ -61670,8 +62028,20 @@ num_index:
 			str = ZSTR_EMPTY_ALLOC();
 			goto str_index;
 		} else if (Z_TYPE_P(offset) == IS_DOUBLE) {
-			hval = zend_dval_to_lval_safe(Z_DVAL_P(offset));
-			goto num_index;
+			zval key_zv;
+			zend_double_to_int_key(&key_zv, Z_DVAL_P(offset));
+			if (UNEXPECTED(EG(exception))) {
+				zval_ptr_dtor_nogc(expr_ptr);
+				HANDLE_EXCEPTION();
+			}
+			if (Z_TYPE(key_zv) == IS_LONG) {
+				hval = Z_LVAL(key_zv);
+				goto num_index;
+			}
+			str = zend_bigint_to_str(Z_BIG(key_zv));
+			zend_hash_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), str, expr_ptr);
+			zend_string_release(str);
+			zval_ptr_dtor_nogc(&key_zv);
 		} else if (Z_TYPE_P(offset) == IS_FALSE) {
 			hval = 0;
 			goto num_index;
@@ -61686,6 +62056,10 @@ num_index:
 			ZVAL_UNDEFINED_OP2();
 			str = ZSTR_EMPTY_ALLOC();
 			goto str_index;
+		} else if (Z_TYPE_P(offset) == IS_BIGINT) {
+			str = zend_bigint_to_str(Z_BIG_P(offset));
+			zend_hash_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), str, expr_ptr);
+			zend_string_release(str);
 		} else {
 			zend_illegal_array_offset_access(offset);
 			zval_ptr_dtor_nogc(expr_ptr);
@@ -64307,8 +64681,20 @@ num_index:
 			str = ZSTR_EMPTY_ALLOC();
 			goto str_index;
 		} else if (Z_TYPE_P(offset) == IS_DOUBLE) {
-			hval = zend_dval_to_lval_safe(Z_DVAL_P(offset));
-			goto num_index;
+			zval key_zv;
+			zend_double_to_int_key(&key_zv, Z_DVAL_P(offset));
+			if (UNEXPECTED(EG(exception))) {
+				zval_ptr_dtor_nogc(expr_ptr);
+				HANDLE_EXCEPTION();
+			}
+			if (Z_TYPE(key_zv) == IS_LONG) {
+				hval = Z_LVAL(key_zv);
+				goto num_index;
+			}
+			str = zend_bigint_to_str(Z_BIG(key_zv));
+			zend_hash_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), str, expr_ptr);
+			zend_string_release(str);
+			zval_ptr_dtor_nogc(&key_zv);
 		} else if (Z_TYPE_P(offset) == IS_FALSE) {
 			hval = 0;
 			goto num_index;
@@ -64323,6 +64709,10 @@ num_index:
 			ZVAL_UNDEFINED_OP2();
 			str = ZSTR_EMPTY_ALLOC();
 			goto str_index;
+		} else if (Z_TYPE_P(offset) == IS_BIGINT) {
+			str = zend_bigint_to_str(Z_BIG_P(offset));
+			zend_hash_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), str, expr_ptr);
+			zend_string_release(str);
 		} else {
 			zend_illegal_array_offset_access(offset);
 			zval_ptr_dtor_nogc(expr_ptr);
@@ -65169,8 +65559,20 @@ num_index:
 			str = ZSTR_EMPTY_ALLOC();
 			goto str_index;
 		} else if (Z_TYPE_P(offset) == IS_DOUBLE) {
-			hval = zend_dval_to_lval_safe(Z_DVAL_P(offset));
-			goto num_index;
+			zval key_zv;
+			zend_double_to_int_key(&key_zv, Z_DVAL_P(offset));
+			if (UNEXPECTED(EG(exception))) {
+				zval_ptr_dtor_nogc(expr_ptr);
+				HANDLE_EXCEPTION();
+			}
+			if (Z_TYPE(key_zv) == IS_LONG) {
+				hval = Z_LVAL(key_zv);
+				goto num_index;
+			}
+			str = zend_bigint_to_str(Z_BIG(key_zv));
+			zend_hash_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), str, expr_ptr);
+			zend_string_release(str);
+			zval_ptr_dtor_nogc(&key_zv);
 		} else if (Z_TYPE_P(offset) == IS_FALSE) {
 			hval = 0;
 			goto num_index;
@@ -65185,6 +65587,10 @@ num_index:
 			ZVAL_UNDEFINED_OP2();
 			str = ZSTR_EMPTY_ALLOC();
 			goto str_index;
+		} else if (Z_TYPE_P(offset) == IS_BIGINT) {
+			str = zend_bigint_to_str(Z_BIG_P(offset));
+			zend_hash_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), str, expr_ptr);
+			zend_string_release(str);
 		} else {
 			zend_illegal_array_offset_access(offset);
 			zval_ptr_dtor_nogc(expr_ptr);
@@ -66871,8 +67277,20 @@ num_index:
 			str = ZSTR_EMPTY_ALLOC();
 			goto str_index;
 		} else if (Z_TYPE_P(offset) == IS_DOUBLE) {
-			hval = zend_dval_to_lval_safe(Z_DVAL_P(offset));
-			goto num_index;
+			zval key_zv;
+			zend_double_to_int_key(&key_zv, Z_DVAL_P(offset));
+			if (UNEXPECTED(EG(exception))) {
+				zval_ptr_dtor_nogc(expr_ptr);
+				HANDLE_EXCEPTION();
+			}
+			if (Z_TYPE(key_zv) == IS_LONG) {
+				hval = Z_LVAL(key_zv);
+				goto num_index;
+			}
+			str = zend_bigint_to_str(Z_BIG(key_zv));
+			zend_hash_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), str, expr_ptr);
+			zend_string_release(str);
+			zval_ptr_dtor_nogc(&key_zv);
 		} else if (Z_TYPE_P(offset) == IS_FALSE) {
 			hval = 0;
 			goto num_index;
@@ -66887,6 +67305,10 @@ num_index:
 			ZVAL_UNDEFINED_OP2();
 			str = ZSTR_EMPTY_ALLOC();
 			goto str_index;
+		} else if (Z_TYPE_P(offset) == IS_BIGINT) {
+			str = zend_bigint_to_str(Z_BIG_P(offset));
+			zend_hash_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), str, expr_ptr);
+			zend_string_release(str);
 		} else {
 			zend_illegal_array_offset_access(offset);
 			zval_ptr_dtor_nogc(expr_ptr);
@@ -73393,8 +73815,20 @@ num_index:
 			str = ZSTR_EMPTY_ALLOC();
 			goto str_index;
 		} else if (Z_TYPE_P(offset) == IS_DOUBLE) {
-			hval = zend_dval_to_lval_safe(Z_DVAL_P(offset));
-			goto num_index;
+			zval key_zv;
+			zend_double_to_int_key(&key_zv, Z_DVAL_P(offset));
+			if (UNEXPECTED(EG(exception))) {
+				zval_ptr_dtor_nogc(expr_ptr);
+				HANDLE_EXCEPTION();
+			}
+			if (Z_TYPE(key_zv) == IS_LONG) {
+				hval = Z_LVAL(key_zv);
+				goto num_index;
+			}
+			str = zend_bigint_to_str(Z_BIG(key_zv));
+			zend_hash_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), str, expr_ptr);
+			zend_string_release(str);
+			zval_ptr_dtor_nogc(&key_zv);
 		} else if (Z_TYPE_P(offset) == IS_FALSE) {
 			hval = 0;
 			goto num_index;
@@ -73409,6 +73843,10 @@ num_index:
 			ZVAL_UNDEFINED_OP2();
 			str = ZSTR_EMPTY_ALLOC();
 			goto str_index;
+		} else if (Z_TYPE_P(offset) == IS_BIGINT) {
+			str = zend_bigint_to_str(Z_BIG_P(offset));
+			zend_hash_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), str, expr_ptr);
+			zend_string_release(str);
 		} else {
 			zend_illegal_array_offset_access(offset);
 			zval_ptr_dtor_nogc(expr_ptr);
@@ -75013,8 +75451,20 @@ num_index:
 			str = ZSTR_EMPTY_ALLOC();
 			goto str_index;
 		} else if (Z_TYPE_P(offset) == IS_DOUBLE) {
-			hval = zend_dval_to_lval_safe(Z_DVAL_P(offset));
-			goto num_index;
+			zval key_zv;
+			zend_double_to_int_key(&key_zv, Z_DVAL_P(offset));
+			if (UNEXPECTED(EG(exception))) {
+				zval_ptr_dtor_nogc(expr_ptr);
+				HANDLE_EXCEPTION();
+			}
+			if (Z_TYPE(key_zv) == IS_LONG) {
+				hval = Z_LVAL(key_zv);
+				goto num_index;
+			}
+			str = zend_bigint_to_str(Z_BIG(key_zv));
+			zend_hash_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), str, expr_ptr);
+			zend_string_release(str);
+			zval_ptr_dtor_nogc(&key_zv);
 		} else if (Z_TYPE_P(offset) == IS_FALSE) {
 			hval = 0;
 			goto num_index;
@@ -75029,6 +75479,10 @@ num_index:
 			ZVAL_UNDEFINED_OP2();
 			str = ZSTR_EMPTY_ALLOC();
 			goto str_index;
+		} else if (Z_TYPE_P(offset) == IS_BIGINT) {
+			str = zend_bigint_to_str(Z_BIG_P(offset));
+			zend_hash_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), str, expr_ptr);
+			zend_string_release(str);
 		} else {
 			zend_illegal_array_offset_access(offset);
 			zval_ptr_dtor_nogc(expr_ptr);
@@ -75678,8 +76132,20 @@ num_index:
 			str = ZSTR_EMPTY_ALLOC();
 			goto str_index;
 		} else if (Z_TYPE_P(offset) == IS_DOUBLE) {
-			hval = zend_dval_to_lval_safe(Z_DVAL_P(offset));
-			goto num_index;
+			zval key_zv;
+			zend_double_to_int_key(&key_zv, Z_DVAL_P(offset));
+			if (UNEXPECTED(EG(exception))) {
+				zval_ptr_dtor_nogc(expr_ptr);
+				HANDLE_EXCEPTION();
+			}
+			if (Z_TYPE(key_zv) == IS_LONG) {
+				hval = Z_LVAL(key_zv);
+				goto num_index;
+			}
+			str = zend_bigint_to_str(Z_BIG(key_zv));
+			zend_hash_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), str, expr_ptr);
+			zend_string_release(str);
+			zval_ptr_dtor_nogc(&key_zv);
 		} else if (Z_TYPE_P(offset) == IS_FALSE) {
 			hval = 0;
 			goto num_index;
@@ -75694,6 +76160,10 @@ num_index:
 			ZVAL_UNDEFINED_OP2();
 			str = ZSTR_EMPTY_ALLOC();
 			goto str_index;
+		} else if (Z_TYPE_P(offset) == IS_BIGINT) {
+			str = zend_bigint_to_str(Z_BIG_P(offset));
+			zend_hash_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), str, expr_ptr);
+			zend_string_release(str);
 		} else {
 			zend_illegal_array_offset_access(offset);
 			zval_ptr_dtor_nogc(expr_ptr);
@@ -76789,8 +77259,20 @@ num_index:
 			str = ZSTR_EMPTY_ALLOC();
 			goto str_index;
 		} else if (Z_TYPE_P(offset) == IS_DOUBLE) {
-			hval = zend_dval_to_lval_safe(Z_DVAL_P(offset));
-			goto num_index;
+			zval key_zv;
+			zend_double_to_int_key(&key_zv, Z_DVAL_P(offset));
+			if (UNEXPECTED(EG(exception))) {
+				zval_ptr_dtor_nogc(expr_ptr);
+				HANDLE_EXCEPTION();
+			}
+			if (Z_TYPE(key_zv) == IS_LONG) {
+				hval = Z_LVAL(key_zv);
+				goto num_index;
+			}
+			str = zend_bigint_to_str(Z_BIG(key_zv));
+			zend_hash_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), str, expr_ptr);
+			zend_string_release(str);
+			zval_ptr_dtor_nogc(&key_zv);
 		} else if (Z_TYPE_P(offset) == IS_FALSE) {
 			hval = 0;
 			goto num_index;
@@ -76805,6 +77287,10 @@ num_index:
 			ZVAL_UNDEFINED_OP2();
 			str = ZSTR_EMPTY_ALLOC();
 			goto str_index;
+		} else if (Z_TYPE_P(offset) == IS_BIGINT) {
+			str = zend_bigint_to_str(Z_BIG_P(offset));
+			zend_hash_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), str, expr_ptr);
+			zend_string_release(str);
 		} else {
 			zend_illegal_array_offset_access(offset);
 			zval_ptr_dtor_nogc(expr_ptr);
@@ -80130,8 +80616,20 @@ num_index:
 			str = ZSTR_EMPTY_ALLOC();
 			goto str_index;
 		} else if (Z_TYPE_P(offset) == IS_DOUBLE) {
-			hval = zend_dval_to_lval_safe(Z_DVAL_P(offset));
-			goto num_index;
+			zval key_zv;
+			zend_double_to_int_key(&key_zv, Z_DVAL_P(offset));
+			if (UNEXPECTED(EG(exception))) {
+				zval_ptr_dtor_nogc(expr_ptr);
+				HANDLE_EXCEPTION();
+			}
+			if (Z_TYPE(key_zv) == IS_LONG) {
+				hval = Z_LVAL(key_zv);
+				goto num_index;
+			}
+			str = zend_bigint_to_str(Z_BIG(key_zv));
+			zend_hash_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), str, expr_ptr);
+			zend_string_release(str);
+			zval_ptr_dtor_nogc(&key_zv);
 		} else if (Z_TYPE_P(offset) == IS_FALSE) {
 			hval = 0;
 			goto num_index;
@@ -80146,6 +80644,10 @@ num_index:
 			ZVAL_UNDEFINED_OP2();
 			str = ZSTR_EMPTY_ALLOC();
 			goto str_index;
+		} else if (Z_TYPE_P(offset) == IS_BIGINT) {
+			str = zend_bigint_to_str(Z_BIG_P(offset));
+			zend_hash_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), str, expr_ptr);
+			zend_string_release(str);
 		} else {
 			zend_illegal_array_offset_access(offset);
 			zval_ptr_dtor_nogc(expr_ptr);
@@ -80224,15 +80726,27 @@ num_index_dim:
 				/* The array may be destroyed while throwing a warning in case the float is not representable as an int.
 				 * Temporarily increase the refcount to detect this situation. */
 				GC_TRY_ADDREF(ht);
-				hval = zend_dval_to_lval_safe(Z_DVAL_P(offset));
+				zval key_zv;
+				zend_double_to_int_key(&key_zv, Z_DVAL_P(offset));
 				if (!(GC_FLAGS(ht) & IS_ARRAY_IMMUTABLE) && !GC_DELREF(ht)) {
+					if (!EG(exception)) {
+						zval_ptr_dtor_nogc(&key_zv);
+					}
 					zend_array_destroy(ht);
 					break;
 				}
 				if (EG(exception)) {
 					break;
 				}
-				goto num_index_dim;
+				if (Z_TYPE(key_zv) == IS_LONG) {
+					hval = Z_LVAL(key_zv);
+					goto num_index_dim;
+				}
+				key = zend_bigint_to_str(Z_BIG(key_zv));
+				ZEND_ASSERT(ht != &EG(symbol_table));
+				zend_hash_del(ht, key);
+				zend_string_release(key);
+				zval_ptr_dtor_nogc(&key_zv);
 			} else if (Z_TYPE_P(offset) == IS_NULL) {
 				key = ZSTR_EMPTY_ALLOC();
 				goto str_index_dim;
@@ -80250,6 +80764,11 @@ num_index_dim:
 				ZVAL_UNDEFINED_OP2();
 				key = ZSTR_EMPTY_ALLOC();
 				goto str_index_dim;
+			} else if (Z_TYPE_P(offset) == IS_BIGINT) {
+				key = zend_bigint_to_str(Z_BIG_P(offset));
+				ZEND_ASSERT(ht != &EG(symbol_table));
+				zend_hash_del(ht, key);
+				zend_string_release(key);
 			} else {
 				zend_illegal_array_offset_unset(offset);
 			}
@@ -82389,8 +82908,20 @@ num_index:
 			str = ZSTR_EMPTY_ALLOC();
 			goto str_index;
 		} else if (Z_TYPE_P(offset) == IS_DOUBLE) {
-			hval = zend_dval_to_lval_safe(Z_DVAL_P(offset));
-			goto num_index;
+			zval key_zv;
+			zend_double_to_int_key(&key_zv, Z_DVAL_P(offset));
+			if (UNEXPECTED(EG(exception))) {
+				zval_ptr_dtor_nogc(expr_ptr);
+				HANDLE_EXCEPTION();
+			}
+			if (Z_TYPE(key_zv) == IS_LONG) {
+				hval = Z_LVAL(key_zv);
+				goto num_index;
+			}
+			str = zend_bigint_to_str(Z_BIG(key_zv));
+			zend_hash_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), str, expr_ptr);
+			zend_string_release(str);
+			zval_ptr_dtor_nogc(&key_zv);
 		} else if (Z_TYPE_P(offset) == IS_FALSE) {
 			hval = 0;
 			goto num_index;
@@ -82405,6 +82936,10 @@ num_index:
 			ZVAL_UNDEFINED_OP2();
 			str = ZSTR_EMPTY_ALLOC();
 			goto str_index;
+		} else if (Z_TYPE_P(offset) == IS_BIGINT) {
+			str = zend_bigint_to_str(Z_BIG_P(offset));
+			zend_hash_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), str, expr_ptr);
+			zend_string_release(str);
 		} else {
 			zend_illegal_array_offset_access(offset);
 			zval_ptr_dtor_nogc(expr_ptr);
@@ -82482,15 +83017,27 @@ num_index_dim:
 				/* The array may be destroyed while throwing a warning in case the float is not representable as an int.
 				 * Temporarily increase the refcount to detect this situation. */
 				GC_TRY_ADDREF(ht);
-				hval = zend_dval_to_lval_safe(Z_DVAL_P(offset));
+				zval key_zv;
+				zend_double_to_int_key(&key_zv, Z_DVAL_P(offset));
 				if (!(GC_FLAGS(ht) & IS_ARRAY_IMMUTABLE) && !GC_DELREF(ht)) {
+					if (!EG(exception)) {
+						zval_ptr_dtor_nogc(&key_zv);
+					}
 					zend_array_destroy(ht);
 					break;
 				}
 				if (EG(exception)) {
 					break;
 				}
-				goto num_index_dim;
+				if (Z_TYPE(key_zv) == IS_LONG) {
+					hval = Z_LVAL(key_zv);
+					goto num_index_dim;
+				}
+				key = zend_bigint_to_str(Z_BIG(key_zv));
+				ZEND_ASSERT(ht != &EG(symbol_table));
+				zend_hash_del(ht, key);
+				zend_string_release(key);
+				zval_ptr_dtor_nogc(&key_zv);
 			} else if (Z_TYPE_P(offset) == IS_NULL) {
 				key = ZSTR_EMPTY_ALLOC();
 				goto str_index_dim;
@@ -82508,6 +83055,11 @@ num_index_dim:
 				ZVAL_UNDEFINED_OP2();
 				key = ZSTR_EMPTY_ALLOC();
 				goto str_index_dim;
+			} else if (Z_TYPE_P(offset) == IS_BIGINT) {
+				key = zend_bigint_to_str(Z_BIG_P(offset));
+				ZEND_ASSERT(ht != &EG(symbol_table));
+				zend_hash_del(ht, key);
+				zend_string_release(key);
 			} else {
 				zend_illegal_array_offset_unset(offset);
 			}
@@ -84160,8 +84712,20 @@ num_index:
 			str = ZSTR_EMPTY_ALLOC();
 			goto str_index;
 		} else if (Z_TYPE_P(offset) == IS_DOUBLE) {
-			hval = zend_dval_to_lval_safe(Z_DVAL_P(offset));
-			goto num_index;
+			zval key_zv;
+			zend_double_to_int_key(&key_zv, Z_DVAL_P(offset));
+			if (UNEXPECTED(EG(exception))) {
+				zval_ptr_dtor_nogc(expr_ptr);
+				HANDLE_EXCEPTION();
+			}
+			if (Z_TYPE(key_zv) == IS_LONG) {
+				hval = Z_LVAL(key_zv);
+				goto num_index;
+			}
+			str = zend_bigint_to_str(Z_BIG(key_zv));
+			zend_hash_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), str, expr_ptr);
+			zend_string_release(str);
+			zval_ptr_dtor_nogc(&key_zv);
 		} else if (Z_TYPE_P(offset) == IS_FALSE) {
 			hval = 0;
 			goto num_index;
@@ -84176,6 +84740,10 @@ num_index:
 			ZVAL_UNDEFINED_OP2();
 			str = ZSTR_EMPTY_ALLOC();
 			goto str_index;
+		} else if (Z_TYPE_P(offset) == IS_BIGINT) {
+			str = zend_bigint_to_str(Z_BIG_P(offset));
+			zend_hash_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), str, expr_ptr);
+			zend_string_release(str);
 		} else {
 			zend_illegal_array_offset_access(offset);
 			zval_ptr_dtor_nogc(expr_ptr);
@@ -86268,8 +86836,20 @@ num_index:
 			str = ZSTR_EMPTY_ALLOC();
 			goto str_index;
 		} else if (Z_TYPE_P(offset) == IS_DOUBLE) {
-			hval = zend_dval_to_lval_safe(Z_DVAL_P(offset));
-			goto num_index;
+			zval key_zv;
+			zend_double_to_int_key(&key_zv, Z_DVAL_P(offset));
+			if (UNEXPECTED(EG(exception))) {
+				zval_ptr_dtor_nogc(expr_ptr);
+				HANDLE_EXCEPTION();
+			}
+			if (Z_TYPE(key_zv) == IS_LONG) {
+				hval = Z_LVAL(key_zv);
+				goto num_index;
+			}
+			str = zend_bigint_to_str(Z_BIG(key_zv));
+			zend_hash_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), str, expr_ptr);
+			zend_string_release(str);
+			zval_ptr_dtor_nogc(&key_zv);
 		} else if (Z_TYPE_P(offset) == IS_FALSE) {
 			hval = 0;
 			goto num_index;
@@ -86284,6 +86864,10 @@ num_index:
 			ZVAL_UNDEFINED_OP2();
 			str = ZSTR_EMPTY_ALLOC();
 			goto str_index;
+		} else if (Z_TYPE_P(offset) == IS_BIGINT) {
+			str = zend_bigint_to_str(Z_BIG_P(offset));
+			zend_hash_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), str, expr_ptr);
+			zend_string_release(str);
 		} else {
 			zend_illegal_array_offset_access(offset);
 			zval_ptr_dtor_nogc(expr_ptr);
@@ -86362,15 +86946,27 @@ num_index_dim:
 				/* The array may be destroyed while throwing a warning in case the float is not representable as an int.
 				 * Temporarily increase the refcount to detect this situation. */
 				GC_TRY_ADDREF(ht);
-				hval = zend_dval_to_lval_safe(Z_DVAL_P(offset));
+				zval key_zv;
+				zend_double_to_int_key(&key_zv, Z_DVAL_P(offset));
 				if (!(GC_FLAGS(ht) & IS_ARRAY_IMMUTABLE) && !GC_DELREF(ht)) {
+					if (!EG(exception)) {
+						zval_ptr_dtor_nogc(&key_zv);
+					}
 					zend_array_destroy(ht);
 					break;
 				}
 				if (EG(exception)) {
 					break;
 				}
-				goto num_index_dim;
+				if (Z_TYPE(key_zv) == IS_LONG) {
+					hval = Z_LVAL(key_zv);
+					goto num_index_dim;
+				}
+				key = zend_bigint_to_str(Z_BIG(key_zv));
+				ZEND_ASSERT(ht != &EG(symbol_table));
+				zend_hash_del(ht, key);
+				zend_string_release(key);
+				zval_ptr_dtor_nogc(&key_zv);
 			} else if (Z_TYPE_P(offset) == IS_NULL) {
 				key = ZSTR_EMPTY_ALLOC();
 				goto str_index_dim;
@@ -86388,6 +86984,11 @@ num_index_dim:
 				ZVAL_UNDEFINED_OP2();
 				key = ZSTR_EMPTY_ALLOC();
 				goto str_index_dim;
+			} else if (Z_TYPE_P(offset) == IS_BIGINT) {
+				key = zend_bigint_to_str(Z_BIG_P(offset));
+				ZEND_ASSERT(ht != &EG(symbol_table));
+				zend_hash_del(ht, key);
+				zend_string_release(key);
 			} else {
 				zend_illegal_array_offset_unset(offset);
 			}
@@ -98288,8 +98889,20 @@ num_index:
 			str = ZSTR_EMPTY_ALLOC();
 			goto str_index;
 		} else if (Z_TYPE_P(offset) == IS_DOUBLE) {
-			hval = zend_dval_to_lval_safe(Z_DVAL_P(offset));
-			goto num_index;
+			zval key_zv;
+			zend_double_to_int_key(&key_zv, Z_DVAL_P(offset));
+			if (UNEXPECTED(EG(exception))) {
+				zval_ptr_dtor_nogc(expr_ptr);
+				HANDLE_EXCEPTION();
+			}
+			if (Z_TYPE(key_zv) == IS_LONG) {
+				hval = Z_LVAL(key_zv);
+				goto num_index;
+			}
+			str = zend_bigint_to_str(Z_BIG(key_zv));
+			zend_hash_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), str, expr_ptr);
+			zend_string_release(str);
+			zval_ptr_dtor_nogc(&key_zv);
 		} else if (Z_TYPE_P(offset) == IS_FALSE) {
 			hval = 0;
 			goto num_index;
@@ -98304,6 +98917,10 @@ num_index:
 			ZVAL_UNDEFINED_OP2();
 			str = ZSTR_EMPTY_ALLOC();
 			goto str_index;
+		} else if (Z_TYPE_P(offset) == IS_BIGINT) {
+			str = zend_bigint_to_str(Z_BIG_P(offset));
+			zend_hash_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), str, expr_ptr);
+			zend_string_release(str);
 		} else {
 			zend_illegal_array_offset_access(offset);
 			zval_ptr_dtor_nogc(expr_ptr);
@@ -98382,15 +98999,27 @@ num_index_dim:
 				/* The array may be destroyed while throwing a warning in case the float is not representable as an int.
 				 * Temporarily increase the refcount to detect this situation. */
 				GC_TRY_ADDREF(ht);
-				hval = zend_dval_to_lval_safe(Z_DVAL_P(offset));
+				zval key_zv;
+				zend_double_to_int_key(&key_zv, Z_DVAL_P(offset));
 				if (!(GC_FLAGS(ht) & IS_ARRAY_IMMUTABLE) && !GC_DELREF(ht)) {
+					if (!EG(exception)) {
+						zval_ptr_dtor_nogc(&key_zv);
+					}
 					zend_array_destroy(ht);
 					break;
 				}
 				if (EG(exception)) {
 					break;
 				}
-				goto num_index_dim;
+				if (Z_TYPE(key_zv) == IS_LONG) {
+					hval = Z_LVAL(key_zv);
+					goto num_index_dim;
+				}
+				key = zend_bigint_to_str(Z_BIG(key_zv));
+				ZEND_ASSERT(ht != &EG(symbol_table));
+				zend_hash_del(ht, key);
+				zend_string_release(key);
+				zval_ptr_dtor_nogc(&key_zv);
 			} else if (Z_TYPE_P(offset) == IS_NULL) {
 				key = ZSTR_EMPTY_ALLOC();
 				goto str_index_dim;
@@ -98408,6 +99037,11 @@ num_index_dim:
 				ZVAL_UNDEFINED_OP2();
 				key = ZSTR_EMPTY_ALLOC();
 				goto str_index_dim;
+			} else if (Z_TYPE_P(offset) == IS_BIGINT) {
+				key = zend_bigint_to_str(Z_BIG_P(offset));
+				ZEND_ASSERT(ht != &EG(symbol_table));
+				zend_hash_del(ht, key);
+				zend_string_release(key);
 			} else {
 				zend_illegal_array_offset_unset(offset);
 			}
@@ -102023,8 +102657,20 @@ num_index:
 			str = ZSTR_EMPTY_ALLOC();
 			goto str_index;
 		} else if (Z_TYPE_P(offset) == IS_DOUBLE) {
-			hval = zend_dval_to_lval_safe(Z_DVAL_P(offset));
-			goto num_index;
+			zval key_zv;
+			zend_double_to_int_key(&key_zv, Z_DVAL_P(offset));
+			if (UNEXPECTED(EG(exception))) {
+				zval_ptr_dtor_nogc(expr_ptr);
+				HANDLE_EXCEPTION();
+			}
+			if (Z_TYPE(key_zv) == IS_LONG) {
+				hval = Z_LVAL(key_zv);
+				goto num_index;
+			}
+			str = zend_bigint_to_str(Z_BIG(key_zv));
+			zend_hash_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), str, expr_ptr);
+			zend_string_release(str);
+			zval_ptr_dtor_nogc(&key_zv);
 		} else if (Z_TYPE_P(offset) == IS_FALSE) {
 			hval = 0;
 			goto num_index;
@@ -102039,6 +102685,10 @@ num_index:
 			ZVAL_UNDEFINED_OP2();
 			str = ZSTR_EMPTY_ALLOC();
 			goto str_index;
+		} else if (Z_TYPE_P(offset) == IS_BIGINT) {
+			str = zend_bigint_to_str(Z_BIG_P(offset));
+			zend_hash_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), str, expr_ptr);
+			zend_string_release(str);
 		} else {
 			zend_illegal_array_offset_access(offset);
 			zval_ptr_dtor_nogc(expr_ptr);
@@ -102116,15 +102766,27 @@ num_index_dim:
 				/* The array may be destroyed while throwing a warning in case the float is not representable as an int.
 				 * Temporarily increase the refcount to detect this situation. */
 				GC_TRY_ADDREF(ht);
-				hval = zend_dval_to_lval_safe(Z_DVAL_P(offset));
+				zval key_zv;
+				zend_double_to_int_key(&key_zv, Z_DVAL_P(offset));
 				if (!(GC_FLAGS(ht) & IS_ARRAY_IMMUTABLE) && !GC_DELREF(ht)) {
+					if (!EG(exception)) {
+						zval_ptr_dtor_nogc(&key_zv);
+					}
 					zend_array_destroy(ht);
 					break;
 				}
 				if (EG(exception)) {
 					break;
 				}
-				goto num_index_dim;
+				if (Z_TYPE(key_zv) == IS_LONG) {
+					hval = Z_LVAL(key_zv);
+					goto num_index_dim;
+				}
+				key = zend_bigint_to_str(Z_BIG(key_zv));
+				ZEND_ASSERT(ht != &EG(symbol_table));
+				zend_hash_del(ht, key);
+				zend_string_release(key);
+				zval_ptr_dtor_nogc(&key_zv);
 			} else if (Z_TYPE_P(offset) == IS_NULL) {
 				key = ZSTR_EMPTY_ALLOC();
 				goto str_index_dim;
@@ -102142,6 +102804,11 @@ num_index_dim:
 				ZVAL_UNDEFINED_OP2();
 				key = ZSTR_EMPTY_ALLOC();
 				goto str_index_dim;
+			} else if (Z_TYPE_P(offset) == IS_BIGINT) {
+				key = zend_bigint_to_str(Z_BIG_P(offset));
+				ZEND_ASSERT(ht != &EG(symbol_table));
+				zend_hash_del(ht, key);
+				zend_string_release(key);
 			} else {
 				zend_illegal_array_offset_unset(offset);
 			}
@@ -103629,8 +104296,20 @@ num_index:
 			str = ZSTR_EMPTY_ALLOC();
 			goto str_index;
 		} else if (Z_TYPE_P(offset) == IS_DOUBLE) {
-			hval = zend_dval_to_lval_safe(Z_DVAL_P(offset));
-			goto num_index;
+			zval key_zv;
+			zend_double_to_int_key(&key_zv, Z_DVAL_P(offset));
+			if (UNEXPECTED(EG(exception))) {
+				zval_ptr_dtor_nogc(expr_ptr);
+				HANDLE_EXCEPTION();
+			}
+			if (Z_TYPE(key_zv) == IS_LONG) {
+				hval = Z_LVAL(key_zv);
+				goto num_index;
+			}
+			str = zend_bigint_to_str(Z_BIG(key_zv));
+			zend_hash_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), str, expr_ptr);
+			zend_string_release(str);
+			zval_ptr_dtor_nogc(&key_zv);
 		} else if (Z_TYPE_P(offset) == IS_FALSE) {
 			hval = 0;
 			goto num_index;
@@ -103645,6 +104324,10 @@ num_index:
 			ZVAL_UNDEFINED_OP2();
 			str = ZSTR_EMPTY_ALLOC();
 			goto str_index;
+		} else if (Z_TYPE_P(offset) == IS_BIGINT) {
+			str = zend_bigint_to_str(Z_BIG_P(offset));
+			zend_hash_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), str, expr_ptr);
+			zend_string_release(str);
 		} else {
 			zend_illegal_array_offset_access(offset);
 			zval_ptr_dtor_nogc(expr_ptr);
@@ -107166,8 +107849,20 @@ num_index:
 			str = ZSTR_EMPTY_ALLOC();
 			goto str_index;
 		} else if (Z_TYPE_P(offset) == IS_DOUBLE) {
-			hval = zend_dval_to_lval_safe(Z_DVAL_P(offset));
-			goto num_index;
+			zval key_zv;
+			zend_double_to_int_key(&key_zv, Z_DVAL_P(offset));
+			if (UNEXPECTED(EG(exception))) {
+				zval_ptr_dtor_nogc(expr_ptr);
+				HANDLE_EXCEPTION();
+			}
+			if (Z_TYPE(key_zv) == IS_LONG) {
+				hval = Z_LVAL(key_zv);
+				goto num_index;
+			}
+			str = zend_bigint_to_str(Z_BIG(key_zv));
+			zend_hash_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), str, expr_ptr);
+			zend_string_release(str);
+			zval_ptr_dtor_nogc(&key_zv);
 		} else if (Z_TYPE_P(offset) == IS_FALSE) {
 			hval = 0;
 			goto num_index;
@@ -107182,6 +107877,10 @@ num_index:
 			ZVAL_UNDEFINED_OP2();
 			str = ZSTR_EMPTY_ALLOC();
 			goto str_index;
+		} else if (Z_TYPE_P(offset) == IS_BIGINT) {
+			str = zend_bigint_to_str(Z_BIG_P(offset));
+			zend_hash_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), str, expr_ptr);
+			zend_string_release(str);
 		} else {
 			zend_illegal_array_offset_access(offset);
 			zval_ptr_dtor_nogc(expr_ptr);
@@ -107260,15 +107959,27 @@ num_index_dim:
 				/* The array may be destroyed while throwing a warning in case the float is not representable as an int.
 				 * Temporarily increase the refcount to detect this situation. */
 				GC_TRY_ADDREF(ht);
-				hval = zend_dval_to_lval_safe(Z_DVAL_P(offset));
+				zval key_zv;
+				zend_double_to_int_key(&key_zv, Z_DVAL_P(offset));
 				if (!(GC_FLAGS(ht) & IS_ARRAY_IMMUTABLE) && !GC_DELREF(ht)) {
+					if (!EG(exception)) {
+						zval_ptr_dtor_nogc(&key_zv);
+					}
 					zend_array_destroy(ht);
 					break;
 				}
 				if (EG(exception)) {
 					break;
 				}
-				goto num_index_dim;
+				if (Z_TYPE(key_zv) == IS_LONG) {
+					hval = Z_LVAL(key_zv);
+					goto num_index_dim;
+				}
+				key = zend_bigint_to_str(Z_BIG(key_zv));
+				ZEND_ASSERT(ht != &EG(symbol_table));
+				zend_hash_del(ht, key);
+				zend_string_release(key);
+				zval_ptr_dtor_nogc(&key_zv);
 			} else if (Z_TYPE_P(offset) == IS_NULL) {
 				key = ZSTR_EMPTY_ALLOC();
 				goto str_index_dim;
@@ -107286,6 +107997,11 @@ num_index_dim:
 				ZVAL_UNDEFINED_OP2();
 				key = ZSTR_EMPTY_ALLOC();
 				goto str_index_dim;
+			} else if (Z_TYPE_P(offset) == IS_BIGINT) {
+				key = zend_bigint_to_str(Z_BIG_P(offset));
+				ZEND_ASSERT(ht != &EG(symbol_table));
+				zend_hash_del(ht, key);
+				zend_string_release(key);
 			} else {
 				zend_illegal_array_offset_unset(offset);
 			}

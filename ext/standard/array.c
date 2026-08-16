@@ -35,6 +35,7 @@
 #include "zend_exceptions.h"
 #include "ext/random/php_random.h"
 #include "zend_frameless_function.h"
+#include "zend_bigint.h"
 
 /* {{{ defines */
 
@@ -7236,9 +7237,21 @@ PHP_FUNCTION(array_key_exists)
 			zend_error(E_DEPRECATED, "Using null as the key parameter for array_key_exists() is deprecated, use an empty string instead");
 			RETVAL_BOOL(zend_hash_exists(ht, ZSTR_EMPTY_ALLOC()));
 			break;
-		case IS_DOUBLE:
-			RETVAL_BOOL(zend_hash_index_exists(ht, zend_dval_to_lval_safe(Z_DVAL_P(key))));
+		case IS_DOUBLE: {
+			zval key_zv;
+			if (UNEXPECTED(zend_double_to_int_key(&key_zv, Z_DVAL_P(key)) == FAILURE)) {
+				RETURN_THROWS();
+			}
+			if (Z_TYPE(key_zv) == IS_LONG) {
+				RETVAL_BOOL(zend_hash_index_exists(ht, Z_LVAL(key_zv)));
+			} else {
+				zend_string *dbl_key = zend_bigint_to_str(Z_BIG(key_zv));
+				RETVAL_BOOL(zend_hash_exists(ht, dbl_key));
+				zend_string_release(dbl_key);
+				zval_ptr_dtor_nogc(&key_zv);
+			}
 			break;
+		}
 		case IS_FALSE:
 			RETVAL_BOOL(zend_hash_index_exists(ht, 0));
 			break;
@@ -7249,6 +7262,12 @@ PHP_FUNCTION(array_key_exists)
 			zend_use_resource_as_offset(key);
 			RETVAL_BOOL(zend_hash_index_exists(ht, Z_RES_HANDLE_P(key)));
 			break;
+		case IS_BIGINT: {
+			zend_string *bigint_key = zend_bigint_to_str(Z_BIG_P(key));
+			RETVAL_BOOL(zend_hash_exists(ht, bigint_key));
+			zend_string_release(bigint_key);
+			break;
+		}
 		default:
 			zend_argument_type_error(1, "must be a valid array offset type");
 			break;

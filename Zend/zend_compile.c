@@ -10836,6 +10836,9 @@ static bool zend_try_ct_eval_array(zval *result, zend_ast *ast) /* {{{ */
 				case IS_NULL:
 					/* Null key will generate a warning at run-time. */
 					goto fail;
+				case IS_BIGINT:
+					/* Leave boxed keys to the run-time array-element opcode. */
+					goto fail;
 				default:
 					zend_error_noreturn(E_COMPILE_ERROR, "Illegal offset type");
 			}

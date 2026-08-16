@@ -25,6 +25,7 @@
 #include "zend.h"
 #include "zend_compile.h"
 #include "zend_execute.h"
+#include "zend_int.h"
 #include "zend_API.h"
 #include "zend_ptr_stack.h"
 #include "zend_constants.h"
@@ -2508,9 +2509,15 @@ static zend_never_inline ZEND_COLD void ZEND_FASTCALL zend_undefined_offset(zend
 	zend_error(E_WARNING, "Undefined array key " ZEND_LONG_FMT, lval);
 }
 
-static zend_never_inline ZEND_COLD void ZEND_FASTCALL zend_undefined_index(const zend_string *offset)
+ZEND_API ZEND_COLD void ZEND_FASTCALL zend_undefined_index(const zend_string *offset)
 {
-	zend_error(E_WARNING, "Undefined array key \"%s\"", ZSTR_VAL(offset));
+	if (zend_string_is_canonical_bigint_key(offset)) {
+		/* A string key in canonical over-range decimal form is the stored form of an
+		 * integer key, so the warning prints it unquoted like any other integer key. */
+		zend_error(E_WARNING, "Undefined array key %s", ZSTR_VAL(offset));
+	} else {
+		zend_error(E_WARNING, "Undefined array key \"%s\"", ZSTR_VAL(offset));
+	}
 }
 
 ZEND_API ZEND_COLD zval* ZEND_FASTCALL zend_undefined_offset_write(HashTable *ht, zend_long lval)
@@ -2679,21 +2686,32 @@ static zend_never_inline uint8_t slow_index_convert(HashTable *ht, const zval *d
 
 			value->str = ZSTR_EMPTY_ALLOC();
 			return IS_STRING;
-		case IS_DOUBLE:
+		case IS_DOUBLE: {
 			/* The array may be destroyed while throwing the notice.
 			 * Temporarily increase the refcount to detect this situation. */
 			if (!(GC_FLAGS(ht) & IS_ARRAY_IMMUTABLE)) {
 				GC_ADDREF(ht);
 			}
-			value->lval = zend_dval_to_lval_safe(Z_DVAL_P(dim));
+			zval key_zv;
+			zend_double_to_int_key(&key_zv, Z_DVAL_P(dim));
 			if (!(GC_FLAGS(ht) & IS_ARRAY_IMMUTABLE) && !GC_DELREF(ht)) {
+				if (!EG(exception)) {
+					zval_ptr_dtor_nogc(&key_zv);
+				}
 				zend_array_destroy(ht);
 				return IS_NULL;
 			}
 			if (EG(exception)) {
 				return IS_NULL;
 			}
-			return IS_LONG;
+			if (Z_TYPE(key_zv) == IS_LONG) {
+				value->lval = Z_LVAL(key_zv);
+				return IS_LONG;
+			}
+			value->str = zend_bigint_to_str(Z_BIG(key_zv));
+			zval_ptr_dtor_nogc(&key_zv);
+			return IS_STRING;
+		}
 		case IS_RESOURCE:
 			/* The array may be destroyed while throwing the notice.
 			 * Temporarily increase the refcount to detect this situation. */
@@ -2716,6 +2734,10 @@ static zend_never_inline uint8_t slow_index_convert(HashTable *ht, const zval *d
 		case IS_TRUE:
 			value->lval = 1;
 			return IS_LONG;
+		case IS_BIGINT:
+			/* A bigint lies outside long range, so the key is its decimal string form. */
+			value->str = zend_bigint_to_str(Z_BIG_P(dim));
+			return IS_STRING;
 		default:
 			zend_illegal_array_offset_access(dim);
 			return IS_NULL;
@@ -2761,14 +2783,18 @@ static zend_never_inline uint8_t slow_index_convert_w(HashTable *ht, const zval 
 			}
 			value->str = ZSTR_EMPTY_ALLOC();
 			return IS_STRING;
-		case IS_DOUBLE:
+		case IS_DOUBLE: {
 			/* The array may be destroyed while throwing the notice.
 			 * Temporarily increase the refcount to detect this situation. */
 			if (!(GC_FLAGS(ht) & IS_ARRAY_IMMUTABLE)) {
 				GC_ADDREF(ht);
 			}
-			value->lval = zend_dval_to_lval_safe(Z_DVAL_P(dim));
+			zval key_zv;
+			zend_double_to_int_key(&key_zv, Z_DVAL_P(dim));
 			if (!(GC_FLAGS(ht) & IS_ARRAY_IMMUTABLE) && GC_DELREF(ht) != 1) {
+				if (!EG(exception)) {
+					zval_ptr_dtor_nogc(&key_zv);
+				}
 				if (!GC_REFCOUNT(ht)) {
 					zend_array_destroy(ht);
 				}
@@ -2777,7 +2803,14 @@ static zend_never_inline uint8_t slow_index_convert_w(HashTable *ht, const zval 
 			if (EG(exception)) {
 				return IS_NULL;
 			}
-			return IS_LONG;
+			if (Z_TYPE(key_zv) == IS_LONG) {
+				value->lval = Z_LVAL(key_zv);
+				return IS_LONG;
+			}
+			value->str = zend_bigint_to_str(Z_BIG(key_zv));
+			zval_ptr_dtor_nogc(&key_zv);
+			return IS_STRING;
+		}
 		case IS_RESOURCE:
 			/* The array may be destroyed while throwing the notice.
 			 * Temporarily increase the refcount to detect this situation. */
@@ -2802,6 +2835,10 @@ static zend_never_inline uint8_t slow_index_convert_w(HashTable *ht, const zval 
 		case IS_TRUE:
 			value->lval = 1;
 			return IS_LONG;
+		case IS_BIGINT:
+			/* A bigint lies outside long range, so the key is its decimal string form. */
+			value->str = zend_bigint_to_str(Z_BIG_P(dim));
+			return IS_STRING;
 		default:
 			zend_illegal_array_offset_access(dim);
 			return IS_NULL;
@@ -2813,6 +2850,7 @@ static zend_always_inline zval *zend_fetch_dimension_address_inner(HashTable *ht
 	zval *retval = NULL;
 	zend_string *offset_key;
 	zend_ulong hval;
+	bool release_offset_key = false;
 
 try_again:
 	if (EXPECTED(Z_TYPE_P(dim) == IS_LONG)) {
@@ -2846,7 +2884,7 @@ num_undef:
 		}
 str_index:
 		if (type != BP_VAR_W) {
-			retval = zend_hash_find_ex(ht, offset_key, ZEND_CONST_COND(dim_type == IS_CONST, 0));
+			retval = zend_hash_find_ex(ht, offset_key, !release_offset_key && ZEND_CONST_COND(dim_type == IS_CONST, 0));
 			if (!retval) {
 				switch (type) {
 					case BP_VAR_R:
@@ -2878,6 +2916,13 @@ str_index:
 		}
 		if (t == IS_STRING) {
 			offset_key = val.str;
+			/* Owned string, so it must be released. The bigint case allocates a
+			 * decimal; the null-offset case is interned, making the release a
+			 * no-op. */
+			release_offset_key = true;
+			/* A freshly rendered string carries no hash yet; compute it now so a
+			 * known-hash lookup below never reads a stale ZSTR_H of 0. */
+			zend_string_hash_val(offset_key);
 			goto str_index;
 		} else if (t == IS_LONG) {
 			hval = val.lval;
@@ -2886,6 +2931,9 @@ str_index:
 			retval = (type == BP_VAR_W || type == BP_VAR_RW) ?
 					NULL : &EG(uninitialized_zval);
 		}
+	}
+	if (UNEXPECTED(release_offset_key)) {
+		zend_string_release(offset_key);
 	}
 	return retval;
 }
@@ -3253,14 +3301,26 @@ static zend_never_inline zval* ZEND_FASTCALL zend_find_array_dim_slow(HashTable 
 		/* The array may be destroyed while throwing a warning in case the float is not representable as an int.
 		 * Temporarily increase the refcount to detect this situation. */
 		GC_TRY_ADDREF(ht);
-		hval = zend_dval_to_lval_safe(Z_DVAL_P(offset));
+		zval key_zv;
+		zend_double_to_int_key(&key_zv, Z_DVAL_P(offset));
 		if (!(GC_FLAGS(ht) & IS_ARRAY_IMMUTABLE) && !GC_DELREF(ht)) {
+			if (!EG(exception)) {
+				zval_ptr_dtor_nogc(&key_zv);
+			}
 			zend_array_destroy(ht);
 			return NULL;
 		}
 		if (EG(exception)) {
 			return NULL;
 		}
+		if (Z_TYPE(key_zv) != IS_LONG) {
+			zend_string *dbl_key = zend_bigint_to_str(Z_BIG(key_zv));
+			zval *dbl_value = zend_hash_find(ht, dbl_key);
+			zend_string_release(dbl_key);
+			zval_ptr_dtor_nogc(&key_zv);
+			return dbl_value;
+		}
+		hval = Z_LVAL(key_zv);
 num_idx:
 		return zend_hash_index_find(ht, hval);
 	} else if (Z_TYPE_P(offset) == IS_NULL) {
@@ -3294,6 +3354,11 @@ null_undef_idx:
 	} else if (/*OP2_TYPE == IS_CV &&*/ Z_TYPE_P(offset) == IS_UNDEF) {
 		ZVAL_UNDEFINED_OP2();
 		goto null_undef_idx;
+	} else if (Z_TYPE_P(offset) == IS_BIGINT) {
+		zend_string *bigint_key = zend_bigint_to_str(Z_BIG_P(offset));
+		zval *value = zend_hash_find(ht, bigint_key);
+		zend_string_release(bigint_key);
+		return value;
 	} else {
 		zend_illegal_array_offset_isset(offset);
 		return NULL;
@@ -3402,14 +3467,26 @@ num_key:
 		/* The array may be destroyed while throwing a warning in case the float is not representable as an int.
 		 * Temporarily increase the refcount to detect this situation. */
 		GC_TRY_ADDREF(ht);
-		hval = zend_dval_to_lval_safe(Z_DVAL_P(key));
+		zval key_zv;
+		zend_double_to_int_key(&key_zv, Z_DVAL_P(key));
 		if (!(GC_FLAGS(ht) & IS_ARRAY_IMMUTABLE) && !GC_DELREF(ht)) {
+			if (!EG(exception)) {
+				zval_ptr_dtor_nogc(&key_zv);
+			}
 			zend_array_destroy(ht);
 			return false;
 		}
 		if (EG(exception)) {
 			return false;
 		}
+		if (Z_TYPE(key_zv) != IS_LONG) {
+			zend_string *dbl_key = zend_bigint_to_str(Z_BIG(key_zv));
+			bool dbl_exists = zend_hash_exists(ht, dbl_key);
+			zend_string_release(dbl_key);
+			zval_ptr_dtor_nogc(&key_zv);
+			return dbl_exists;
+		}
+		hval = Z_LVAL(key_zv);
 		goto num_key;
 	} else if (Z_TYPE_P(key) == IS_FALSE) {
 		hval = 0;
@@ -3421,6 +3498,11 @@ num_key:
 		zend_use_resource_as_offset(key);
 		hval = Z_RES_HANDLE_P(key);
 		goto num_key;
+	} else if (Z_TYPE_P(key) == IS_BIGINT) {
+		zend_string *bigint_key = zend_bigint_to_str(Z_BIG_P(key));
+		bool exists = zend_hash_exists(ht, bigint_key);
+		zend_string_release(bigint_key);
+		return exists;
 	} else if (Z_TYPE_P(key) <= IS_NULL) {
 		if (UNEXPECTED(Z_TYPE_P(key) == IS_UNDEF)) {
 			ZVAL_UNDEFINED_OP1();

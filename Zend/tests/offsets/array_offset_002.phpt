@@ -7,12 +7,12 @@ set_error_handler(function($code, $msg) {
     $GLOBALS[''] = $GLOBALS['y'];
 });
 function x(&$s){
-    $s[100000000000000000000] = 1;
+    $s[2.5] = 1;
 }
 x($y);
 var_dump($y);
 ?>
 --EXPECT--
-Err: The float 1.0E+20 is not representable as an int, cast occurred
+Err: Implicit conversion from float 2.5 to int loses precision
 array(0) {
 }
