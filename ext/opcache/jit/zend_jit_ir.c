@@ -1798,7 +1798,7 @@ static void jit_ZVAL_DTOR(zend_jit_ctx *jit, ir_ref ref, uint32_t op_info, const
 				ir_CALL_1(IR_VOID, ir_CONST_FC_FUNC(_efree), ref);
 				return;
 		} else if (type == IS_ARRAY) {
-			if ((op_info) & (MAY_BE_ARRAY_KEY_STRING|MAY_BE_ARRAY_OF_STRING|MAY_BE_ARRAY_OF_ARRAY|MAY_BE_ARRAY_OF_OBJECT|MAY_BE_ARRAY_OF_RESOURCE|MAY_BE_ARRAY_OF_REF)) {
+			if ((op_info) & (MAY_BE_ARRAY_KEY_STRING|MAY_BE_ARRAY_OF_STRING|MAY_BE_ARRAY_OF_BIGINT|MAY_BE_ARRAY_OF_ARRAY|MAY_BE_ARRAY_OF_OBJECT|MAY_BE_ARRAY_OF_RESOURCE|MAY_BE_ARRAY_OF_REF)) {
 				if (opline && ((op_info) & (MAY_BE_ARRAY_OF_ARRAY|MAY_BE_ARRAY_OF_OBJECT|MAY_BE_ARRAY_OF_RESOURCE|MAY_BE_ARRAY_OF_REF))) {
 					jit_SET_EX_OPLINE(jit, opline);
 				}
