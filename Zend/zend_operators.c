@@ -4808,6 +4808,37 @@ ZEND_API uint8_t ZEND_FASTCALL zend_string_to_number(const char *str, size_t len
 	return Z_TYPE_P(result);
 }
 
+ZEND_API bool ZEND_FASTCALL zend_integer_string_out_of_long_range(const char *str, size_t len,
+	zend_integer_string_info *info)
+{
+	int oflow_info = 0;
+	const char *num, *num_end, *end;
+
+	/* An integer that fits returns IS_LONG, and a float form leaves the
+	 * overflow flag clear, so both answer no here. */
+	if (IS_DOUBLE != is_numeric_string_ex(str, len, NULL, NULL, /* allow errors */ true, &oflow_info, NULL)
+	 || oflow_info == 0) {
+		return false;
+	}
+
+	zend_locate_integer_span(str, len, &num, &num_end);
+	if (!zend_integer_span_is_pure(str, len, num_end)) {
+		return false;
+	}
+
+	zend_extract_decimal_magnitude(str, len, &info->digits, &info->digits_len);
+	info->negative = oflow_info < 0;
+
+	end = str + len;
+	while (num_end < end && (*num_end == ' ' || *num_end == '\t' || *num_end == '\n'
+			|| *num_end == '\r' || *num_end == '\v' || *num_end == '\f')) {
+		num_end++;
+	}
+	info->trailing_data = num_end != end;
+
+	return true;
+}
+
 /*
  * String matching - Sunday algorithm
  * http://www.iti.fh-flensburg.de/lang/algorithmen/pattern/sundayen.htm

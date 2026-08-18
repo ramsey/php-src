@@ -168,7 +168,8 @@ $offsets = [
     -14.0,
     //PHP_INT_MAX,
     //PHP_INT_MIN,
-    PHP_INT_MAX * 2,
+    // Writing at an offset above PHP_INT_MAX grows a string container past the memory limit.
+    //PHP_INT_MAX * 2,
     PHP_INT_MIN * 2,
     INF,
     -INF,
@@ -187,7 +188,8 @@ $offsets = [
     '-15',
     '-16.5',
     '-17.0',
-    (string) PHP_INT_MAX * 2,
+    // Writing at an offset above PHP_INT_MAX grows a string container past the memory limit.
+    //(string) PHP_INT_MAX * 2,
     (string) PHP_INT_MIN * 2,
     [],
     STDERR,

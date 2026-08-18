@@ -103,6 +103,27 @@ ZEND_API bool zend_string_only_has_ascii_alphanumeric(const zend_string *str);
 ZEND_API uint8_t ZEND_FASTCALL _is_numeric_string_ex(const char *str, size_t length, zend_long *lval,
 	double *dval, bool allow_errors, int *oflow_info, bool *trailing_data);
 
+/* The parts of an integer string, filled in by
+ * zend_integer_string_out_of_long_range(). */
+typedef struct {
+	/* Significant decimal digits, sign and leading zeros stripped. */
+	const char *digits;
+	size_t digits_len;
+	bool negative;
+	/* True when characters other than trailing whitespace follow the integer. */
+	bool trailing_data;
+} zend_integer_string_info;
+
+/**
+ * Returns true when the string represents an integer whose value lies outside
+ * the range of zend_long, and fills in its parts. Leading whitespace and a
+ * sign are allowed. A decimal point or an exponent is not. The whole digit run
+ * is scanned, so the answer does not depend on the width of zend_long. Nothing
+ * is allocated.
+ */
+ZEND_API bool ZEND_FASTCALL zend_integer_string_out_of_long_range(const char *str, size_t len,
+	zend_integer_string_info *info);
+
 /**
  * Converts a numeric string to a zval. An in-range integer string becomes
  * IS_LONG, a float-shaped string becomes IS_DOUBLE, and an out-of-range

@@ -1307,6 +1307,57 @@ num_index:
 	return retval;
 }
 
+/* Recognizes an integer string whose value lies outside the range of zend_long
+ * and writes the offset it reads as, which lies past whichever end of the
+ * string its sign points to. Also reports whether characters follow the
+ * integer, which the caller diagnoses the way it diagnoses an integer string
+ * that fits. */
+static bool zend_string_offset_out_of_long_range(const zend_string *dim_str, zend_long *offset, bool *trailing_data)
+{
+	zend_integer_string_info info;
+
+	if (!zend_integer_string_out_of_long_range(ZSTR_VAL(dim_str), ZSTR_LEN(dim_str), &info)) {
+		return false;
+	}
+
+	*offset = info.negative ? ZEND_LONG_MIN : ZEND_LONG_MAX;
+	*trailing_data = info.trailing_data;
+
+	return true;
+}
+
+/* An out-of-range string offset is clamped to ZEND_LONG_MIN or ZEND_LONG_MAX
+ * for the bounds check, which loses the value the program passed. Diagnostics
+ * call this to recover it as decimal text, for a boxed offset or for an integer
+ * string outside long range. Returns NULL for an offset that fit, which the
+ * caller formats itself. The caller owns the result. */
+static zend_never_inline ZEND_COLD zend_string *zend_string_offset_repr(const zval *dim)
+{
+	zend_integer_string_info info;
+
+	if (Z_TYPE_P(dim) == IS_REFERENCE) {
+		dim = Z_REFVAL_P(dim);
+	}
+	if (Z_TYPE_P(dim) == IS_BIGINT) {
+		return zend_bigint_to_str(Z_BIG_P(dim));
+	}
+	if (Z_TYPE_P(dim) == IS_STRING
+	 && zend_integer_string_out_of_long_range(Z_STRVAL_P(dim), Z_STRLEN_P(dim), &info)) {
+		size_t sign_len = info.negative ? 1 : 0;
+		zend_string *repr = zend_string_alloc(sign_len + info.digits_len, 0);
+
+		if (info.negative) {
+			ZSTR_VAL(repr)[0] = '-';
+		}
+		memcpy(ZSTR_VAL(repr) + sign_len, info.digits, info.digits_len);
+		ZSTR_VAL(repr)[sign_len + info.digits_len] = '\0';
+
+		return repr;
+	}
+
+	return NULL;
+}
+
 /* type is one of the BP_VAR_* constants */
 static zend_never_inline zend_long zend_check_string_offset(zval *dim, int type)
 {
@@ -1328,6 +1379,13 @@ try_again:
 				}
 				return offset;
 			}
+			if (zend_string_offset_out_of_long_range(Z_STR_P(dim), &offset, &trailing_data)) {
+				if (UNEXPECTED(trailing_data)
+				 && EG(current_execute_data)->opline->opcode != ZEND_FETCH_DIM_UNSET) {
+					zend_error(E_WARNING, "Illegal string offset \"%s\"", Z_STRVAL_P(dim));
+				}
+				return offset;
+			}
 			zend_illegal_container_offset(ZSTR_KNOWN(ZEND_STR_STRING), dim, BP_VAR_R);
 			return 0;
 		}
@@ -1343,6 +1401,8 @@ try_again:
 		case IS_TRUE:
 			zend_error(E_WARNING, "String offset cast occurred");
 			break;
+		case IS_BIGINT:
+			return zend_bigint_sign(Z_BIG_P(dim)) < 0 ? ZEND_LONG_MIN : ZEND_LONG_MAX;
 		case IS_REFERENCE:
 			dim = Z_REFVAL_P(dim);
 			goto try_again;
@@ -1354,7 +1414,9 @@ try_again:
 	return zval_get_long_func(dim, /* is_strict */ false);
 }
 
-static zend_always_inline zend_string* zend_jit_fetch_dim_str_offset(zend_string *str, zend_long offset)
+/* dim is the dimension the offset came from, or NULL when the caller already
+ * knows it held a value of type int. */
+static zend_always_inline zend_string* zend_jit_fetch_dim_str_offset(zend_string *str, zend_long offset, const zval *dim)
 {
 	if (UNEXPECTED((zend_ulong)offset >= (zend_ulong)ZSTR_LEN(str))) {
 		if (EXPECTED(offset < 0)) {
@@ -1365,7 +1427,13 @@ static zend_always_inline zend_string* zend_jit_fetch_dim_str_offset(zend_string
 				return ZSTR_CHAR((uint8_t)ZSTR_VAL(str)[real_offset]);
 			}
 		}
-		zend_error(E_WARNING, "Uninitialized string offset " ZEND_LONG_FMT, offset);
+		zend_string *offset_repr = dim != NULL ? zend_string_offset_repr(dim) : NULL;
+		if (UNEXPECTED(offset_repr != NULL)) {
+			zend_error(E_WARNING, "Uninitialized string offset %s", ZSTR_VAL(offset_repr));
+			zend_string_release(offset_repr);
+		} else {
+			zend_error(E_WARNING, "Uninitialized string offset " ZEND_LONG_FMT, offset);
+		}
 		return ZSTR_EMPTY_ALLOC();
 	} else {
 		return ZSTR_CHAR((uint8_t)ZSTR_VAL(str)[offset]);
@@ -1374,7 +1442,7 @@ static zend_always_inline zend_string* zend_jit_fetch_dim_str_offset(zend_string
 
 static zend_string* ZEND_FASTCALL zend_jit_fetch_dim_str_offset_r_helper(zend_string *str, zend_long offset)
 {
-	return zend_jit_fetch_dim_str_offset(str, offset);
+	return zend_jit_fetch_dim_str_offset(str, offset, NULL);
 }
 
 static zend_string* ZEND_FASTCALL zend_jit_fetch_dim_str_r_helper(zend_string *str, zval *dim)
@@ -1387,7 +1455,7 @@ static zend_string* ZEND_FASTCALL zend_jit_fetch_dim_str_r_helper(zend_string *s
 		}
 		offset = zend_check_string_offset(dim, BP_VAR_R);
 		if (!(GC_FLAGS(str) & IS_STR_INTERNED) && UNEXPECTED(GC_DELREF(str) == 0)) {
-			zend_string *ret = zend_jit_fetch_dim_str_offset(str, offset);
+			zend_string *ret = zend_jit_fetch_dim_str_offset(str, offset, dim);
 			zend_string_efree(str);
 			return ret;
 		}
@@ -1397,7 +1465,7 @@ static zend_string* ZEND_FASTCALL zend_jit_fetch_dim_str_r_helper(zend_string *s
 	if (UNEXPECTED(EG(exception) != NULL)) {
 		return ZSTR_EMPTY_ALLOC();
 	}
-	return zend_jit_fetch_dim_str_offset(str, offset);
+	return zend_jit_fetch_dim_str_offset(str, offset, dim);
 }
 
 static void ZEND_FASTCALL zend_jit_fetch_dim_str_is_helper(zend_string *str, zval *dim, zval *result)
@@ -1408,12 +1476,19 @@ try_string_offset:
 	if (UNEXPECTED(Z_TYPE_P(dim) != IS_LONG)) {
 		switch (Z_TYPE_P(dim)) {
 			/* case IS_LONG: */
-			case IS_STRING:
+			case IS_STRING: {
+				bool trailing_data = false;
+
 				if (IS_LONG == is_numeric_string(Z_STRVAL_P(dim), Z_STRLEN_P(dim), &offset, NULL, false)) {
+					goto out;
+				}
+				if (zend_string_offset_out_of_long_range(Z_STR_P(dim), &offset, &trailing_data)
+				 && !trailing_data) {
 					goto out;
 				}
 				ZVAL_NULL(result);
 				return;
+			}
 			case IS_DOUBLE:
 				offset = zend_dval_to_lval_silent(Z_DVAL_P(dim));
 				goto out;
@@ -1424,6 +1499,9 @@ try_string_offset:
 			case IS_FALSE:
 			case IS_TRUE:
 				break;
+			case IS_BIGINT:
+				offset = zend_bigint_sign(Z_BIG_P(dim)) < 0 ? ZEND_LONG_MIN : ZEND_LONG_MAX;
+				goto out;
 			case IS_REFERENCE:
 				dim = Z_REFVAL_P(dim);
 				goto try_string_offset;
@@ -1553,7 +1631,13 @@ static zend_never_inline void zend_assign_to_string_offset(zval *str, zval *dim,
 	}
 	if (offset < -(zend_long)ZSTR_LEN(s)) {
 		/* Error on negative offset */
-		zend_error(E_WARNING, "Illegal string offset " ZEND_LONG_FMT, offset);
+		zend_string *offset_repr = zend_string_offset_repr(dim);
+		if (UNEXPECTED(offset_repr != NULL)) {
+			zend_error(E_WARNING, "Illegal string offset %s", ZSTR_VAL(offset_repr));
+			zend_string_release(offset_repr);
+		} else {
+			zend_error(E_WARNING, "Illegal string offset " ZEND_LONG_FMT, offset);
+		}
 		if (result) {
 			ZVAL_NULL(result);
 		}
@@ -2037,6 +2121,10 @@ isset_str_offset:
 			}
 		} else {
 			ZVAL_DEREF(offset);
+			if (Z_TYPE_P(offset) == IS_BIGINT) {
+				lval = zend_bigint_sign(Z_BIG_P(offset)) < 0 ? ZEND_LONG_MIN : ZEND_LONG_MAX;
+				goto isset_str_offset;
+			}
 			if (Z_TYPE_P(offset) < IS_STRING /* simple scalar types */
 					|| (Z_TYPE_P(offset) == IS_STRING /* or numeric string */
 						&& IS_LONG == is_numeric_string(Z_STRVAL_P(offset), Z_STRLEN_P(offset), NULL, NULL, false))) {

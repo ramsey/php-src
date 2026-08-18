@@ -1,5 +1,5 @@
 --TEST--
-bigint: string offsets with a boxed integer: isset/empty saturate out of range, direct read still rejects the type
+bigint: string offsets with a boxed integer: isset/empty saturate out of range, a direct read reports the offset
 --FILE--
 <?php
 $pos = 340282366920938463463374607431768211456;
@@ -9,22 +9,24 @@ $s = 'abc';
 var_dump(isset($s[$pos]));
 var_dump(isset($s[$neg]));
 var_dump(empty($s[$pos]));
+var_dump(empty($s[$neg]));
 
-try {
-    $s[$pos];
-} catch (TypeError $e) {
-    echo $e::class . ': ' . $e->getMessage() . "\n";
-}
+var_dump($s[$pos]);
+var_dump($s[$pos] ?? 'none');
 
-try {
-    $s[$pos] ?? 'none';
-} catch (TypeError $e) {
-    echo $e::class . ': ' . $e->getMessage() . "\n";
-}
+var_dump($s[$neg]);
+var_dump($s[$neg] ?? 'none');
 ?>
---EXPECT--
+--EXPECTF--
 bool(false)
 bool(false)
 bool(true)
-TypeError: Cannot access offset of type int on string
-TypeError: Cannot access offset of type int on string
+bool(true)
+
+Warning: Uninitialized string offset 340282366920938463463374607431768211456 in %s on line %d
+string(0) ""
+string(4) "none"
+
+Warning: Uninitialized string offset -340282366920938463463374607431768211456 in %s on line %d
+string(0) ""
+string(4) "none"
