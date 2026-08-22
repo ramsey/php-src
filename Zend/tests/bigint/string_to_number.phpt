@@ -31,6 +31,23 @@ $v = zend_test_string_to_number('99999999999999999999abc', true, $trailing);
 var_dump($v);
 var_dump(zend_test_int_is_boxed($v));
 var_dump($trailing);
+
+// Float-shaped strings take their nearest-double value; only pure integer
+// strings box.
+var_dump(zend_test_string_to_number('99999999999999999999.5'));
+var_dump(zend_test_string_to_number('-99999999999999999999.5'));
+var_dump(zend_test_string_to_number('99999999999999999999e2'));
+var_dump(zend_test_string_to_number('99999999999999999999.'));
+
+$trailing = false;
+$v = zend_test_string_to_number('99999999999999999999.5abc', true, $trailing);
+var_dump($v);
+var_dump($trailing);
+
+$trailing = false;
+$v = zend_test_string_to_number('99999999999999999999e', true, $trailing);
+var_dump($v);
+var_dump($trailing);
 ?>
 --EXPECT--
 int(123)
@@ -48,4 +65,12 @@ int(99999999999999999999)
 bool(true)
 int(99999999999999999999)
 bool(true)
+bool(true)
+float(1.0E+20)
+float(-1.0E+20)
+float(1.0E+22)
+float(1.0E+20)
+float(1.0E+20)
+bool(true)
+float(1.0E+20)
 bool(true)

@@ -4799,9 +4799,14 @@ ZEND_API uint8_t ZEND_FASTCALL zend_string_to_number(const char *str, size_t len
 	}
 
 	/* An integer out of long range becomes a bigint, parsed from its exact
-	 * integer span (sign and leading zeros kept). */
+	 * integer span (sign and leading zeros kept). A float-shaped string is
+	 * not an integer and keeps its nearest-double value. */
 	const char *num, *num_end;
 	zend_locate_integer_span(str, len, &num, &num_end);
+	if (!zend_integer_span_is_pure(str, len, num_end)) {
+		ZVAL_DOUBLE(result, dval);
+		return IS_DOUBLE;
+	}
 	zend_bigint *big = zend_bigint_from_string(num, (size_t) (num_end - num), 10);
 	ZEND_ASSERT(big != NULL);
 	zend_int_from_bigint(result, big);
