@@ -2957,6 +2957,10 @@ static zend_always_inline zend_result _zend_update_type_info(
 					/* Overflow of the long component boxes. */
 					tmp |= MAY_BE_LONG | MAY_BE_BIGINT | MAY_BE_RC1;
 				}
+				if (t1 & MAY_BE_BIGINT) {
+					/* A boxed operand may step back into long range. */
+					tmp |= MAY_BE_LONG | MAY_BE_BIGINT | MAY_BE_RC1;
+				}
 				if (t1 & MAY_BE_DOUBLE) {
 					tmp |= MAY_BE_DOUBLE;
 				}
@@ -3019,6 +3023,10 @@ static zend_always_inline zend_result _zend_update_type_info(
 				}
 				if (t1 & MAY_BE_LONG) {
 					/* Overflow of the long component boxes. */
+					tmp |= MAY_BE_LONG | MAY_BE_BIGINT | MAY_BE_RC1;
+				}
+				if (t1 & MAY_BE_BIGINT) {
+					/* A boxed operand may step back into long range. */
 					tmp |= MAY_BE_LONG | MAY_BE_BIGINT | MAY_BE_RC1;
 				}
 				if (t1 & MAY_BE_DOUBLE) {
