@@ -250,6 +250,10 @@ static void zend_dump_type_info(uint32_t info, bool is_class, const zend_class_e
 			if (first) first = false; else fprintf(stderr, ", ");
 			fprintf(stderr, "long");
 		}
+		if (info & MAY_BE_BIGINT) {
+			if (first) first = false; else fprintf(stderr, ", ");
+			fprintf(stderr, "bigint");
+		}
 		if (info & MAY_BE_DOUBLE) {
 			if (first) first = false; else fprintf(stderr, ", ");
 			fprintf(stderr, "double");
