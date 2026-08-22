@@ -4448,7 +4448,8 @@ static int zend_jit_store_reg(zend_jit_ctx *jit, uint32_t info, int var, int8_t 
 		src = zend_jit_deopt_rload(jit, type, reg);
 		if (jit->ra && jit->ra[var].ref == IR_NULL) {
 			zend_jit_def_reg(jit, ZEND_ADDR_REG(var), src);
-		} else if (!in_mem) {
+		}
+		if (!in_mem) {
 			jit_set_Z_LVAL(jit, dst, src);
 			if (set_type &&
 			    (Z_REG(dst) != ZREG_FP ||
@@ -4462,7 +4463,8 @@ static int zend_jit_store_reg(zend_jit_ctx *jit, uint32_t info, int var, int8_t 
 		src = zend_jit_deopt_rload(jit, type, reg);
 		if (jit->ra && jit->ra[var].ref == IR_NULL) {
 			zend_jit_def_reg(jit, ZEND_ADDR_REG(var), src);
-		} else if (!in_mem) {
+		}
+		if (!in_mem) {
 			jit_set_Z_DVAL(jit, dst, src);
 			if (set_type &&
 			    (Z_REG(dst) != ZREG_FP ||
