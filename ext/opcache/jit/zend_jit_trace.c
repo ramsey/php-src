@@ -3615,6 +3615,7 @@ static int zend_jit_trace_deoptimization(
 				uint8_t type = STACK_TYPE(parent_stack, i);
 
 				if (!zend_jit_store_spill_slot(jit, 1 << type, i, reg, STACK_REF(parent_stack, i),
+						(STACK_FLAGS(parent_stack, i) & (ZREG_LOAD|ZREG_STORE)) != 0,
 						STACK_MEM_TYPE(parent_stack, i) != type)) {
 					return 0;
 				}
