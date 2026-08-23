@@ -3949,6 +3949,22 @@ static void assign_regs(ir_ctx *ctx)
 										prev_use_ref = ref;
 									}
 								} else {
+									if (ctx->ir_base[ref].op == IR_SNAPSHOT) {
+										IR_ASSERT(use_pos->hint_ref >= 0);
+										/* A following GUARD's fused operand load may clobber the
+										 * register before the side exit consumes the snapshot. The
+										 * spill store is placed at the definition, so the memory
+										 * copy is current here. */
+										if (top_ival->flags & IR_LIVE_INTERVAL_SPILL_SPECIAL) {
+											reg = IR_REG_NONE;
+										} else {
+											/* A reference to a CPU spill slot */
+											reg = IR_REG_SPILL_STORE | IR_REG_STACK_POINTER;
+										}
+										ir_set_alocated_reg(ctx, ref, use_pos->op_num, reg);
+										use_pos = use_pos->next;
+										continue;
+									}
 									if ((!prev_use_ref || ctx->cfg_map[prev_use_ref] != ctx->cfg_map[ref])
 									 && needs_spill_reload(ctx, ival, ctx->cfg_map[ref], available)) {
 										if (!(use_pos->flags & IR_USE_MUST_BE_IN_REG)
