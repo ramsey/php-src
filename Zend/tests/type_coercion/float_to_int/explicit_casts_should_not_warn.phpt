@@ -1,9 +1,5 @@
 --TEST--
 Explicit (int) cast must not warn if value is representable
---SKIPIF--
-<?php
-if (PHP_INT_SIZE != 8) die("skip this test is for 64bit platform only");
-?>
 --FILE--
 <?php
 

@@ -10,6 +10,8 @@ $valid_ints = [
   PHP_INT_MAX,
   PHP_INT_MIN,
   2147483640,
+  PHP_INT_MIN-1,
+  PHP_INT_MAX+1,
 ];
 
 foreach ($valid_ints as $value ) {
@@ -20,8 +22,6 @@ foreach ($valid_ints as $value ) {
 
 $not_int_types = [
   /* float values */
-  PHP_INT_MIN-1,
-  PHP_INT_MAX+1,
   0.0,
   -0.1,
   1.0,

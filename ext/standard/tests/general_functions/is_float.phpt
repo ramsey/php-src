@@ -5,8 +5,6 @@ Test is_float()
 
 // different valid float values
 $floats = [
-  PHP_INT_MIN -1,
-  PHP_INT_MAX +1,
   0.0,
   -0.1,
   10.0000000000000000005,
@@ -64,6 +62,8 @@ $not_floats = [
   -0x673,
   0123,
   -0123,
+  PHP_INT_MIN -1,
+  PHP_INT_MAX +1,
 ];
 
 foreach ($not_floats as $value ) {

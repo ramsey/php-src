@@ -42,9 +42,9 @@ cast('INF', INF);
 cast('-INF', -INF);
 cast('NAN', NAN);
 
-var_dump(intval('99999999999999999999', 10));
-var_dump(intval('99999999999999999999', 16));
-var_dump(intval('1e20', 10));
+var_dump(intval('99999999999999999999', 10) === PHP_INT_MAX);
+var_dump(intval('99999999999999999999', 16) === PHP_INT_MAX);
+var_dump(intval('1e20', 10) === PHP_INT_MAX);
 ?>
 --EXPECTF--
 (int) 1e20: int(100000000000000000000)
@@ -120,6 +120,6 @@ settype NAN: int(0)
 intval NAN: 
 Warning: The float NAN is not representable as an int, cast occurred in %s on line %d
 int(0)
-int(9223372036854775807)
-int(9223372036854775807)
-int(9223372036854775807)
+bool(true)
+bool(true)
+bool(true)

@@ -11,7 +11,7 @@ function check(string $label, bool $ok): void {
     echo $label . ': ' . ($ok ? 'ok' : 'FAIL') . "\n";
 }
 
-$p = PHP_INT_MAX;
+$p = 2 ** 63 - 1;
 $q = (float) $p;
 for ($i = 0; $i < 200; $i++) {
     $eq = $p == $q;
@@ -24,15 +24,15 @@ for ($i = 0; $i < 200; $i++) {
     $rlt = $q < $p;
     $rsp = $q <=> $p;
 }
-check('PHP_INT_MAX == (float) PHP_INT_MAX (int on left)', $eq === false);
-check('PHP_INT_MAX != (float) PHP_INT_MAX (int on left)', $ne === true);
-check('PHP_INT_MAX < (float) PHP_INT_MAX (int on left)', $lt === true);
-check('PHP_INT_MAX <= (float) PHP_INT_MAX (int on left)', $le === true);
-check('PHP_INT_MAX >= (float) PHP_INT_MAX (int on left)', $ge === false);
-check('PHP_INT_MAX <=> (float) PHP_INT_MAX (int on left)', $sp === -1);
-check('(float) PHP_INT_MAX == PHP_INT_MAX (float on left)', $req === false);
-check('(float) PHP_INT_MAX < PHP_INT_MAX (float on left)', $rlt === false);
-check('(float) PHP_INT_MAX <=> PHP_INT_MAX (float on left)', $rsp === 1);
+check('2 ** 63 - 1 == (float) (2 ** 63 - 1) (int on left)', $eq === false);
+check('2 ** 63 - 1 != (float) (2 ** 63 - 1) (int on left)', $ne === true);
+check('2 ** 63 - 1 < (float) (2 ** 63 - 1) (int on left)', $lt === true);
+check('2 ** 63 - 1 <= (float) (2 ** 63 - 1) (int on left)', $le === true);
+check('2 ** 63 - 1 >= (float) (2 ** 63 - 1) (int on left)', $ge === false);
+check('2 ** 63 - 1 <=> (float) (2 ** 63 - 1) (int on left)', $sp === -1);
+check('(float) (2 ** 63 - 1) == 2 ** 63 - 1 (float on left)', $req === false);
+check('(float) (2 ** 63 - 1) < 2 ** 63 - 1 (float on left)', $rlt === false);
+check('(float) (2 ** 63 - 1) <=> 2 ** 63 - 1 (float on left)', $rsp === 1);
 
 $p = 2 ** 53 + 1;
 $q = (float) $p;
@@ -96,15 +96,15 @@ check('PHP_INT_MAX <= NAN under tracing', $nan_le === false);
 check('PHP_INT_MAX != NAN under tracing', $nan_ne === true);
 ?>
 --EXPECT--
-PHP_INT_MAX == (float) PHP_INT_MAX (int on left): ok
-PHP_INT_MAX != (float) PHP_INT_MAX (int on left): ok
-PHP_INT_MAX < (float) PHP_INT_MAX (int on left): ok
-PHP_INT_MAX <= (float) PHP_INT_MAX (int on left): ok
-PHP_INT_MAX >= (float) PHP_INT_MAX (int on left): ok
-PHP_INT_MAX <=> (float) PHP_INT_MAX (int on left): ok
-(float) PHP_INT_MAX == PHP_INT_MAX (float on left): ok
-(float) PHP_INT_MAX < PHP_INT_MAX (float on left): ok
-(float) PHP_INT_MAX <=> PHP_INT_MAX (float on left): ok
+2 ** 63 - 1 == (float) (2 ** 63 - 1) (int on left): ok
+2 ** 63 - 1 != (float) (2 ** 63 - 1) (int on left): ok
+2 ** 63 - 1 < (float) (2 ** 63 - 1) (int on left): ok
+2 ** 63 - 1 <= (float) (2 ** 63 - 1) (int on left): ok
+2 ** 63 - 1 >= (float) (2 ** 63 - 1) (int on left): ok
+2 ** 63 - 1 <=> (float) (2 ** 63 - 1) (int on left): ok
+(float) (2 ** 63 - 1) == 2 ** 63 - 1 (float on left): ok
+(float) (2 ** 63 - 1) < 2 ** 63 - 1 (float on left): ok
+(float) (2 ** 63 - 1) <=> 2 ** 63 - 1 (float on left): ok
 2 ** 53 + 1 == (float) (2 ** 53 + 1) (int on left): ok
 2 ** 53 + 1 != (float) (2 ** 53 + 1) (int on left): ok
 2 ** 53 + 1 < (float) (2 ** 53 + 1) (int on left): ok
