@@ -12795,10 +12795,10 @@ bool zend_try_ct_eval_cast(zval *result, uint32_t type, zval *op1)
 			ZVAL_BOOL(result, zend_is_true(op1));
 			return true;
 		case IS_LONG:
-			if (Z_TYPE_P(op1) == IS_DOUBLE && !ZEND_DOUBLE_FITS_LONG(Z_DVAL_P((op1)))) {
+			if (Z_TYPE_P(op1) == IS_DOUBLE && !zend_finite(Z_DVAL_P(op1))) {
 				return false;
 			}
-			ZVAL_LONG(result, zval_get_long(op1));
+			zend_cast_to_int(result, op1);
 			return true;
 		case IS_DOUBLE:
 			ZVAL_DOUBLE(result, zval_get_double(op1));

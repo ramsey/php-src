@@ -623,6 +623,51 @@ try_again:
 }
 /* }}} */
 
+/* Userland (int) semantics. A finite double truncates toward zero to its
+ * exact integer, an integer string outside the machine range boxes, and a
+ * float-shaped string truncates its double value the same way. A non-finite
+ * double warns and yields 0, and a non-finite float-shaped string yields 0
+ * silently. */
+ZEND_API void ZEND_FASTCALL zend_cast_to_int(zval *result, zval *op) /* {{{ */
+{
+	ZVAL_DEREF(op);
+	switch (Z_TYPE_P(op)) {
+		case IS_BIGINT:
+			ZVAL_COPY(result, op);
+			return;
+		case IS_DOUBLE:
+			if (UNEXPECTED(!zend_finite(Z_DVAL_P(op)))) {
+				ZVAL_LONG(result, zend_dval_to_lval(Z_DVAL_P(op)));
+				return;
+			}
+			zend_int_from_double(result, Z_DVAL_P(op));
+			return;
+		case IS_STRING: {
+			zval holder;
+			switch (zend_string_to_number(Z_STRVAL_P(op), Z_STRLEN_P(op), true, &holder, NULL)) {
+				case IS_LONG:
+				case IS_BIGINT:
+					ZVAL_COPY_VALUE(result, &holder);
+					return;
+				case IS_DOUBLE:
+					if (UNEXPECTED(!zend_finite(Z_DVAL(holder)))) {
+						ZVAL_LONG(result, 0);
+						return;
+					}
+					zend_int_from_double(result, Z_DVAL(holder));
+					return;
+				default:
+					ZVAL_LONG(result, 0);
+					return;
+			}
+		}
+		default:
+			ZVAL_LONG(result, zval_get_long(op));
+			return;
+	}
+}
+/* }}} */
+
 ZEND_API void ZEND_FASTCALL convert_to_double(zval *op) /* {{{ */
 {
 	double tmp;

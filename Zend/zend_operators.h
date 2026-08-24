@@ -350,6 +350,7 @@ ZEND_API void ZEND_FASTCALL convert_to_null(zval *op);
 ZEND_API void ZEND_FASTCALL convert_to_boolean(zval *op);
 ZEND_API void ZEND_FASTCALL convert_to_array(zval *op);
 ZEND_API void ZEND_FASTCALL convert_to_object(zval *op);
+ZEND_API void ZEND_FASTCALL zend_cast_to_int(zval *result, zval *op);
 
 ZEND_API zend_long    ZEND_FASTCALL zval_get_long_func(const zval *op, bool is_strict);
 ZEND_API zend_long    ZEND_FASTCALL zval_try_get_long(const zval *op, bool *failed);

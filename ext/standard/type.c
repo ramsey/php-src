@@ -102,7 +102,10 @@ PHP_FUNCTION(settype)
 	if (zend_string_equals_ci(type, ZSTR_KNOWN(ZEND_STR_INTEGER))
 			|| zend_string_equals_ci(type, ZSTR_KNOWN(ZEND_STR_INT))) {
 		if (!Z_IS_INT_P(ptr)) {
-			convert_to_long(ptr);
+			zval as_int;
+			zend_cast_to_int(&as_int, ptr);
+			zval_ptr_dtor(ptr);
+			ZVAL_COPY_VALUE(ptr, &as_int);
 		}
 	} else if (zend_string_equals_ci(type, ZSTR_KNOWN(ZEND_STR_FLOAT))) {
 		convert_to_double(ptr);
@@ -151,7 +154,11 @@ PHP_FUNCTION(intval)
 		Z_PARAM_LONG(base)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (Z_TYPE_P(num) != IS_STRING || base == 10) {
+	if (Z_TYPE_P(num) != IS_STRING || ZEND_NUM_ARGS() == 1) {
+		zend_cast_to_int(return_value, num);
+		return;
+	}
+	if (base == 10) {
 		RETURN_LONG(zval_get_long(num));
 	}
 

@@ -7,7 +7,7 @@ $float = 10e120;
 $string_float = (string) $float;
 
 var_dump((int) $float);
-var_dump((int) $string_float === PHP_INT_MAX);
+var_dump((int) $string_float === (int) $float);
 
 $arrayConstant = [10e120 => 'Large float', (string) 10e120 => 'String large float'];
 $arrayDynamic = [$float => 'Large float', $string_float => 'String large float'];
@@ -23,8 +23,7 @@ var_dump($array[$string_float]);
 
 ?>
 --EXPECTF--
-Warning: The float 1.0E+121 is not representable as an int, cast occurred in %s on line %d
-int(0)
+int(10000000000000000373409337471459889719393275754491820381027730410378005080671497101378613371421126415052399029342192009216)
 bool(true)
 array(2) {
   [10000000000000000373409337471459889719393275754491820381027730410378005080671497101378613371421126415052399029342192009216]=>

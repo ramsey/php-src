@@ -1,5 +1,5 @@
 --TEST--
-bigint: conversions of boxed integers: float and string exact, bool true, long saturates via intval
+bigint: conversions of boxed integers: float and string exact, bool true, intval identity
 --EXTENSIONS--
 zend_test
 --FILE--
@@ -9,8 +9,8 @@ $neg = zend_test_bigint_make('-340282366920938463463374607431768211456');
 var_dump((float) $pos === 2.0 ** 128);
 var_dump((string) $pos);
 var_dump((bool) $neg);
-var_dump(intval($pos, 10) === PHP_INT_MAX);
-var_dump(intval($neg, 10) === PHP_INT_MIN);
+var_dump(intval($pos) === $pos);
+var_dump(intval($neg, 10) === $neg);
 
 $arr = (array) $pos;
 var_dump(count($arr) === 1);

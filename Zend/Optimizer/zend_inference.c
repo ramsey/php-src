@@ -2721,8 +2721,10 @@ static zend_always_inline zend_result _zend_update_type_info(
 					}
 				}
 			}
-			if (opline->extended_value == IS_LONG && (t1 & MAY_BE_BIGINT)) {
-				/* (int) keeps an already-boxed integer boxed. */
+			if (opline->extended_value == IS_LONG
+			 && (t1 & (MAY_BE_BIGINT|MAY_BE_DOUBLE|MAY_BE_STRING))) {
+				/* (int) keeps an already-boxed integer boxed, and a double or
+				 * numeric string outside the machine range boxes. */
 				tmp |= MAY_BE_BIGINT | MAY_BE_RC1;
 			}
 			if (opline->extended_value == IS_ARRAY) {
