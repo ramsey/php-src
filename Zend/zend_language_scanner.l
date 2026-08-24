@@ -2238,12 +2238,14 @@ OPTIONAL_WHITESPACE_OR_COMMENTS ({WHITESPACE}|{MULTI_LINE_COMMENT}|{SINGLE_LINE_
 		errno = 0;
 		ZVAL_LONG(zendlval, ZEND_STRTOL(yytext, &end, 10));
 		if (errno == ERANGE) {
-			goto string;
+			goto bigint_offset;
 		}
 		ZEND_ASSERT(end == yytext + yyleng);
 	} else {
-string:
-		ZVAL_STRINGL(zendlval, yytext, yyleng);
+bigint_offset:;
+		zend_bigint *big = zend_bigint_from_string(yytext, yyleng, 10);
+		ZEND_ASSERT(big != NULL);
+		zend_int_from_bigint(zendlval, big);
 	}
 	RETURN_TOKEN_WITH_VAL(T_NUM_STRING);
 }
