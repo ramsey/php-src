@@ -369,7 +369,11 @@ static zend_always_inline uint32_t zend_jit_trace_type_to_info_ex(uint8_t type, 
 		 * always refcounted. */
 		return MAY_BE_BIGINT | MAY_BE_RC1 | MAY_BE_RCN;
 	}
-	ZEND_ASSERT(info & (1 << type));
+	/* An object operand routes through a do_operation handler that may
+	 * return any type. Inference models such a result as object or false
+	 * only, so the recorded runtime type may fall outside info. The caller
+	 * narrows to the recorded type in that case. */
+	ZEND_ASSERT((info & (1 << type)) || (info & MAY_BE_OBJECT));
 	if (type < IS_STRING) {
 		return (1 << type);
 	} else if (type != IS_ARRAY) {
