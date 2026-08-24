@@ -1905,11 +1905,12 @@ ZEND_API zend_result ZEND_FASTCALL mod_function(zval *result, zval *op1, zval *o
 	ZVAL_DEREF(op1);
 	ZVAL_DEREF(op2);
 	if (Z_TYPE_P(op1) == IS_BIGINT || Z_TYPE_P(op2) == IS_BIGINT) {
+		ZEND_TRY_BINARY_OBJECT_OPERATION(ZEND_MOD);
+
 		zval op1_holder, op2_holder;
 		zval *a = op1, *b = op2;
 		if (!Z_IS_INT_P(op1)) {
 			bool failed;
-			ZEND_TRY_BINARY_OP1_OBJECT_OPERATION(ZEND_MOD);
 			ZVAL_LONG(&op1_holder, zendi_try_get_long(op1, &failed));
 			if (UNEXPECTED(failed)) {
 				zend_binop_error("%", op1, op2);
@@ -1922,7 +1923,6 @@ ZEND_API zend_result ZEND_FASTCALL mod_function(zval *result, zval *op1, zval *o
 		}
 		if (!Z_IS_INT_P(op2)) {
 			bool failed;
-			ZEND_TRY_BINARY_OP2_OBJECT_OPERATION(ZEND_MOD);
 			ZVAL_LONG(&op2_holder, zendi_try_get_long(op2, &failed));
 			if (UNEXPECTED(failed)) {
 				zend_binop_error("%", op1, op2);
@@ -2178,11 +2178,11 @@ try_again:
 /* Shared IS_BIGINT operand arm for the bitwise operators. */
 #define bitwise_bigint_op(op1, op2, result, opcode, sigil, int_fn) \
 	do { \
+		ZEND_TRY_BINARY_OBJECT_OPERATION(opcode); \
 		zval op1_holder, op2_holder; \
 		zval *a = op1, *b = op2; \
 		if (!Z_IS_INT_P(op1)) { \
 			bool failed; \
-			ZEND_TRY_BINARY_OP1_OBJECT_OPERATION(opcode); \
 			ZVAL_LONG(&op1_holder, zendi_try_get_long(op1, &failed)); \
 			if (UNEXPECTED(failed)) { \
 				zend_binop_error(sigil, op1, op2); \
@@ -2195,7 +2195,6 @@ try_again:
 		} \
 		if (!Z_IS_INT_P(op2)) { \
 			bool failed; \
-			ZEND_TRY_BINARY_OP2_OBJECT_OPERATION(opcode); \
 			ZVAL_LONG(&op2_holder, zendi_try_get_long(op2, &failed)); \
 			if (UNEXPECTED(failed)) { \
 				zend_binop_error(sigil, op1, op2); \
@@ -2539,6 +2538,8 @@ ZEND_API zend_result ZEND_FASTCALL shift_left_function(zval *result, zval *op1, 
 	ZVAL_DEREF(op2);
 	if ((Z_IS_INT_P(op1) && Z_IS_INT_P(op2))
 			|| Z_TYPE_P(op1) == IS_BIGINT || Z_TYPE_P(op2) == IS_BIGINT) {
+		ZEND_TRY_BINARY_OBJECT_OPERATION(ZEND_SL);
+
 		/* Both operands are logical integers, or one is a box opposite a
 		 * noninteger scalar. Coerce that scalar to long, keep the box exact,
 		 * and let the value op box an overflowing shift. */
@@ -2546,7 +2547,6 @@ ZEND_API zend_result ZEND_FASTCALL shift_left_function(zval *result, zval *op1, 
 		zval *a = op1, *b = op2;
 		if (!Z_IS_INT_P(op1)) {
 			bool failed;
-			ZEND_TRY_BINARY_OP1_OBJECT_OPERATION(ZEND_SL);
 			ZVAL_LONG(&op1_holder, zendi_try_get_long(op1, &failed));
 			if (UNEXPECTED(failed)) {
 				zend_binop_error("<<", op1, op2);
@@ -2559,7 +2559,6 @@ ZEND_API zend_result ZEND_FASTCALL shift_left_function(zval *result, zval *op1, 
 		}
 		if (!Z_IS_INT_P(op2)) {
 			bool failed;
-			ZEND_TRY_BINARY_OP2_OBJECT_OPERATION(ZEND_SL);
 			ZVAL_LONG(&op2_holder, zendi_try_get_long(op2, &failed));
 			if (UNEXPECTED(failed)) {
 				zend_binop_error("<<", op1, op2);
@@ -2712,6 +2711,8 @@ ZEND_API zend_result ZEND_FASTCALL shift_right_function(zval *result, zval *op1,
 	ZVAL_DEREF(op2);
 	if ((Z_IS_INT_P(op1) && Z_IS_INT_P(op2))
 			|| Z_TYPE_P(op1) == IS_BIGINT || Z_TYPE_P(op2) == IS_BIGINT) {
+		ZEND_TRY_BINARY_OBJECT_OPERATION(ZEND_SR);
+
 		/* Both operands are logical integers, or one is a box opposite a
 		 * noninteger scalar. Coerce that scalar to long and keep the box
 		 * exact; the value op saturates a count past every bit. */
@@ -2719,7 +2720,6 @@ ZEND_API zend_result ZEND_FASTCALL shift_right_function(zval *result, zval *op1,
 		zval *a = op1, *b = op2;
 		if (!Z_IS_INT_P(op1)) {
 			bool failed;
-			ZEND_TRY_BINARY_OP1_OBJECT_OPERATION(ZEND_SR);
 			ZVAL_LONG(&op1_holder, zendi_try_get_long(op1, &failed));
 			if (UNEXPECTED(failed)) {
 				zend_binop_error(">>", op1, op2);
@@ -2732,7 +2732,6 @@ ZEND_API zend_result ZEND_FASTCALL shift_right_function(zval *result, zval *op1,
 		}
 		if (!Z_IS_INT_P(op2)) {
 			bool failed;
-			ZEND_TRY_BINARY_OP2_OBJECT_OPERATION(ZEND_SR);
 			ZVAL_LONG(&op2_holder, zendi_try_get_long(op2, &failed));
 			if (UNEXPECTED(failed)) {
 				zend_binop_error(">>", op1, op2);

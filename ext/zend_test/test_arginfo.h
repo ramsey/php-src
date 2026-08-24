@@ -1,5 +1,5 @@
 /* This is a generated file, edit test.stub.php instead.
- * Stub hash: 1d6250315e6253750b6545a1c2de59122d1f41a4
+ * Stub hash: d854e89c50a88de9a35ec9fdda39a79f32e51685
  * Has decl header: yes */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_zend_trigger_bailout, 0, 0, IS_NEVER, 0)
@@ -1355,6 +1355,57 @@ static zend_class_entry *register_class__ZendTestMagicCallForward(void)
 #else
 	class_entry = zend_register_internal_class_ex(&ce, NULL);
 #endif
+
+	return class_entry;
+}
+
+static zend_class_entry *register_class__ZendTestBigintOperand(void)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_CLASS_ENTRY(ce, "_ZendTestBigintOperand", NULL);
+#if (PHP_VERSION_ID >= 80400)
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_FINAL);
+#else
+	class_entry = zend_register_internal_class_ex(&ce, NULL);
+	class_entry->ce_flags |= ZEND_ACC_FINAL;
+#endif
+
+	zval property_fail_default_value;
+	ZVAL_FALSE(&property_fail_default_value);
+	zend_string *property_fail_name = zend_string_init("fail", sizeof("fail") - 1, true);
+	zend_declare_typed_property(class_entry, property_fail_name, &property_fail_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_BOOL));
+	zend_string_release_ex(property_fail_name, true);
+
+	zval property_castable_default_value;
+	ZVAL_FALSE(&property_castable_default_value);
+	zend_string *property_castable_name = zend_string_init("castable", sizeof("castable") - 1, true);
+	zend_declare_typed_property(class_entry, property_castable_name, &property_castable_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_BOOL));
+	zend_string_release_ex(property_castable_name, true);
+
+	zval property_castValue_default_value;
+	ZVAL_LONG(&property_castValue_default_value, 0);
+	zend_string *property_castValue_name = zend_string_init("castValue", sizeof("castValue") - 1, true);
+	zend_declare_typed_property(class_entry, property_castValue_name, &property_castValue_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+	zend_string_release_ex(property_castValue_name, true);
+
+	zval property_lastOpcode_default_value;
+	ZVAL_EMPTY_STRING(&property_lastOpcode_default_value);
+	zend_string *property_lastOpcode_name = zend_string_init("lastOpcode", sizeof("lastOpcode") - 1, true);
+	zend_declare_typed_property(class_entry, property_lastOpcode_name, &property_lastOpcode_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
+	zend_string_release_ex(property_lastOpcode_name, true);
+
+	zval property_lastOp1Type_default_value;
+	ZVAL_EMPTY_STRING(&property_lastOp1Type_default_value);
+	zend_string *property_lastOp1Type_name = zend_string_init("lastOp1Type", sizeof("lastOp1Type") - 1, true);
+	zend_declare_typed_property(class_entry, property_lastOp1Type_name, &property_lastOp1Type_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
+	zend_string_release_ex(property_lastOp1Type_name, true);
+
+	zval property_lastOp2Type_default_value;
+	ZVAL_EMPTY_STRING(&property_lastOp2Type_default_value);
+	zend_string *property_lastOp2Type_name = zend_string_init("lastOp2Type", sizeof("lastOp2Type") - 1, true);
+	zend_declare_typed_property(class_entry, property_lastOp2Type_name, &property_lastOp2Type_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
+	zend_string_release_ex(property_lastOp2Type_name, true);
 
 	return class_entry;
 }

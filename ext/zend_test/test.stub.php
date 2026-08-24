@@ -120,6 +120,16 @@ namespace {
         public function __call(string $name, array $args): mixed {}
     }
 
+    final class _ZendTestBigintOperand
+    {
+        public bool $fail = false;
+        public bool $castable = false;
+        public int $castValue = 0;
+        public string $lastOpcode = '';
+        public string $lastOp1Type = '';
+        public string $lastOp2Type = '';
+    }
+
     class _ZendTestChildClass extends _ZendTestClass
     {
         public function returnsThrowable(): Exception {}

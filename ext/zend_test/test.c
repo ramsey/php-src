@@ -79,7 +79,9 @@ static zend_class_entry *zend_test_string_enum;
 static zend_class_entry *zend_test_int_enum;
 static zend_class_entry *zend_test_enum_with_interface;
 static zend_class_entry *zend_test_magic_call;
+static zend_class_entry *zend_test_bigint_operand_class;
 static zend_object_handlers zend_test_class_handlers;
+static zend_object_handlers zend_test_bigint_operand_handlers;
 
 static int le_throwing_resource;
 
@@ -2115,6 +2117,54 @@ static void register_dynamic_function_entries(int module_type) {
 	zend_register_functions(NULL, dynamic_function_entries, NULL, module_type);
 }
 
+static zend_result zend_test_bigint_operand_cast_object(zend_object *readobj, zval *writeobj, int type)
+{
+	if (type == IS_LONG) {
+		zval rv;
+		zval *castable = zend_read_property(zend_test_bigint_operand_class, readobj, "castable", sizeof("castable") - 1, 1, &rv);
+		if (Z_TYPE_P(castable) == IS_TRUE) {
+			zval *cast_value = zend_read_property(zend_test_bigint_operand_class, readobj, "castValue", sizeof("castValue") - 1, 1, &rv);
+			ZVAL_LONG(writeobj, zval_get_long(cast_value));
+			return SUCCESS;
+		}
+	}
+	return zend_std_cast_object_tostring(readobj, writeobj, type);
+}
+
+static const char *zend_test_bigint_operand_type_name(const zval *op)
+{
+	return Z_TYPE_P(op) == IS_BIGINT ? "bigint" : zend_zval_type_name(op);
+}
+
+static zend_result zend_test_bigint_operand_do_operation(uint8_t opcode, zval *result, zval *op1, zval *op2)
+{
+	zval *self = op1;
+
+	if (Z_TYPE_P(self) != IS_OBJECT || !instanceof_function(Z_OBJCE_P(self), zend_test_bigint_operand_class)) {
+		self = op2;
+	}
+	ZEND_ASSERT(self != NULL && Z_TYPE_P(self) == IS_OBJECT);
+
+	zend_object *zobj = Z_OBJ_P(self);
+	zend_update_property_string(zend_test_bigint_operand_class, zobj, "lastOpcode", sizeof("lastOpcode") - 1, zend_get_opcode_name(opcode));
+	zend_update_property_string(zend_test_bigint_operand_class, zobj, "lastOp1Type", sizeof("lastOp1Type") - 1, zend_test_bigint_operand_type_name(op1));
+	zend_update_property_string(zend_test_bigint_operand_class, zobj, "lastOp2Type", sizeof("lastOp2Type") - 1, op2 ? zend_test_bigint_operand_type_name(op2) : "none");
+
+	zval rv;
+	zval *fail = zend_read_property(zend_test_bigint_operand_class, zobj, "fail", sizeof("fail") - 1, 1, &rv);
+	if (Z_TYPE_P(fail) == IS_TRUE) {
+		return FAILURE;
+	}
+
+	zval marker;
+	ZVAL_STRING(&marker, "marker");
+	if (result == op1) {
+		zval_ptr_dtor(result);
+	}
+	ZVAL_COPY_VALUE(result, &marker);
+	return SUCCESS;
+}
+
 PHP_MINIT_FUNCTION(zend_test)
 {
 	register_dynamic_function_entries(type);
@@ -2190,6 +2240,12 @@ PHP_MINIT_FUNCTION(zend_test)
 	zend_test_magic_call = register_class__ZendTestMagicCall();
 
 	register_class__ZendTestMagicCallForward();
+
+	zend_test_bigint_operand_class = register_class__ZendTestBigintOperand();
+	memcpy(&zend_test_bigint_operand_handlers, &std_object_handlers, sizeof(zend_object_handlers));
+	zend_test_bigint_operand_handlers.do_operation = zend_test_bigint_operand_do_operation;
+	zend_test_bigint_operand_handlers.cast_object = zend_test_bigint_operand_cast_object;
+	zend_test_bigint_operand_class->default_object_handlers = &zend_test_bigint_operand_handlers;
 
 	zend_register_functions(NULL, ext_function_legacy, NULL, EG(current_module)->type);
 
