@@ -80,8 +80,8 @@ BB0:
 0000 INIT_FCALL 3 %d string("var_dump")
 0001 #0.T0 [bool] = FETCH_OBJ_R THIS string("public")
 0002 SEND_VAL #0.T0 [bool] 1
-0003 #1.T1 [long] = FETCH_OBJ_R THIS string("protected")
-0004 SEND_VAL #1.T1 [long] 2
+0003 #1.T1 [long, bigint] = FETCH_OBJ_R THIS string("protected")
+0004 SEND_VAL #1.T1 [long, bigint] 2
 0005 #2.T2 [double] = FETCH_OBJ_R THIS string("private")
 0006 SEND_VAL #2.T2 [double] 3
 0007 DO_ICALL
@@ -100,8 +100,8 @@ BB0:
 0001 INIT_FCALL 3 %d string("var_dump")
 0002 #2.T1 [bool] = FETCH_OBJ_R #1.CV0($test2) [object (instanceof Test2)] string("public")
 0003 SEND_VAL #2.T1 [bool] 1
-0004 #3.T2 [long] = FETCH_OBJ_R #1.CV0($test2) [object (instanceof Test2)] string("protected")
-0005 SEND_VAL #3.T2 [long] 2
+0004 #3.T2 [long, bigint] = FETCH_OBJ_R #1.CV0($test2) [object (instanceof Test2)] string("protected")
+0005 SEND_VAL #3.T2 [long, bigint] 2
 0006 #4.T3 [double] = FETCH_OBJ_R #1.CV0($test2) [object (instanceof Test2)] string("private")
 0007 SEND_VAL #4.T3 [double] 3
 0008 DO_ICALL
@@ -118,8 +118,8 @@ BB0:
 0000 INIT_FCALL 3 %d string("var_dump")
 0001 #0.T0 [bool] = FETCH_OBJ_R THIS string("public")
 0002 SEND_VAL #0.T0 [bool] 1
-0003 #1.T1 [long] = FETCH_OBJ_R THIS string("protected")
-0004 SEND_VAL #1.T1 [long] 2
+0003 #1.T1 [long, bigint] = FETCH_OBJ_R THIS string("protected")
+0004 SEND_VAL #1.T1 [long, bigint] 2
 0005 #2.T2 [array of [any, ref]] = FETCH_OBJ_R THIS string("private")
 0006 SEND_VAL #2.T2 [array of [any, ref]] 3
 0007 DO_ICALL

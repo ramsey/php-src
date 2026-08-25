@@ -50,15 +50,15 @@ BB1:
      ; to=(BB2)
      ; idom=BB0
      ; level=1
-     #3.CV0($test) [object (instanceof Test)] = Pi<BB0>(#1.CV0($test) [null, object (instanceof Test)] & TYPE [ref, bool, long, double, string, array of [any, ref], object, resource])
-0003 #4.T1 [long] = FETCH_OBJ_R #3.CV0($test) [object (instanceof Test)] string("prop")
+     #3.CV0($test) [object (instanceof Test)] = Pi<BB0>(#1.CV0($test) [null, object (instanceof Test)] & TYPE [ref, bool, long, bigint, double, string, array of [any, ref], object, resource])
+0003 #4.T1 [long, bigint] = FETCH_OBJ_R #3.CV0($test) [object (instanceof Test)] string("prop")
 
 BB2:
      ; follow target exit lines=[4-6]
      ; from=(BB0, BB1)
      ; idom=BB0
      ; level=1
-     #5.X1 [null, long] = Phi(#2.X1 [null], #4.X1 [long])
-0004 SEND_VAL #5.T1 [null, long] 1
+     #5.X1 [null, long, bigint] = Phi(#2.X1 [null], #4.X1 [long, bigint])
+0004 SEND_VAL #5.T1 [null, long, bigint] 1
 0005 DO_ICALL
 0006 RETURN null
