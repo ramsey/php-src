@@ -2767,6 +2767,8 @@ PHP_FUNCTION(array_fill_keys)
 		if (Z_TYPE_P(entry) == IS_LONG) {
 			zend_hash_index_add(Z_ARRVAL_P(return_value), Z_LVAL_P(entry), val);
 		} else {
+			/* The string form of a boxed key equals its canonical storage key,
+			 * so stringified insertion and canonical lookup agree. */
 			zend_string *tmp_key;
 			zend_string *key = zval_get_tmp_string(entry, &tmp_key);
 			zend_symtable_add(Z_ARRVAL_P(return_value), key, val);
