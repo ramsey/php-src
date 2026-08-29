@@ -30,6 +30,7 @@ $a = [
     -(2 ** 100) => 'neg',
     5 => 'five',
     '42' => 'forty-two',
+    '9223372036854775808' => 'boundary',
     '0x10' => 'hex',
 ];
 $s = 'abcdef';
@@ -41,6 +42,7 @@ var_dump("$s[1267650600228229401496703205376]");
 var_dump($s[1267650600228229401496703205376]);
 var_dump("$a[5]");
 var_dump("$a[42]");
+var_dump("$a[9223372036854775808]");
 var_dump("$a[0x10]");
 
 "$p[1267650600228229401496703205376]";
@@ -59,6 +61,7 @@ Warning: Uninitialized string offset 1267650600228229401496703205376 in %s on li
 string(0) ""
 string(4) "five"
 string(9) "forty-two"
+string(8) "boundary"
 string(3) "hex"
 int(1267650600228229401496703205376)
 int(-1267650600228229401496703205376)

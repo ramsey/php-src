@@ -1,5 +1,5 @@
 --TEST--
-bigint: inline compare fast paths stay exact for out-of-band longs
+bigint: inline compare fast paths stay exact beyond the float significand
 --FILE--
 <?php
 function check(string $expr, mixed $result): void {

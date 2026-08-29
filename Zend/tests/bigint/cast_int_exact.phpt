@@ -45,6 +45,19 @@ cast('NAN', NAN);
 var_dump(intval('99999999999999999999', 10) === PHP_INT_MAX);
 var_dump(intval('99999999999999999999', 16) === PHP_INT_MAX);
 var_dump(intval('1e20', 10) === PHP_INT_MAX);
+
+$long = '99999999999999999999';
+settype($long, 'integer');
+var_dump($long);
+$short = '99999999999999999999';
+settype($short, 'int');
+var_dump($long === $short);
+
+var_dump((int) new stdClass());
+
+$x = 2 ** 100;
+$r = &$x;
+var_dump((int) $r);
 ?>
 --EXPECTF--
 (int) 1e20: int(100000000000000000000)
@@ -123,3 +136,9 @@ int(0)
 bool(true)
 bool(true)
 bool(true)
+int(99999999999999999999)
+bool(true)
+
+Warning: Object of class stdClass could not be converted to int in %s on line %d
+int(1)
+int(1267650600228229401496703205376)

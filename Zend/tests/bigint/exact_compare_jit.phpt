@@ -1,5 +1,5 @@
 --TEST--
-bigint: compare fast paths stay exact for out-of-band longs under tracing JIT
+bigint: compare fast paths stay exact beyond the float significand under tracing JIT
 --INI--
 opcache.enable_cli=1
 opcache.jit=tracing
