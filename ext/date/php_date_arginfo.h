@@ -1,7 +1,7 @@
 /* This is a generated file, edit php_date.stub.php instead.
  * Stub hash: 8556e1b5f05ae9f78200f05f01d9f8e815cba49d */
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_strtotime, 0, 1, MAY_BE_LONG|MAY_BE_FALSE)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_strtotime, 0, 1, MAY_BE_INT|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, datetime, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, baseTimestamp, IS_LONG, 1, "null")
 ZEND_END_ARG_INFO()
@@ -11,14 +11,14 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_date, 0, 1, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, timestamp, IS_LONG, 1, "null")
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_idate, 0, 1, MAY_BE_LONG|MAY_BE_FALSE)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_idate, 0, 1, MAY_BE_INT|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, format, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, timestamp, IS_LONG, 1, "null")
 ZEND_END_ARG_INFO()
 
 #define arginfo_gmdate arginfo_date
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_mktime, 0, 1, MAY_BE_LONG|MAY_BE_FALSE)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_mktime, 0, 1, MAY_BE_INT|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, hour, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, minute, IS_LONG, 1, "null")
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, second, IS_LONG, 1, "null")
@@ -208,7 +208,7 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_date_default_timezone_get arginfo_timezone_version_get
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_date_sunrise, 0, 1, MAY_BE_STRING|MAY_BE_LONG|MAY_BE_DOUBLE|MAY_BE_FALSE)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_date_sunrise, 0, 1, MAY_BE_STRING|MAY_BE_INT|MAY_BE_DOUBLE|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, timestamp, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, returnFormat, IS_LONG, 0, "SUNFUNCS_RET_STRING")
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, latitude, IS_DOUBLE, 1, "null")
@@ -283,7 +283,7 @@ ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_DateTime_cre
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_DateTime_createFromTimestamp, 0, 1, IS_STATIC, 0)
-	ZEND_ARG_TYPE_MASK(0, timestamp, MAY_BE_LONG|MAY_BE_DOUBLE, NULL)
+	ZEND_ARG_TYPE_MASK(0, timestamp, MAY_BE_INT|MAY_BE_DOUBLE, NULL)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_MASK_EX(arginfo_class_DateTime_getLastErrors, 0, 0, MAY_BE_ARRAY|MAY_BE_FALSE)
@@ -1083,85 +1083,85 @@ static zend_class_entry *register_class_DateTimeZone(void)
 	zval const_AFRICA_value;
 	ZVAL_LONG(&const_AFRICA_value, PHP_DATE_TIMEZONE_GROUP_AFRICA);
 	zend_string *const_AFRICA_name = zend_string_init_interned("AFRICA", sizeof("AFRICA") - 1, true);
-	zend_declare_typed_class_constant(class_entry, const_AFRICA_name, &const_AFRICA_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+	zend_declare_typed_class_constant(class_entry, const_AFRICA_name, &const_AFRICA_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_INT));
 	zend_string_release_ex(const_AFRICA_name, true);
 
 	zval const_AMERICA_value;
 	ZVAL_LONG(&const_AMERICA_value, PHP_DATE_TIMEZONE_GROUP_AMERICA);
 	zend_string *const_AMERICA_name = zend_string_init_interned("AMERICA", sizeof("AMERICA") - 1, true);
-	zend_declare_typed_class_constant(class_entry, const_AMERICA_name, &const_AMERICA_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+	zend_declare_typed_class_constant(class_entry, const_AMERICA_name, &const_AMERICA_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_INT));
 	zend_string_release_ex(const_AMERICA_name, true);
 
 	zval const_ANTARCTICA_value;
 	ZVAL_LONG(&const_ANTARCTICA_value, PHP_DATE_TIMEZONE_GROUP_ANTARCTICA);
 	zend_string *const_ANTARCTICA_name = zend_string_init_interned("ANTARCTICA", sizeof("ANTARCTICA") - 1, true);
-	zend_declare_typed_class_constant(class_entry, const_ANTARCTICA_name, &const_ANTARCTICA_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+	zend_declare_typed_class_constant(class_entry, const_ANTARCTICA_name, &const_ANTARCTICA_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_INT));
 	zend_string_release_ex(const_ANTARCTICA_name, true);
 
 	zval const_ARCTIC_value;
 	ZVAL_LONG(&const_ARCTIC_value, PHP_DATE_TIMEZONE_GROUP_ARCTIC);
 	zend_string *const_ARCTIC_name = zend_string_init_interned("ARCTIC", sizeof("ARCTIC") - 1, true);
-	zend_declare_typed_class_constant(class_entry, const_ARCTIC_name, &const_ARCTIC_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+	zend_declare_typed_class_constant(class_entry, const_ARCTIC_name, &const_ARCTIC_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_INT));
 	zend_string_release_ex(const_ARCTIC_name, true);
 
 	zval const_ASIA_value;
 	ZVAL_LONG(&const_ASIA_value, PHP_DATE_TIMEZONE_GROUP_ASIA);
 	zend_string *const_ASIA_name = zend_string_init_interned("ASIA", sizeof("ASIA") - 1, true);
-	zend_declare_typed_class_constant(class_entry, const_ASIA_name, &const_ASIA_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+	zend_declare_typed_class_constant(class_entry, const_ASIA_name, &const_ASIA_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_INT));
 	zend_string_release_ex(const_ASIA_name, true);
 
 	zval const_ATLANTIC_value;
 	ZVAL_LONG(&const_ATLANTIC_value, PHP_DATE_TIMEZONE_GROUP_ATLANTIC);
 	zend_string *const_ATLANTIC_name = zend_string_init_interned("ATLANTIC", sizeof("ATLANTIC") - 1, true);
-	zend_declare_typed_class_constant(class_entry, const_ATLANTIC_name, &const_ATLANTIC_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+	zend_declare_typed_class_constant(class_entry, const_ATLANTIC_name, &const_ATLANTIC_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_INT));
 	zend_string_release_ex(const_ATLANTIC_name, true);
 
 	zval const_AUSTRALIA_value;
 	ZVAL_LONG(&const_AUSTRALIA_value, PHP_DATE_TIMEZONE_GROUP_AUSTRALIA);
 	zend_string *const_AUSTRALIA_name = zend_string_init_interned("AUSTRALIA", sizeof("AUSTRALIA") - 1, true);
-	zend_declare_typed_class_constant(class_entry, const_AUSTRALIA_name, &const_AUSTRALIA_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+	zend_declare_typed_class_constant(class_entry, const_AUSTRALIA_name, &const_AUSTRALIA_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_INT));
 	zend_string_release_ex(const_AUSTRALIA_name, true);
 
 	zval const_EUROPE_value;
 	ZVAL_LONG(&const_EUROPE_value, PHP_DATE_TIMEZONE_GROUP_EUROPE);
 	zend_string *const_EUROPE_name = zend_string_init_interned("EUROPE", sizeof("EUROPE") - 1, true);
-	zend_declare_typed_class_constant(class_entry, const_EUROPE_name, &const_EUROPE_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+	zend_declare_typed_class_constant(class_entry, const_EUROPE_name, &const_EUROPE_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_INT));
 	zend_string_release_ex(const_EUROPE_name, true);
 
 	zval const_INDIAN_value;
 	ZVAL_LONG(&const_INDIAN_value, PHP_DATE_TIMEZONE_GROUP_INDIAN);
 	zend_string *const_INDIAN_name = zend_string_init_interned("INDIAN", sizeof("INDIAN") - 1, true);
-	zend_declare_typed_class_constant(class_entry, const_INDIAN_name, &const_INDIAN_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+	zend_declare_typed_class_constant(class_entry, const_INDIAN_name, &const_INDIAN_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_INT));
 	zend_string_release_ex(const_INDIAN_name, true);
 
 	zval const_PACIFIC_value;
 	ZVAL_LONG(&const_PACIFIC_value, PHP_DATE_TIMEZONE_GROUP_PACIFIC);
 	zend_string *const_PACIFIC_name = zend_string_init_interned("PACIFIC", sizeof("PACIFIC") - 1, true);
-	zend_declare_typed_class_constant(class_entry, const_PACIFIC_name, &const_PACIFIC_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+	zend_declare_typed_class_constant(class_entry, const_PACIFIC_name, &const_PACIFIC_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_INT));
 	zend_string_release_ex(const_PACIFIC_name, true);
 
 	zval const_UTC_value;
 	ZVAL_LONG(&const_UTC_value, PHP_DATE_TIMEZONE_GROUP_UTC);
 	zend_string *const_UTC_name = zend_string_init_interned("UTC", sizeof("UTC") - 1, true);
-	zend_declare_typed_class_constant(class_entry, const_UTC_name, &const_UTC_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+	zend_declare_typed_class_constant(class_entry, const_UTC_name, &const_UTC_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_INT));
 	zend_string_release_ex(const_UTC_name, true);
 
 	zval const_ALL_value;
 	ZVAL_LONG(&const_ALL_value, PHP_DATE_TIMEZONE_GROUP_ALL);
 	zend_string *const_ALL_name = zend_string_init_interned("ALL", sizeof("ALL") - 1, true);
-	zend_declare_typed_class_constant(class_entry, const_ALL_name, &const_ALL_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+	zend_declare_typed_class_constant(class_entry, const_ALL_name, &const_ALL_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_INT));
 	zend_string_release_ex(const_ALL_name, true);
 
 	zval const_ALL_WITH_BC_value;
 	ZVAL_LONG(&const_ALL_WITH_BC_value, PHP_DATE_TIMEZONE_GROUP_ALL_W_BC);
 	zend_string *const_ALL_WITH_BC_name = zend_string_init_interned("ALL_WITH_BC", sizeof("ALL_WITH_BC") - 1, true);
-	zend_declare_typed_class_constant(class_entry, const_ALL_WITH_BC_name, &const_ALL_WITH_BC_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+	zend_declare_typed_class_constant(class_entry, const_ALL_WITH_BC_name, &const_ALL_WITH_BC_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_INT));
 	zend_string_release_ex(const_ALL_WITH_BC_name, true);
 
 	zval const_PER_COUNTRY_value;
 	ZVAL_LONG(&const_PER_COUNTRY_value, PHP_DATE_TIMEZONE_PER_COUNTRY);
 	zend_string *const_PER_COUNTRY_name = zend_string_init_interned("PER_COUNTRY", sizeof("PER_COUNTRY") - 1, true);
-	zend_declare_typed_class_constant(class_entry, const_PER_COUNTRY_name, &const_PER_COUNTRY_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+	zend_declare_typed_class_constant(class_entry, const_PER_COUNTRY_name, &const_PER_COUNTRY_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_INT));
 	zend_string_release_ex(const_PER_COUNTRY_name, true);
 
 
@@ -1204,13 +1204,13 @@ static zend_class_entry *register_class_DatePeriod(zend_class_entry *class_entry
 	zval const_EXCLUDE_START_DATE_value;
 	ZVAL_LONG(&const_EXCLUDE_START_DATE_value, PHP_DATE_PERIOD_EXCLUDE_START_DATE);
 	zend_string *const_EXCLUDE_START_DATE_name = zend_string_init_interned("EXCLUDE_START_DATE", sizeof("EXCLUDE_START_DATE") - 1, true);
-	zend_declare_typed_class_constant(class_entry, const_EXCLUDE_START_DATE_name, &const_EXCLUDE_START_DATE_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+	zend_declare_typed_class_constant(class_entry, const_EXCLUDE_START_DATE_name, &const_EXCLUDE_START_DATE_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_INT));
 	zend_string_release_ex(const_EXCLUDE_START_DATE_name, true);
 
 	zval const_INCLUDE_END_DATE_value;
 	ZVAL_LONG(&const_INCLUDE_END_DATE_value, PHP_DATE_PERIOD_INCLUDE_END_DATE);
 	zend_string *const_INCLUDE_END_DATE_name = zend_string_init_interned("INCLUDE_END_DATE", sizeof("INCLUDE_END_DATE") - 1, true);
-	zend_declare_typed_class_constant(class_entry, const_INCLUDE_END_DATE_name, &const_INCLUDE_END_DATE_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+	zend_declare_typed_class_constant(class_entry, const_INCLUDE_END_DATE_name, &const_INCLUDE_END_DATE_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_INT));
 	zend_string_release_ex(const_INCLUDE_END_DATE_name, true);
 
 	zval property_start_default_value;
@@ -1244,7 +1244,7 @@ static zend_class_entry *register_class_DatePeriod(zend_class_entry *class_entry
 	zval property_recurrences_default_value;
 	ZVAL_UNDEF(&property_recurrences_default_value);
 	zend_string *property_recurrences_name = zend_string_init("recurrences", sizeof("recurrences") - 1, true);
-	zend_declare_typed_property(class_entry, property_recurrences_name, &property_recurrences_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_VIRTUAL, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+	zend_declare_typed_property(class_entry, property_recurrences_name, &property_recurrences_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_VIRTUAL, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_INT));
 	zend_string_release_ex(property_recurrences_name, true);
 
 	zval property_include_start_date_default_value;

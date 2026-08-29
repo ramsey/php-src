@@ -132,13 +132,13 @@ static zend_class_entry *register_class_XSLTProcessor(void)
 	zval property_maxTemplateDepth_default_value;
 	ZVAL_UNDEF(&property_maxTemplateDepth_default_value);
 	zend_string *property_maxTemplateDepth_name = zend_string_init("maxTemplateDepth", sizeof("maxTemplateDepth") - 1, true);
-	zend_declare_typed_property(class_entry, property_maxTemplateDepth_name, &property_maxTemplateDepth_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+	zend_declare_typed_property(class_entry, property_maxTemplateDepth_name, &property_maxTemplateDepth_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_INT));
 	zend_string_release_ex(property_maxTemplateDepth_name, true);
 
 	zval property_maxTemplateVars_default_value;
 	ZVAL_UNDEF(&property_maxTemplateVars_default_value);
 	zend_string *property_maxTemplateVars_name = zend_string_init("maxTemplateVars", sizeof("maxTemplateVars") - 1, true);
-	zend_declare_typed_property(class_entry, property_maxTemplateVars_name, &property_maxTemplateVars_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+	zend_declare_typed_property(class_entry, property_maxTemplateVars_name, &property_maxTemplateVars_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_INT));
 	zend_string_release_ex(property_maxTemplateVars_name, true);
 
 	return class_entry;

@@ -179,7 +179,7 @@ static zend_class_entry *register_class_Exception(zend_class_entry *class_entry_
 
 	zval property_line_default_value;
 	ZVAL_LONG(&property_line_default_value, 0);
-	zend_declare_typed_property(class_entry, ZSTR_KNOWN(ZEND_STR_LINE), &property_line_default_value, ZEND_ACC_PROTECTED, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+	zend_declare_typed_property(class_entry, ZSTR_KNOWN(ZEND_STR_LINE), &property_line_default_value, ZEND_ACC_PROTECTED, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_INT));
 
 	zval property_trace_default_value;
 	ZVAL_EMPTY_ARRAY(&property_trace_default_value);
@@ -202,7 +202,7 @@ static zend_class_entry *register_class_ErrorException(zend_class_entry *class_e
 
 	zval property_severity_default_value;
 	ZVAL_LONG(&property_severity_default_value, E_ERROR);
-	zend_declare_typed_property(class_entry, ZSTR_KNOWN(ZEND_STR_SEVERITY), &property_severity_default_value, ZEND_ACC_PROTECTED, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+	zend_declare_typed_property(class_entry, ZSTR_KNOWN(ZEND_STR_SEVERITY), &property_severity_default_value, ZEND_ACC_PROTECTED, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_INT));
 
 	return class_entry;
 }
@@ -233,7 +233,7 @@ static zend_class_entry *register_class_Error(zend_class_entry *class_entry_Thro
 
 	zval property_line_default_value;
 	ZVAL_UNDEF(&property_line_default_value);
-	zend_declare_typed_property(class_entry, ZSTR_KNOWN(ZEND_STR_LINE), &property_line_default_value, ZEND_ACC_PROTECTED, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+	zend_declare_typed_property(class_entry, ZSTR_KNOWN(ZEND_STR_LINE), &property_line_default_value, ZEND_ACC_PROTECTED, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_INT));
 
 	zval property_trace_default_value;
 	ZVAL_EMPTY_ARRAY(&property_trace_default_value);

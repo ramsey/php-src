@@ -230,73 +230,73 @@ static zend_class_entry *register_class_Io_Poll_FailedPollOperationException(zen
 	zval const_ERROR_NONE_value;
 	ZVAL_LONG(&const_ERROR_NONE_value, PHP_POLL_ERROR_CODE_NONE);
 	zend_string *const_ERROR_NONE_name = zend_string_init_interned("ERROR_NONE", sizeof("ERROR_NONE") - 1, true);
-	zend_declare_typed_class_constant(class_entry, const_ERROR_NONE_name, &const_ERROR_NONE_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+	zend_declare_typed_class_constant(class_entry, const_ERROR_NONE_name, &const_ERROR_NONE_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_INT));
 	zend_string_release_ex(const_ERROR_NONE_name, true);
 
 	zval const_ERROR_SYSTEM_value;
 	ZVAL_LONG(&const_ERROR_SYSTEM_value, PHP_POLL_ERROR_CODE_SYSTEM);
 	zend_string *const_ERROR_SYSTEM_name = zend_string_init_interned("ERROR_SYSTEM", sizeof("ERROR_SYSTEM") - 1, true);
-	zend_declare_typed_class_constant(class_entry, const_ERROR_SYSTEM_name, &const_ERROR_SYSTEM_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+	zend_declare_typed_class_constant(class_entry, const_ERROR_SYSTEM_name, &const_ERROR_SYSTEM_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_INT));
 	zend_string_release_ex(const_ERROR_SYSTEM_name, true);
 
 	zval const_ERROR_NOMEM_value;
 	ZVAL_LONG(&const_ERROR_NOMEM_value, PHP_POLL_ERROR_CODE_NOMEM);
 	zend_string *const_ERROR_NOMEM_name = zend_string_init_interned("ERROR_NOMEM", sizeof("ERROR_NOMEM") - 1, true);
-	zend_declare_typed_class_constant(class_entry, const_ERROR_NOMEM_name, &const_ERROR_NOMEM_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+	zend_declare_typed_class_constant(class_entry, const_ERROR_NOMEM_name, &const_ERROR_NOMEM_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_INT));
 	zend_string_release_ex(const_ERROR_NOMEM_name, true);
 
 	zval const_ERROR_INVALID_value;
 	ZVAL_LONG(&const_ERROR_INVALID_value, PHP_POLL_ERROR_CODE_INVALID);
 	zend_string *const_ERROR_INVALID_name = zend_string_init_interned("ERROR_INVALID", sizeof("ERROR_INVALID") - 1, true);
-	zend_declare_typed_class_constant(class_entry, const_ERROR_INVALID_name, &const_ERROR_INVALID_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+	zend_declare_typed_class_constant(class_entry, const_ERROR_INVALID_name, &const_ERROR_INVALID_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_INT));
 	zend_string_release_ex(const_ERROR_INVALID_name, true);
 
 	zval const_ERROR_EXISTS_value;
 	ZVAL_LONG(&const_ERROR_EXISTS_value, PHP_POLL_ERROR_CODE_EXISTS);
 	zend_string *const_ERROR_EXISTS_name = zend_string_init_interned("ERROR_EXISTS", sizeof("ERROR_EXISTS") - 1, true);
-	zend_declare_typed_class_constant(class_entry, const_ERROR_EXISTS_name, &const_ERROR_EXISTS_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+	zend_declare_typed_class_constant(class_entry, const_ERROR_EXISTS_name, &const_ERROR_EXISTS_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_INT));
 	zend_string_release_ex(const_ERROR_EXISTS_name, true);
 
 	zval const_ERROR_NOTFOUND_value;
 	ZVAL_LONG(&const_ERROR_NOTFOUND_value, PHP_POLL_ERROR_CODE_NOTFOUND);
 	zend_string *const_ERROR_NOTFOUND_name = zend_string_init_interned("ERROR_NOTFOUND", sizeof("ERROR_NOTFOUND") - 1, true);
-	zend_declare_typed_class_constant(class_entry, const_ERROR_NOTFOUND_name, &const_ERROR_NOTFOUND_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+	zend_declare_typed_class_constant(class_entry, const_ERROR_NOTFOUND_name, &const_ERROR_NOTFOUND_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_INT));
 	zend_string_release_ex(const_ERROR_NOTFOUND_name, true);
 
 	zval const_ERROR_TIMEOUT_value;
 	ZVAL_LONG(&const_ERROR_TIMEOUT_value, PHP_POLL_ERROR_CODE_TIMEOUT);
 	zend_string *const_ERROR_TIMEOUT_name = zend_string_init_interned("ERROR_TIMEOUT", sizeof("ERROR_TIMEOUT") - 1, true);
-	zend_declare_typed_class_constant(class_entry, const_ERROR_TIMEOUT_name, &const_ERROR_TIMEOUT_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+	zend_declare_typed_class_constant(class_entry, const_ERROR_TIMEOUT_name, &const_ERROR_TIMEOUT_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_INT));
 	zend_string_release_ex(const_ERROR_TIMEOUT_name, true);
 
 	zval const_ERROR_INTERRUPTED_value;
 	ZVAL_LONG(&const_ERROR_INTERRUPTED_value, PHP_POLL_ERROR_CODE_INTERRUPTED);
 	zend_string *const_ERROR_INTERRUPTED_name = zend_string_init_interned("ERROR_INTERRUPTED", sizeof("ERROR_INTERRUPTED") - 1, true);
-	zend_declare_typed_class_constant(class_entry, const_ERROR_INTERRUPTED_name, &const_ERROR_INTERRUPTED_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+	zend_declare_typed_class_constant(class_entry, const_ERROR_INTERRUPTED_name, &const_ERROR_INTERRUPTED_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_INT));
 	zend_string_release_ex(const_ERROR_INTERRUPTED_name, true);
 
 	zval const_ERROR_PERMISSION_value;
 	ZVAL_LONG(&const_ERROR_PERMISSION_value, PHP_POLL_ERROR_CODE_PERMISSION);
 	zend_string *const_ERROR_PERMISSION_name = zend_string_init_interned("ERROR_PERMISSION", sizeof("ERROR_PERMISSION") - 1, true);
-	zend_declare_typed_class_constant(class_entry, const_ERROR_PERMISSION_name, &const_ERROR_PERMISSION_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+	zend_declare_typed_class_constant(class_entry, const_ERROR_PERMISSION_name, &const_ERROR_PERMISSION_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_INT));
 	zend_string_release_ex(const_ERROR_PERMISSION_name, true);
 
 	zval const_ERROR_TOOBIG_value;
 	ZVAL_LONG(&const_ERROR_TOOBIG_value, PHP_POLL_ERROR_CODE_TOOBIG);
 	zend_string *const_ERROR_TOOBIG_name = zend_string_init_interned("ERROR_TOOBIG", sizeof("ERROR_TOOBIG") - 1, true);
-	zend_declare_typed_class_constant(class_entry, const_ERROR_TOOBIG_name, &const_ERROR_TOOBIG_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+	zend_declare_typed_class_constant(class_entry, const_ERROR_TOOBIG_name, &const_ERROR_TOOBIG_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_INT));
 	zend_string_release_ex(const_ERROR_TOOBIG_name, true);
 
 	zval const_ERROR_AGAIN_value;
 	ZVAL_LONG(&const_ERROR_AGAIN_value, PHP_POLL_ERROR_CODE_AGAIN);
 	zend_string *const_ERROR_AGAIN_name = zend_string_init_interned("ERROR_AGAIN", sizeof("ERROR_AGAIN") - 1, true);
-	zend_declare_typed_class_constant(class_entry, const_ERROR_AGAIN_name, &const_ERROR_AGAIN_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+	zend_declare_typed_class_constant(class_entry, const_ERROR_AGAIN_name, &const_ERROR_AGAIN_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_INT));
 	zend_string_release_ex(const_ERROR_AGAIN_name, true);
 
 	zval const_ERROR_NOSUPPORT_value;
 	ZVAL_LONG(&const_ERROR_NOSUPPORT_value, PHP_POLL_ERROR_CODE_NOSUPPORT);
 	zend_string *const_ERROR_NOSUPPORT_name = zend_string_init_interned("ERROR_NOSUPPORT", sizeof("ERROR_NOSUPPORT") - 1, true);
-	zend_declare_typed_class_constant(class_entry, const_ERROR_NOSUPPORT_name, &const_ERROR_NOSUPPORT_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+	zend_declare_typed_class_constant(class_entry, const_ERROR_NOSUPPORT_name, &const_ERROR_NOSUPPORT_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_INT));
 	zend_string_release_ex(const_ERROR_NOSUPPORT_name, true);
 
 	return class_entry;

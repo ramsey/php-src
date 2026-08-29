@@ -518,7 +518,7 @@ static zend_class_entry *register_class_Uri_Rfc3986_UriBuilder(void)
 
 	zval property_port_default_value;
 	ZVAL_NULL(&property_port_default_value);
-	zend_declare_typed_property(class_entry, ZSTR_KNOWN(ZEND_STR_PORT), &property_port_default_value, ZEND_ACC_PRIVATE, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG|MAY_BE_NULL));
+	zend_declare_typed_property(class_entry, ZSTR_KNOWN(ZEND_STR_PORT), &property_port_default_value, ZEND_ACC_PRIVATE, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_INT|MAY_BE_NULL));
 
 	zval property_path_default_value;
 	ZVAL_EMPTY_STRING(&property_path_default_value);
@@ -701,7 +701,7 @@ static zend_class_entry *register_class_Uri_WhatWg_UrlBuilder(void)
 
 	zval property_port_default_value;
 	ZVAL_NULL(&property_port_default_value);
-	zend_declare_typed_property(class_entry, ZSTR_KNOWN(ZEND_STR_PORT), &property_port_default_value, ZEND_ACC_PRIVATE, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG|MAY_BE_NULL));
+	zend_declare_typed_property(class_entry, ZSTR_KNOWN(ZEND_STR_PORT), &property_port_default_value, ZEND_ACC_PRIVATE, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_INT|MAY_BE_NULL));
 
 	zval property_path_default_value;
 	ZVAL_EMPTY_STRING(&property_path_default_value);

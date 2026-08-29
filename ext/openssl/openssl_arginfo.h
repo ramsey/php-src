@@ -34,7 +34,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_openssl_x509_parse, 0, 1, MAY_BE
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, short_names, _IS_BOOL, 0, "true")
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_openssl_x509_checkpurpose, 0, 2, MAY_BE_BOOL|MAY_BE_LONG)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_openssl_x509_checkpurpose, 0, 2, MAY_BE_BOOL|MAY_BE_INT)
 	ZEND_ARG_OBJ_TYPE_MASK(0, certificate, OpenSSLCertificate, MAY_BE_STRING, NULL)
 	ZEND_ARG_TYPE_INFO(0, purpose, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, ca_info, IS_ARRAY, 0, "[]")
@@ -159,7 +159,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_openssl_pbkdf2, 0, 4, MAY_BE_STR
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, digest_algo, IS_STRING, 0, "\"sha1\"")
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_openssl_pkcs7_verify, 0, 2, MAY_BE_BOOL|MAY_BE_LONG)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_openssl_pkcs7_verify, 0, 2, MAY_BE_BOOL|MAY_BE_INT)
 	ZEND_ARG_TYPE_INFO(0, input_filename, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, flags, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, signers_certificates_filename, IS_STRING, 1, "null")
@@ -219,7 +219,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_openssl_cms_encrypt, 0, 4, _IS_B
 	ZEND_ARG_TYPE_INFO(0, headers, IS_ARRAY, 1)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, flags, IS_LONG, 0, "0")
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, encoding, IS_LONG, 0, "OPENSSL_ENCODING_SMIME")
-	ZEND_ARG_TYPE_MASK(0, cipher_algo, MAY_BE_STRING|MAY_BE_LONG, "OPENSSL_CIPHER_AES_128_CBC")
+	ZEND_ARG_TYPE_MASK(0, cipher_algo, MAY_BE_STRING|MAY_BE_INT, "OPENSSL_CIPHER_AES_128_CBC")
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_openssl_cms_sign, 0, 5, _IS_BOOL, 0)
@@ -283,21 +283,21 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_openssl_sign, 0, 3, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, data, IS_STRING, 0)
 	ZEND_ARG_INFO(1, signature)
 	ZEND_ARG_INFO(0, private_key)
-	ZEND_ARG_TYPE_MASK(0, algorithm, MAY_BE_STRING|MAY_BE_LONG, "OPENSSL_ALGO_SHA1")
+	ZEND_ARG_TYPE_MASK(0, algorithm, MAY_BE_STRING|MAY_BE_INT, "OPENSSL_ALGO_SHA1")
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, padding, IS_LONG, 0, "0")
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, salt_length, IS_LONG, 0, "OPENSSL_RSA_PSS_SALTLEN_AUTO")
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_openssl_verify, 0, 3, MAY_BE_LONG|MAY_BE_FALSE)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_openssl_verify, 0, 3, MAY_BE_INT|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, data, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, signature, IS_STRING, 0)
 	ZEND_ARG_INFO(0, public_key)
-	ZEND_ARG_TYPE_MASK(0, algorithm, MAY_BE_STRING|MAY_BE_LONG, "OPENSSL_ALGO_SHA1")
+	ZEND_ARG_TYPE_MASK(0, algorithm, MAY_BE_STRING|MAY_BE_INT, "OPENSSL_ALGO_SHA1")
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, padding, IS_LONG, 0, "0")
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, salt_length, IS_LONG, 0, "OPENSSL_RSA_PSS_SALTLEN_AUTO")
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_openssl_seal, 0, 5, MAY_BE_LONG|MAY_BE_FALSE)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_openssl_seal, 0, 5, MAY_BE_INT|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, data, IS_STRING, 0)
 	ZEND_ARG_INFO(1, sealed_data)
 	ZEND_ARG_INFO(1, encrypted_keys)
@@ -353,7 +353,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_openssl_decrypt, 0, 3, MAY_BE_ST
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, aad, IS_STRING, 1, "\"\"")
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_openssl_cipher_iv_length, 0, 1, MAY_BE_LONG|MAY_BE_FALSE)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_openssl_cipher_iv_length, 0, 1, MAY_BE_INT|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, cipher_algo, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
@@ -846,13 +846,13 @@ static zend_class_entry *register_class_Openssl_Psk(void)
 	zval const_MAX_PSK_LEN_value;
 	ZVAL_LONG(&const_MAX_PSK_LEN_value, PHP_OPENSSL_PSK_MAX_PSK_LEN);
 	zend_string *const_MAX_PSK_LEN_name = zend_string_init_interned("MAX_PSK_LEN", sizeof("MAX_PSK_LEN") - 1, true);
-	zend_declare_typed_class_constant(class_entry, const_MAX_PSK_LEN_name, &const_MAX_PSK_LEN_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+	zend_declare_typed_class_constant(class_entry, const_MAX_PSK_LEN_name, &const_MAX_PSK_LEN_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_INT));
 	zend_string_release_ex(const_MAX_PSK_LEN_name, true);
 
 	zval const_MAX_IDENTITY_LEN_value;
 	ZVAL_LONG(&const_MAX_IDENTITY_LEN_value, PHP_OPENSSL_PSK_MAX_IDENTITY_LEN);
 	zend_string *const_MAX_IDENTITY_LEN_name = zend_string_init_interned("MAX_IDENTITY_LEN", sizeof("MAX_IDENTITY_LEN") - 1, true);
-	zend_declare_typed_class_constant(class_entry, const_MAX_IDENTITY_LEN_name, &const_MAX_IDENTITY_LEN_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+	zend_declare_typed_class_constant(class_entry, const_MAX_IDENTITY_LEN_name, &const_MAX_IDENTITY_LEN_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_INT));
 	zend_string_release_ex(const_MAX_IDENTITY_LEN_name, true);
 
 	zval property_psk_default_value;

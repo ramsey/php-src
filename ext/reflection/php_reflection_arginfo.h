@@ -40,7 +40,7 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_MASK_EX(arginfo_class_ReflectionFunctionAbstract_getDocComment, 0, 0, MAY_BE_STRING|MAY_BE_FALSE)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_MASK_EX(arginfo_class_ReflectionFunctionAbstract_getEndLine, 0, 0, MAY_BE_LONG|MAY_BE_FALSE)
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_MASK_EX(arginfo_class_ReflectionFunctionAbstract_getEndLine, 0, 0, MAY_BE_INT|MAY_BE_FALSE)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_OBJ_INFO_EX(arginfo_class_ReflectionFunctionAbstract_getExtension, 0, 0, ReflectionExtension, 1)
@@ -521,7 +521,7 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_ReflectionParameter___construct, 0, 0, 2)
 	ZEND_ARG_INFO(0, function)
-	ZEND_ARG_TYPE_MASK(0, param, MAY_BE_LONG|MAY_BE_STRING, NULL)
+	ZEND_ARG_TYPE_MASK(0, param, MAY_BE_INT|MAY_BE_STRING, NULL)
 ZEND_END_ARG_INFO()
 
 #define arginfo_class_ReflectionParameter___toString arginfo_class_ReflectionFunction___toString
@@ -634,7 +634,7 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_ReflectionReference_fromArrayElement, 0, 2, ReflectionReference, 1)
 	ZEND_ARG_TYPE_INFO(0, array, IS_ARRAY, 0)
-	ZEND_ARG_TYPE_MASK(0, key, MAY_BE_LONG|MAY_BE_STRING, NULL)
+	ZEND_ARG_TYPE_MASK(0, key, MAY_BE_INT|MAY_BE_STRING, NULL)
 ZEND_END_ARG_INFO()
 
 #define arginfo_class_ReflectionReference_getId arginfo_class_ReflectionFunction___toString
@@ -694,7 +694,7 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_ReflectionEnumBackedCase___construct arginfo_class_ReflectionClassConstant___construct
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_class_ReflectionEnumBackedCase_getBackingValue, 0, 0, MAY_BE_LONG|MAY_BE_STRING)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_class_ReflectionEnumBackedCase_getBackingValue, 0, 0, MAY_BE_INT|MAY_BE_STRING)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_ReflectionFiber___construct, 0, 0, 1)
@@ -1454,7 +1454,7 @@ static zend_class_entry *register_class_ReflectionFunction(zend_class_entry *cla
 	zval const_IS_DEPRECATED_value;
 	ZVAL_LONG(&const_IS_DEPRECATED_value, ZEND_ACC_DEPRECATED);
 	zend_string *const_IS_DEPRECATED_name = zend_string_init_interned("IS_DEPRECATED", sizeof("IS_DEPRECATED") - 1, true);
-	zend_declare_typed_class_constant(class_entry, const_IS_DEPRECATED_name, &const_IS_DEPRECATED_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+	zend_declare_typed_class_constant(class_entry, const_IS_DEPRECATED_name, &const_IS_DEPRECATED_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_INT));
 	zend_string_release_ex(const_IS_DEPRECATED_name, true);
 
 
@@ -1488,37 +1488,37 @@ static zend_class_entry *register_class_ReflectionMethod(zend_class_entry *class
 	zval const_IS_STATIC_value;
 	ZVAL_LONG(&const_IS_STATIC_value, ZEND_ACC_STATIC);
 	zend_string *const_IS_STATIC_name = zend_string_init_interned("IS_STATIC", sizeof("IS_STATIC") - 1, true);
-	zend_declare_typed_class_constant(class_entry, const_IS_STATIC_name, &const_IS_STATIC_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+	zend_declare_typed_class_constant(class_entry, const_IS_STATIC_name, &const_IS_STATIC_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_INT));
 	zend_string_release_ex(const_IS_STATIC_name, true);
 
 	zval const_IS_PUBLIC_value;
 	ZVAL_LONG(&const_IS_PUBLIC_value, ZEND_ACC_PUBLIC);
 	zend_string *const_IS_PUBLIC_name = zend_string_init_interned("IS_PUBLIC", sizeof("IS_PUBLIC") - 1, true);
-	zend_declare_typed_class_constant(class_entry, const_IS_PUBLIC_name, &const_IS_PUBLIC_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+	zend_declare_typed_class_constant(class_entry, const_IS_PUBLIC_name, &const_IS_PUBLIC_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_INT));
 	zend_string_release_ex(const_IS_PUBLIC_name, true);
 
 	zval const_IS_PROTECTED_value;
 	ZVAL_LONG(&const_IS_PROTECTED_value, ZEND_ACC_PROTECTED);
 	zend_string *const_IS_PROTECTED_name = zend_string_init_interned("IS_PROTECTED", sizeof("IS_PROTECTED") - 1, true);
-	zend_declare_typed_class_constant(class_entry, const_IS_PROTECTED_name, &const_IS_PROTECTED_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+	zend_declare_typed_class_constant(class_entry, const_IS_PROTECTED_name, &const_IS_PROTECTED_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_INT));
 	zend_string_release_ex(const_IS_PROTECTED_name, true);
 
 	zval const_IS_PRIVATE_value;
 	ZVAL_LONG(&const_IS_PRIVATE_value, ZEND_ACC_PRIVATE);
 	zend_string *const_IS_PRIVATE_name = zend_string_init_interned("IS_PRIVATE", sizeof("IS_PRIVATE") - 1, true);
-	zend_declare_typed_class_constant(class_entry, const_IS_PRIVATE_name, &const_IS_PRIVATE_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+	zend_declare_typed_class_constant(class_entry, const_IS_PRIVATE_name, &const_IS_PRIVATE_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_INT));
 	zend_string_release_ex(const_IS_PRIVATE_name, true);
 
 	zval const_IS_ABSTRACT_value;
 	ZVAL_LONG(&const_IS_ABSTRACT_value, ZEND_ACC_ABSTRACT);
 	zend_string *const_IS_ABSTRACT_name = zend_string_init_interned("IS_ABSTRACT", sizeof("IS_ABSTRACT") - 1, true);
-	zend_declare_typed_class_constant(class_entry, const_IS_ABSTRACT_name, &const_IS_ABSTRACT_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+	zend_declare_typed_class_constant(class_entry, const_IS_ABSTRACT_name, &const_IS_ABSTRACT_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_INT));
 	zend_string_release_ex(const_IS_ABSTRACT_name, true);
 
 	zval const_IS_FINAL_value;
 	ZVAL_LONG(&const_IS_FINAL_value, ZEND_ACC_FINAL);
 	zend_string *const_IS_FINAL_name = zend_string_init_interned("IS_FINAL", sizeof("IS_FINAL") - 1, true);
-	zend_declare_typed_class_constant(class_entry, const_IS_FINAL_name, &const_IS_FINAL_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+	zend_declare_typed_class_constant(class_entry, const_IS_FINAL_name, &const_IS_FINAL_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_INT));
 	zend_string_release_ex(const_IS_FINAL_name, true);
 
 	zval property_class_default_value;
@@ -1547,37 +1547,37 @@ static zend_class_entry *register_class_ReflectionClass(zend_class_entry *class_
 	zval const_IS_IMPLICIT_ABSTRACT_value;
 	ZVAL_LONG(&const_IS_IMPLICIT_ABSTRACT_value, ZEND_ACC_IMPLICIT_ABSTRACT_CLASS);
 	zend_string *const_IS_IMPLICIT_ABSTRACT_name = zend_string_init_interned("IS_IMPLICIT_ABSTRACT", sizeof("IS_IMPLICIT_ABSTRACT") - 1, true);
-	zend_declare_typed_class_constant(class_entry, const_IS_IMPLICIT_ABSTRACT_name, &const_IS_IMPLICIT_ABSTRACT_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+	zend_declare_typed_class_constant(class_entry, const_IS_IMPLICIT_ABSTRACT_name, &const_IS_IMPLICIT_ABSTRACT_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_INT));
 	zend_string_release_ex(const_IS_IMPLICIT_ABSTRACT_name, true);
 
 	zval const_IS_EXPLICIT_ABSTRACT_value;
 	ZVAL_LONG(&const_IS_EXPLICIT_ABSTRACT_value, ZEND_ACC_EXPLICIT_ABSTRACT_CLASS);
 	zend_string *const_IS_EXPLICIT_ABSTRACT_name = zend_string_init_interned("IS_EXPLICIT_ABSTRACT", sizeof("IS_EXPLICIT_ABSTRACT") - 1, true);
-	zend_declare_typed_class_constant(class_entry, const_IS_EXPLICIT_ABSTRACT_name, &const_IS_EXPLICIT_ABSTRACT_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+	zend_declare_typed_class_constant(class_entry, const_IS_EXPLICIT_ABSTRACT_name, &const_IS_EXPLICIT_ABSTRACT_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_INT));
 	zend_string_release_ex(const_IS_EXPLICIT_ABSTRACT_name, true);
 
 	zval const_IS_FINAL_value;
 	ZVAL_LONG(&const_IS_FINAL_value, ZEND_ACC_FINAL);
 	zend_string *const_IS_FINAL_name = zend_string_init_interned("IS_FINAL", sizeof("IS_FINAL") - 1, true);
-	zend_declare_typed_class_constant(class_entry, const_IS_FINAL_name, &const_IS_FINAL_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+	zend_declare_typed_class_constant(class_entry, const_IS_FINAL_name, &const_IS_FINAL_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_INT));
 	zend_string_release_ex(const_IS_FINAL_name, true);
 
 	zval const_IS_READONLY_value;
 	ZVAL_LONG(&const_IS_READONLY_value, ZEND_ACC_READONLY_CLASS);
 	zend_string *const_IS_READONLY_name = zend_string_init_interned("IS_READONLY", sizeof("IS_READONLY") - 1, true);
-	zend_declare_typed_class_constant(class_entry, const_IS_READONLY_name, &const_IS_READONLY_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+	zend_declare_typed_class_constant(class_entry, const_IS_READONLY_name, &const_IS_READONLY_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_INT));
 	zend_string_release_ex(const_IS_READONLY_name, true);
 
 	zval const_SKIP_INITIALIZATION_ON_SERIALIZE_value;
 	ZVAL_LONG(&const_SKIP_INITIALIZATION_ON_SERIALIZE_value, ZEND_LAZY_OBJECT_SKIP_INITIALIZATION_ON_SERIALIZE);
 	zend_string *const_SKIP_INITIALIZATION_ON_SERIALIZE_name = zend_string_init_interned("SKIP_INITIALIZATION_ON_SERIALIZE", sizeof("SKIP_INITIALIZATION_ON_SERIALIZE") - 1, true);
-	zend_declare_typed_class_constant(class_entry, const_SKIP_INITIALIZATION_ON_SERIALIZE_name, &const_SKIP_INITIALIZATION_ON_SERIALIZE_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+	zend_declare_typed_class_constant(class_entry, const_SKIP_INITIALIZATION_ON_SERIALIZE_name, &const_SKIP_INITIALIZATION_ON_SERIALIZE_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_INT));
 	zend_string_release_ex(const_SKIP_INITIALIZATION_ON_SERIALIZE_name, true);
 
 	zval const_SKIP_DESTRUCTOR_value;
 	ZVAL_LONG(&const_SKIP_DESTRUCTOR_value, ZEND_LAZY_OBJECT_SKIP_DESTRUCTOR);
 	zend_string *const_SKIP_DESTRUCTOR_name = zend_string_init_interned("SKIP_DESTRUCTOR", sizeof("SKIP_DESTRUCTOR") - 1, true);
-	zend_declare_typed_class_constant(class_entry, const_SKIP_DESTRUCTOR_name, &const_SKIP_DESTRUCTOR_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+	zend_declare_typed_class_constant(class_entry, const_SKIP_DESTRUCTOR_name, &const_SKIP_DESTRUCTOR_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_INT));
 	zend_string_release_ex(const_SKIP_DESTRUCTOR_name, true);
 
 	zval property_name_default_value;
@@ -1625,61 +1625,61 @@ static zend_class_entry *register_class_ReflectionProperty(zend_class_entry *cla
 	zval const_IS_STATIC_value;
 	ZVAL_LONG(&const_IS_STATIC_value, ZEND_ACC_STATIC);
 	zend_string *const_IS_STATIC_name = zend_string_init_interned("IS_STATIC", sizeof("IS_STATIC") - 1, true);
-	zend_declare_typed_class_constant(class_entry, const_IS_STATIC_name, &const_IS_STATIC_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+	zend_declare_typed_class_constant(class_entry, const_IS_STATIC_name, &const_IS_STATIC_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_INT));
 	zend_string_release_ex(const_IS_STATIC_name, true);
 
 	zval const_IS_READONLY_value;
 	ZVAL_LONG(&const_IS_READONLY_value, ZEND_ACC_READONLY);
 	zend_string *const_IS_READONLY_name = zend_string_init_interned("IS_READONLY", sizeof("IS_READONLY") - 1, true);
-	zend_declare_typed_class_constant(class_entry, const_IS_READONLY_name, &const_IS_READONLY_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+	zend_declare_typed_class_constant(class_entry, const_IS_READONLY_name, &const_IS_READONLY_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_INT));
 	zend_string_release_ex(const_IS_READONLY_name, true);
 
 	zval const_IS_PUBLIC_value;
 	ZVAL_LONG(&const_IS_PUBLIC_value, ZEND_ACC_PUBLIC);
 	zend_string *const_IS_PUBLIC_name = zend_string_init_interned("IS_PUBLIC", sizeof("IS_PUBLIC") - 1, true);
-	zend_declare_typed_class_constant(class_entry, const_IS_PUBLIC_name, &const_IS_PUBLIC_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+	zend_declare_typed_class_constant(class_entry, const_IS_PUBLIC_name, &const_IS_PUBLIC_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_INT));
 	zend_string_release_ex(const_IS_PUBLIC_name, true);
 
 	zval const_IS_PROTECTED_value;
 	ZVAL_LONG(&const_IS_PROTECTED_value, ZEND_ACC_PROTECTED);
 	zend_string *const_IS_PROTECTED_name = zend_string_init_interned("IS_PROTECTED", sizeof("IS_PROTECTED") - 1, true);
-	zend_declare_typed_class_constant(class_entry, const_IS_PROTECTED_name, &const_IS_PROTECTED_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+	zend_declare_typed_class_constant(class_entry, const_IS_PROTECTED_name, &const_IS_PROTECTED_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_INT));
 	zend_string_release_ex(const_IS_PROTECTED_name, true);
 
 	zval const_IS_PRIVATE_value;
 	ZVAL_LONG(&const_IS_PRIVATE_value, ZEND_ACC_PRIVATE);
 	zend_string *const_IS_PRIVATE_name = zend_string_init_interned("IS_PRIVATE", sizeof("IS_PRIVATE") - 1, true);
-	zend_declare_typed_class_constant(class_entry, const_IS_PRIVATE_name, &const_IS_PRIVATE_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+	zend_declare_typed_class_constant(class_entry, const_IS_PRIVATE_name, &const_IS_PRIVATE_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_INT));
 	zend_string_release_ex(const_IS_PRIVATE_name, true);
 
 	zval const_IS_ABSTRACT_value;
 	ZVAL_LONG(&const_IS_ABSTRACT_value, ZEND_ACC_ABSTRACT);
 	zend_string *const_IS_ABSTRACT_name = zend_string_init_interned("IS_ABSTRACT", sizeof("IS_ABSTRACT") - 1, true);
-	zend_declare_typed_class_constant(class_entry, const_IS_ABSTRACT_name, &const_IS_ABSTRACT_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+	zend_declare_typed_class_constant(class_entry, const_IS_ABSTRACT_name, &const_IS_ABSTRACT_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_INT));
 	zend_string_release_ex(const_IS_ABSTRACT_name, true);
 
 	zval const_IS_PROTECTED_SET_value;
 	ZVAL_LONG(&const_IS_PROTECTED_SET_value, ZEND_ACC_PROTECTED_SET);
 	zend_string *const_IS_PROTECTED_SET_name = zend_string_init_interned("IS_PROTECTED_SET", sizeof("IS_PROTECTED_SET") - 1, true);
-	zend_declare_typed_class_constant(class_entry, const_IS_PROTECTED_SET_name, &const_IS_PROTECTED_SET_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+	zend_declare_typed_class_constant(class_entry, const_IS_PROTECTED_SET_name, &const_IS_PROTECTED_SET_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_INT));
 	zend_string_release_ex(const_IS_PROTECTED_SET_name, true);
 
 	zval const_IS_PRIVATE_SET_value;
 	ZVAL_LONG(&const_IS_PRIVATE_SET_value, ZEND_ACC_PRIVATE_SET);
 	zend_string *const_IS_PRIVATE_SET_name = zend_string_init_interned("IS_PRIVATE_SET", sizeof("IS_PRIVATE_SET") - 1, true);
-	zend_declare_typed_class_constant(class_entry, const_IS_PRIVATE_SET_name, &const_IS_PRIVATE_SET_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+	zend_declare_typed_class_constant(class_entry, const_IS_PRIVATE_SET_name, &const_IS_PRIVATE_SET_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_INT));
 	zend_string_release_ex(const_IS_PRIVATE_SET_name, true);
 
 	zval const_IS_VIRTUAL_value;
 	ZVAL_LONG(&const_IS_VIRTUAL_value, ZEND_ACC_VIRTUAL);
 	zend_string *const_IS_VIRTUAL_name = zend_string_init_interned("IS_VIRTUAL", sizeof("IS_VIRTUAL") - 1, true);
-	zend_declare_typed_class_constant(class_entry, const_IS_VIRTUAL_name, &const_IS_VIRTUAL_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+	zend_declare_typed_class_constant(class_entry, const_IS_VIRTUAL_name, &const_IS_VIRTUAL_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_INT));
 	zend_string_release_ex(const_IS_VIRTUAL_name, true);
 
 	zval const_IS_FINAL_value;
 	ZVAL_LONG(&const_IS_FINAL_value, ZEND_ACC_FINAL);
 	zend_string *const_IS_FINAL_name = zend_string_init_interned("IS_FINAL", sizeof("IS_FINAL") - 1, true);
-	zend_declare_typed_class_constant(class_entry, const_IS_FINAL_name, &const_IS_FINAL_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+	zend_declare_typed_class_constant(class_entry, const_IS_FINAL_name, &const_IS_FINAL_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_INT));
 	zend_string_release_ex(const_IS_FINAL_name, true);
 
 	zval property_name_default_value;
@@ -1712,25 +1712,25 @@ static zend_class_entry *register_class_ReflectionClassConstant(zend_class_entry
 	zval const_IS_PUBLIC_value;
 	ZVAL_LONG(&const_IS_PUBLIC_value, ZEND_ACC_PUBLIC);
 	zend_string *const_IS_PUBLIC_name = zend_string_init_interned("IS_PUBLIC", sizeof("IS_PUBLIC") - 1, true);
-	zend_declare_typed_class_constant(class_entry, const_IS_PUBLIC_name, &const_IS_PUBLIC_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+	zend_declare_typed_class_constant(class_entry, const_IS_PUBLIC_name, &const_IS_PUBLIC_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_INT));
 	zend_string_release_ex(const_IS_PUBLIC_name, true);
 
 	zval const_IS_PROTECTED_value;
 	ZVAL_LONG(&const_IS_PROTECTED_value, ZEND_ACC_PROTECTED);
 	zend_string *const_IS_PROTECTED_name = zend_string_init_interned("IS_PROTECTED", sizeof("IS_PROTECTED") - 1, true);
-	zend_declare_typed_class_constant(class_entry, const_IS_PROTECTED_name, &const_IS_PROTECTED_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+	zend_declare_typed_class_constant(class_entry, const_IS_PROTECTED_name, &const_IS_PROTECTED_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_INT));
 	zend_string_release_ex(const_IS_PROTECTED_name, true);
 
 	zval const_IS_PRIVATE_value;
 	ZVAL_LONG(&const_IS_PRIVATE_value, ZEND_ACC_PRIVATE);
 	zend_string *const_IS_PRIVATE_name = zend_string_init_interned("IS_PRIVATE", sizeof("IS_PRIVATE") - 1, true);
-	zend_declare_typed_class_constant(class_entry, const_IS_PRIVATE_name, &const_IS_PRIVATE_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+	zend_declare_typed_class_constant(class_entry, const_IS_PRIVATE_name, &const_IS_PRIVATE_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_INT));
 	zend_string_release_ex(const_IS_PRIVATE_name, true);
 
 	zval const_IS_FINAL_value;
 	ZVAL_LONG(&const_IS_FINAL_value, ZEND_ACC_FINAL);
 	zend_string *const_IS_FINAL_name = zend_string_init_interned("IS_FINAL", sizeof("IS_FINAL") - 1, true);
-	zend_declare_typed_class_constant(class_entry, const_IS_FINAL_name, &const_IS_FINAL_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+	zend_declare_typed_class_constant(class_entry, const_IS_FINAL_name, &const_IS_FINAL_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_INT));
 	zend_string_release_ex(const_IS_FINAL_name, true);
 
 	zval property_name_default_value;
@@ -1871,7 +1871,7 @@ static zend_class_entry *register_class_ReflectionAttribute(zend_class_entry *cl
 	zval const_IS_INSTANCEOF_value;
 	ZVAL_LONG(&const_IS_INSTANCEOF_value, REFLECTION_ATTRIBUTE_IS_INSTANCEOF);
 	zend_string *const_IS_INSTANCEOF_name = zend_string_init_interned("IS_INSTANCEOF", sizeof("IS_INSTANCEOF") - 1, true);
-	zend_declare_typed_class_constant(class_entry, const_IS_INSTANCEOF_name, &const_IS_INSTANCEOF_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+	zend_declare_typed_class_constant(class_entry, const_IS_INSTANCEOF_name, &const_IS_INSTANCEOF_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_INT));
 	zend_string_release_ex(const_IS_INSTANCEOF_name, true);
 
 	zval property_name_default_value;

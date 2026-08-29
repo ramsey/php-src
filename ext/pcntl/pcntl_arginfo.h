@@ -50,12 +50,12 @@ ZEND_END_ARG_INFO()
 #endif
 
 #if (defined(HAVE_SIGWAITINFO) && defined(HAVE_SIGTIMEDWAIT))
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_pcntl_sigwaitinfo, 0, 1, MAY_BE_LONG|MAY_BE_FALSE)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_pcntl_sigwaitinfo, 0, 1, MAY_BE_INT|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, signals, IS_ARRAY, 0)
 	ZEND_ARG_INFO_WITH_DEFAULT_VALUE(1, info, "[]")
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_pcntl_sigtimedwait, 0, 1, MAY_BE_LONG|MAY_BE_FALSE)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_pcntl_sigtimedwait, 0, 1, MAY_BE_INT|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, signals, IS_ARRAY, 0)
 	ZEND_ARG_INFO_WITH_DEFAULT_VALUE(1, info, "[]")
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, seconds, IS_LONG, 0, "0")
@@ -77,7 +77,7 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_pcntl_wifsignaled arginfo_pcntl_wifexited
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_pcntl_wexitstatus, 0, 1, MAY_BE_LONG|MAY_BE_FALSE)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_pcntl_wexitstatus, 0, 1, MAY_BE_INT|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, status, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
@@ -100,7 +100,7 @@ ZEND_END_ARG_INFO()
 #define arginfo_pcntl_errno arginfo_pcntl_fork
 
 #if defined(HAVE_GETPRIORITY)
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_pcntl_getpriority, 0, 0, MAY_BE_LONG|MAY_BE_FALSE)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_pcntl_getpriority, 0, 0, MAY_BE_INT|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, process_id, IS_LONG, 1, "null")
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, mode, IS_LONG, 0, "PRIO_PROCESS")
 ZEND_END_ARG_INFO()

@@ -29,3 +29,5 @@ _strpos:
 0001 T1 = FRAMELESS_ICALL_3(strpos) CV0($str) string("o")
 0002 OP_DATA int(1)
 0003 RETURN T1
+LIVE RANGES:
+     1: 0002 - 0003 (tmp/var)

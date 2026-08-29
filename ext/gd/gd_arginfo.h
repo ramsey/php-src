@@ -73,7 +73,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_imagelayereffect, 0, 2, IS_TRUE,
 	ZEND_ARG_TYPE_INFO(0, effect, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_imagecolorallocatealpha, 0, 5, MAY_BE_LONG|MAY_BE_FALSE)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_imagecolorallocatealpha, 0, 5, MAY_BE_INT|MAY_BE_FALSE)
 	ZEND_ARG_OBJ_INFO(0, image, GdImage, 0)
 	ZEND_ARG_TYPE_INFO(0, red, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, green, IS_LONG, 0)
@@ -268,7 +268,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_imagedestroy, 0, 1, IS_TRUE, 0)
 	ZEND_ARG_OBJ_INFO(0, image, GdImage, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_imagecolorallocate, 0, 4, MAY_BE_LONG|MAY_BE_FALSE)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_imagecolorallocate, 0, 4, MAY_BE_INT|MAY_BE_FALSE)
 	ZEND_ARG_OBJ_INFO(0, image, GdImage, 0)
 	ZEND_ARG_TYPE_INFO(0, red, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, green, IS_LONG, 0)
@@ -280,7 +280,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_imagepalettecopy, 0, 2, IS_VOID,
 	ZEND_ARG_OBJ_INFO(0, src, GdImage, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_imagecolorat, 0, 3, MAY_BE_LONG|MAY_BE_FALSE)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_imagecolorat, 0, 3, MAY_BE_INT|MAY_BE_FALSE)
 	ZEND_ARG_OBJ_INFO(0, image, GdImage, 0)
 	ZEND_ARG_TYPE_INFO(0, x, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, y, IS_LONG, 0)
@@ -395,14 +395,14 @@ ZEND_END_ARG_INFO()
 #define arginfo_imagefilledpolygon arginfo_imagepolygon
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_imagefontwidth, 0, 1, IS_LONG, 0)
-	ZEND_ARG_OBJ_TYPE_MASK(0, font, GdFont, MAY_BE_LONG, NULL)
+	ZEND_ARG_OBJ_TYPE_MASK(0, font, GdFont, MAY_BE_INT, NULL)
 ZEND_END_ARG_INFO()
 
 #define arginfo_imagefontheight arginfo_imagefontwidth
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_imagechar, 0, 6, IS_TRUE, 0)
 	ZEND_ARG_OBJ_INFO(0, image, GdImage, 0)
-	ZEND_ARG_OBJ_TYPE_MASK(0, font, GdFont, MAY_BE_LONG, NULL)
+	ZEND_ARG_OBJ_TYPE_MASK(0, font, GdFont, MAY_BE_INT, NULL)
 	ZEND_ARG_TYPE_INFO(0, x, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, y, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, char, IS_STRING, 0)
@@ -413,7 +413,7 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_imagestring, 0, 6, IS_TRUE, 0)
 	ZEND_ARG_OBJ_INFO(0, image, GdImage, 0)
-	ZEND_ARG_OBJ_TYPE_MASK(0, font, GdFont, MAY_BE_LONG, NULL)
+	ZEND_ARG_OBJ_TYPE_MASK(0, font, GdFont, MAY_BE_INT, NULL)
 	ZEND_ARG_TYPE_INFO(0, x, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, y, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, string, IS_STRING, 0)

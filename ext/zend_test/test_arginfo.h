@@ -89,12 +89,12 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_zend_float_or_null_slow_zpp arginfo_zend_float_or_null
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_zend_number, 0, 1, MAY_BE_LONG|MAY_BE_DOUBLE)
-	ZEND_ARG_TYPE_MASK(0, param, MAY_BE_LONG|MAY_BE_DOUBLE, NULL)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_zend_number, 0, 1, MAY_BE_INT|MAY_BE_DOUBLE)
+	ZEND_ARG_TYPE_MASK(0, param, MAY_BE_INT|MAY_BE_DOUBLE, NULL)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_zend_number_or_null, 0, 1, MAY_BE_LONG|MAY_BE_DOUBLE|MAY_BE_NULL)
-	ZEND_ARG_TYPE_MASK(0, param, MAY_BE_LONG|MAY_BE_DOUBLE|MAY_BE_NULL, NULL)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_zend_number_or_null, 0, 1, MAY_BE_INT|MAY_BE_DOUBLE|MAY_BE_NULL)
+	ZEND_ARG_TYPE_MASK(0, param, MAY_BE_INT|MAY_BE_DOUBLE|MAY_BE_NULL, NULL)
 ZEND_END_ARG_INFO()
 
 #define arginfo_zend_number_slow_zpp arginfo_zend_number
@@ -179,20 +179,20 @@ ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_zend_obj_stdclass_or_string_
 	ZEND_ARG_OBJ_TYPE_MASK(0, param, stdClass, MAY_BE_STRING|MAY_BE_NULL, NULL)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_zend_obj_stdclass_or_int, 0, 1, stdClass, MAY_BE_LONG)
-	ZEND_ARG_OBJ_TYPE_MASK(0, param, stdClass, MAY_BE_LONG|MAY_BE_NULL, NULL)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_zend_obj_stdclass_or_int, 0, 1, stdClass, MAY_BE_INT)
+	ZEND_ARG_OBJ_TYPE_MASK(0, param, stdClass, MAY_BE_INT|MAY_BE_NULL, NULL)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_zend_obj_stdclass_or_int_or_null, 0, 1, stdClass, MAY_BE_LONG|MAY_BE_NULL)
-	ZEND_ARG_OBJ_TYPE_MASK(0, param, stdClass, MAY_BE_LONG|MAY_BE_NULL, NULL)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_zend_obj_stdclass_or_int_or_null, 0, 1, stdClass, MAY_BE_INT|MAY_BE_NULL)
+	ZEND_ARG_OBJ_TYPE_MASK(0, param, stdClass, MAY_BE_INT|MAY_BE_NULL, NULL)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_zend_number_or_string, 0, 1, MAY_BE_STRING|MAY_BE_LONG|MAY_BE_DOUBLE)
-	ZEND_ARG_TYPE_MASK(0, param, MAY_BE_STRING|MAY_BE_LONG|MAY_BE_DOUBLE, NULL)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_zend_number_or_string, 0, 1, MAY_BE_STRING|MAY_BE_INT|MAY_BE_DOUBLE)
+	ZEND_ARG_TYPE_MASK(0, param, MAY_BE_STRING|MAY_BE_INT|MAY_BE_DOUBLE, NULL)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_zend_number_or_string_or_null, 0, 1, MAY_BE_STRING|MAY_BE_LONG|MAY_BE_DOUBLE|MAY_BE_NULL)
-	ZEND_ARG_TYPE_MASK(0, param, MAY_BE_STRING|MAY_BE_LONG|MAY_BE_DOUBLE|MAY_BE_NULL, NULL)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_zend_number_or_string_or_null, 0, 1, MAY_BE_STRING|MAY_BE_INT|MAY_BE_DOUBLE|MAY_BE_NULL)
+	ZEND_ARG_TYPE_MASK(0, param, MAY_BE_STRING|MAY_BE_INT|MAY_BE_DOUBLE|MAY_BE_NULL, NULL)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_zend_iterable, 0, 1, IS_VOID, 0)
@@ -332,7 +332,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_zend_test_bigint_roundtrip, 0, 1
 	ZEND_ARG_TYPE_INFO(0, digits, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_zend_test_bigint_cmp_strings, 0, 2, MAY_BE_LONG|MAY_BE_FALSE)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_zend_test_bigint_cmp_strings, 0, 2, MAY_BE_INT|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, a, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, b, IS_STRING, 0)
 ZEND_END_ARG_INFO()
@@ -1117,7 +1117,7 @@ static zend_class_entry *register_class__ZendTestTraitForInternalClass(void)
 	zval property_traitProp_default_value;
 	ZVAL_LONG(&property_traitProp_default_value, 456);
 	zend_string *property_traitProp_name = zend_string_init("traitProp", sizeof("traitProp") - 1, true);
-	zend_declare_typed_property(class_entry, property_traitProp_name, &property_traitProp_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+	zend_declare_typed_property(class_entry, property_traitProp_name, &property_traitProp_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_INT));
 	zend_string_release_ex(property_traitProp_name, true);
 
 	return class_entry;
@@ -1144,7 +1144,7 @@ static zend_class_entry *register_class__ZendTestTraitForInternalClass2(void)
 	zval property_staticTraitProp_default_value;
 	ZVAL_LONG(&property_staticTraitProp_default_value, 999);
 	zend_string *property_staticTraitProp_name = zend_string_init("staticTraitProp", sizeof("staticTraitProp") - 1, true);
-	zend_declare_typed_property(class_entry, property_staticTraitProp_name, &property_staticTraitProp_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+	zend_declare_typed_property(class_entry, property_staticTraitProp_name, &property_staticTraitProp_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_INT));
 	zend_string_release_ex(property_staticTraitProp_name, true);
 
 	return class_entry;
@@ -1192,7 +1192,7 @@ static zend_class_entry *register_class__ZendTestClass(zend_class_entry *class_e
 	ZVAL_LONG(&const_TYPED_CLASS_CONST2_value, 42);
 	zend_string *const_TYPED_CLASS_CONST2_name = zend_string_init_interned("TYPED_CLASS_CONST2", sizeof("TYPED_CLASS_CONST2") - 1, true);
 #if (PHP_VERSION_ID >= 80300)
-	zend_declare_typed_class_constant(class_entry, const_TYPED_CLASS_CONST2_name, &const_TYPED_CLASS_CONST2_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG|MAY_BE_ARRAY));
+	zend_declare_typed_class_constant(class_entry, const_TYPED_CLASS_CONST2_name, &const_TYPED_CLASS_CONST2_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_INT|MAY_BE_ARRAY));
 #else
 	zend_declare_class_constant_ex(class_entry, const_TYPED_CLASS_CONST2_name, &const_TYPED_CLASS_CONST2_value, ZEND_ACC_PUBLIC, NULL);
 #endif
@@ -1202,7 +1202,7 @@ static zend_class_entry *register_class__ZendTestClass(zend_class_entry *class_e
 	ZVAL_LONG(&const_TYPED_CLASS_CONST3_value, 1);
 	zend_string *const_TYPED_CLASS_CONST3_name = zend_string_init_interned("TYPED_CLASS_CONST3", sizeof("TYPED_CLASS_CONST3") - 1, true);
 #if (PHP_VERSION_ID >= 80300)
-	zend_declare_typed_class_constant(class_entry, const_TYPED_CLASS_CONST3_name, &const_TYPED_CLASS_CONST3_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG|MAY_BE_STRING));
+	zend_declare_typed_class_constant(class_entry, const_TYPED_CLASS_CONST3_name, &const_TYPED_CLASS_CONST3_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_INT|MAY_BE_STRING));
 #else
 	zend_declare_class_constant_ex(class_entry, const_TYPED_CLASS_CONST3_name, &const_TYPED_CLASS_CONST3_value, ZEND_ACC_PUBLIC, NULL);
 #endif
@@ -1212,7 +1212,7 @@ static zend_class_entry *register_class__ZendTestClass(zend_class_entry *class_e
 	ZVAL_LONG(&const_ZEND_TEST_DEPRECATED_value, 42);
 	zend_string *const_ZEND_TEST_DEPRECATED_name = zend_string_init_interned("ZEND_TEST_DEPRECATED", sizeof("ZEND_TEST_DEPRECATED") - 1, true);
 #if (PHP_VERSION_ID >= 80300)
-	zend_declare_typed_class_constant(class_entry, const_ZEND_TEST_DEPRECATED_name, &const_ZEND_TEST_DEPRECATED_value, ZEND_ACC_PUBLIC|ZEND_ACC_DEPRECATED, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+	zend_declare_typed_class_constant(class_entry, const_ZEND_TEST_DEPRECATED_name, &const_ZEND_TEST_DEPRECATED_value, ZEND_ACC_PUBLIC|ZEND_ACC_DEPRECATED, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_INT));
 #else
 	zend_declare_class_constant_ex(class_entry, const_ZEND_TEST_DEPRECATED_name, &const_ZEND_TEST_DEPRECATED_value, ZEND_ACC_PUBLIC|ZEND_ACC_DEPRECATED, NULL);
 #endif
@@ -1222,7 +1222,7 @@ static zend_class_entry *register_class__ZendTestClass(zend_class_entry *class_e
 	ZVAL_LONG(&const_ZEND_TEST_DEPRECATED_ATTR_value, 42);
 	zend_string *const_ZEND_TEST_DEPRECATED_ATTR_name = zend_string_init_interned("ZEND_TEST_DEPRECATED_ATTR", sizeof("ZEND_TEST_DEPRECATED_ATTR") - 1, true);
 #if (PHP_VERSION_ID >= 80300)
-	zend_class_constant *const_ZEND_TEST_DEPRECATED_ATTR = zend_declare_typed_class_constant(class_entry, const_ZEND_TEST_DEPRECATED_ATTR_name, &const_ZEND_TEST_DEPRECATED_ATTR_value, ZEND_ACC_PUBLIC|ZEND_ACC_DEPRECATED, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+	zend_class_constant *const_ZEND_TEST_DEPRECATED_ATTR = zend_declare_typed_class_constant(class_entry, const_ZEND_TEST_DEPRECATED_ATTR_name, &const_ZEND_TEST_DEPRECATED_ATTR_value, ZEND_ACC_PUBLIC|ZEND_ACC_DEPRECATED, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_INT));
 #else
 	zend_class_constant *const_ZEND_TEST_DEPRECATED_ATTR = zend_declare_class_constant_ex(class_entry, const_ZEND_TEST_DEPRECATED_ATTR_name, &const_ZEND_TEST_DEPRECATED_ATTR_value, ZEND_ACC_PUBLIC|ZEND_ACC_DEPRECATED, NULL);
 #endif
@@ -1237,7 +1237,7 @@ static zend_class_entry *register_class__ZendTestClass(zend_class_entry *class_e
 	zval property_staticIntProp_default_value;
 	ZVAL_LONG(&property_staticIntProp_default_value, 123);
 	zend_string *property_staticIntProp_name = zend_string_init("staticIntProp", sizeof("staticIntProp") - 1, true);
-	zend_declare_typed_property(class_entry, property_staticIntProp_name, &property_staticIntProp_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+	zend_declare_typed_property(class_entry, property_staticIntProp_name, &property_staticIntProp_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_INT));
 	zend_string_release_ex(property_staticIntProp_name, true);
 
 	zval property_doubleQuoteEscaped_default_value;
@@ -1264,7 +1264,7 @@ static zend_class_entry *register_class__ZendTestClass(zend_class_entry *class_e
 	zval property_intProp_default_value;
 	ZVAL_LONG(&property_intProp_default_value, 123);
 	zend_string *property_intProp_name = zend_string_init("intProp", sizeof("intProp") - 1, true);
-	zend_declare_typed_property(class_entry, property_intProp_name, &property_intProp_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+	zend_declare_typed_property(class_entry, property_intProp_name, &property_intProp_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_INT));
 	zend_string_release_ex(property_intProp_name, true);
 
 	zval property_classProp_default_value;
@@ -1304,9 +1304,9 @@ static zend_class_entry *register_class__ZendTestClass(zend_class_entry *class_e
 	ZVAL_UNDEF(&property_readonlyProp_default_value);
 	zend_string *property_readonlyProp_name = zend_string_init("readonlyProp", sizeof("readonlyProp") - 1, true);
 #if (PHP_VERSION_ID >= 80100)
-	zend_declare_typed_property(class_entry, property_readonlyProp_name, &property_readonlyProp_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_READONLY, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+	zend_declare_typed_property(class_entry, property_readonlyProp_name, &property_readonlyProp_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_READONLY, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_INT));
 #elif (PHP_VERSION_ID >= 80000)
-	zend_declare_typed_property(class_entry, property_readonlyProp_name, &property_readonlyProp_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+	zend_declare_typed_property(class_entry, property_readonlyProp_name, &property_readonlyProp_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_INT));
 #endif
 	zend_string_release_ex(property_readonlyProp_name, true);
 
@@ -1314,9 +1314,9 @@ static zend_class_entry *register_class__ZendTestClass(zend_class_entry *class_e
 	ZVAL_UNDEF(&property_finalProp_default_value);
 	zend_string *property_finalProp_name = zend_string_init("finalProp", sizeof("finalProp") - 1, true);
 #if (PHP_VERSION_ID >= 80400)
-	zend_declare_typed_property(class_entry, property_finalProp_name, &property_finalProp_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_FINAL, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+	zend_declare_typed_property(class_entry, property_finalProp_name, &property_finalProp_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_FINAL, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_INT));
 #elif (PHP_VERSION_ID >= 80000)
-	zend_declare_typed_property(class_entry, property_finalProp_name, &property_finalProp_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+	zend_declare_typed_property(class_entry, property_finalProp_name, &property_finalProp_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_INT));
 #endif
 	zend_string_release_ex(property_finalProp_name, true);
 
@@ -1386,7 +1386,7 @@ static zend_class_entry *register_class__ZendTestBigintOperand(void)
 	zval property_castValue_default_value;
 	ZVAL_LONG(&property_castValue_default_value, 0);
 	zend_string *property_castValue_name = zend_string_init("castValue", sizeof("castValue") - 1, true);
-	zend_declare_typed_property(class_entry, property_castValue_name, &property_castValue_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+	zend_declare_typed_property(class_entry, property_castValue_name, &property_castValue_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_INT));
 	zend_string_release_ex(property_castValue_name, true);
 
 	zval property_lastOpcode_default_value;

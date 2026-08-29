@@ -229,7 +229,7 @@ static zend_class_entry *register_class_StreamError(void)
 
 	zval property_severity_default_value;
 	ZVAL_UNDEF(&property_severity_default_value);
-	zend_declare_typed_property(class_entry, ZSTR_KNOWN(ZEND_STR_SEVERITY), &property_severity_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_READONLY, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+	zend_declare_typed_property(class_entry, ZSTR_KNOWN(ZEND_STR_SEVERITY), &property_severity_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_READONLY, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_INT));
 
 	zval property_terminating_default_value;
 	ZVAL_UNDEF(&property_terminating_default_value);

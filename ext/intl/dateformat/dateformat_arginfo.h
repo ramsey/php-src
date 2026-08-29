@@ -15,11 +15,11 @@ ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_OBJ_INFO_EX(arginfo_class_IntlDateFormatter
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, dateType, IS_LONG, 0, "IntlDateFormatter::FULL")
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, timeType, IS_LONG, 0, "IntlDateFormatter::FULL")
 	ZEND_ARG_OBJ_TYPE_MASK(0, timezone, IntlTimeZone|DateTimeZone, MAY_BE_STRING|MAY_BE_NULL, "null")
-	ZEND_ARG_OBJ_TYPE_MASK(0, calendar, IntlCalendar, MAY_BE_LONG|MAY_BE_NULL, "null")
+	ZEND_ARG_OBJ_TYPE_MASK(0, calendar, IntlCalendar, MAY_BE_INT|MAY_BE_NULL, "null")
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, pattern, IS_STRING, 1, "null")
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_MASK_EX(arginfo_class_IntlDateFormatter_getDateType, 0, 0, MAY_BE_LONG|MAY_BE_FALSE)
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_MASK_EX(arginfo_class_IntlDateFormatter_getDateType, 0, 0, MAY_BE_INT|MAY_BE_FALSE)
 ZEND_END_ARG_INFO()
 
 #define arginfo_class_IntlDateFormatter_getTimeType arginfo_class_IntlDateFormatter_getDateType
@@ -27,7 +27,7 @@ ZEND_END_ARG_INFO()
 #define arginfo_class_IntlDateFormatter_getCalendar arginfo_class_IntlDateFormatter_getDateType
 
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_IntlDateFormatter_setCalendar, 0, 1, _IS_BOOL, 0)
-	ZEND_ARG_OBJ_TYPE_MASK(0, calendar, IntlCalendar, MAY_BE_LONG|MAY_BE_NULL, NULL)
+	ZEND_ARG_OBJ_TYPE_MASK(0, calendar, IntlCalendar, MAY_BE_INT|MAY_BE_NULL, NULL)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_MASK_EX(arginfo_class_IntlDateFormatter_getTimeZoneId, 0, 0, MAY_BE_STRING|MAY_BE_FALSE)
@@ -70,12 +70,12 @@ ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_MASK_EX(arginfo_class_IntlDateFormatte
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, locale, IS_STRING, 1, "null")
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_MASK_EX(arginfo_class_IntlDateFormatter_parse, 0, 1, MAY_BE_LONG|MAY_BE_DOUBLE|MAY_BE_FALSE)
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_MASK_EX(arginfo_class_IntlDateFormatter_parse, 0, 1, MAY_BE_INT|MAY_BE_DOUBLE|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, string, IS_STRING, 0)
 	ZEND_ARG_INFO_WITH_DEFAULT_VALUE(1, offset, "null")
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_class_IntlDateFormatter_parseToCalendar, 0, 1, MAY_BE_LONG|MAY_BE_DOUBLE|MAY_BE_FALSE)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_class_IntlDateFormatter_parseToCalendar, 0, 1, MAY_BE_INT|MAY_BE_DOUBLE|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, string, IS_STRING, 0)
 	ZEND_ARG_INFO_WITH_DEFAULT_VALUE(1, offset, "null")
 ZEND_END_ARG_INFO()
@@ -150,79 +150,79 @@ static zend_class_entry *register_class_IntlDateFormatter(void)
 	zval const_FULL_value;
 	ZVAL_LONG(&const_FULL_value, UDAT_FULL);
 	zend_string *const_FULL_name = zend_string_init_interned("FULL", sizeof("FULL") - 1, true);
-	zend_declare_typed_class_constant(class_entry, const_FULL_name, &const_FULL_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+	zend_declare_typed_class_constant(class_entry, const_FULL_name, &const_FULL_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_INT));
 	zend_string_release_ex(const_FULL_name, true);
 
 	zval const_LONG_value;
 	ZVAL_LONG(&const_LONG_value, UDAT_LONG);
 	zend_string *const_LONG_name = zend_string_init_interned("LONG", sizeof("LONG") - 1, true);
-	zend_declare_typed_class_constant(class_entry, const_LONG_name, &const_LONG_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+	zend_declare_typed_class_constant(class_entry, const_LONG_name, &const_LONG_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_INT));
 	zend_string_release_ex(const_LONG_name, true);
 
 	zval const_MEDIUM_value;
 	ZVAL_LONG(&const_MEDIUM_value, UDAT_MEDIUM);
 	zend_string *const_MEDIUM_name = zend_string_init_interned("MEDIUM", sizeof("MEDIUM") - 1, true);
-	zend_declare_typed_class_constant(class_entry, const_MEDIUM_name, &const_MEDIUM_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+	zend_declare_typed_class_constant(class_entry, const_MEDIUM_name, &const_MEDIUM_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_INT));
 	zend_string_release_ex(const_MEDIUM_name, true);
 
 	zval const_SHORT_value;
 	ZVAL_LONG(&const_SHORT_value, UDAT_SHORT);
 	zend_string *const_SHORT_name = zend_string_init_interned("SHORT", sizeof("SHORT") - 1, true);
-	zend_declare_typed_class_constant(class_entry, const_SHORT_name, &const_SHORT_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+	zend_declare_typed_class_constant(class_entry, const_SHORT_name, &const_SHORT_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_INT));
 	zend_string_release_ex(const_SHORT_name, true);
 
 	zval const_NONE_value;
 	ZVAL_LONG(&const_NONE_value, UDAT_NONE);
 	zend_string *const_NONE_name = zend_string_init_interned("NONE", sizeof("NONE") - 1, true);
-	zend_declare_typed_class_constant(class_entry, const_NONE_name, &const_NONE_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+	zend_declare_typed_class_constant(class_entry, const_NONE_name, &const_NONE_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_INT));
 	zend_string_release_ex(const_NONE_name, true);
 
 	zval const_RELATIVE_FULL_value;
 	ZVAL_LONG(&const_RELATIVE_FULL_value, UDAT_FULL_RELATIVE);
 	zend_string *const_RELATIVE_FULL_name = zend_string_init_interned("RELATIVE_FULL", sizeof("RELATIVE_FULL") - 1, true);
-	zend_declare_typed_class_constant(class_entry, const_RELATIVE_FULL_name, &const_RELATIVE_FULL_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+	zend_declare_typed_class_constant(class_entry, const_RELATIVE_FULL_name, &const_RELATIVE_FULL_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_INT));
 	zend_string_release_ex(const_RELATIVE_FULL_name, true);
 
 	zval const_RELATIVE_LONG_value;
 	ZVAL_LONG(&const_RELATIVE_LONG_value, UDAT_LONG_RELATIVE);
 	zend_string *const_RELATIVE_LONG_name = zend_string_init_interned("RELATIVE_LONG", sizeof("RELATIVE_LONG") - 1, true);
-	zend_declare_typed_class_constant(class_entry, const_RELATIVE_LONG_name, &const_RELATIVE_LONG_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+	zend_declare_typed_class_constant(class_entry, const_RELATIVE_LONG_name, &const_RELATIVE_LONG_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_INT));
 	zend_string_release_ex(const_RELATIVE_LONG_name, true);
 
 	zval const_RELATIVE_MEDIUM_value;
 	ZVAL_LONG(&const_RELATIVE_MEDIUM_value, UDAT_MEDIUM_RELATIVE);
 	zend_string *const_RELATIVE_MEDIUM_name = zend_string_init_interned("RELATIVE_MEDIUM", sizeof("RELATIVE_MEDIUM") - 1, true);
-	zend_declare_typed_class_constant(class_entry, const_RELATIVE_MEDIUM_name, &const_RELATIVE_MEDIUM_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+	zend_declare_typed_class_constant(class_entry, const_RELATIVE_MEDIUM_name, &const_RELATIVE_MEDIUM_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_INT));
 	zend_string_release_ex(const_RELATIVE_MEDIUM_name, true);
 
 	zval const_RELATIVE_SHORT_value;
 	ZVAL_LONG(&const_RELATIVE_SHORT_value, UDAT_SHORT_RELATIVE);
 	zend_string *const_RELATIVE_SHORT_name = zend_string_init_interned("RELATIVE_SHORT", sizeof("RELATIVE_SHORT") - 1, true);
-	zend_declare_typed_class_constant(class_entry, const_RELATIVE_SHORT_name, &const_RELATIVE_SHORT_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+	zend_declare_typed_class_constant(class_entry, const_RELATIVE_SHORT_name, &const_RELATIVE_SHORT_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_INT));
 	zend_string_release_ex(const_RELATIVE_SHORT_name, true);
 
 	zval const_PATTERN_value;
 	ZVAL_LONG(&const_PATTERN_value, UDAT_PATTERN);
 	zend_string *const_PATTERN_name = zend_string_init_interned("PATTERN", sizeof("PATTERN") - 1, true);
-	zend_declare_typed_class_constant(class_entry, const_PATTERN_name, &const_PATTERN_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+	zend_declare_typed_class_constant(class_entry, const_PATTERN_name, &const_PATTERN_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_INT));
 	zend_string_release_ex(const_PATTERN_name, true);
 
 	zval const_GREGORIAN_value;
 	ZVAL_LONG(&const_GREGORIAN_value, UCAL_GREGORIAN);
 	zend_string *const_GREGORIAN_name = zend_string_init_interned("GREGORIAN", sizeof("GREGORIAN") - 1, true);
-	zend_declare_typed_class_constant(class_entry, const_GREGORIAN_name, &const_GREGORIAN_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+	zend_declare_typed_class_constant(class_entry, const_GREGORIAN_name, &const_GREGORIAN_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_INT));
 	zend_string_release_ex(const_GREGORIAN_name, true);
 
 	zval const_TRADITIONAL_value;
 	ZVAL_LONG(&const_TRADITIONAL_value, UCAL_TRADITIONAL);
 	zend_string *const_TRADITIONAL_name = zend_string_init_interned("TRADITIONAL", sizeof("TRADITIONAL") - 1, true);
-	zend_declare_typed_class_constant(class_entry, const_TRADITIONAL_name, &const_TRADITIONAL_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+	zend_declare_typed_class_constant(class_entry, const_TRADITIONAL_name, &const_TRADITIONAL_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_INT));
 	zend_string_release_ex(const_TRADITIONAL_name, true);
 
 	zval const_PROLEPTIC_GREGORIAN_value;
 	ZVAL_LONG(&const_PROLEPTIC_GREGORIAN_value, -16);
 	zend_string *const_PROLEPTIC_GREGORIAN_name = zend_string_init_interned("PROLEPTIC_GREGORIAN", sizeof("PROLEPTIC_GREGORIAN") - 1, true);
-	zend_declare_typed_class_constant(class_entry, const_PROLEPTIC_GREGORIAN_name, &const_PROLEPTIC_GREGORIAN_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+	zend_declare_typed_class_constant(class_entry, const_PROLEPTIC_GREGORIAN_name, &const_PROLEPTIC_GREGORIAN_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_INT));
 	zend_string_release_ex(const_PROLEPTIC_GREGORIAN_name, true);
 
 	return class_entry;

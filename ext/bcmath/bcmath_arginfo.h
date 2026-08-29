@@ -62,11 +62,11 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_bcround, 0, 1, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_BcMath_Number___construct, 0, 0, 1)
-	ZEND_ARG_TYPE_MASK(0, num, MAY_BE_STRING|MAY_BE_LONG, NULL)
+	ZEND_ARG_TYPE_MASK(0, num, MAY_BE_STRING|MAY_BE_INT, NULL)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_BcMath_Number_add, 0, 1, BcMath\\\116umber, 0)
-	ZEND_ARG_OBJ_TYPE_MASK(0, num, BcMath\\\116umber, MAY_BE_STRING|MAY_BE_LONG, NULL)
+	ZEND_ARG_OBJ_TYPE_MASK(0, num, BcMath\\\116umber, MAY_BE_STRING|MAY_BE_INT, NULL)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, scale, IS_LONG, 1, "null")
 ZEND_END_ARG_INFO()
 
@@ -79,18 +79,18 @@ ZEND_END_ARG_INFO()
 #define arginfo_class_BcMath_Number_mod arginfo_class_BcMath_Number_add
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_BcMath_Number_divmod, 0, 1, IS_ARRAY, 0)
-	ZEND_ARG_OBJ_TYPE_MASK(0, num, BcMath\\\116umber, MAY_BE_STRING|MAY_BE_LONG, NULL)
+	ZEND_ARG_OBJ_TYPE_MASK(0, num, BcMath\\\116umber, MAY_BE_STRING|MAY_BE_INT, NULL)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, scale, IS_LONG, 1, "null")
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_BcMath_Number_powmod, 0, 2, BcMath\\\116umber, 0)
-	ZEND_ARG_OBJ_TYPE_MASK(0, exponent, BcMath\\\116umber, MAY_BE_STRING|MAY_BE_LONG, NULL)
-	ZEND_ARG_OBJ_TYPE_MASK(0, modulus, BcMath\\\116umber, MAY_BE_STRING|MAY_BE_LONG, NULL)
+	ZEND_ARG_OBJ_TYPE_MASK(0, exponent, BcMath\\\116umber, MAY_BE_STRING|MAY_BE_INT, NULL)
+	ZEND_ARG_OBJ_TYPE_MASK(0, modulus, BcMath\\\116umber, MAY_BE_STRING|MAY_BE_INT, NULL)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, scale, IS_LONG, 1, "null")
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_BcMath_Number_pow, 0, 1, BcMath\\\116umber, 0)
-	ZEND_ARG_OBJ_TYPE_MASK(0, exponent, BcMath\\\116umber, MAY_BE_STRING|MAY_BE_LONG, NULL)
+	ZEND_ARG_OBJ_TYPE_MASK(0, exponent, BcMath\\\116umber, MAY_BE_STRING|MAY_BE_INT, NULL)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, scale, IS_LONG, 1, "null")
 ZEND_END_ARG_INFO()
 
@@ -109,7 +109,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_BcMath_Number_round, 0, 0, 
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_BcMath_Number_compare, 0, 1, IS_LONG, 0)
-	ZEND_ARG_OBJ_TYPE_MASK(0, num, BcMath\\\116umber, MAY_BE_STRING|MAY_BE_LONG, NULL)
+	ZEND_ARG_OBJ_TYPE_MASK(0, num, BcMath\\\116umber, MAY_BE_STRING|MAY_BE_INT, NULL)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, scale, IS_LONG, 1, "null")
 ZEND_END_ARG_INFO()
 
@@ -209,7 +209,7 @@ static zend_class_entry *register_class_BcMath_Number(zend_class_entry *class_en
 	zval property_scale_default_value;
 	ZVAL_UNDEF(&property_scale_default_value);
 	zend_string *property_scale_name = zend_string_init("scale", sizeof("scale") - 1, true);
-	zend_declare_typed_property(class_entry, property_scale_name, &property_scale_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_READONLY|ZEND_ACC_VIRTUAL, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+	zend_declare_typed_property(class_entry, property_scale_name, &property_scale_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_READONLY|ZEND_ACC_VIRTUAL, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_INT));
 	zend_string_release_ex(property_scale_name, true);
 
 	return class_entry;

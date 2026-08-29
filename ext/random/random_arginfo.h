@@ -51,7 +51,7 @@ ZEND_END_ARG_INFO()
 #define arginfo_class_Random_Engine_Mt19937___debugInfo arginfo_class_Random_Engine_Mt19937___serialize
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Random_Engine_PcgOneseq128XslRr64___construct, 0, 0, 0)
-	ZEND_ARG_TYPE_MASK(0, seed, MAY_BE_STRING|MAY_BE_LONG|MAY_BE_NULL, "null")
+	ZEND_ARG_TYPE_MASK(0, seed, MAY_BE_STRING|MAY_BE_INT|MAY_BE_NULL, "null")
 ZEND_END_ARG_INFO()
 
 #define arginfo_class_Random_Engine_PcgOneseq128XslRr64_generate arginfo_class_Random_Engine_Mt19937_generate

@@ -112,7 +112,7 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_MultipleIterator_attachIterator, 0, 1, IS_VOID, 0)
 	ZEND_ARG_OBJ_INFO(0, iterator, Iterator, 0)
-	ZEND_ARG_TYPE_MASK(0, info, MAY_BE_STRING|MAY_BE_LONG|MAY_BE_NULL, "null")
+	ZEND_ARG_TYPE_MASK(0, info, MAY_BE_STRING|MAY_BE_INT|MAY_BE_NULL, "null")
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_MultipleIterator_detachIterator, 0, 1, IS_VOID, 0)
@@ -294,25 +294,25 @@ static zend_class_entry *register_class_MultipleIterator(zend_class_entry *class
 	zval const_MIT_NEED_ANY_value;
 	ZVAL_LONG(&const_MIT_NEED_ANY_value, MIT_NEED_ANY);
 	zend_string *const_MIT_NEED_ANY_name = zend_string_init_interned("MIT_NEED_ANY", sizeof("MIT_NEED_ANY") - 1, true);
-	zend_declare_typed_class_constant(class_entry, const_MIT_NEED_ANY_name, &const_MIT_NEED_ANY_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+	zend_declare_typed_class_constant(class_entry, const_MIT_NEED_ANY_name, &const_MIT_NEED_ANY_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_INT));
 	zend_string_release_ex(const_MIT_NEED_ANY_name, true);
 
 	zval const_MIT_NEED_ALL_value;
 	ZVAL_LONG(&const_MIT_NEED_ALL_value, MIT_NEED_ALL);
 	zend_string *const_MIT_NEED_ALL_name = zend_string_init_interned("MIT_NEED_ALL", sizeof("MIT_NEED_ALL") - 1, true);
-	zend_declare_typed_class_constant(class_entry, const_MIT_NEED_ALL_name, &const_MIT_NEED_ALL_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+	zend_declare_typed_class_constant(class_entry, const_MIT_NEED_ALL_name, &const_MIT_NEED_ALL_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_INT));
 	zend_string_release_ex(const_MIT_NEED_ALL_name, true);
 
 	zval const_MIT_KEYS_NUMERIC_value;
 	ZVAL_LONG(&const_MIT_KEYS_NUMERIC_value, MIT_KEYS_NUMERIC);
 	zend_string *const_MIT_KEYS_NUMERIC_name = zend_string_init_interned("MIT_KEYS_NUMERIC", sizeof("MIT_KEYS_NUMERIC") - 1, true);
-	zend_declare_typed_class_constant(class_entry, const_MIT_KEYS_NUMERIC_name, &const_MIT_KEYS_NUMERIC_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+	zend_declare_typed_class_constant(class_entry, const_MIT_KEYS_NUMERIC_name, &const_MIT_KEYS_NUMERIC_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_INT));
 	zend_string_release_ex(const_MIT_KEYS_NUMERIC_name, true);
 
 	zval const_MIT_KEYS_ASSOC_value;
 	ZVAL_LONG(&const_MIT_KEYS_ASSOC_value, MIT_KEYS_ASSOC);
 	zend_string *const_MIT_KEYS_ASSOC_name = zend_string_init_interned("MIT_KEYS_ASSOC", sizeof("MIT_KEYS_ASSOC") - 1, true);
-	zend_declare_typed_class_constant(class_entry, const_MIT_KEYS_ASSOC_name, &const_MIT_KEYS_ASSOC_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+	zend_declare_typed_class_constant(class_entry, const_MIT_KEYS_ASSOC_name, &const_MIT_KEYS_ASSOC_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_INT));
 	zend_string_release_ex(const_MIT_KEYS_ASSOC_name, true);
 
 	return class_entry;

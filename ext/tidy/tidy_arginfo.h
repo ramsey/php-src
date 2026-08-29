@@ -73,7 +73,7 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_tidy_config_count arginfo_tidy_get_status
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_tidy_getopt, 0, 2, MAY_BE_STRING|MAY_BE_LONG|MAY_BE_BOOL)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_tidy_getopt, 0, 2, MAY_BE_STRING|MAY_BE_INT|MAY_BE_BOOL)
 	ZEND_ARG_OBJ_INFO(0, tidy, tidy, 0)
 	ZEND_ARG_TYPE_INFO(0, option, IS_STRING, 0)
 ZEND_END_ARG_INFO()
@@ -95,7 +95,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_class_tidy___construct, 0, 0, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, useIncludePath, _IS_BOOL, 0, "false")
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_MASK_EX(arginfo_class_tidy_getOpt, 0, 1, MAY_BE_STRING|MAY_BE_LONG|MAY_BE_BOOL)
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_MASK_EX(arginfo_class_tidy_getOpt, 0, 1, MAY_BE_STRING|MAY_BE_INT|MAY_BE_BOOL)
 	ZEND_ARG_TYPE_INFO(0, option, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
@@ -504,16 +504,16 @@ static zend_class_entry *register_class_tidyNode(void)
 
 	zval property_type_default_value;
 	ZVAL_UNDEF(&property_type_default_value);
-	zend_declare_typed_property(class_entry, ZSTR_KNOWN(ZEND_STR_TYPE), &property_type_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_READONLY, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+	zend_declare_typed_property(class_entry, ZSTR_KNOWN(ZEND_STR_TYPE), &property_type_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_READONLY, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_INT));
 
 	zval property_line_default_value;
 	ZVAL_UNDEF(&property_line_default_value);
-	zend_declare_typed_property(class_entry, ZSTR_KNOWN(ZEND_STR_LINE), &property_line_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_READONLY, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+	zend_declare_typed_property(class_entry, ZSTR_KNOWN(ZEND_STR_LINE), &property_line_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_READONLY, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_INT));
 
 	zval property_column_default_value;
 	ZVAL_UNDEF(&property_column_default_value);
 	zend_string *property_column_name = zend_string_init("column", sizeof("column") - 1, true);
-	zend_declare_typed_property(class_entry, property_column_name, &property_column_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_READONLY, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+	zend_declare_typed_property(class_entry, property_column_name, &property_column_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_READONLY, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_INT));
 	zend_string_release_ex(property_column_name, true);
 
 	zval property_proprietary_default_value;
@@ -525,7 +525,7 @@ static zend_class_entry *register_class_tidyNode(void)
 	zval property_id_default_value;
 	ZVAL_UNDEF(&property_id_default_value);
 	zend_string *property_id_name = zend_string_init("id", sizeof("id") - 1, true);
-	zend_declare_typed_property(class_entry, property_id_name, &property_id_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_READONLY, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG|MAY_BE_NULL));
+	zend_declare_typed_property(class_entry, property_id_name, &property_id_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_READONLY, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_INT|MAY_BE_NULL));
 	zend_string_release_ex(property_id_name, true);
 
 	zval property_attribute_default_value;

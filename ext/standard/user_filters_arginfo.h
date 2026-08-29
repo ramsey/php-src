@@ -93,13 +93,13 @@ static zend_class_entry *register_class_StreamBucket(void)
 	zval property_datalen_default_value;
 	ZVAL_UNDEF(&property_datalen_default_value);
 	zend_string *property_datalen_name = zend_string_init("datalen", sizeof("datalen") - 1, true);
-	zend_declare_typed_property(class_entry, property_datalen_name, &property_datalen_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+	zend_declare_typed_property(class_entry, property_datalen_name, &property_datalen_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_INT));
 	zend_string_release_ex(property_datalen_name, true);
 
 	zval property_dataLength_default_value;
 	ZVAL_UNDEF(&property_dataLength_default_value);
 	zend_string *property_dataLength_name = zend_string_init("dataLength", sizeof("dataLength") - 1, true);
-	zend_declare_typed_property(class_entry, property_dataLength_name, &property_dataLength_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+	zend_declare_typed_property(class_entry, property_dataLength_name, &property_dataLength_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_INT));
 	zend_string_release_ex(property_dataLength_name, true);
 
 	return class_entry;

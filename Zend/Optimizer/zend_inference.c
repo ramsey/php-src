@@ -2437,7 +2437,7 @@ static uint32_t zend_convert_type(const zend_script *script, zend_type type, zen
 			}
 		}
 	}
-	if (tmp & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE)) {
+	if (tmp & (MAY_BE_STRING|MAY_BE_BIGINT|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE)) {
 		tmp |= MAY_BE_RC1 | MAY_BE_RCN;
 	}
 	return tmp;

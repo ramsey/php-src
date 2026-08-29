@@ -407,7 +407,7 @@ class SimpleType {
             "false" => ["IS_FALSE", "MAY_BE_FALSE"],
             "true" => ["IS_TRUE", "MAY_BE_TRUE"],
             "bool" => ["_IS_BOOL", "MAY_BE_BOOL"],
-            "int" => ["IS_LONG", "MAY_BE_LONG"],
+            "int" => ["IS_LONG", "MAY_BE_INT"],
             "float" => ["IS_DOUBLE", "MAY_BE_DOUBLE"],
             "string" => ["IS_STRING", "MAY_BE_STRING"],
             "array" => ["IS_ARRAY", "MAY_BE_ARRAY"],

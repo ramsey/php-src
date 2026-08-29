@@ -163,8 +163,10 @@ ZEND_API uint32_t zend_get_func_info(
 			uint32_t ret_any = ret & MAY_BE_ANY, internal_ret_any = internal_ret & MAY_BE_ANY;
 			if (ret_any != MAY_BE_ANY) {
 				uint32_t diff = internal_ret_any ^ ret_any;
-				/* Func info may contain "true" types as well as isolated "null" and "false". */
+				/* Func info may contain "true" types as well as isolated "null" and "false".
+				 * It may also drop "bigint" from a widened "int" return type. */
 				if (diff && !(diff == MAY_BE_FALSE && (ret & MAY_BE_FALSE))
+						&& !(diff == MAY_BE_BIGINT && (ret & MAY_BE_BIGINT))
 						&& (internal_ret_any & ~(MAY_BE_NULL|MAY_BE_FALSE))) {
 					fprintf(stderr, "Incorrect func info for %s()\n", ZSTR_VAL(name));
 				}

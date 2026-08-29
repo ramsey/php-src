@@ -19,7 +19,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_class_SoapHeader___construct, 0, 0, 2)
 	ZEND_ARG_TYPE_INFO(0, name, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, data, IS_MIXED, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, mustUnderstand, _IS_BOOL, 0, "false")
-	ZEND_ARG_TYPE_MASK(0, actor, MAY_BE_STRING|MAY_BE_LONG|MAY_BE_NULL, "null")
+	ZEND_ARG_TYPE_MASK(0, actor, MAY_BE_STRING|MAY_BE_INT|MAY_BE_NULL, "null")
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_SoapFault___construct, 0, 0, 2)
@@ -400,7 +400,7 @@ static zend_class_entry *register_class_SoapHeader(void)
 	zval property_actor_default_value;
 	ZVAL_UNDEF(&property_actor_default_value);
 	zend_string *property_actor_name = zend_string_init("actor", sizeof("actor") - 1, true);
-	zend_declare_typed_property(class_entry, property_actor_name, &property_actor_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING|MAY_BE_LONG|MAY_BE_NULL));
+	zend_declare_typed_property(class_entry, property_actor_name, &property_actor_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING|MAY_BE_INT|MAY_BE_NULL));
 	zend_string_release_ex(property_actor_name, true);
 
 	return class_entry;
@@ -474,7 +474,7 @@ static zend_class_entry *register_class_SoapVar(void)
 	zval property_enc_type_default_value;
 	ZVAL_UNDEF(&property_enc_type_default_value);
 	zend_string *property_enc_type_name = zend_string_init("enc_type", sizeof("enc_type") - 1, true);
-	zend_declare_typed_property(class_entry, property_enc_type_name, &property_enc_type_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+	zend_declare_typed_property(class_entry, property_enc_type_name, &property_enc_type_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_INT));
 	zend_string_release_ex(property_enc_type_name, true);
 
 	zval property_enc_value_default_value;
@@ -543,13 +543,13 @@ static zend_class_entry *register_class_SoapClient(void)
 	zval property_style_default_value;
 	ZVAL_NULL(&property_style_default_value);
 	zend_string *property_style_name = zend_string_init("style", sizeof("style") - 1, true);
-	zend_declare_typed_property(class_entry, property_style_name, &property_style_default_value, ZEND_ACC_PRIVATE, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG|MAY_BE_NULL));
+	zend_declare_typed_property(class_entry, property_style_name, &property_style_default_value, ZEND_ACC_PRIVATE, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_INT|MAY_BE_NULL));
 	zend_string_release_ex(property_style_name, true);
 
 	zval property_use_default_value;
 	ZVAL_NULL(&property_use_default_value);
 	zend_string *property_use_name = zend_string_init("use", sizeof("use") - 1, true);
-	zend_declare_typed_property(class_entry, property_use_name, &property_use_default_value, ZEND_ACC_PRIVATE, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG|MAY_BE_NULL));
+	zend_declare_typed_property(class_entry, property_use_name, &property_use_default_value, ZEND_ACC_PRIVATE, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_INT|MAY_BE_NULL));
 	zend_string_release_ex(property_use_name, true);
 
 	zval property_location_default_value;
@@ -565,7 +565,7 @@ static zend_class_entry *register_class_SoapClient(void)
 	zval property_compression_default_value;
 	ZVAL_NULL(&property_compression_default_value);
 	zend_string *property_compression_name = zend_string_init("compression", sizeof("compression") - 1, true);
-	zend_declare_typed_property(class_entry, property_compression_name, &property_compression_default_value, ZEND_ACC_PRIVATE, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG|MAY_BE_NULL));
+	zend_declare_typed_property(class_entry, property_compression_name, &property_compression_default_value, ZEND_ACC_PRIVATE, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_INT|MAY_BE_NULL));
 	zend_string_release_ex(property_compression_name, true);
 
 	zval property_sdl_default_value;
@@ -621,7 +621,7 @@ static zend_class_entry *register_class_SoapClient(void)
 	zval property__proxy_port_default_value;
 	ZVAL_NULL(&property__proxy_port_default_value);
 	zend_string *property__proxy_port_name = zend_string_init("_proxy_port", sizeof("_proxy_port") - 1, true);
-	zend_declare_typed_property(class_entry, property__proxy_port_name, &property__proxy_port_default_value, ZEND_ACC_PRIVATE, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG|MAY_BE_NULL));
+	zend_declare_typed_property(class_entry, property__proxy_port_name, &property__proxy_port_default_value, ZEND_ACC_PRIVATE, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_INT|MAY_BE_NULL));
 	zend_string_release_ex(property__proxy_port_name, true);
 
 	zval property__proxy_login_default_value;
@@ -657,13 +657,13 @@ static zend_class_entry *register_class_SoapClient(void)
 	zval property__features_default_value;
 	ZVAL_NULL(&property__features_default_value);
 	zend_string *property__features_name = zend_string_init("_features", sizeof("_features") - 1, true);
-	zend_declare_typed_property(class_entry, property__features_name, &property__features_default_value, ZEND_ACC_PRIVATE, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG|MAY_BE_NULL));
+	zend_declare_typed_property(class_entry, property__features_name, &property__features_default_value, ZEND_ACC_PRIVATE, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_INT|MAY_BE_NULL));
 	zend_string_release_ex(property__features_name, true);
 
 	zval property__connection_timeout_default_value;
 	ZVAL_LONG(&property__connection_timeout_default_value, 0);
 	zend_string *property__connection_timeout_name = zend_string_init("_connection_timeout", sizeof("_connection_timeout") - 1, true);
-	zend_declare_typed_property(class_entry, property__connection_timeout_name, &property__connection_timeout_default_value, ZEND_ACC_PRIVATE, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+	zend_declare_typed_property(class_entry, property__connection_timeout_name, &property__connection_timeout_default_value, ZEND_ACC_PRIVATE, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_INT));
 	zend_string_release_ex(property__connection_timeout_name, true);
 
 	zval property__stream_context_default_value;
@@ -687,19 +687,19 @@ static zend_class_entry *register_class_SoapClient(void)
 	zval property__ssl_method_default_value;
 	ZVAL_NULL(&property__ssl_method_default_value);
 	zend_string *property__ssl_method_name = zend_string_init("_ssl_method", sizeof("_ssl_method") - 1, true);
-	zend_declare_typed_property(class_entry, property__ssl_method_name, &property__ssl_method_default_value, ZEND_ACC_PRIVATE, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG|MAY_BE_NULL));
+	zend_declare_typed_property(class_entry, property__ssl_method_name, &property__ssl_method_default_value, ZEND_ACC_PRIVATE, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_INT|MAY_BE_NULL));
 	zend_string_release_ex(property__ssl_method_name, true);
 
 	zval property__soap_version_default_value;
 	ZVAL_UNDEF(&property__soap_version_default_value);
 	zend_string *property__soap_version_name = zend_string_init("_soap_version", sizeof("_soap_version") - 1, true);
-	zend_declare_typed_property(class_entry, property__soap_version_name, &property__soap_version_default_value, ZEND_ACC_PRIVATE, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+	zend_declare_typed_property(class_entry, property__soap_version_name, &property__soap_version_default_value, ZEND_ACC_PRIVATE, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_INT));
 	zend_string_release_ex(property__soap_version_name, true);
 
 	zval property__use_proxy_default_value;
 	ZVAL_NULL(&property__use_proxy_default_value);
 	zend_string *property__use_proxy_name = zend_string_init("_use_proxy", sizeof("_use_proxy") - 1, true);
-	zend_declare_typed_property(class_entry, property__use_proxy_name, &property__use_proxy_default_value, ZEND_ACC_PRIVATE, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG|MAY_BE_NULL));
+	zend_declare_typed_property(class_entry, property__use_proxy_name, &property__use_proxy_default_value, ZEND_ACC_PRIVATE, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_INT|MAY_BE_NULL));
 	zend_string_release_ex(property__use_proxy_name, true);
 
 	zval property__cookies_default_value;

@@ -144,13 +144,13 @@ static zend_class_entry *register_class_Locale(void)
 	zval const_ACTUAL_LOCALE_value;
 	ZVAL_LONG(&const_ACTUAL_LOCALE_value, ULOC_ACTUAL_LOCALE);
 	zend_string *const_ACTUAL_LOCALE_name = zend_string_init_interned("ACTUAL_LOCALE", sizeof("ACTUAL_LOCALE") - 1, true);
-	zend_declare_typed_class_constant(class_entry, const_ACTUAL_LOCALE_name, &const_ACTUAL_LOCALE_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+	zend_declare_typed_class_constant(class_entry, const_ACTUAL_LOCALE_name, &const_ACTUAL_LOCALE_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_INT));
 	zend_string_release_ex(const_ACTUAL_LOCALE_name, true);
 
 	zval const_VALID_LOCALE_value;
 	ZVAL_LONG(&const_VALID_LOCALE_value, ULOC_VALID_LOCALE);
 	zend_string *const_VALID_LOCALE_name = zend_string_init_interned("VALID_LOCALE", sizeof("VALID_LOCALE") - 1, true);
-	zend_declare_typed_class_constant(class_entry, const_VALID_LOCALE_name, &const_VALID_LOCALE_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+	zend_declare_typed_class_constant(class_entry, const_VALID_LOCALE_name, &const_VALID_LOCALE_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_INT));
 	zend_string_release_ex(const_VALID_LOCALE_name, true);
 
 	zval const_DEFAULT_LOCALE_value;

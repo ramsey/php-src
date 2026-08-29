@@ -112,13 +112,13 @@ static zend_class_entry *register_class_Time_Duration(void)
 	zval property_seconds_default_value;
 	ZVAL_UNDEF(&property_seconds_default_value);
 	zend_string *property_seconds_name = zend_string_init("seconds", sizeof("seconds") - 1, true);
-	zend_declare_typed_property(class_entry, property_seconds_name, &property_seconds_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_READONLY, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+	zend_declare_typed_property(class_entry, property_seconds_name, &property_seconds_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_READONLY, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_INT));
 	zend_string_release_ex(property_seconds_name, true);
 
 	zval property_nanoseconds_default_value;
 	ZVAL_UNDEF(&property_nanoseconds_default_value);
 	zend_string *property_nanoseconds_name = zend_string_init("nanoseconds", sizeof("nanoseconds") - 1, true);
-	zend_declare_typed_property(class_entry, property_nanoseconds_name, &property_nanoseconds_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_READONLY, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+	zend_declare_typed_property(class_entry, property_nanoseconds_name, &property_nanoseconds_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_READONLY, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_INT));
 	zend_string_release_ex(property_nanoseconds_name, true);
 
 	zval property_negative_default_value;
