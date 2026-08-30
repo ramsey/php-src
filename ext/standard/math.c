@@ -1492,23 +1492,20 @@ PHP_FUNCTION(fpow)
 /* {{{ Returns the integer quotient of the division of dividend by divisor */
 PHP_FUNCTION(intdiv)
 {
-	zend_long dividend, divisor;
+	zval *dividend, *divisor;
+	zval result;
 
 	ZEND_PARSE_PARAMETERS_START(2, 2)
-		Z_PARAM_LONG(dividend)
-		Z_PARAM_LONG(divisor)
+		Z_PARAM_INT(dividend)
+		Z_PARAM_INT(divisor)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (divisor == 0) {
+	if (Z_TYPE_P(divisor) == IS_LONG && Z_LVAL_P(divisor) == 0) {
 		zend_throw_exception_ex(zend_ce_division_by_zero_error, 0, "Division by zero");
-		RETURN_THROWS();
-	} else if (divisor == -1 && dividend == ZEND_LONG_MIN) {
-		/* Prevent overflow error/crash ... really should not happen:
-		   We don't return a float here as that violates function contract */
-		zend_throw_exception_ex(zend_ce_arithmetic_error, 0, "Division of PHP_INT_MIN by -1 is not an integer");
 		RETURN_THROWS();
 	}
 
-	RETURN_LONG(dividend / divisor);
+	zend_int_div_trunc(&result, dividend, divisor);
+	RETURN_INT(&result);
 }
 /* }}} */
