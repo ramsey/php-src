@@ -7,4 +7,4 @@ memory_limit=64M
 str_repeat('ab', 10 ** 30);
 ?>
 --EXPECTF--
-Fatal error: Possible integer overflow in memory allocation (2 * %d + 32) in %s on line %d
+Fatal error: Possible integer overflow in memory allocation (2 * %d + %d) in %s on line %d
