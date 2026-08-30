@@ -698,17 +698,19 @@ PHP_FUNCTION(name) \
 	zend_long level = -1; \
 	zend_long encoding = default_encoding; \
 	if (default_encoding) { \
-		if (SUCCESS != zend_parse_parameters(ZEND_NUM_ARGS(), "S|ll", &in, &level, &encoding)) { \
-			RETURN_THROWS(); \
-		} \
+		ZEND_PARSE_PARAMETERS_START(1, 3) \
+			Z_PARAM_STR(in) \
+			Z_PARAM_OPTIONAL \
+			Z_PARAM_INT_RANGE(level, -1, 9) \
+			Z_PARAM_LONG(encoding) \
+		ZEND_PARSE_PARAMETERS_END(); \
 	} else { \
-		if (SUCCESS != zend_parse_parameters(ZEND_NUM_ARGS(), "Sl|l", &in, &encoding, &level)) { \
-			RETURN_THROWS(); \
-		} \
-	} \
-	if (level < -1 || level > 9) { \
-		zend_argument_value_error(default_encoding ? 2 : 3, "must be between -1 and 9"); \
-		RETURN_THROWS(); \
+		ZEND_PARSE_PARAMETERS_START(2, 3) \
+			Z_PARAM_STR(in) \
+			Z_PARAM_LONG(encoding) \
+			Z_PARAM_OPTIONAL \
+			Z_PARAM_INT_RANGE(level, -1, 9) \
+		ZEND_PARSE_PARAMETERS_END(); \
 	} \
 	switch (encoding) { \
 		case PHP_ZLIB_ENCODING_RAW: \
