@@ -5544,24 +5544,30 @@ PHP_FUNCTION(str_getcsv)
 PHP_FUNCTION(str_repeat)
 {
 	zend_string		*input_str;		/* Input string */
-	zend_long 		mult;			/* Multiplier */
+	zval			*times;			/* Multiplier */
+	zend_long		mult;			/* Multiplier as a long */
 	zend_string	*result;		/* Resulting string */
 	size_t		result_len;		/* Length of the resulting string */
 
 	ZEND_PARSE_PARAMETERS_START(2, 2)
 		Z_PARAM_STR(input_str)
-		Z_PARAM_LONG(mult)
+		Z_PARAM_INT(times)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (mult < 0) {
+	if (zend_int_sign(times) < 0) {
 		zend_argument_value_error(2, "must be greater than or equal to 0");
 		RETURN_THROWS();
 	}
 
 	/* Don't waste our time if it's empty */
 	/* ... or if the multiplier is zero */
-	if (ZSTR_LEN(input_str) == 0 || mult == 0)
+	if (ZSTR_LEN(input_str) == 0 || zend_int_sign(times) == 0)
 		RETURN_EMPTY_STRING();
+
+	/* An over-limit multiplier saturates so zend_string_safe_alloc reports it */
+	if (!zend_int_get_long(times, &mult)) {
+		mult = ZEND_LONG_MAX;
+	}
 
 	/* Initialize the result string */
 	result = zend_string_safe_alloc(ZSTR_LEN(input_str), mult, 0, 0);

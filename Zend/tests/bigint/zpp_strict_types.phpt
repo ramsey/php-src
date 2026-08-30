@@ -11,7 +11,7 @@ $big = zend_test_bigint_make('340282366920938463463374607431768211456');
 var_dump(sqrt($big) === sqrt(2.0 ** 128));
 
 try {
-    str_repeat('a', $big);
+    str_pad('a', $big);
 } catch (ValueError $e) {
     echo $e::class . ': ' . $e->getMessage() . "\n";
 }
@@ -24,5 +24,5 @@ try {
 ?>
 --EXPECTF--
 bool(true)
-ValueError: str_repeat(): Argument #2 ($times) must be between %i and %i
+ValueError: str_pad(): Argument #2 ($length) must be between %i and %i
 ValueError: dechex(): Argument #1 ($num) must be between %i and %i
