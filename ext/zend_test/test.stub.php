@@ -540,6 +540,8 @@ function zend_test_override_libxml_global_state(): void {}
     function zend_test_string_to_number(string $str, bool $allowErrors = true, &$trailingData = null): int|float|false {}
 
     function zend_test_zpp_int(int $i): int {}
+
+    function zend_test_zpp_int_clamp(int $n): int {}
 }
 
 namespace ZendTestNS {

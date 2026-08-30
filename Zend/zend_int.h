@@ -355,6 +355,17 @@ static zend_always_inline int zend_int_sign(const zval *op)
 	return zend_bigint_sign(Z_BIG_P(op));
 }
 
+/* Returns the integer zval as a zend_long, saturating a boxed value to the
+ * nearer machine bound. */
+static zend_always_inline zend_long zend_int_get_long_clamp(const zval *zv)
+{
+	if (EXPECTED(Z_TYPE_P(zv) == IS_LONG)) {
+		return Z_LVAL_P(zv);
+	}
+	ZEND_ASSERT(Z_TYPE_P(zv) == IS_BIGINT);
+	return zend_int_sign(zv) < 0 ? ZEND_LONG_MIN : ZEND_LONG_MAX;
+}
+
 static zend_always_inline bool zend_int_is_odd(const zval *op)
 {
 	ZEND_ASSERT(Z_IS_INT_P(op));

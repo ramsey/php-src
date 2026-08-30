@@ -760,6 +760,19 @@ ZEND_API bool ZEND_FASTCALL zend_parse_arg_int_slow(zval *arg, zval **dest, uint
 }
 /* }}} */
 
+ZEND_API bool ZEND_FASTCALL zend_parse_arg_int_clamp_slow(zval *arg, zend_long *dest, uint32_t arg_num) /* {{{ */
+{
+	if (UNEXPECTED(ZEND_ARG_USES_STRICT_TYPES())) {
+		return 0;
+	}
+	if (UNEXPECTED(!zend_parse_arg_int_weak(arg, arg_num))) {
+		return 0;
+	}
+	*dest = zend_int_get_long_clamp(arg);
+	return 1;
+}
+/* }}} */
+
 ZEND_API double ZEND_FASTCALL zend_parse_arg_double_weak(const zval *arg, uint32_t arg_num) /* {{{ */
 {
 	if (EXPECTED(Z_TYPE_P(arg) == IS_LONG)) {

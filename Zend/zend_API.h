@@ -1945,6 +1945,20 @@ ZEND_API ZEND_COLD void zend_class_redeclaration_error_ex(int type, zend_string 
 #define Z_PARAM_INT_OR_NULL(dest, is_null) \
 	Z_PARAM_INT_EX(dest, is_null, 1, 0)
 
+#define Z_PARAM_INT_CLAMP_EX(dest, is_null, check_null, deref) \
+		Z_PARAM_PROLOGUE(deref, 0); \
+		if (UNEXPECTED(!zend_parse_arg_int_clamp_ex(_arg, &dest, &is_null, check_null, _i, /* frameless */ false))) { \
+			_expected_type = check_null ? Z_EXPECTED_LONG_OR_NULL : Z_EXPECTED_LONG; \
+			_error_code = ZPP_ERROR_WRONG_ARG; \
+			break; \
+		}
+
+#define Z_PARAM_INT_CLAMP(dest) \
+	Z_PARAM_INT_CLAMP_EX(dest, _dummy, 0, 0)
+
+#define Z_PARAM_INT_CLAMP_OR_NULL(dest, is_null) \
+	Z_PARAM_INT_CLAMP_EX(dest, is_null, 1, 0)
+
 /* old "n" */
 #define Z_PARAM_NUMBER_EX(dest, check_null) \
 	Z_PARAM_PROLOGUE(0, 0); \
@@ -2238,6 +2252,7 @@ ZEND_API bool ZEND_FASTCALL zend_parse_arg_long_slow(const zval *arg, zend_long 
 ZEND_API bool ZEND_FASTCALL zend_parse_arg_long_weak(const zval *arg, zend_long *dest, uint32_t arg_num);
 ZEND_API bool ZEND_FASTCALL zend_parse_arg_int_slow(zval *arg, zval **dest, uint32_t arg_num);
 ZEND_API bool ZEND_FASTCALL zend_parse_arg_int_weak(zval *arg, uint32_t arg_num);
+ZEND_API bool ZEND_FASTCALL zend_parse_arg_int_clamp_slow(zval *arg, zend_long *dest, uint32_t arg_num);
 ZEND_API double ZEND_FASTCALL zend_parse_arg_double_slow(const zval *arg, uint32_t arg_num);
 ZEND_API double ZEND_FASTCALL zend_parse_arg_double_weak(const zval *arg, uint32_t arg_num);
 ZEND_API zend_string* ZEND_FASTCALL zend_parse_arg_str_slow(zval *arg, uint32_t arg_num);
@@ -2319,6 +2334,25 @@ static zend_always_inline bool zend_parse_arg_int(zval *arg, zval **dest, bool *
 		*dest = NULL;
 	} else {
 		return zend_parse_arg_int_slow(arg, dest, arg_num);
+	}
+	return 1;
+}
+
+static zend_always_inline bool zend_parse_arg_int_clamp_ex(zval *arg, zend_long *dest, bool *is_null, bool check_null, uint32_t arg_num, bool frameless)
+{
+	if (check_null) {
+		*is_null = 0;
+	}
+	if (EXPECTED(Z_IS_INT_P(arg))) {
+		*dest = zend_int_get_long_clamp(arg);
+	} else if (check_null && Z_TYPE_P(arg) == IS_NULL) {
+		*is_null = 1;
+		*dest = 0;
+	} else {
+		if (frameless) {
+			return zend_parse_arg_int_clamp_slow(arg, dest, arg_num);
+		}
+		return zend_parse_arg_int_clamp_slow(arg, dest, arg_num);
 	}
 	return 1;
 }

@@ -3153,3 +3153,14 @@ static ZEND_FUNCTION(zend_test_zpp_int)
 
 	RETURN_COPY(i);
 }
+
+static ZEND_FUNCTION(zend_test_zpp_int_clamp)
+{
+	zend_long n;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_INT_CLAMP(n)
+	ZEND_PARSE_PARAMETERS_END();
+
+	RETURN_LONG(n);
+}
