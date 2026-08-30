@@ -84,6 +84,16 @@
 		zend_wrong_parameter_type_error(arg_num, Z_EXPECTED_LONG_OR_NULL, arg ## arg_num); \
 		goto flf_clean; \
 	}
+#define Z_FLF_PARAM_INT_CLAMP(arg_num, dest) \
+	if (!zend_parse_arg_int_clamp_ex(arg ## arg_num, &dest, /* is_null */ NULL, /* null_check */ false, arg_num, /* frameless */ true)) { \
+		zend_wrong_parameter_type_error(arg_num, Z_EXPECTED_LONG, arg ## arg_num); \
+		goto flf_clean; \
+	}
+#define Z_FLF_PARAM_INT_CLAMP_OR_NULL(arg_num, is_null, dest) \
+	if (!zend_parse_arg_int_clamp_ex(arg ## arg_num, &dest, &is_null, /* null_check */ true, arg_num, /* frameless */ true)) { \
+		zend_wrong_parameter_type_error(arg_num, Z_EXPECTED_LONG_OR_NULL, arg ## arg_num); \
+		goto flf_clean; \
+	}
 #define Z_FLF_PARAM_STR(arg_num, dest, tmp) \
 	if (Z_TYPE_P(arg ## arg_num) == IS_STRING) { \
 		dest = Z_STR_P(arg ## arg_num); \

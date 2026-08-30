@@ -773,6 +773,25 @@ ZEND_API bool ZEND_FASTCALL zend_parse_arg_int_clamp_slow(zval *arg, zend_long *
 }
 /* }}} */
 
+ZEND_API bool ZEND_FASTCALL zend_flf_parse_arg_int_clamp_slow(zval *arg, zend_long *dest, uint32_t arg_num)
+{
+	zval tmp;
+
+	if (UNEXPECTED(ZEND_FLF_ARG_USES_STRICT_TYPES())) {
+		return 0;
+	}
+	/* The operand is a live CV and zend_parse_arg_int_weak() rewrites its
+	 * argument in place, so coerce a copy and release it afterwards. */
+	ZVAL_COPY(&tmp, arg);
+	if (UNEXPECTED(!zend_parse_arg_int_weak(&tmp, arg_num))) {
+		zval_ptr_dtor(&tmp);
+		return 0;
+	}
+	*dest = zend_int_get_long_clamp(&tmp);
+	zval_ptr_dtor(&tmp);
+	return 1;
+}
+
 ZEND_API double ZEND_FASTCALL zend_parse_arg_double_weak(const zval *arg, uint32_t arg_num) /* {{{ */
 {
 	if (EXPECTED(Z_TYPE_P(arg) == IS_LONG)) {

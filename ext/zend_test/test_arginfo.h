@@ -1,5 +1,5 @@
 /* This is a generated file, edit test.stub.php instead.
- * Stub hash: 16ef91a4cb001e654d9135fb10c83d2d7ec50b1b
+ * Stub hash: cd6ebce5e5a9156620fce49c5a7dbb64dbb843cf
  * Has decl header: yes */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_zend_trigger_bailout, 0, 0, IS_NEVER, 0)
@@ -431,6 +431,8 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_zend_test_zpp_int_clamp, 0, 1, I
 	ZEND_ARG_TYPE_INFO(0, n, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
+#define arginfo_zend_test_flf_int_clamp arginfo_zend_test_zpp_int_clamp
+
 #define arginfo_ZendTestNS2_namespaced_func arginfo_zend_test_is_pcre_bundled
 
 #define arginfo_ZendTestNS2_namespaced_deprecated_func arginfo_zend_test_void_return
@@ -519,6 +521,15 @@ ZEND_END_ARG_INFO()
 #define arginfo_class_ZendTestNS2_Foo_method arginfo_zend_test_void_return
 
 #define arginfo_class_ZendTestNS2_ZendSubNS_Foo_method arginfo_zend_test_void_return
+
+
+#if (PHP_VERSION_ID >= 80400)
+ZEND_FRAMELESS_FUNCTION(zend_test_flf_int_clamp, 1);
+static const zend_frameless_function_info frameless_function_infos_zend_test_flf_int_clamp[] = {
+	{ ZEND_FRAMELESS_FUNCTION_NAME(zend_test_flf_int_clamp, 1), 1 },
+	{ 0 },
+};
+#endif
 
 static ZEND_FUNCTION(zend_trigger_bailout);
 static ZEND_FUNCTION(zend_test_array_return);
@@ -655,6 +666,7 @@ static ZEND_FUNCTION(zend_test_int_from_double);
 static ZEND_FUNCTION(zend_test_string_to_number);
 static ZEND_FUNCTION(zend_test_zpp_int);
 static ZEND_FUNCTION(zend_test_zpp_int_clamp);
+static ZEND_FUNCTION(zend_test_flf_int_clamp);
 static ZEND_FUNCTION(ZendTestNS2_namespaced_func);
 static ZEND_FUNCTION(ZendTestNS2_namespaced_deprecated_func);
 static ZEND_FUNCTION(ZendTestNS2_ZendSubNS_namespaced_func);
@@ -872,6 +884,11 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(zend_test_string_to_number, arginfo_zend_test_string_to_number)
 	ZEND_FE(zend_test_zpp_int, arginfo_zend_test_zpp_int)
 	ZEND_FE(zend_test_zpp_int_clamp, arginfo_zend_test_zpp_int_clamp)
+#if (PHP_VERSION_ID >= 80400)
+	ZEND_RAW_FENTRY("zend_test_flf_int_clamp", zif_zend_test_flf_int_clamp, arginfo_zend_test_flf_int_clamp, 0, frameless_function_infos_zend_test_flf_int_clamp, NULL)
+#else
+	ZEND_RAW_FENTRY("zend_test_flf_int_clamp", zif_zend_test_flf_int_clamp, arginfo_zend_test_flf_int_clamp, 0)
+#endif
 #if (PHP_VERSION_ID >= 80400)
 	ZEND_RAW_FENTRY(ZEND_NS_NAME("ZendTestNS2", "namespaced_func"), zif_ZendTestNS2_namespaced_func, arginfo_ZendTestNS2_namespaced_func, 0, NULL, NULL)
 #else

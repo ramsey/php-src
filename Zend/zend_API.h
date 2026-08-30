@@ -2264,6 +2264,7 @@ ZEND_API bool ZEND_FASTCALL zend_parse_arg_str_or_long_slow(zval *arg, zend_stri
 ZEND_API zpp_parse_bool_status ZEND_FASTCALL zend_flf_parse_arg_bool_slow(const zval *arg, uint32_t arg_num);
 ZEND_API zend_string* ZEND_FASTCALL zend_flf_parse_arg_str_slow(zval *arg, uint32_t arg_num);
 ZEND_API bool ZEND_FASTCALL zend_flf_parse_arg_long_slow(const zval *arg, zend_long *dest, uint32_t arg_num);
+ZEND_API bool ZEND_FASTCALL zend_flf_parse_arg_int_clamp_slow(zval *arg, zend_long *dest, uint32_t arg_num);
 
 static zend_always_inline bool zend_parse_arg_bool_ex(const zval *arg, bool *dest, bool *is_null, bool check_null, uint32_t arg_num, bool frameless)
 {
@@ -2350,7 +2351,7 @@ static zend_always_inline bool zend_parse_arg_int_clamp_ex(zval *arg, zend_long 
 		*dest = 0;
 	} else {
 		if (frameless) {
-			return zend_parse_arg_int_clamp_slow(arg, dest, arg_num);
+			return zend_flf_parse_arg_int_clamp_slow(arg, dest, arg_num);
 		}
 		return zend_parse_arg_int_clamp_slow(arg, dest, arg_num);
 	}
