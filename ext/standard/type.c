@@ -159,7 +159,8 @@ PHP_FUNCTION(intval)
 		return;
 	}
 	if (base == 10) {
-		RETURN_LONG(zval_get_long(num));
+		zend_cast_to_int(return_value, num);
+		return;
 	}
 
 

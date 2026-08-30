@@ -42,9 +42,10 @@ cast('INF', INF);
 cast('-INF', -INF);
 cast('NAN', NAN);
 
-var_dump(intval('99999999999999999999', 10) === PHP_INT_MAX);
+var_dump(intval('9223372036854775808', 10) === 9223372036854775808);
+var_dump(intval('99999999999999999999', 10) === 99999999999999999999);
 var_dump(intval('99999999999999999999', 16) === PHP_INT_MAX);
-var_dump(intval('1e20', 10) === PHP_INT_MAX);
+var_dump(intval('1e20', 10) === 10 ** 20);
 
 $long = '99999999999999999999';
 settype($long, 'integer');
@@ -133,6 +134,7 @@ settype NAN: int(0)
 intval NAN: 
 Warning: The float NAN is not representable as an int, cast occurred in %s on line %d
 int(0)
+bool(true)
 bool(true)
 bool(true)
 bool(true)
