@@ -1,5 +1,5 @@
 /* This is a generated file, edit test.stub.php instead.
- * Stub hash: d854e89c50a88de9a35ec9fdda39a79f32e51685
+ * Stub hash: 9283974595c8585ee695b8dc8118fb0af01f5af2
  * Has decl header: yes */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_zend_trigger_bailout, 0, 0, IS_NEVER, 0)
@@ -341,7 +341,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_zend_test_bigint_persist_roundtr
 	ZEND_ARG_TYPE_INFO(0, digits, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_zend_test_bigint_make, 0, 0, 1)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_zend_test_bigint_make, 0, 1, MAY_BE_INT|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, digits, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
@@ -358,7 +358,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_zend_test_int_debug_str, 0, 2, I
 	ZEND_ARG_TYPE_INFO(0, maxDigits, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_zend_test_int_add, 0, 0, 2)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_zend_test_int_add, 0, 2, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, a, IS_MIXED, 0)
 	ZEND_ARG_TYPE_INFO(0, b, IS_MIXED, 0)
 ZEND_END_ARG_INFO()
@@ -367,11 +367,9 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_zend_test_int_mul arginfo_zend_test_int_add
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_zend_test_int_neg, 0, 0, 1)
-	ZEND_ARG_TYPE_INFO(0, value, IS_MIXED, 0)
-ZEND_END_ARG_INFO()
+#define arginfo_zend_test_int_neg arginfo_zend_test_refcount
 
-#define arginfo_zend_test_int_abs arginfo_zend_test_int_neg
+#define arginfo_zend_test_int_abs arginfo_zend_test_refcount
 
 #define arginfo_zend_test_int_div_trunc arginfo_zend_test_int_add
 
@@ -385,7 +383,7 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_zend_test_int_xor arginfo_zend_test_int_add
 
-#define arginfo_zend_test_int_not arginfo_zend_test_int_neg
+#define arginfo_zend_test_int_not arginfo_zend_test_refcount
 
 #define arginfo_zend_test_int_shift_left arginfo_zend_test_int_add
 
@@ -393,10 +391,7 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_zend_test_int_pow arginfo_zend_test_int_add
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_zend_test_int_cmp, 0, 2, IS_LONG, 0)
-	ZEND_ARG_TYPE_INFO(0, a, IS_MIXED, 0)
-	ZEND_ARG_TYPE_INFO(0, b, IS_MIXED, 0)
-ZEND_END_ARG_INFO()
+#define arginfo_zend_test_int_cmp arginfo_zend_test_int_add
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_zend_test_int_cmp_long, 0, 2, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, a, IS_MIXED, 0)
@@ -418,11 +413,11 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_zend_test_int_to_double, 0, 1, I
 	ZEND_ARG_TYPE_INFO(0, value, IS_MIXED, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_zend_test_int_from_double, 0, 0, 1)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_zend_test_int_from_double, 0, 1, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, value, IS_DOUBLE, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_zend_test_string_to_number, 0, 0, 1)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_zend_test_string_to_number, 0, 1, MAY_BE_INT|MAY_BE_DOUBLE|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, str, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, allowErrors, _IS_BOOL, 0, "true")
 	ZEND_ARG_INFO_WITH_DEFAULT_VALUE(1, trailingData, "null")

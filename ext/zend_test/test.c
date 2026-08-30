@@ -2652,8 +2652,7 @@ static ZEND_FUNCTION(zend_test_bigint_to_string)
 		Z_PARAM_ZVAL(value)
 	ZEND_PARSE_PARAMETERS_END();
 
-	/* The parameter is mixed because zpp does not yet know IS_BIGINT in this
-	 * phase, so guard the tag before reaching into the box. */
+	/* The parameter is mixed so the bridge can observe the exact zval tag. */
 	if (Z_TYPE_P(value) != IS_BIGINT) {
 		zend_argument_type_error(1, "must be a bigint box");
 		RETURN_THROWS();

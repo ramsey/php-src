@@ -1,5 +1,5 @@
 /* This is a generated file, edit test.stub.php instead.
- * Stub hash: d854e89c50a88de9a35ec9fdda39a79f32e51685
+ * Stub hash: 9283974595c8585ee695b8dc8118fb0af01f5af2
  * Has decl header: yes */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_zend_trigger_bailout, 0, 0, 0)

@@ -474,14 +474,7 @@ function zend_test_override_libxml_global_state(): void {}
 
     function zend_test_bigint_persist_roundtrip(string $digits): bool {}
 
-    /**
-     * Returns an IS_BIGINT box. The return type is PHPDoc-only on purpose:
-     * internal return verification checks the exact tag, which zpp does not yet
-     * know in this phase, so a declared return type would reject the box.
-     *
-     * @return mixed
-     */
-    function zend_test_bigint_make(string $digits) {}
+    function zend_test_bigint_make(string $digits): int|false {}
 
     function zend_test_int_is_boxed(mixed $value): bool {}
 
@@ -489,159 +482,43 @@ function zend_test_override_libxml_global_state(): void {}
 
     function zend_test_int_debug_str(mixed $v, int $maxDigits): string {}
 
-    /**
-     * Returns an IS_BIGINT box when the sum is out of long range. The return
-     * type is PHPDoc-only for the same reason as zend_test_bigint_make.
-     *
-     * @param mixed $a
-     * @param mixed $b
-     * @return mixed
-     */
-    function zend_test_int_add(mixed $a, mixed $b) {}
+    function zend_test_int_add(mixed $a, mixed $b): int {}
 
-    /**
-     * Returns an IS_BIGINT box when the difference is out of long range. The
-     * return type is PHPDoc-only for the same reason as zend_test_bigint_make.
-     *
-     * @param mixed $a
-     * @param mixed $b
-     * @return mixed
-     */
-    function zend_test_int_sub(mixed $a, mixed $b) {}
+    function zend_test_int_sub(mixed $a, mixed $b): int {}
 
-    /**
-     * Returns an IS_BIGINT box when the product is out of long range. The
-     * return type is PHPDoc-only for the same reason as zend_test_bigint_make.
-     *
-     * @param mixed $a
-     * @param mixed $b
-     * @return mixed
-     */
-    function zend_test_int_mul(mixed $a, mixed $b) {}
+    function zend_test_int_mul(mixed $a, mixed $b): int {}
 
-    /**
-     * Returns an IS_BIGINT box when the negation is out of long range. The
-     * return type is PHPDoc-only for the same reason as zend_test_bigint_make.
-     *
-     * @param mixed $value
-     * @return mixed
-     */
-    function zend_test_int_neg(mixed $value) {}
+    function zend_test_int_neg(mixed $value): int {}
 
-    /**
-     * Returns an IS_BIGINT box when the absolute value is out of long range.
-     * The return type is PHPDoc-only for the same reason as
-     * zend_test_bigint_make.
-     *
-     * @param mixed $value
-     * @return mixed
-     */
-    function zend_test_int_abs(mixed $value) {}
+    function zend_test_int_abs(mixed $value): int {}
 
-    /**
-     * Returns an IS_BIGINT box when the quotient is out of long range,
-     * truncating toward zero. The return type is PHPDoc-only for the same
-     * reason as zend_test_bigint_make.
-     *
-     * @param mixed $a
-     * @param mixed $b
-     * @return mixed
-     */
-    function zend_test_int_div_trunc(mixed $a, mixed $b) {}
+    function zend_test_int_div_trunc(mixed $a, mixed $b): int {}
 
-    /**
-     * Returns the remainder of truncated division, taking the sign of the
-     * dividend. The return type is PHPDoc-only for the same reason as
-     * zend_test_bigint_make.
-     *
-     * @param mixed $a
-     * @param mixed $b
-     * @return mixed
-     */
-    function zend_test_int_mod(mixed $a, mixed $b) {}
+    /** Returns the remainder of truncated division, taking the sign of the dividend. */
+    function zend_test_int_mod(mixed $a, mixed $b): int {}
 
     /**
      * Calls the out-of-line modulo half directly, bypassing the inline fast
-     * path, so the long/long arm of zend_int_mod_slow can be exercised. The
-     * return type is PHPDoc-only for the same reason as zend_test_bigint_make.
-     *
-     * @param mixed $a
-     * @param mixed $b
-     * @return mixed
+     * path, so the long/long arm of zend_int_mod_slow can be exercised.
      */
-    function zend_test_int_mod_slow(mixed $a, mixed $b) {}
+    function zend_test_int_mod_slow(mixed $a, mixed $b): int {}
 
-    /**
-     * Returns an IS_BIGINT box when the result is out of long range. The
-     * return type is PHPDoc-only for the same reason as zend_test_bigint_make.
-     *
-     * @param mixed $a
-     * @param mixed $b
-     * @return mixed
-     */
-    function zend_test_int_and(mixed $a, mixed $b) {}
+    function zend_test_int_and(mixed $a, mixed $b): int {}
 
-    /**
-     * Returns an IS_BIGINT box when the result is out of long range. The
-     * return type is PHPDoc-only for the same reason as zend_test_bigint_make.
-     *
-     * @param mixed $a
-     * @param mixed $b
-     * @return mixed
-     */
-    function zend_test_int_or(mixed $a, mixed $b) {}
+    function zend_test_int_or(mixed $a, mixed $b): int {}
 
-    /**
-     * Returns an IS_BIGINT box when the result is out of long range. The
-     * return type is PHPDoc-only for the same reason as zend_test_bigint_make.
-     *
-     * @param mixed $a
-     * @param mixed $b
-     * @return mixed
-     */
-    function zend_test_int_xor(mixed $a, mixed $b) {}
+    function zend_test_int_xor(mixed $a, mixed $b): int {}
 
-    /**
-     * Returns an IS_BIGINT box when the complement is out of long range. The
-     * return type is PHPDoc-only for the same reason as zend_test_bigint_make.
-     *
-     * @param mixed $value
-     * @return mixed
-     */
-    function zend_test_int_not(mixed $value) {}
+    function zend_test_int_not(mixed $value): int {}
 
-    /**
-     * Returns an IS_BIGINT box when the result is out of long range. Throws
-     * ArithmeticError when the count exceeds the backend's reach. The return
-     * type is PHPDoc-only for the same reason as zend_test_bigint_make.
-     *
-     * @param mixed $a
-     * @param mixed $b
-     * @return mixed
-     */
-    function zend_test_int_shift_left(mixed $a, mixed $b) {}
+    /** Throws ArithmeticError when the count exceeds the backend's reach. */
+    function zend_test_int_shift_left(mixed $a, mixed $b): int {}
 
-    /**
-     * Returns an IS_BIGINT box when the result is out of long range,
-     * saturating to 0 or -1 once the count exceeds the backend's reach. The
-     * return type is PHPDoc-only for the same reason as zend_test_bigint_make.
-     *
-     * @param mixed $a
-     * @param mixed $b
-     * @return mixed
-     */
-    function zend_test_int_shift_right(mixed $a, mixed $b) {}
+    /** Saturates to 0 or -1 once the count exceeds the backend's reach. */
+    function zend_test_int_shift_right(mixed $a, mixed $b): int {}
 
-    /**
-     * Returns an IS_BIGINT box when the result is out of long range. Throws
-     * ArithmeticError when the exponent exceeds the backend's reach. The
-     * return type is PHPDoc-only for the same reason as zend_test_bigint_make.
-     *
-     * @param mixed $a
-     * @param mixed $b
-     * @return mixed
-     */
-    function zend_test_int_pow(mixed $a, mixed $b) {}
+    /** Throws ArithmeticError when the exponent exceeds the backend's reach. */
+    function zend_test_int_pow(mixed $a, mixed $b): int {}
 
     function zend_test_int_cmp(mixed $a, mixed $b): int {}
 
@@ -657,25 +534,10 @@ function zend_test_override_libxml_global_state(): void {}
 
     function zend_test_int_to_double(mixed $value): float {}
 
-    /**
-     * Returns an IS_BIGINT box when the reconstructed value is out of long
-     * range. The return type is PHPDoc-only for the same reason as
-     * zend_test_bigint_make.
-     *
-     * @return mixed
-     */
-    function zend_test_int_from_double(float $value) {}
+    function zend_test_int_from_double(float $value): int {}
 
-    /**
-     * Classifies a numeric string as int, float, an IS_BIGINT box when the
-     * integer is out of long range, or false when the string is not numeric.
-     * The return type is PHPDoc-only for the same reason as
-     * zend_test_bigint_make.
-     *
-     * @param bool $trailingData
-     * @return mixed
-     */
-    function zend_test_string_to_number(string $str, bool $allowErrors = true, &$trailingData = null) {}
+    /** @param bool $trailingData */
+    function zend_test_string_to_number(string $str, bool $allowErrors = true, &$trailingData = null): int|float|false {}
 }
 
 namespace ZendTestNS {
