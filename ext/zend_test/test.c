@@ -3165,6 +3165,17 @@ static ZEND_FUNCTION(zend_test_zpp_int_clamp)
 	RETURN_LONG(n);
 }
 
+static ZEND_FUNCTION(zend_test_zpp_int_range)
+{
+	zend_long n;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_INT_RANGE(n, 0, 255)
+	ZEND_PARSE_PARAMETERS_END();
+
+	RETURN_LONG(n);
+}
+
 static ZEND_FUNCTION(zend_test_flf_int_clamp)
 {
 	zend_long n;

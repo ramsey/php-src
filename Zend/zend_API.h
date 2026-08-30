@@ -1623,6 +1623,7 @@ ZEND_API ZEND_COLD void zend_argument_type_error_ex(const zend_function *functio
 ZEND_API ZEND_COLD void zend_argument_value_error(uint32_t arg_num, const char *format, ...);
 ZEND_API ZEND_COLD void zend_argument_value_error_ex(const zend_function *function, uint32_t arg_num, const char *format, ...);
 ZEND_API ZEND_COLD void zend_argument_must_not_be_empty_error(uint32_t arg_num);
+ZEND_API ZEND_COLD void zend_argument_int_range_error(uint32_t arg_num, zend_long min, zend_long max);
 ZEND_API ZEND_COLD void zend_class_redeclaration_error(int type, const zend_class_entry *old_ce);
 ZEND_API ZEND_COLD void zend_class_redeclaration_error_ex(int type, zend_string *new_name, const zend_class_entry *old_ce);
 
@@ -1959,6 +1960,16 @@ ZEND_API ZEND_COLD void zend_class_redeclaration_error_ex(int type, zend_string 
 #define Z_PARAM_INT_CLAMP_OR_NULL(dest, is_null) \
 	Z_PARAM_INT_CLAMP_EX(dest, is_null, 1, 0)
 
+#define Z_PARAM_INT_RANGE(dest, min, max) \
+		ZEND_STATIC_ASSERT((min) > ZEND_LONG_MIN || (max) < ZEND_LONG_MAX, \
+			"declared range must be a proper subset of the machine range"); \
+		Z_PARAM_PROLOGUE(0, 0); \
+		if (UNEXPECTED(!zend_parse_arg_int_range(_arg, &dest, (min), (max), _i))) { \
+			_expected_type = Z_EXPECTED_LONG; \
+			_error_code = ZPP_ERROR_WRONG_ARG; \
+			break; \
+		}
+
 /* old "n" */
 #define Z_PARAM_NUMBER_EX(dest, check_null) \
 	Z_PARAM_PROLOGUE(0, 0); \
@@ -2253,6 +2264,7 @@ ZEND_API bool ZEND_FASTCALL zend_parse_arg_long_weak(const zval *arg, zend_long 
 ZEND_API bool ZEND_FASTCALL zend_parse_arg_int_slow(zval *arg, zval **dest, uint32_t arg_num);
 ZEND_API bool ZEND_FASTCALL zend_parse_arg_int_weak(zval *arg, uint32_t arg_num);
 ZEND_API bool ZEND_FASTCALL zend_parse_arg_int_clamp_slow(zval *arg, zend_long *dest, uint32_t arg_num);
+ZEND_API bool ZEND_FASTCALL zend_parse_arg_int_range_slow(zval *arg, zend_long *dest, zend_long min, zend_long max, uint32_t arg_num);
 ZEND_API double ZEND_FASTCALL zend_parse_arg_double_slow(const zval *arg, uint32_t arg_num);
 ZEND_API double ZEND_FASTCALL zend_parse_arg_double_weak(const zval *arg, uint32_t arg_num);
 ZEND_API zend_string* ZEND_FASTCALL zend_parse_arg_str_slow(zval *arg, uint32_t arg_num);
@@ -2356,6 +2368,19 @@ static zend_always_inline bool zend_parse_arg_int_clamp_ex(zval *arg, zend_long 
 		return zend_parse_arg_int_clamp_slow(arg, dest, arg_num);
 	}
 	return 1;
+}
+
+static zend_always_inline bool zend_parse_arg_int_range(zval *arg, zend_long *dest, zend_long min, zend_long max, uint32_t arg_num)
+{
+	if (EXPECTED(Z_TYPE_P(arg) == IS_LONG)) {
+		*dest = Z_LVAL_P(arg);
+		if (UNEXPECTED(*dest < min || *dest > max)) {
+			zend_argument_int_range_error(arg_num, min, max);
+			return 0;
+		}
+		return 1;
+	}
+	return zend_parse_arg_int_range_slow(arg, dest, min, max, arg_num);
 }
 
 static zend_always_inline bool zend_parse_arg_double(const zval *arg, double *dest, bool *is_null, bool check_null, uint32_t arg_num)

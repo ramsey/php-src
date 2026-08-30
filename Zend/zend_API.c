@@ -477,6 +477,11 @@ ZEND_API ZEND_COLD void zend_argument_must_not_be_empty_error(uint32_t arg_num)
 	zend_argument_value_error(arg_num, "must not be empty");
 }
 
+ZEND_API ZEND_COLD void zend_argument_int_range_error(uint32_t arg_num, zend_long min, zend_long max)
+{
+	zend_argument_value_error(arg_num, "must be between " ZEND_LONG_FMT " and " ZEND_LONG_FMT, min, max);
+}
+
 ZEND_API ZEND_COLD void zend_class_redeclaration_error_ex(int type, zend_string *new_name, const zend_class_entry *old_ce)
 {
 	if (old_ce->type == ZEND_INTERNAL_CLASS) {
@@ -791,6 +796,31 @@ ZEND_API bool ZEND_FASTCALL zend_flf_parse_arg_int_clamp_slow(zval *arg, zend_lo
 	zval_ptr_dtor(&tmp);
 	return 1;
 }
+
+ZEND_API bool ZEND_FASTCALL zend_parse_arg_int_range_slow(zval *arg, zend_long *dest, zend_long min, zend_long max, uint32_t arg_num) /* {{{ */
+{
+	if (UNEXPECTED(Z_TYPE_P(arg) == IS_BIGINT)) {
+		zend_argument_int_range_error(arg_num, min, max);
+		return 0;
+	}
+	if (UNEXPECTED(ZEND_ARG_USES_STRICT_TYPES())) {
+		return 0;
+	}
+	if (UNEXPECTED(!zend_parse_arg_int_weak(arg, arg_num))) {
+		return 0;
+	}
+	if (UNEXPECTED(Z_TYPE_P(arg) == IS_BIGINT)) {
+		zend_argument_int_range_error(arg_num, min, max);
+		return 0;
+	}
+	*dest = Z_LVAL_P(arg);
+	if (UNEXPECTED(*dest < min || *dest > max)) {
+		zend_argument_int_range_error(arg_num, min, max);
+		return 0;
+	}
+	return 1;
+}
+/* }}} */
 
 ZEND_API double ZEND_FASTCALL zend_parse_arg_double_weak(const zval *arg, uint32_t arg_num) /* {{{ */
 {

@@ -543,6 +543,8 @@ function zend_test_override_libxml_global_state(): void {}
 
     function zend_test_zpp_int_clamp(int $n): int {}
 
+    function zend_test_zpp_int_range(int $n): int {}
+
     /** @frameless-function {"arity": 1} */
     function zend_test_flf_int_clamp(int $n): int {}
 }
