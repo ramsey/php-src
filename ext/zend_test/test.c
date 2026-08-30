@@ -3142,3 +3142,14 @@ static ZEND_FUNCTION(zend_test_string_to_number)
 		RETURN_FALSE;
 	}
 }
+
+static ZEND_FUNCTION(zend_test_zpp_int)
+{
+	zval *i;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_INT(i)
+	ZEND_PARSE_PARAMETERS_END();
+
+	RETURN_COPY(i);
+}

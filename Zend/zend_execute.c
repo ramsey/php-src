@@ -790,6 +790,25 @@ static bool can_convert_to_string(const zval *zv) {
 	return Z_TYPE_P(zv) <= IS_STRING;
 }
 
+/* Mirrors zend_parse_arg_int_weak without converting or emitting diagnostics. */
+static bool zend_verify_weak_int_no_sideeffect(const zval *arg)
+{
+	if (Z_TYPE_P(arg) == IS_DOUBLE) {
+		return zend_finite(Z_DVAL_P(arg));
+	}
+	if (Z_TYPE_P(arg) == IS_STRING) {
+		zval num;
+		uint8_t type = zend_string_to_number(Z_STRVAL_P(arg), Z_STRLEN_P(arg), false, &num, NULL);
+		if (type == 0) {
+			return false;
+		}
+		bool ok = type != IS_DOUBLE || zend_finite(Z_DVAL(num));
+		zval_ptr_dtor(&num);
+		return ok;
+	}
+	return Z_TYPE_P(arg) <= IS_TRUE;
+}
+
 /* Used to sanity-check internal arginfo types without performing any actual type conversions. */
 static bool zend_verify_weak_scalar_type_hint_no_sideeffect(uint32_t type_mask, const zval *arg)
 {
@@ -798,6 +817,9 @@ static bool zend_verify_weak_scalar_type_hint_no_sideeffect(uint32_t type_mask, 
 	/* Pass (uint32_t)-1 as arg_num to indicate to ZPP not to emit any deprecation notice,
 	 * this is needed because the version with side effects also uses 0 (e.g. for typed properties) */
 	if ((type_mask & MAY_BE_LONG) && zend_parse_arg_long_weak(arg, &lval, (uint32_t)-1)) {
+		return true;
+	}
+	if ((type_mask & MAY_BE_BIGINT) && zend_verify_weak_int_no_sideeffect(arg)) {
 		return true;
 	}
 	if ((type_mask & MAY_BE_DOUBLE) && !zend_isnan(zend_parse_arg_double_weak(arg, (uint32_t)-1))) {

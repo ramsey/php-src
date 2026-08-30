@@ -33,6 +33,13 @@ ZEND_API bool zend_int_fits_long(const zval *zv);
  * Returns false without throwing when a boxed value is too large to represent. */
 ZEND_API bool zend_int_get_long(const zval *zv, zend_long *out);
 
+/* Returns the machine value of an integer zval known to be immediate. */
+static zend_always_inline zend_long zend_int_get_long_unchecked(const zval *zv)
+{
+	ZEND_ASSERT(Z_TYPE_P(zv) == IS_LONG);
+	return Z_LVAL_P(zv);
+}
+
 /* Renders the integer zval as a decimal string. A value within max_digits
  * renders in full; a larger boxed value renders the fixed placeholder
  * "<integer too large to display>" instead. */

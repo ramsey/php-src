@@ -538,6 +538,8 @@ function zend_test_override_libxml_global_state(): void {}
 
     /** @param bool $trailingData */
     function zend_test_string_to_number(string $str, bool $allowErrors = true, &$trailingData = null): int|float|false {}
+
+    function zend_test_zpp_int(int $i): int {}
 }
 
 namespace ZendTestNS {
