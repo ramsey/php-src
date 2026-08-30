@@ -2275,9 +2275,9 @@ PHP_FUNCTION(substr)
 
 	ZEND_PARSE_PARAMETERS_START(2, 3)
 		Z_PARAM_STR(str)
-		Z_PARAM_LONG(f)
+		Z_PARAM_INT_CLAMP(f)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_LONG_OR_NULL(l, len_is_null)
+		Z_PARAM_INT_CLAMP_OR_NULL(l, len_is_null)
 	ZEND_PARSE_PARAMETERS_END();
 
 	_zend_substr(return_value, str, f, len_is_null, l);
@@ -2291,7 +2291,7 @@ ZEND_FRAMELESS_FUNCTION(substr, 2)
 	zend_long f;
 
 	Z_FLF_PARAM_STR(1, str, str_tmp);
-	Z_FLF_PARAM_LONG(2, f);
+	Z_FLF_PARAM_INT_CLAMP(2, f);
 
 	_zend_substr(return_value, str, f, /* len_is_null */ true, 0);
 
@@ -2307,8 +2307,8 @@ ZEND_FRAMELESS_FUNCTION(substr, 3)
 	bool len_is_null;
 
 	Z_FLF_PARAM_STR(1, str, str_tmp);
-	Z_FLF_PARAM_LONG(2, f);
-	Z_FLF_PARAM_LONG_OR_NULL(3, len_is_null, l);
+	Z_FLF_PARAM_INT_CLAMP(2, f);
+	Z_FLF_PARAM_INT_CLAMP_OR_NULL(3, len_is_null, l);
 
 	_zend_substr(return_value, str, f, len_is_null, l);
 
